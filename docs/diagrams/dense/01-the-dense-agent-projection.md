@@ -17,7 +17,7 @@ sources:
   - crates/sealmap-corpus/src/structure.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 11b3b565af520f0fa391e4d75c23bf328a1d8e24
+verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
 ---
 ## For developers
 

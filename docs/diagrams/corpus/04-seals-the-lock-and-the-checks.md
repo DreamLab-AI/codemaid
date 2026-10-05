@@ -16,7 +16,7 @@ sources:
   - crates/sealmap-rust/src/collect.rs
   - crates/sealmap-extract/src/lower.rs
   - docs/DESIGN.md
-verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
+verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
 ---
 ## For developers
 
