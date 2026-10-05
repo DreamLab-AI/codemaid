@@ -1,6 +1,6 @@
 # sealmap design
 
-Status: proposed for owner sign-off, 2026-10-05. Supersedes the v0.1 README's
+Status: accepted by the owner, 2026-10-05 (all §11 recommendations taken). Supersedes the v0.1 README's
 "committed 1:1 corpus with a drift gate" premise. Evidence: `research/01`–`05` in
 the design session scratchpad. Each section below names the report it summarises.
 
@@ -234,14 +234,19 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
 9. **Migrate VisionFlow** area by area: `cite-to-sym`, then review, then seal,
    with `verify` running non-blocking first.
 
-## 11. Decisions for the owner
+## 11. Decisions (accepted 2026-10-05)
 
-1. **`topic_hash`: recommend yes.** Without it, prose can change after review
-   and the seal still passes. The cost is a zero-token re-seal for cosmetic
-   edits.
-2. **Lock plus pointer (§3): recommend yes.**
-3. **Repository rename and crate-name reservation at step 1:** both are public
-   and can't be undone.
-4. **The model-routing ADR** (§6): four activities and two hosts.
-5. **Rotate the Gemini key**, then move it to agentbox `.env` as
-   `GEMINI_API_KEY`.
+1. **`topic_hash`: yes.** A seal binds the topic's prose as well as its
+   symbols; a cosmetic edit costs a zero-token re-seal.
+2. **Lock plus pointer: yes.** Hashes live in `docs/diagrams/seals.lock`; each
+   topic carries a one-line pointer in its front matter.
+3. **Repository renamed** to `DreamLab-AI/sealmap` (done). **Crate names are
+   reserved by a real, documented release** of the renamed 0.1 crates at the
+   end of step 1, never by placeholder crates. Crates that do not exist yet
+   (`sealmap-dense`, `sealmap-ts`, `sealmap-frontend` if not split by then)
+   are published when they have content.
+4. **Model-routing ADR: yes.** Four activities (`diagram-polish`,
+   `diagram-narrative`, `diagram-synthesis`, `seal-review`) and `loom` / `zai`
+   hosts, recorded in agentbox.
+5. **Gemini key rotated.** The new key goes in agentbox `.env` as
+   `GEMINI_API_KEY`; no key is ever written to a repository.
