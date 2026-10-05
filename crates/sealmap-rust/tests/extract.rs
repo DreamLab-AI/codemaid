@@ -412,3 +412,97 @@ fn undefined_member_of_internal_type_stays_with_the_type() {
         [("sym:cargo core_model . hash/Fp#default().".to_owned(), Confidence::Inferred)]
     );
 }
+
+/// Triage finding (2026-10-05): a generic parameter used to be recognised by
+/// its shape (one capital, optional digits), so a real `struct A` or
+/// `struct V2` lost every method call made through it. Concrete types with
+/// such names resolve like any other type.
+#[test]
+fn single_capital_type_names_are_concrete_types_not_generics() {
+    let cb = model(&[
+        (
+            "src/lib.rs",
+            r#"
+            pub mod geom;
+            use crate::geom::*;
+            pub struct A { n: u32 }
+            impl A { pub fn bump(&self) {} }
+            pub struct Holder { a: A }
+            impl Holder { pub fn poke(&self) { self.a.bump(); } }
+            pub fn drive(a: &A, v: V2) { a.bump(); v.normalise(); }
+            "#,
+        ),
+        ("src/geom.rs", "pub struct V2 { x: f32, y: f32 }\nimpl V2 { pub fn normalise(&self) {} }"),
+    ]);
+    assert_eq!(
+        calls(&cb, "sym:cargo app . drive()."),
+        [
+            ("sym:cargo app . A#bump().".to_owned(), Confidence::Exact),
+            ("sym:cargo app . geom/V2#normalise().".to_owned(), Confidence::Exact)
+        ]
+    );
+    assert_eq!(
+        calls(&cb, "sym:cargo app . Holder#poke()."),
+        [("sym:cargo app . A#bump().".to_owned(), Confidence::Exact)]
+    );
+    // `V2` reaches `drive` through a glob import: still a used type.
+    assert!(cb.relations.iter().any(|r| r.kind == RelationKind::Uses
+        && r.from == id("sym:cargo app . drive().")
+        && r.to == id("sym:cargo app . geom/V2#")));
+}
+
+/// A generic parameter is whatever the item, impl or trait declares, of any
+/// length. `Store` declared as a parameter shadows the concrete `Store`, in
+/// a function, in an impl block (bounded in a `where` clause) and in a
+/// struct's fields.
+#[test]
+fn declared_multi_letter_generics_shadow_concrete_types() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        pub trait Backend { fn put(&self); fn open() -> Self; }
+        pub struct Store;
+        impl Store { pub fn put(&self) {} pub fn open() -> Self { Store } }
+        pub fn sync<Store: Backend>(s: Store) { s.put(); Store::open(); }
+        pub struct Item;
+        impl Item { pub fn put(&self) {} }
+        pub struct Cache<Item> { slot: Item }
+        impl<Item> Cache<Item> where Item: Backend {
+            pub fn flush(&self) { self.slot.put(); }
+            pub fn swap(&self, next: Item) { next.put(); }
+        }
+        "#,
+    )]);
+    for f in ["sync().", "Cache#flush().", "Cache#swap()."] {
+        let t = targets(&cb, &format!("sym:cargo app . {f}"));
+        assert!(
+            !t.iter().any(|t| t.starts_with("sym:cargo app . Store#") || t.starts_with("sym:cargo app . Item#")),
+            "{f} bound a generic parameter to a concrete type: {t:?}"
+        );
+    }
+    let concrete = [id("sym:cargo app . Store#"), id("sym:cargo app . Item#")];
+    let wrong: Vec<_> = cb
+        .relations
+        .iter()
+        .filter(|r| concrete.contains(&r.to) && matches!(r.kind, RelationKind::Uses | RelationKind::FieldType))
+        .map(|r| format!("{} -{:?}-> {}", r.from, r.kind, r.to))
+        .collect();
+    assert!(wrong.is_empty(), "generic parameters drawn as concrete types: {wrong:?}");
+}
+
+/// The common single-letter case is unchanged: a `T` receiver has no
+/// concrete type, so its calls and `T::Assoc` paths stay unresolved.
+#[test]
+fn single_letter_generic_parameters_stay_unresolved() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        pub trait Backend { type Key; fn put(&self); fn open() -> Self; }
+        pub struct Db;
+        impl Db { pub fn put(&self) {} }
+        pub fn each<T: Backend>(t: T, k: T::Key) -> T { t.put(); T::open() }
+        "#,
+    )]);
+    assert!(calls(&cb, "sym:cargo app . each().").is_empty());
+    assert!(!cb.relations.iter().any(|r| r.from == id("sym:cargo app . each().")));
+}
