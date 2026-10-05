@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::path::SourcePath;
 use crate::source::SourceFile;
-use crate::symbol::{Relation, RelationKind, Symbol, SymbolId, SymbolKind};
+use crate::sym::SymbolId;
+use crate::symbol::{Relation, RelationKind, Symbol, SymbolKind};
 
 /// The whole analysed codebase: files, symbols and relations.
 ///
@@ -97,7 +98,7 @@ impl Codebase {
     /// `Relation` orders by `from` first, so this is a range scan
     /// (O(log n + k)), not a pass over every relation.
     pub fn relations_from<'a>(&'a self, id: &'a SymbolId) -> impl Iterator<Item = &'a Relation> {
-        let lower = Relation::new(id.clone(), SymbolId::new(""), RelationKind::Contains, crate::Confidence::Exact);
+        let lower = Relation::new(id.clone(), SymbolId::min_value(), RelationKind::Contains, crate::Confidence::Exact);
         self.relations.range(lower..).take_while(move |r| &r.from == id)
     }
 

@@ -73,7 +73,7 @@
 //! let corpus = generate(&model, &CorpusOptions::default());
 //! let doc = corpus.document("src/lib.rs.md").unwrap();
 //! assert!(doc.contains("sequenceDiagram"));
-//! assert!(doc.contains("demo__A->>demo: helper()"));
+//! assert!(doc.contains(": helper()"));
 //! assert!(corpus.document("_index.json").is_some());
 //! ```
 

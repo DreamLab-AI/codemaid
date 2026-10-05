@@ -6,8 +6,15 @@ use std::fs;
 use sealmap_corpus::{
     Corpus, CorpusOptions, Drift, FragmentKind, corpus_hash, generate, verify, verify_against, write,
 };
-use sealmap_model::{SourcePath, SourceSet};
+use sealmap_mermaid::Ident;
+use sealmap_model::{SourcePath, SourceSet, SymbolId};
 use sealmap_rust::{RustOptions, extract};
+
+/// The diagram id of a canonical `sym:` id.
+fn mid(sym: &str) -> String {
+    let id = SymbolId::parse(sym).unwrap_or_else(|e| panic!("{sym}: {e}"));
+    Ident::from_path(&id.to_string()).as_str().to_owned()
+}
 
 fn corpus(files: &[(&str, &str)]) -> Corpus {
     let mut src = SourceSet::new();
@@ -54,29 +61,31 @@ fn one_document_per_source_file_plus_reserved_files() {
 fn documents_carry_front_matter_structure_and_sequences() {
     let c = corpus(SHOP);
     let doc = c.document("src/orders.rs.md").unwrap();
-    assert!(doc.starts_with("---\nsealmap: 1\nsource: src/orders.rs\nmodule: shop::orders\n"));
+    assert!(doc.starts_with("---\nsealmap: 1\nsource: src/orders.rs\nmodule: \"sym:cargo shop . orders/\"\n"));
     assert!(doc.contains("## structure\n```mermaid\nclassDiagram"));
-    assert!(doc.contains("shop__orders__Orders *-- shop__db__Db : db"));
-    assert!(doc.contains("## `shop::orders::Orders::place`"));
-    let seq = doc.split("## `shop::orders::Orders::place`").nth(1).unwrap();
-    assert!(seq.contains("participant shop__orders__Orders as Orders"));
-    assert!(seq.contains("shop__orders__Orders->>shop__db__Db: exists(id)"));
-    assert!(seq.contains("Note over shop__orders__Orders: return Err(#quot;dup#quot;.into())"));
-    assert!(seq.contains("shop__orders__Orders->>shop__db__Db: insert(id)?"));
-    assert!(seq.contains("shop__orders__Orders->>shop__orders: audit(id)"));
+    let (orders, db, module) =
+        (mid("sym:cargo shop . orders/Orders#"), mid("sym:cargo shop . db/Db#"), mid("sym:cargo shop . orders/"));
+    assert!(doc.contains(&format!("{orders} *-- {db} : db")));
+    assert!(doc.contains("## `sym:cargo shop . orders/Orders#place().`"));
+    let seq = doc.split("## `sym:cargo shop . orders/Orders#place().`").nth(1).unwrap();
+    assert!(seq.contains(&format!("participant {orders} as Orders")));
+    assert!(seq.contains(&format!("{orders}->>{db}: exists(id)")));
+    assert!(seq.contains(&format!("Note over {orders}: return Err(#quot;dup#quot;.into())")));
+    assert!(seq.contains(&format!("{orders}->>{db}: insert(id)?")));
+    assert!(seq.contains(&format!("{orders}->>{module}: audit(id)")));
 }
 
 #[test]
 fn index_links_calls_to_expanding_fragments() {
     let c = corpus(SHOP);
-    let place = c.index.fragment("shop::orders::Orders::place").unwrap();
+    let place = c.index.fragment("sym:cargo shop . orders/Orders#place().").unwrap();
     assert_eq!(place.kind, FragmentKind::Sequence);
-    let by_target: BTreeMap<&str, Option<&str>> =
-        place.calls.iter().map(|c| (c.target.as_str(), c.expands.as_deref())).collect();
+    let by_target: BTreeMap<String, Option<&str>> =
+        place.calls.iter().map(|c| (c.target.to_string(), c.expands.as_deref())).collect();
     // `insert` has its own sequence (it calls `push`... which is std and dropped),
     // so only callees with flows expand.
-    assert_eq!(by_target.get("shop::db::Db::exists"), Some(&None));
-    assert!(by_target.contains_key("shop::orders::audit"));
+    assert_eq!(by_target.get("sym:cargo shop . db/Db#exists()."), Some(&None));
+    assert!(by_target.contains_key("sym:cargo shop . orders/audit()."));
     assert!(c.index.fragment("structure:src/db.rs").is_some());
 }
 
@@ -169,5 +178,7 @@ fn colliding_paths_get_distinct_diagram_ids() {
         .map(|l| l.split_whitespace().next().unwrap())
         .collect();
     assert_eq!(lanes.len(), 2, "{seq}");
-    assert!(!seq.contains("a__b__c->>a__b__c"), "{seq}");
+    let (outer, inner) = (mid("sym:cargo a . b__c#"), mid("sym:cargo a . b/c#"));
+    assert_ne!(outer, inner);
+    assert!(seq.contains(&format!("{outer}->>{inner}")), "{seq}");
 }

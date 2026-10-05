@@ -33,9 +33,9 @@ src.insert("src/lib.rs", r#"
 "#).unwrap();
 
 let out = extract(&src, &RustOptions::default());
-let place = out.codebase.symbol(&SymbolId::new("shop::Orders::place")).unwrap();
-let calls: Vec<_> = place.flow.as_ref().unwrap().calls().map(|c| c.target.as_str()).collect();
-assert_eq!(calls, ["shop::Db::insert"]);
+let place = out.codebase.symbol(&SymbolId::parse("sym:cargo shop . Orders#place().").unwrap()).unwrap();
+let calls: Vec<_> = place.flow.as_ref().unwrap().calls().map(|c| c.target.to_string()).collect();
+assert_eq!(calls, ["sym:cargo shop . Db#insert()."]);
 ```
 
 ## Licence

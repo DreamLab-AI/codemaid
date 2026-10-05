@@ -13,17 +13,24 @@ fn model(files: &[(&str, &str)]) -> Codebase {
     out.codebase
 }
 
-fn calls(cb: &Codebase, id: &str) -> Vec<(String, Confidence)> {
-    cb.symbol(&SymbolId::new(id))
-        .unwrap_or_else(|| panic!("no symbol {id}; have {:?}", cb.symbols.keys().collect::<Vec<_>>()))
+/// Parse a canonical `sym:` id.
+fn id(s: &str) -> SymbolId {
+    SymbolId::parse(s).unwrap_or_else(|e| panic!("{s}: {e}"))
+}
+
+fn calls(cb: &Codebase, sym: &str) -> Vec<(String, Confidence)> {
+    cb.symbol(&id(sym))
+        .unwrap_or_else(|| {
+            panic!("no symbol {sym}; have {:?}", cb.symbols.keys().map(|k| k.to_string()).collect::<Vec<_>>())
+        })
         .flow
         .as_ref()
         .map(|f| f.calls().map(|c| (c.target.to_string(), c.confidence)).collect())
         .unwrap_or_default()
 }
 
-fn targets(cb: &Codebase, id: &str) -> Vec<String> {
-    calls(cb, id).into_iter().map(|(t, _)| t).collect()
+fn targets(cb: &Codebase, sym: &str) -> Vec<String> {
+    calls(cb, sym).into_iter().map(|(t, _)| t).collect()
 }
 
 #[test]
@@ -38,11 +45,19 @@ fn resolves_paths_through_imports_renames_globs_and_reexports() {
         ),
     ]);
     assert_eq!(
-        targets(&cb, "app::b::go"),
-        ["app::a::inner::deep", "app::a::inner::other", "app::a::top", "app::a::inner::deep"]
+        targets(&cb, "sym:cargo app . b/go()."),
+        [
+            "sym:cargo app . a/inner/deep().",
+            "sym:cargo app . a/inner/other().",
+            "sym:cargo app . a/top().",
+            "sym:cargo app . a/inner/deep()."
+        ]
     );
-    assert_eq!(targets(&cb, "app::a::inner::sib"), ["app::a::top", "app::b::util"]);
-    assert!(calls(&cb, "app::b::go").iter().all(|(_, c)| *c == Confidence::Exact));
+    assert_eq!(
+        targets(&cb, "sym:cargo app . a/inner/sib()."),
+        ["sym:cargo app . a/top().", "sym:cargo app . b/util()."]
+    );
+    assert!(calls(&cb, "sym:cargo app . b/go().").iter().all(|(_, c)| *c == Confidence::Exact));
 }
 
 #[test]
@@ -72,23 +87,21 @@ fn resolves_methods_from_receiver_types() {
         "#,
     )]);
     assert_eq!(
-        targets(&cb, "app::Svc::run"),
+        targets(&cb, "sym:cargo app . Svc#run()."),
         [
-            "app::Db::query",
-            "app::Db::<Store>::put",
-            "app::Store::touch",
-            "app::Svc::new",
-            "app::Svc::helper",
-            "app::Svc::helper"
+            "sym:cargo app . Db#query().",
+            "sym:cargo app . Db#[Store]put().",
+            "sym:cargo app . Store#touch().",
+            "sym:cargo app . Svc#new().",
+            "sym:cargo app . Svc#helper().",
+            "sym:cargo app . Svc#helper()."
         ]
     );
     // Trait default method calls the required method on Self (the trait).
-    assert_eq!(targets(&cb, "app::Store::touch"), ["app::Store::put"]);
-    assert!(
-        cb.relations.iter().any(|r| r.kind == RelationKind::Implements
-            && r.from.as_str() == "app::Db"
-            && r.to.as_str() == "app::Store")
-    );
+    assert_eq!(targets(&cb, "sym:cargo app . Store#touch()."), ["sym:cargo app . Store#put()."]);
+    assert!(cb.relations.iter().any(|r| r.kind == RelationKind::Implements
+        && r.from == id("sym:cargo app . Db#")
+        && r.to == id("sym:cargo app . Store#")));
 }
 
 #[test]
@@ -107,8 +120,8 @@ fn drops_std_prelude_and_local_closures_by_default() {
         }
         "#,
     )]);
-    assert_eq!(targets(&cb, "app::f"), ["serde_json::to_string"]);
-    assert_eq!(calls(&cb, "app::f")[0].1, Confidence::External);
+    assert_eq!(targets(&cb, "sym:cargo app . f()."), ["sym:extern serde_json::to_string"]);
+    assert_eq!(calls(&cb, "sym:cargo app . f().")[0].1, Confidence::External);
 }
 
 #[test]
@@ -123,7 +136,7 @@ fn external_calls_policy_all_keeps_std() {
         .flat_map(|f| f.calls())
         .map(|c| c.target.to_string())
         .collect();
-    assert!(ts.contains(&"std::fs::read".to_string()), "{ts:?}");
+    assert!(ts.contains(&"sym:extern std::fs::read".to_string()), "{ts:?}");
 }
 
 #[test]
@@ -145,7 +158,7 @@ fn flow_shapes_follow_control_flow() {
         fn items2() -> Vec<u8> { vec![] }
         "#,
     )]);
-    let f = cb.symbol(&SymbolId::new("app::flow")).unwrap().flow.clone().unwrap();
+    let f = cb.symbol(&id("sym:cargo app . flow().")).unwrap().flow.clone().unwrap();
     let shape: Vec<&str> = f
         .steps
         .iter()
@@ -159,7 +172,7 @@ fn flow_shapes_follow_control_flow() {
         })
         .collect();
     assert_eq!(shape, ["call", "branch", "loop", "opt", "call", "call", "loop", "call", "par"]);
-    let net = f.calls().find(|c| c.target.as_str() == "app::net").unwrap();
+    let net = f.calls().find(|c| c.target == id("sym:cargo app . net().")).unwrap();
     assert!(net.awaited && net.fallible);
     assert_eq!(net.kind, CallKind::Function);
     // The else-branch early return survives as an exit inside the branch.
@@ -183,20 +196,23 @@ fn workspace_crates_resolve_across_packages() {
         ("api/Cargo.toml", "[package]\nname = 'api'"),
         ("api/src/lib.rs", "use my_core::Engine;\npub fn serve(e: &Engine) { e.start(); }"),
     ]);
-    assert_eq!(calls(&cb, "api::serve"), [("my_core::Engine::start".to_string(), Confidence::Exact)]);
-    assert!(cb.symbol(&SymbolId::new("my_core::Engine")).is_some_and(|s| s.kind == SymbolKind::Struct));
+    assert_eq!(
+        calls(&cb, "sym:cargo api . serve()."),
+        [("sym:cargo my_core . Engine#start().".to_string(), Confidence::Exact)]
+    );
+    assert!(cb.symbol(&id("sym:cargo my_core . Engine#")).is_some_and(|s| s.kind == SymbolKind::Struct));
 }
 
 #[test]
 fn tests_are_excluded_unless_requested() {
     let src_files = [("src/lib.rs", "pub fn real() {}\n#[cfg(test)] mod tests { #[test] fn t() { super::real(); } }")];
     let cb = model(&src_files);
-    assert!(cb.symbol(&SymbolId::new("app::tests")).is_none());
+    assert!(cb.symbol(&id("sym:cargo app . tests/")).is_none());
 
     let mut src = SourceSet::new();
     src.insert(src_files[0].0, src_files[0].1).unwrap();
     let cb = extract(&src, &RustOptions { name: "app".into(), include_tests: true, ..Default::default() }).codebase;
-    assert_eq!(targets(&cb, "app::tests::t"), ["app::real"]);
+    assert_eq!(targets(&cb, "sym:cargo app . tests/t()."), ["sym:cargo app . real()."]);
 }
 
 #[test]
@@ -207,7 +223,7 @@ fn unparsable_files_are_reported_but_still_present() {
     let out = extract(&src, &RustOptions { name: "app".into(), ..Default::default() });
     assert_eq!(out.diagnostics.len(), 1);
     assert_eq!(out.diagnostics[0].file.as_str(), "src/broken.rs");
-    assert!(out.codebase.symbol(&SymbolId::new("app::broken")).is_some());
+    assert!(out.codebase.symbol(&id("sym:cargo app . broken/")).is_some());
     assert_eq!(out.codebase.files.len(), 2);
 }
 
@@ -252,7 +268,7 @@ fn deep_nesting_does_not_overflow() {
         src.insert("src/lib.rs", &text).unwrap();
         src.insert("src/other.rs", "pub fn h() {}").unwrap();
         let out = extract(&src, &RustOptions { name: "deep".into(), ..Default::default() });
-        assert!(out.codebase.symbol(&SymbolId::new("deep")).is_some());
+        assert!(out.codebase.symbol(&id("sym:cargo deep .")).is_some());
     }
 }
 
@@ -280,7 +296,7 @@ fn glob_cycles_resolve_quickly() {
     let t = std::time::Instant::now();
     let out = extract(&src, &RustOptions { name: "g".into(), ..Default::default() });
     assert!(t.elapsed() < std::time::Duration::from_secs(5), "took {:?}", t.elapsed());
-    assert!(out.codebase.symbol(&SymbolId::new("g::m3::T3")).is_some());
+    assert!(out.codebase.symbol(&id("sym:cargo g . m3/T3#")).is_some());
 }
 
 /// Known resolver fault, fixed in the id work (DESIGN §7, step 2): a method
@@ -304,6 +320,6 @@ fn std_receiver_method_is_not_bound_to_same_named_internal_method() {
         }
         "#,
     )]);
-    let t = targets(&cb, "app::walk");
-    assert!(!t.iter().any(|t| t == "app::Id::parent"), "Path::parent bound to Id::parent: {t:?}");
+    let t = targets(&cb, "sym:cargo app . walk().");
+    assert!(!t.iter().any(|t| t == "sym:cargo app . Id#parent()."), "Path::parent bound to Id::parent: {t:?}");
 }

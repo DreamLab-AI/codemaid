@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use sealmap_frontend::{aggregate_calls, ids, lower};
 use sealmap_model::{
-    Call, Codebase, Confidence, Flow, Member, Relation, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind,
+    Call, Codebase, Confidence, Flow, Member, Package, Relation, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind,
 };
 
 use crate::raw::*;
@@ -224,37 +224,35 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
         cb.add_file(SourceFile {
             path: f.path.clone(),
             language: "rust".into(),
-            module: ids::module_id(&f.role.module),
+            module: module_sym(&f.role.module),
             hash: f.hash.clone(),
             lines: f.text_lines,
         });
         for m in &f.modules {
-            let id = ids::module_id(&m.path);
+            let id = module_sym(&m.path);
             let mut s =
                 Symbol::new(id.clone(), m.path.last().cloned().unwrap_or_default(), SymbolKind::Module, f.path.clone());
-            s.parent = ids::parent_module_id(&m.path);
             s.span = m.span;
             s.doc = m.doc.clone();
             s.visibility = m.vis.clone();
             s.tags = m.tags.clone();
             cb.add_symbol(s);
-            let module = ids::module_path(&m.path);
             for u in &m.uses {
                 if u.alias == "*" {
-                    if let Some(t) = r.resolve_internal(&module, &u.target, None) {
+                    if let Some(t) = r.resolve_internal(&id, &u.target, None) {
                         cb.add_relation(Relation::new(id.clone(), t, RelationKind::Imports, Confidence::Exact));
                     }
                     continue;
                 }
-                let (t, c) = r.resolve(&module, &u.target, None);
+                let (t, c) = r.resolve(&id, &u.target, None, Ns::Type);
                 if keep_ref(&t) {
                     cb.add_relation(Relation::new(id.clone(), t, RelationKind::Imports, c));
                 }
             }
         }
         for it in &f.items {
-            let module = ids::module_path(&it.module);
-            let id = ids::item_id(&module, &it.name);
+            let module = module_sym(&it.module);
+            let id = ids::item_id(&module, it.kind, &it.name);
             let mut s = Symbol::new(id.clone(), &it.name, it.kind, f.path.clone());
             s.visibility = it.vis.clone();
             s.span = it.span;
@@ -265,12 +263,12 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             s.members = it.members.iter().map(|m| r.member(&module, m, Some(&id))).collect();
             for m in &s.members {
                 for t in &m.refs {
-                    let c = if cb_has(&r, t) { Confidence::Exact } else { Confidence::External };
+                    let c = if r.internal.contains(t) { Confidence::Exact } else { Confidence::External };
                     cb.add_relation(Relation::new(id.clone(), t.clone(), RelationKind::FieldType, c));
                 }
             }
             for st in &it.supertraits {
-                let (t, c) = r.resolve(&module, st, None);
+                let (t, c) = r.resolve(&module, st, None, Ns::Type);
                 if keep_ref(&t) {
                     cb.add_relation(Relation::new(id.clone(), t, RelationKind::Extends, c));
                 }
@@ -288,19 +286,18 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             cb.add_symbol(s);
         }
         for imp in &f.impls {
-            let module = ids::module_path(&imp.module);
+            let module = module_sym(&imp.module);
             let Some(self_segs) = &imp.self_ty else { continue };
-            let (ty, _) = r.resolve(&module, self_segs, None);
-            let trait_seg = imp.trait_.as_ref().map(|(segs, disp)| {
-                let (t, c) = r.resolve(&module, segs, Some(&ty));
+            let (ty, _) = r.resolve(&module, self_segs, None, Ns::Type);
+            if let Some((segs, _)) = &imp.trait_ {
+                let (t, c) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                 if keep_ref(&t) || r.internal.contains(&t) {
                     cb.add_relation(Relation::new(ty.clone(), t, RelationKind::Implements, c));
                 }
-                ids::trait_impl_segment(disp)
-            });
+            }
             let ctx = FlowCtx { module: &module, self_ty: Some(&ty) };
             for m in &imp.methods {
-                let mid = ids::method_id(&ty, trait_seg.as_deref(), &m.name);
+                let mid = impl_method(&module, &ty, imp, &m.name);
                 let mut ms = r.method_symbol(&mid, &ty, m, f, &ctx, opts, &mut cb);
                 if let Some((_, disp)) = &imp.trait_ {
                     ms.tags.insert(0, format!("impl {disp}"));
@@ -314,32 +311,90 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
     (cb, diags)
 }
 
-fn cb_has(r: &Resolver, id: &SymbolId) -> bool {
-    r.internal.contains(id)
+/// The id of the module at `segments` (crate name first), in the `cargo`
+/// package named by the crate.
+fn module_sym(segments: &[String]) -> SymbolId {
+    let (krate, rest) = segments.split_first().map_or(("", &[][..]), |(k, r)| (k.as_str(), r));
+    ids::module_id(&crate_package(krate), rest)
+}
+
+fn crate_package(krate: &str) -> Package {
+    ids::package("cargo", krate)
+}
+
+/// The id of method `name` from impl block `imp` whose self type resolved
+/// to `ty`.
+fn impl_method(module: &SymbolId, ty: &SymbolId, imp: &RawImpl, name: &str) -> SymbolId {
+    let self_ty = imp.self_ty.as_ref().map(|s| s.join("::")).unwrap_or_default();
+    let trait_ = imp.trait_.as_ref().map(|(_, disp)| disp.as_str());
+    ids::impl_method_id(module, ty, &self_ty, trait_, name)
+}
+
+/// The id of member `name` of `ty` when the codebase does not define it: a
+/// method under a global type, or the path extended by the name.
+fn undefined_member(ty: &SymbolId, name: &str) -> SymbolId {
+    ids::method_id(ty, None, name)
 }
 
 /// Keep a resolved reference as a relation target? Drops std and prelude.
 fn keep_ref(id: &SymbolId) -> bool {
-    let first = id.as_str().split("::").next().unwrap_or("");
+    let root = id.root();
+    let first = root.as_deref().unwrap_or("?");
     !STD_ROOTS.contains(&first) && !PRELUDE.contains(&first)
 }
 
+/// Which namespace a path's final segment is looked up in first. Rust keeps
+/// types (and modules) apart from values (functions, constants), so a module
+/// `config` and a function `config` in one module are both reachable.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Ns {
+    Type,
+    Value,
+}
+
+/// The definitions one name has in one module, per namespace.
+#[derive(Debug, Clone, Default)]
+struct Slots {
+    ty: Option<SymbolId>,
+    value: Option<SymbolId>,
+}
+
+impl Slots {
+    fn insert(&mut self, kind: SymbolKind, id: SymbolId) {
+        let slot = match kind {
+            SymbolKind::Function | SymbolKind::Method | SymbolKind::Const | SymbolKind::Static => &mut self.value,
+            SymbolKind::Macro => return,
+            _ => &mut self.ty,
+        };
+        if slot.is_none() {
+            *slot = Some(id);
+        }
+    }
+
+    fn get(&self, ns: Ns) -> Option<&SymbolId> {
+        match ns {
+            Ns::Type => self.ty.as_ref().or(self.value.as_ref()),
+            Ns::Value => self.value.as_ref().or(self.ty.as_ref()),
+        }
+    }
+}
+
 struct FlowCtx<'a> {
-    module: &'a str,
+    module: &'a SymbolId,
     self_ty: Option<&'a SymbolId>,
 }
 
 /// Lookup tables built from all raw files before any resolution.
 struct Resolver {
     crates: BTreeSet<String>,
-    /// module id → item name → id (items, submodules).
-    items: BTreeMap<String, BTreeMap<String, SymbolId>>,
+    /// module id → item name → definitions (items, submodules).
+    items: BTreeMap<SymbolId, BTreeMap<String, Slots>>,
     /// module id → `use` entries.
-    uses: BTreeMap<String, Vec<RawUse>>,
+    uses: BTreeMap<SymbolId, Vec<RawUse>>,
     /// Every internal symbol id that will exist (types, fns, modules, methods).
     internal: BTreeSet<SymbolId>,
     /// type id → field name → raw refs with defining module.
-    fields: BTreeMap<SymbolId, (String, BTreeMap<String, Vec<Segs>>)>,
+    fields: BTreeMap<SymbolId, (SymbolId, BTreeMap<String, Vec<Segs>>)>,
     /// type id → method name → method id (inherent first).
     methods: BTreeMap<SymbolId, BTreeMap<String, SymbolId>>,
     /// method name → ids, for unknown receivers.
@@ -351,7 +406,7 @@ struct Resolver {
     /// module id → internal modules it glob-imports (`use a::b::*`), in
     /// source order. Resolved once, without consulting globs, so a name
     /// lookup never re-enters glob resolution.
-    globs: BTreeMap<String, Vec<String>>,
+    globs: BTreeMap<SymbolId, Vec<SymbolId>>,
 }
 
 impl Resolver {
@@ -370,22 +425,24 @@ impl Resolver {
         };
         for f in files {
             for m in &f.modules {
-                let id = ids::module_path(&m.path);
-                r.internal.insert(SymbolId::new(&id));
+                let id = module_sym(&m.path);
+                r.internal.insert(id.clone());
                 r.uses.entry(id.clone()).or_default().extend(m.uses.iter().cloned());
-                if m.path.len() > 1 {
-                    let parent = ids::module_path(&m.path[..m.path.len() - 1]);
-                    r.items
-                        .entry(parent)
-                        .or_default()
-                        .insert(m.path.last().cloned().unwrap_or_default(), SymbolId::new(&id));
+                if let Some(parent) = id.parent() {
+                    let name = m.path.last().cloned().unwrap_or_default();
+                    r.items.entry(parent).or_default().entry(name).or_default().insert(SymbolKind::Module, id);
                 }
             }
             for it in &f.items {
-                let module = ids::module_path(&it.module);
-                let id = ids::item_id(&module, &it.name);
+                let module = module_sym(&it.module);
+                let id = ids::item_id(&module, it.kind, &it.name);
                 r.internal.insert(id.clone());
-                r.items.entry(module.clone()).or_default().entry(it.name.clone()).or_insert(id.clone());
+                r.items
+                    .entry(module.clone())
+                    .or_default()
+                    .entry(it.name.clone())
+                    .or_default()
+                    .insert(it.kind, id.clone());
                 if matches!(it.kind, SymbolKind::Struct | SymbolKind::Union | SymbolKind::Enum) {
                     let f = it.members.iter().map(|m| (m.name.clone(), m.refs.clone())).collect();
                     r.fields.insert(id.clone(), (module.clone(), f));
@@ -411,11 +468,10 @@ impl Resolver {
         // resolves targets without globs; round 1 lets a glob target itself
         // be found through round-0 globs (`use super::*; use inner::*;`).
         for round in 0..2 {
-            let mut globs: BTreeMap<String, Vec<String>> = BTreeMap::new();
+            let mut globs: BTreeMap<SymbolId, Vec<SymbolId>> = BTreeMap::new();
             for (module, uses) in &r.uses {
                 for u in uses.iter().filter(|u| u.alias == "*") {
-                    if let Some(t) = r.walk(module, &u.target, None, 0, round > 0) {
-                        let t = t.as_str().to_owned();
+                    if let Some(t) = r.walk(module, &u.target, None, Ns::Type, 0, round > 0) {
                         if r.items.contains_key(&t) && !globs.get(module).is_some_and(|v| v.contains(&t)) {
                             globs.entry(module.clone()).or_default().push(t);
                         }
@@ -432,16 +488,15 @@ impl Resolver {
                     if imp.trait_.is_some() != pass_trait {
                         continue;
                     }
-                    let module = ids::module_path(&imp.module);
+                    let module = module_sym(&imp.module);
                     let Some(segs) = &imp.self_ty else { continue };
-                    let (ty, _) = r.resolve(&module, segs, None);
-                    let tseg = imp.trait_.as_ref().map(|(segs, disp)| {
-                        let (t, _) = r.resolve(&module, segs, Some(&ty));
+                    let (ty, _) = r.resolve(&module, segs, None, Ns::Type);
+                    if let Some((segs, _)) = &imp.trait_ {
+                        let (t, _) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                         r.impls.entry(ty.clone()).or_default().insert(t);
-                        ids::trait_impl_segment(disp)
-                    });
+                    }
                     for m in &imp.methods {
-                        let mid = ids::method_id(&ty, tseg.as_deref(), &m.name);
+                        let mid = impl_method(&module, &ty, imp, &m.name);
                         r.internal.insert(mid.clone());
                         r.methods.entry(ty.clone()).or_default().entry(m.name.clone()).or_insert(mid.clone());
                         r.by_name.entry(m.name.clone()).or_default().insert(mid);
@@ -452,30 +507,43 @@ impl Resolver {
         r
     }
 
-    /// Resolve `segs` as written in `module`. Returns the canonical id and how
-    /// sure we are. Unresolvable paths come back as their literal text with
+    /// Resolve `segs` as written in `module`, looking the final segment up
+    /// in `ns` first. Returns the canonical id and how sure we are.
+    /// Unresolvable paths come back as a path id with
     /// [`Confidence::External`].
-    fn resolve(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> (SymbolId, Confidence) {
-        match self.walk(module, segs, self_ty, 0, true) {
+    fn resolve(
+        &self,
+        module: &SymbolId,
+        segs: &[String],
+        self_ty: Option<&SymbolId>,
+        ns: Ns,
+    ) -> (SymbolId, Confidence) {
+        match self.walk(module, segs, self_ty, ns, 0, true) {
             Some(id) if self.internal.contains(&id) => (id, Confidence::Exact),
             Some(id) => {
-                let root = id.as_str().split("::").next().unwrap_or("");
-                if self.crates.contains(root) { (id, Confidence::Inferred) } else { (id, Confidence::External) }
+                let in_workspace = id.root().is_some_and(|root| self.crates.contains(root.as_ref()));
+                (id, if in_workspace { Confidence::Inferred } else { Confidence::External })
             }
-            None => (ids::path_id(segs), Confidence::External),
+            None => (ids::path_id(segs).unwrap_or_else(|| ids::unresolved_method_id("")), Confidence::External),
         }
     }
 
-    fn resolve_internal(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
-        self.walk(module, segs, self_ty, 0, true).filter(|id| self.internal.contains(id))
+    fn resolve_internal(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
+        self.walk(module, segs, self_ty, Ns::Type, 0, true).filter(|id| self.internal.contains(id))
+    }
+
+    /// The definition of `name` in module `module`, `ns` first.
+    fn item(&self, module: &SymbolId, name: &str, ns: Ns) -> Option<&SymbolId> {
+        self.items.get(module).and_then(|m| m.get(name)).and_then(|s| s.get(ns))
     }
 
     /// `use_globs` is false only while the glob table itself is being built.
     fn walk(
         &self,
-        module: &str,
+        module: &SymbolId,
         segs: &[String],
         self_ty: Option<&SymbolId>,
+        ns: Ns,
         depth: u8,
         use_globs: bool,
     ) -> Option<SymbolId> {
@@ -484,11 +552,14 @@ impl Resolver {
         }
         let first = segs[0].as_str();
         let mut rest = &segs[1..];
+        // Intermediate segments name modules and types; only the last one is
+        // looked up in `ns` first.
+        let ns_at = |i: usize| if i + 1 == segs.len() { ns } else { Ns::Type };
         let base: SymbolId = match first {
-            "crate" => SymbolId::new(module.split("::").next().unwrap_or(module)),
-            "self" => SymbolId::new(module),
+            "crate" => module_sym(&[module.root().unwrap_or_default().into_owned()]),
+            "self" => module.clone(),
             "super" => {
-                let mut m = SymbolId::new(module).parent().unwrap_or_else(|| SymbolId::new(module));
+                let mut m = module.parent().unwrap_or_else(|| module.clone());
                 while rest.first().map(String::as_str) == Some("super") {
                     m = m.parent().unwrap_or(m);
                     rest = &rest[1..];
@@ -497,7 +568,7 @@ impl Resolver {
             }
             "Self" => self_ty?.clone(),
             name => {
-                if let Some(id) = self.items.get(module).and_then(|m| m.get(name)) {
+                if let Some(id) = self.item(module, name, ns_at(0)) {
                     id.clone()
                 } else if let Some(u) = self
                     .uses
@@ -509,30 +580,28 @@ impl Resolver {
                     // itself; it falls through to the crate check below.)
                     let mut full = u.target.clone();
                     full.extend(rest.iter().cloned());
-                    return self
-                        .walk(module, &full, self_ty, depth + 1, use_globs)
-                        .or_else(|| Some(ids::path_id(&full)));
-                } else if let Some(id) = use_globs.then(|| self.glob(module, name)).flatten() {
+                    return self.walk(module, &full, self_ty, ns, depth + 1, use_globs).or_else(|| ids::path_id(&full));
+                } else if let Some(id) = use_globs.then(|| self.glob(module, name, ns_at(0))).flatten() {
                     id
                 } else if self.crates.contains(name) {
-                    SymbolId::new(name)
+                    module_sym(&[name.to_owned()])
                 } else {
-                    return Some(ids::path_id(segs));
+                    return ids::path_id(segs);
                 }
             }
         };
+        let offset = segs.len() - rest.len();
         let mut cur = base;
         for (i, seg) in rest.iter().enumerate() {
-            let key = cur.as_str().to_owned();
-            if let Some(id) = self.items.get(&key).and_then(|m| m.get(seg)) {
+            if let Some(id) = self.item(&cur, seg, ns_at(offset + i)) {
                 cur = id.clone();
             } else if let Some(id) = self.methods.get(&cur).and_then(|m| m.get(seg)) {
                 cur = id.clone();
-            } else if self.uses.get(&key).is_some_and(|us| us.iter().any(|u| &u.alias == seg)) {
+            } else if self.uses.get(&cur).is_some_and(|us| us.iter().any(|u| &u.alias == seg)) {
                 // `pub use` re-export inside an internal module.
-                return self.walk(&key, &rest[i..], self_ty, depth + 1, use_globs);
+                return self.walk(&cur, &rest[i..], self_ty, ns, depth + 1, use_globs);
             } else {
-                cur = cur.child(seg);
+                cur = cur.extend_path(seg);
             }
         }
         Some(cur)
@@ -542,25 +611,25 @@ impl Resolver {
     /// (`pub use inner::*` re-exports) breadth-first. Each module is visited
     /// at most once, so cyclic globs (`a: use b::*`, `b: use a::*`) are
     /// harmless and the cost is linear in the glob graph.
-    fn glob(&self, module: &str, name: &str) -> Option<SymbolId> {
-        let mut queue: std::collections::VecDeque<&str> = self.globs.get(module)?.iter().map(String::as_str).collect();
-        let mut seen: BTreeSet<&str> = BTreeSet::from([module]);
+    fn glob(&self, module: &SymbolId, name: &str, ns: Ns) -> Option<SymbolId> {
+        let mut queue: std::collections::VecDeque<&SymbolId> = self.globs.get(module)?.iter().collect();
+        let mut seen: BTreeSet<&SymbolId> = BTreeSet::from([module]);
         while let Some(m) = queue.pop_front() {
             if !seen.insert(m) {
                 continue;
             }
-            if let Some(id) = self.items.get(m).and_then(|items| items.get(name)) {
+            if let Some(id) = self.item(m, name, ns) {
                 return Some(id.clone());
             }
             if let Some(next) = self.globs.get(m) {
-                queue.extend(next.iter().map(String::as_str));
+                queue.extend(next.iter());
             }
         }
         None
     }
 
     /// Resolve a list of raw type refs to kept relation targets.
-    fn refs(&self, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId> {
+    fn refs(&self, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId> {
         let mut out = Vec::new();
         for segs in raw {
             // Associated types (`Self::Error`, `T::Output`) are not symbols.
@@ -573,7 +642,7 @@ impl Resolver {
             {
                 continue;
             }
-            let (id, _) = self.resolve(module, segs, self_ty);
+            let (id, _) = self.resolve(module, segs, self_ty, Ns::Type);
             if (keep_ref(&id) || self.internal.contains(&id)) && Some(&id) != self_ty && !out.contains(&id) {
                 out.push(id);
             }
@@ -582,12 +651,12 @@ impl Resolver {
     }
 
     /// `true` if `name` is defined or imported in `module`.
-    fn local(&self, module: &str, name: &str) -> bool {
+    fn local(&self, module: &SymbolId, name: &str) -> bool {
         self.items.get(module).is_some_and(|m| m.contains_key(name))
             || self.uses.get(module).is_some_and(|us| us.iter().any(|u| u.alias == name))
     }
 
-    fn member(&self, module: &str, m: &RawMember, owner: Option<&SymbolId>) -> Member {
+    fn member(&self, module: &SymbolId, m: &RawMember, owner: Option<&SymbolId>) -> Member {
         Member {
             name: m.name.clone(),
             kind: m.kind,
@@ -598,7 +667,14 @@ impl Resolver {
         }
     }
 
-    fn add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>) {
+    fn add_uses(
+        &self,
+        cb: &mut Codebase,
+        from: &SymbolId,
+        module: &SymbolId,
+        raw: &[Segs],
+        self_ty: Option<&SymbolId>,
+    ) {
         for t in self.refs(module, raw, self_ty) {
             let c = if self.internal.contains(&t) { Confidence::Exact } else { Confidence::External };
             cb.add_relation(Relation::new(from.clone(), t, RelationKind::Uses, c));
@@ -642,7 +718,7 @@ impl Resolver {
                 if PRELUDE.contains(&segs[0].as_str()) && !self.local(ctx.module, &segs[0]) {
                     return None;
                 }
-                let (id, c) = self.resolve(ctx.module, segs, ctx.self_ty);
+                let (id, c) = self.resolve(ctx.module, segs, ctx.self_ty, Ns::Value);
                 // A bare name that is neither defined, imported nor a crate is
                 // a local closure or function pointer: not a symbol.
                 if segs.len() == 1 && c == Confidence::External && !self.local(ctx.module, &segs[0]) {
@@ -653,7 +729,8 @@ impl Resolver {
             Callee::Method { recv, name } => self.method(ctx, recv, name)?,
         };
         let keep = opts.external_calls.keeps(confidence, || {
-            let root = target.as_str().split("::").next().unwrap_or("");
+            let root = target.root();
+            let root = root.as_deref().unwrap_or("");
             // External roots that look like crates (lower-case); unresolved
             // type names are not dependencies.
             keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.crates.contains(root)
@@ -691,13 +768,13 @@ impl Resolver {
         }
         // Known type, method not defined in the codebase: a derived or std
         // trait method on an internal type, or a dependency's method.
-        Some((ids::method_id(&ty, None, name), Confidence::External))
+        Some((undefined_member(&ty, name), Confidence::External))
     }
 
     /// The type a method is called on, from the declared type's paths
     /// (outermost first). Smart pointers are looked through; any other
     /// wrapper (`Vec`, `Option`, `Mutex`, ...) *is* the receiver.
-    fn receiver_type(&self, module: &str, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
+    fn receiver_type(&self, module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
         const DEREF: &[&str] =
             &["Box", "Arc", "Rc", "Cow", "Pin", "Ref", "RefMut", "MutexGuard", "RwLockReadGuard", "RwLockWriteGuard"];
         for segs in refs {
@@ -705,7 +782,7 @@ impl Resolver {
             if segs.len() == 1 && is_generic_param(last) {
                 return None;
             }
-            let (id, _) = self.resolve(module, segs, self_ty);
+            let (id, _) = self.resolve(module, segs, self_ty, Ns::Type);
             if DEREF.contains(&last) && !self.internal.contains(&id) {
                 continue;
             }
@@ -719,8 +796,9 @@ impl Resolver {
         if !COMMON_METHODS.contains(&name) {
             if let Some(ids) = self.by_name.get(name) {
                 if ids.len() == 1 {
-                    let id = ids.iter().next().cloned().unwrap_or_else(|| SymbolId::new(name));
-                    return (id, Confidence::Inferred);
+                    if let Some(id) = ids.iter().next() {
+                        return (id.clone(), Confidence::Inferred);
+                    }
                 }
             }
         }

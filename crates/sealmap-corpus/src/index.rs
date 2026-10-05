@@ -111,8 +111,9 @@ impl Index {
         for doc in &mut self.documents {
             for frag in &mut doc.fragments {
                 for call in &mut frag.calls {
-                    if seqs.contains_key(call.target.as_str()) {
-                        call.expands = Some(call.target.as_str().to_owned());
+                    let target = call.target.to_string();
+                    if seqs.contains_key(&target) {
+                        call.expands = Some(target);
                     }
                 }
             }

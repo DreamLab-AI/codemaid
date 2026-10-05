@@ -41,12 +41,12 @@ pub(crate) fn render(cb: &Codebase, opts: &CorpusOptions) -> String {
     out
 }
 
-fn root(id: &SymbolId) -> &str {
-    id.as_str().split("::").next().unwrap_or("")
+fn root(id: &SymbolId) -> String {
+    id.root().unwrap_or_default().into_owned()
 }
 
 fn crates_of(cb: &Codebase) -> BTreeSet<String> {
-    cb.files.values().map(|f| root(&f.module).to_owned()).collect()
+    cb.files.values().map(|f| root(&f.module)).collect()
 }
 
 /// Module that physically contains a symbol (its file's module).
@@ -78,8 +78,9 @@ fn crate_graph(cb: &Codebase, crates: &BTreeSet<String>, opts: &CorpusOptions) -
     let mut edges: BTreeMap<(String, String), usize> = BTreeMap::new();
     for r in cb.relations.iter().filter(|r| STRUCTURAL.contains(&r.kind)) {
         let (a, b) = (root(&r.from), root(&r.to));
-        if a != b && crates.contains(a) && !b.is_empty() && b != "?" {
-            *edges.entry((a.to_owned(), b.to_owned())).or_default() += 1;
+        // Unresolved targets have no root (empty), so they are skipped.
+        if a != b && crates.contains(&a) && !b.is_empty() {
+            *edges.entry((a, b)).or_default() += 1;
         }
     }
     if crates.len() < 2 && edges.is_empty() {
@@ -95,7 +96,7 @@ fn crate_graph(cb: &Codebase, crates: &BTreeSet<String>, opts: &CorpusOptions) -
         let top = cb
             .files
             .values()
-            .find(|file| root(&file.module) == k)
+            .find(|file| &root(&file.module) == k)
             .map(|file| file.path.components().next().unwrap_or("").to_owned())
             .unwrap_or_default();
         groups.entry(top).or_default().push(k);
@@ -148,8 +149,9 @@ fn module_graph(cb: &Codebase, krate: &str, opts: &CorpusOptions) -> Option<Stri
     let (edges, dropped) = heaviest(edges, opts.max_edges);
     let mut f = Flowchart::new(Direction::LR);
     for m in &modules {
-        let label = m.as_str().strip_prefix(&format!("{krate}::")).unwrap_or(m.as_str());
-        f.node(ident(m), label, NodeShape::Rect);
+        let below: Vec<String> = m.descriptors().iter().map(|d| d.name().to_owned()).collect();
+        let label = if below.is_empty() { krate.to_owned() } else { below.join("::") };
+        f.node(ident(m), &label, NodeShape::Rect);
     }
     for ((a, b), n) in &edges {
         f.edge(&ident(a), &ident(b), EdgeStyle::Solid, Some(&n.to_string()));
@@ -246,7 +248,7 @@ fn trait_map(cb: &Codebase, opts: &CorpusOptions) -> Option<String> {
     }
     for r in &impls {
         if !d.has_class(&ident(&r.from)) {
-            d.class(Class::new(ident(&r.from), r.from.name()));
+            d.class(Class::new(ident(&r.from), &r.from.name()));
         }
         let kind = if r.kind == RelationKind::Extends {
             ClassRelationKind::Inheritance

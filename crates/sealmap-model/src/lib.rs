@@ -41,6 +41,12 @@
 //! is a canonical [`SymbolId`], separately rendered sequences can be merged or
 //! inlined into each other by a downstream orchestrator.
 //!
+//! ## Symbol ids
+//!
+//! Every symbol is named by a `sym:` id (see [`sym`]): kind-explicit,
+//! SCIP-style, with no file path, so moving code between files never changes
+//! an id.
+//!
 //! ## Example
 //!
 //! Build a tiny model by hand and query it:
@@ -48,23 +54,21 @@
 //! ```
 //! use sealmap_model::*;
 //!
+//! let pkg = Package::current("cargo", "demo").unwrap();
+//! let root = SymbolId::package_root(pkg.clone());
+//! let id = |name: &str| root.child(Descriptor::r#type(name)).unwrap();
+//!
 //! let mut cb = Codebase::new("demo");
 //! let file = SourcePath::new("src/lib.rs").unwrap();
-//! cb.add_file(SourceFile::new(file.clone(), "rust", SymbolId::new("demo"), "pub struct A;"));
+//! cb.add_file(SourceFile::new(file.clone(), "rust", root.clone(), "pub struct A;"));
 //!
-//! let a = Symbol::new(SymbolId::new("demo::A"), "A", SymbolKind::Struct, file.clone());
-//! let b = Symbol::new(SymbolId::new("demo::B"), "B", SymbolKind::Struct, file.clone());
-//! cb.add_symbol(a);
-//! cb.add_symbol(b);
-//! cb.add_relation(Relation::new(
-//!     SymbolId::new("demo::A"),
-//!     SymbolId::new("demo::B"),
-//!     RelationKind::FieldType,
-//!     Confidence::Exact,
-//! ));
+//! cb.add_symbol(Symbol::new(id("A"), "A", SymbolKind::Struct, file.clone()));
+//! cb.add_symbol(Symbol::new(id("B"), "B", SymbolKind::Struct, file.clone()));
+//! cb.add_relation(Relation::new(id("A"), id("B"), RelationKind::FieldType, Confidence::Exact));
 //!
+//! assert_eq!(id("A").to_string(), "sym:cargo demo . A#");
 //! assert_eq!(cb.symbols_in_file(&file).count(), 2);
-//! assert_eq!(cb.relations_from(&SymbolId::new("demo::A")).count(), 1);
+//! assert_eq!(cb.relations_from(&id("A")).count(), 1);
 //! ```
 
 #![forbid(unsafe_code)]
@@ -75,6 +79,7 @@ pub mod flow;
 mod hash;
 mod path;
 mod source;
+pub mod sym;
 mod symbol;
 
 pub use codebase::{Codebase, CodebaseStats};
@@ -82,9 +87,8 @@ pub use flow::{Arm, Call, CallKind, Exit, Flow, Step};
 pub use hash::ContentHash;
 pub use path::{PathError, SourcePath};
 pub use source::{LoadOptions, SourceFile, SourceSet};
-pub use symbol::{
-    Confidence, Member, MemberKind, Relation, RelationKind, Span, Symbol, SymbolId, SymbolKind, Visibility,
-};
+pub use sym::{Descriptor, IdError, Package, Suffix, SymbolId, Version};
+pub use symbol::{Confidence, Member, MemberKind, Relation, RelationKind, Span, Symbol, SymbolKind, Visibility};
 
 /// Version of the serialised model schema (the JSON shape of [`Codebase`]).
 ///

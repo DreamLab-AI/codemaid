@@ -84,9 +84,13 @@ mod tests {
 
     use super::*;
 
+    fn sym(s: &str) -> SymbolId {
+        SymbolId::parse(s).unwrap()
+    }
+
     fn call(t: &str, c: Confidence) -> Step {
         Step::Call(Call {
-            target: SymbolId::new(t),
+            target: SymbolId::parse(t).unwrap(),
             label: t.into(),
             kind: CallKind::Function,
             confidence: c,
@@ -100,16 +104,22 @@ mod tests {
     fn aggregation_keeps_the_strongest_evidence() {
         let mut cb = Codebase::new("app");
         let mut s =
-            Symbol::new(SymbolId::new("app::f"), "f", SymbolKind::Function, SourcePath::new("src/lib.rs").unwrap());
+            Symbol::new(sym("sym:cargo app . f()."), "f", SymbolKind::Function, SourcePath::new("src/lib.rs").unwrap());
         s.flow = Some(Flow::new(vec![
-            call("app::g", Confidence::Inferred),
-            call("app::g", Confidence::Exact),
-            call("dep::h", Confidence::External),
+            call("sym:cargo app . g().", Confidence::Inferred),
+            call("sym:cargo app . g().", Confidence::Exact),
+            call("sym:extern dep::h", Confidence::External),
         ]));
         cb.add_symbol(s);
         aggregate_calls(&mut cb);
-        let edges: Vec<_> = cb.relations.iter().map(|r| (r.to.as_str().to_owned(), r.confidence)).collect();
-        assert_eq!(edges, [("app::g".to_owned(), Confidence::Exact), ("dep::h".to_owned(), Confidence::External)]);
+        let edges: Vec<_> = cb.relations.iter().map(|r| (r.to.to_string(), r.confidence)).collect();
+        assert_eq!(
+            edges,
+            [
+                ("sym:cargo app . g().".to_owned(), Confidence::Exact),
+                ("sym:extern dep::h".to_owned(), Confidence::External)
+            ]
+        );
     }
 
     #[test]

@@ -22,7 +22,7 @@ pub(crate) fn render(
     let mut body = String::new();
 
     let module = cb.symbol(&file.module);
-    let _ = writeln!(body, "# `{}` · {}", file.module, file.path);
+    let _ = writeln!(body, "# {} · {}", code(&file.module.to_string()), file.path);
     if let Some(doc) = module.and_then(|m| m.doc.as_deref()) {
         let _ = writeln!(body, "> {}", inline(doc));
     }
@@ -56,7 +56,7 @@ pub(crate) fn render(
     callables.sort_by_key(|s| (s.span.start_line, s.span.start_col, s.id.clone()));
     for sym in callables {
         let Some(r) = sequence::render(cb, sym, opts) else { continue };
-        let _ = writeln!(body, "\n## `{}`", sym.id);
+        let _ = writeln!(body, "\n## {}", code(&sym.id.to_string()));
         let mut meta = String::new();
         if let Some(sig) = &sym.signature {
             let _ = write!(meta, "`{}` · ", sig.replace('`', "'"));
@@ -98,7 +98,7 @@ pub(crate) fn render(
     let _ = writeln!(text, "---");
     let _ = writeln!(text, "{MARKER}{}", crate::CORPUS_SCHEMA_VERSION);
     let _ = writeln!(text, "source: {}", file.path);
-    let _ = writeln!(text, "module: {}", file.module);
+    let _ = writeln!(text, "module: {}", yaml_str(&file.module.to_string()));
     let _ = writeln!(text, "language: {}", file.language);
     let _ = writeln!(text, "source_hash: {}", file.hash);
     let _ = writeln!(text, "lines: {}", file.lines);
@@ -115,6 +115,18 @@ pub(crate) fn render(
         fragments,
     };
     (doc_path, text, entry)
+}
+
+/// A double-quoted YAML scalar (JSON string syntax is valid YAML), so ids
+/// holding `: ` or ` #` cannot be misread as structure or comments.
+fn yaml_str(text: &str) -> String {
+    serde_json::to_string(text).expect("strings always serialise")
+}
+
+/// Inline Markdown code for `text`, with a longer fence when the text itself
+/// holds backticks (quoted `sym:` names do).
+fn code(text: &str) -> String {
+    if text.contains('`') { format!("`` {text} ``") } else { format!("`{text}`") }
 }
 
 /// Make free text safe on one Markdown line (no fences, no newlines).

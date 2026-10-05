@@ -88,7 +88,7 @@ pub(crate) fn render(
     // The module box: free functions, constants, statics, macros, submodules.
     let modules: Vec<&Symbol> = here.iter().copied().filter(|s| s.kind == SymbolKind::Module).collect();
     for module in &modules {
-        let mut class = Class::new(ident(&module.id), &module.id.to_string());
+        let mut class = Class::new(ident(&module.id), &module.id.display_path());
         class.annotation("module");
         let mut any = false;
         for s in lookup.children(&module.id).filter(|s| visible(s)) {
@@ -210,7 +210,7 @@ fn type_label(cb: &Codebase, id: &SymbolId) -> String {
             format!("{}<{}>", s.name, g.join(", "))
         }
         Some(s) => s.name.clone(),
-        None => id.as_str().to_owned(),
+        None => id.display_path(),
     }
 }
 

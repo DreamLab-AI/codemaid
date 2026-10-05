@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::hash::{ContentHash, normalise_newlines};
 use crate::path::SourcePath;
-use crate::symbol::SymbolId;
+use crate::sym::SymbolId;
 
 /// Metadata about one analysed source file. The file's text is not stored in
 /// the model; only its hash, so the model stays small and the corpus can

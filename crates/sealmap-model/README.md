@@ -9,6 +9,9 @@ flow of every function. It is the shared vocabulary of
 [sealmap](https://github.com/DreamLab-AI/sealmap): frontends produce a
 `Codebase`, projections consume one, and neither side depends on the other.
 
+- **`sym:` symbol ids**: kind-explicit, SCIP-style, no file path
+  (`sym:cargo shop . db/Db#[Store]put().`). Printing is injective and parsing
+  is its exact inverse.
 - **Ordered collections only**, so iteration order is a function of the data.
 - **Normalised paths** (`SourcePath`): relative, `/`-separated, no `.`/`..`.
 - **Stable hashing** (`ContentHash`): BLAKE3 over newline-normalised text.
@@ -18,20 +21,19 @@ flow of every function. It is the shared vocabulary of
 ```rust
 use sealmap_model::*;
 
+let root = SymbolId::package_root(Package::current("cargo", "demo").unwrap());
+let id = |name: &str| root.child(Descriptor::r#type(name)).unwrap();
+
 let mut cb = Codebase::new("demo");
 let file = SourcePath::new("src/lib.rs").unwrap();
-cb.add_file(SourceFile::new(file.clone(), "rust", SymbolId::new("demo"), "pub struct A;"));
-cb.add_symbol(Symbol::new(SymbolId::new("demo::A"), "A", SymbolKind::Struct, file.clone()));
-cb.add_symbol(Symbol::new(SymbolId::new("demo::B"), "B", SymbolKind::Struct, file.clone()));
-cb.add_relation(Relation::new(
-    SymbolId::new("demo::A"),
-    SymbolId::new("demo::B"),
-    RelationKind::FieldType,
-    Confidence::Exact,
-));
+cb.add_file(SourceFile::new(file.clone(), "rust", root.clone(), "pub struct A;"));
+cb.add_symbol(Symbol::new(id("A"), "A", SymbolKind::Struct, file.clone()));
+cb.add_symbol(Symbol::new(id("B"), "B", SymbolKind::Struct, file.clone()));
+cb.add_relation(Relation::new(id("A"), id("B"), RelationKind::FieldType, Confidence::Exact));
 
+assert_eq!(id("A").to_string(), "sym:cargo demo . A#");
 assert_eq!(cb.symbols_in_file(&file).count(), 2);
-assert_eq!(cb.relations_from(&SymbolId::new("demo::A")).count(), 1);
+assert_eq!(cb.relations_from(&id("A")).count(), 1);
 ```
 
 ## Licence

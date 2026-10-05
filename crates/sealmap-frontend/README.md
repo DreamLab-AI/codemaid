@@ -14,7 +14,7 @@ ids and confidences by the same rules:
 | `lower` | flow normalisation: raw steps plus a call resolver → a model `Flow` |
 | `confidence` | the confidence lattice, the external-call policy, call-edge aggregation |
 | `labels` | label rules: token spacing, clipping limits, call/condition/closure labels |
-| `ids` | the symbol-id builder |
+| `ids` | the `sym:` symbol-id builder |
 | `isolate` | per-file collection on big stacks with a panic guard (feature `parallel`: rayon) |
 
 It has no parser dependency; a frontend brings its own.
@@ -22,20 +22,21 @@ It has no parser dependency; a frontend brings its own.
 ```rust
 use sealmap_frontend::raw::{Callee, RawCall, RawStep};
 use sealmap_frontend::{ids, lower};
-use sealmap_model::{CallKind, Confidence};
+use sealmap_model::{CallKind, Confidence, SymbolKind};
 
 let call = |name: &str| {
     RawStep::Call(RawCall::new(Callee::Path(vec![name.into()]), format!("{name}()"), CallKind::Function, 1))
 };
 let raw = vec![call("load"), RawStep::Loop("for x in xs".into(), vec![call("save")])];
 
+let app = ids::module_id(&ids::package("cargo", "app"), &[]);
 let flow = lower::lower_flow(&raw, &mut |c: &RawCall| {
     let Callee::Path(segs) = &c.callee else { return None };
-    Some(c.to_call(ids::item_id("app", &segs[0]), Confidence::Exact))
+    Some(c.to_call(ids::item_id(&app, SymbolKind::Function, &segs[0]), Confidence::Exact))
 })
 .unwrap();
-let targets: Vec<_> = flow.calls().map(|c| c.target.as_str()).collect();
-assert_eq!(targets, ["app::load", "app::save"]);
+let targets: Vec<_> = flow.calls().map(|c| c.target.to_string()).collect();
+assert_eq!(targets, ["sym:cargo app . load().", "sym:cargo app . save()."]);
 ```
 
 ## Licence

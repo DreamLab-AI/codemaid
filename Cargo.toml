@@ -30,6 +30,7 @@ toml = "0.8"
 rayon = "1"
 ignore = "0.4.23"
 clap = { version = "4", features = ["derive"] }
+proptest = { version = "1", default-features = false, features = ["std"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

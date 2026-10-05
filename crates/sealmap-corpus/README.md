@@ -24,7 +24,7 @@ let model = extract(&src, &RustOptions { name: "demo".into(), ..Default::default
 
 let corpus = generate(&model, &CorpusOptions::default());
 let doc = corpus.document("src/lib.rs.md").unwrap();
-assert!(doc.contains("demo__A->>demo: helper()"));
+assert!(doc.contains(": helper()"));
 assert!(corpus.document("_index.json").is_some());
 ```
 

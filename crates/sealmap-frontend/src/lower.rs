@@ -20,7 +20,7 @@
 //! // if cached { log() } else { fetch() }  — `log` is std, so it is dropped.
 //! let raw = vec![RawStep::Branch(vec![("cached".into(), vec![call("log")]), (String::new(), vec![call("fetch")])])];
 //! let flow = lower_flow(&raw, &mut |c: &RawCall| match &c.callee {
-//!     Callee::Path(s) if s[0] == "fetch" => Some(c.to_call(SymbolId::new("app::fetch"), Confidence::Exact)),
+//!     Callee::Path(s) if s[0] == "fetch" => Some(c.to_call(SymbolId::unresolved("fetch"), Confidence::Exact)),
 //!     _ => None,
 //! })
 //! .unwrap();
@@ -132,7 +132,7 @@ mod tests {
 
     fn keep_all(c: &RawCall) -> Option<Call> {
         let Callee::Path(s) = &c.callee else { return None };
-        (s[0] != "drop").then(|| c.to_call(SymbolId::new(&s[0]), Confidence::Exact))
+        (s[0] != "drop").then(|| c.to_call(SymbolId::unresolved(&s[0]), Confidence::Exact))
     }
 
     #[test]

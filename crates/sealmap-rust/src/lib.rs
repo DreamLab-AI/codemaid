@@ -26,6 +26,14 @@
 //!    Method calls are resolved from the receiver's declared or constructed
 //!    type (`self`, `self.field`, typed params, `let x = Foo::new()`).
 //!
+//! ## Ids
+//!
+//! Every definition gets a `sym:` id in the `cargo` package named after its
+//! crate (see `sealmap_frontend::ids` for the full table):
+//! `sym:cargo shop . db/Db#insert().`. Binary, test, example and bench
+//! targets are packages of their own (`shop_main`, `test_it`, ...), so a
+//! binary and the library never share an id.
+//!
 //! ## What "resolved" means here
 //!
 //! There is no type checker. Every call and relation carries a
@@ -84,9 +92,9 @@
 //! "#).unwrap();
 //!
 //! let out = extract(&src, &RustOptions::default());
-//! let place = out.codebase.symbol(&SymbolId::new("shop::Orders::place")).unwrap();
-//! let calls: Vec<_> = place.flow.as_ref().unwrap().calls().map(|c| c.target.as_str()).collect();
-//! assert_eq!(calls, ["shop::db::Db::exists", "shop::db::Db::insert"]);
+//! let place = out.codebase.symbol(&SymbolId::parse("sym:cargo shop . Orders#place().").unwrap()).unwrap();
+//! let calls: Vec<_> = place.flow.as_ref().unwrap().calls().map(|c| c.target.to_string()).collect();
+//! assert_eq!(calls, ["sym:cargo shop . db/Db#exists().", "sym:cargo shop . db/Db#insert()."]);
 //! assert!(out.diagnostics.is_empty());
 //! ```
 

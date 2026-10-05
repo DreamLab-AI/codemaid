@@ -15,15 +15,13 @@
 //! ```
 //! use sealmap_model::*;
 //!
+//! let open = SymbolId::parse("sym:cargo app . Db#open().").unwrap();
+//! let insert = SymbolId::parse("sym:cargo app . Db#insert().").unwrap();
 //! let flow = Flow::new(vec![
-//!     Step::Call(Call::new(SymbolId::new("app::Db::open"), "open", Confidence::Exact)),
+//!     Step::Call(Call::new(open, "open", Confidence::Exact)),
 //!     Step::Loop {
 //!         label: "for row in rows".into(),
-//!         body: vec![Step::Call(Call::new(
-//!             SymbolId::new("app::Db::insert"),
-//!             "insert",
-//!             Confidence::Inferred,
-//!         ))],
+//!         body: vec![Step::Call(Call::new(insert, "insert", Confidence::Inferred))],
 //!     },
 //! ]);
 //! assert_eq!(flow.call_count(), 2);
@@ -32,7 +30,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::symbol::{Confidence, SymbolId};
+use crate::sym::SymbolId;
+use crate::symbol::Confidence;
 
 /// The ordered call/control skeleton of one callable body.
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]

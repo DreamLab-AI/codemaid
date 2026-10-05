@@ -1,69 +1,8 @@
-use std::fmt;
-
 use serde::{Deserialize, Serialize};
 
 use crate::flow::Flow;
 use crate::path::SourcePath;
-
-/// The canonical, fully qualified identity of a symbol, e.g.
-/// `my_crate::net::Client` or `my_crate::net::Client::connect`.
-///
-/// Ids use `::` as the separator for every language so projections can treat
-/// them uniformly. They are the join key between the model, the rendered
-/// diagrams and the JSON metadata, so an agent can follow an id from a node in
-/// a diagram straight back to its definition.
-///
-/// Symbols that live outside the analysed codebase (standard library, third
-/// party crates, or anything the frontend could not resolve) still get an id;
-/// they are simply absent from [`Codebase::symbols`](crate::Codebase::symbols)
-/// and relations pointing at them carry [`Confidence::External`].
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct SymbolId(String);
-
-impl SymbolId {
-    /// Wrap a fully qualified path.
-    pub fn new(path: impl Into<String>) -> Self {
-        Self(path.into())
-    }
-
-    /// The id as a string.
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-
-    /// The last `::` segment (the short name).
-    ///
-    /// ```
-    /// # use sealmap_model::SymbolId;
-    /// assert_eq!(SymbolId::new("a::b::C").name(), "C");
-    /// ```
-    pub fn name(&self) -> &str {
-        self.0.rsplit("::").next().unwrap_or(&self.0)
-    }
-
-    /// The id with the last segment removed, if there is more than one.
-    ///
-    /// ```
-    /// # use sealmap_model::SymbolId;
-    /// assert_eq!(SymbolId::new("a::b::C").parent().unwrap().as_str(), "a::b");
-    /// assert!(SymbolId::new("a").parent().is_none());
-    /// ```
-    pub fn parent(&self) -> Option<SymbolId> {
-        self.0.rfind("::").map(|i| SymbolId(self.0[..i].to_owned()))
-    }
-
-    /// Append a segment: `a::b` + `c` → `a::b::c`.
-    pub fn child(&self, segment: &str) -> SymbolId {
-        SymbolId(format!("{}::{}", self.0, segment))
-    }
-}
-
-impl fmt::Display for SymbolId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
+use crate::sym::{Descriptor, SymbolId};
 
 /// What kind of thing a [`Symbol`] is.
 ///
@@ -107,6 +46,25 @@ impl SymbolKind {
     /// `true` for kinds that have a body and therefore may carry a [`Flow`].
     pub fn is_callable(self) -> bool {
         matches!(self, Self::Function | Self::Method)
+    }
+
+    /// The `sym:` descriptor for a symbol of this kind called `name`: a
+    /// namespace for modules, a type for structs, enums, unions, traits and
+    /// aliases, a method for functions and methods, a term for constants and
+    /// statics, a macro for macros.
+    ///
+    /// ```
+    /// # use sealmap_model::SymbolKind;
+    /// assert_eq!(SymbolKind::Module.descriptor("net").suffix(), &sealmap_model::Suffix::Namespace);
+    /// ```
+    pub fn descriptor(self, name: impl Into<String>) -> Descriptor {
+        match self {
+            Self::Module => Descriptor::namespace(name),
+            Self::Struct | Self::Enum | Self::Union | Self::Trait | Self::TypeAlias => Descriptor::r#type(name),
+            Self::Function | Self::Method => Descriptor::method(name),
+            Self::Const | Self::Static => Descriptor::term(name),
+            Self::Macro => Descriptor::r#macro(name),
+        }
     }
 
     /// Lower-case keyword used in diagrams and metadata (`struct`, `fn`, ...).

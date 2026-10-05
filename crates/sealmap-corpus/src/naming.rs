@@ -7,7 +7,7 @@ use crate::{CorpusOptions, ExternalLanes};
 
 /// Diagram id for a symbol (stable across all documents).
 pub(crate) fn ident(id: &SymbolId) -> Ident {
-    Ident::from_path(id.as_str())
+    Ident::from_path(&id.to_string())
 }
 
 /// Every symbol and relation endpoint must get its own diagram id: a shared
@@ -43,9 +43,9 @@ pub(crate) fn lane_of(cb: &Codebase, target: &SymbolId, opts: &CorpusOptions) ->
         let owner = cb.owner_of(target).unwrap_or_else(|| target.clone());
         return Lane { alias: alias_for(cb, &owner), id: owner, prefix: String::new(), external: false };
     }
-    let s = target.as_str();
-    if s.starts_with("?::") {
-        return Lane { id: SymbolId::new("unresolved"), alias: "?".into(), prefix: String::new(), external: true };
+    if target.is_unresolved() {
+        // One shared lane for every call on a receiver of unknown type.
+        return Lane { id: SymbolId::unresolved(""), alias: "?".into(), prefix: String::new(), external: true };
     }
     // An internal type reached with an unknown method (inferred): owner is
     // the parent, which is internal.
@@ -54,16 +54,17 @@ pub(crate) fn lane_of(cb: &Codebase, target: &SymbolId, opts: &CorpusOptions) ->
             return Lane { alias: alias_for(cb, &parent), id: parent, prefix: String::new(), external: false };
         }
     }
-    let segs: Vec<&str> = s.split("::").collect();
+    let segs = target.names();
     match opts.external_lanes {
         ExternalLanes::CrateRoot => {
-            let root = segs[0];
+            let root = segs[0].clone();
             let prefix = if segs.len() > 2 { format!("{}::", segs[segs.len() - 2]) } else { String::new() };
-            Lane { id: SymbolId::new(root), alias: root.to_owned(), prefix, external: true }
+            let id = SymbolId::path([root.as_ref()]).unwrap_or_else(|_| SymbolId::unresolved(""));
+            Lane { id, alias: root.into_owned(), prefix, external: true }
         }
         ExternalLanes::Owner => {
             let owner = target.parent().unwrap_or_else(|| target.clone());
-            Lane { alias: owner.name().to_owned(), id: owner, prefix: String::new(), external: true }
+            Lane { alias: owner.name().into_owned(), id: owner, prefix: String::new(), external: true }
         }
     }
 }
@@ -73,6 +74,6 @@ pub(crate) fn alias_for(cb: &Codebase, id: &SymbolId) -> String {
     match cb.symbol(id) {
         Some(s) if s.kind == SymbolKind::Module => format!("{} mod", s.name),
         Some(s) => s.name.clone(),
-        None => id.name().to_owned(),
+        None => id.name().into_owned(),
     }
 }

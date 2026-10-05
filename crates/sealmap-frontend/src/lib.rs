@@ -11,7 +11,7 @@
 //! | [`lower`] | flow normalisation: raw steps plus a call resolver → a model [`Flow`](sealmap_model::Flow) |
 //! | [`confidence`] | the confidence lattice, the external-call policy ([`ExternalCalls`]) and call-edge aggregation |
 //! | [`labels`] | label rules: compact token spacing, clipping limits, call, condition and deferred-closure labels |
-//! | [`ids`] | the symbol-id builder (module, item, method and trait-impl ids) |
+//! | [`ids`] | the `sym:` id builder (package, module, item, method and trait-impl ids) |
 //! | [`isolate`] | per-file collection on big stacks with a panic guard |
 //!
 //! It has no parser dependency; a frontend brings its own.
@@ -24,21 +24,22 @@
 //! ```
 //! use sealmap_frontend::raw::{Callee, RawCall, RawStep};
 //! use sealmap_frontend::{ids, lower};
-//! use sealmap_model::{CallKind, Confidence, Step};
+//! use sealmap_model::{CallKind, Confidence, Step, SymbolKind};
 //!
 //! let call = |name: &str, line| {
 //!     RawStep::Call(RawCall::new(Callee::Path(vec![name.into()]), format!("{name}()"), CallKind::Function, line))
 //! };
 //! let raw = vec![call("ready", 1), RawStep::Branch(vec![("ready()".into(), vec![call("go", 1)])])];
 //!
+//! let app = ids::module_id(&ids::package("cargo", "app"), &[]);
 //! let flow = lower::lower_flow(&raw, &mut |c: &RawCall| {
 //!     let Callee::Path(segs) = &c.callee else { return None };
-//!     Some(c.to_call(ids::item_id("app", &segs[0]), Confidence::Exact))
+//!     Some(c.to_call(ids::item_id(&app, SymbolKind::Function, &segs[0]), Confidence::Exact))
 //! })
 //! .unwrap();
 //!
-//! let targets: Vec<_> = flow.calls().map(|c| c.target.as_str()).collect();
-//! assert_eq!(targets, ["app::ready", "app::go"]);
+//! let targets: Vec<_> = flow.calls().map(|c| c.target.to_string()).collect();
+//! assert_eq!(targets, ["sym:cargo app . ready().", "sym:cargo app . go()."]);
 //! // A branch with one surviving arm is an optional fragment.
 //! assert!(matches!(&flow.steps[1], Step::Optional { label, .. } if label == "ready()"));
 //! ```
