@@ -3,15 +3,18 @@
 use std::collections::BTreeMap;
 
 use proc_macro2::Span as PmSpan;
-use sealmap_model::{CallKind, MemberKind, SourcePath, Span, SymbolKind, Visibility};
+use sealmap_frontend::fingerprint::Fingerprinter;
+use sealmap_model::{CallKind, Fingerprint, MemberKind, SourcePath, Span, SymbolKind, Visibility};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
+use syn::visit_mut::VisitMut;
 use syn::{
     Attribute, Block, Expr, Fields, FnArg, GenericParam, Generics, ImplItem, Item, Pat, Stmt, TraitItem, Type,
     TypeParamBound, UseTree,
 };
 
 use crate::RustOptions;
+use crate::fingerprint::{self, Canon};
 use crate::layout::FileRole;
 use crate::raw::*;
 use crate::tidy::tokens;
@@ -47,7 +50,7 @@ pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts:
     };
     let mut c = Collector { opts, raw: &mut raw };
     let span = Span::new(1, 1, c.raw.text_lines.max(1), 1);
-    c.module(role.module.clone(), &file.attrs, &file.items, span, Visibility::Public);
+    c.module(role.module.clone(), &file.attrs, None, &file.items, span, Visibility::Public);
     raw
 }
 
@@ -56,6 +59,7 @@ pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts:
 /// contract still holds and the problem surfaces as a diagnostic.
 pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error: String) -> RawFile {
     let text_lines = text.lines().count() as u32;
+    let (sig_hash, body_hash) = fingerprint::unparsable(role.module.last().map_or("", String::as_str), text);
     RawFile {
         path: path.clone(),
         role: role.clone(),
@@ -68,6 +72,8 @@ pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error:
             vis: Visibility::Public,
             uses: Vec::new(),
             tags: vec!["parse_error".into()],
+            sig_hash,
+            body_hash,
         }],
         items: Vec::new(),
         impls: Vec::new(),
@@ -81,7 +87,27 @@ struct Collector<'a> {
 }
 
 impl Collector<'_> {
-    fn module(&mut self, path: Segs, attrs: &[Attribute], items: &[Item], span: Span, vis: Visibility) {
+    /// Collect a module and everything in it. `syn_vis` is the declared
+    /// visibility of an inline `mod` (`None` for a file's root module).
+    /// Returns the module's (`sig_hash`, `body_hash`).
+    fn module(
+        &mut self,
+        path: Segs,
+        attrs: &[Attribute],
+        syn_vis: Option<&syn::Visibility>,
+        items: &[Item],
+        span: Span,
+        vis: Visibility,
+    ) -> (Fingerprint, Fingerprint) {
+        let mut sig = Fingerprinter::sig();
+        sig.section("mod");
+        fingerprint::attrs(&mut sig, attrs);
+        sig.section("vis");
+        if let Some(v) = syn_vis {
+            fingerprint::feed(&mut sig, v);
+        }
+        sig.section("name");
+        sig.ident(path.last().map_or("", String::as_str));
         let mut uses = Vec::new();
         for item in items {
             if let Item::Use(u) = item {
@@ -95,17 +121,51 @@ impl Collector<'_> {
             vis,
             uses,
             tags: tags_of(attrs),
+            sig_hash: sig.finish(),
+            body_hash: Fingerprint::default(),
         });
+        let at = self.raw.modules.len() - 1;
+        let mut body = Fingerprinter::body();
+        body.section("mod");
+        // rustfmt reorders `use`, `extern crate` and `mod x;` declarations,
+        // and their order carries no meaning, so they are folded sorted.
+        let mut declarations = Vec::new();
         for item in items {
-            self.item(&path, item);
+            match item {
+                Item::Use(_) | Item::ExternCrate(_) | Item::Mod(syn::ItemMod { content: None, .. }) => {
+                    if !self.skip(item_attrs(item)) {
+                        let mut d = Fingerprinter::body();
+                        fingerprint::feed_canonical(&mut d, item, Canon::visit_item_mut);
+                        declarations.push(d.finish());
+                    }
+                }
+                _ => self.item(&path, item, &mut body),
+            }
         }
+        declarations.sort();
+        body.section("declarations");
+        for d in declarations {
+            body.fingerprint(d);
+        }
+        let hashes = (sig.finish(), body.finish());
+        self.raw.modules[at].body_hash = hashes.1;
+        hashes
+    }
+
+    /// Record a collected item and fold it into its module's body.
+    fn push_item(&mut self, it: RawItem, fold: &mut Fingerprinter) {
+        fold_member(fold, it.kind.keyword(), &it.name, it.sig_hash, it.body_hash);
+        self.raw.items.push(it);
     }
 
     fn skip(&self, attrs: &[Attribute]) -> bool {
         !self.opts.include_tests && attrs.iter().any(is_test_attr)
     }
 
-    fn item(&mut self, module: &Segs, item: &Item) {
+    /// Collect one item of `module`, folding what it contributes into the
+    /// module's body fingerprint `fold`. Items left out of the model (tests
+    /// when they are excluded) contribute nothing.
+    fn item(&mut self, module: &Segs, item: &Item, fold: &mut Fingerprinter) {
         let base = |name: String, kind, vis: &syn::Visibility, attrs: &[Attribute], span: PmSpan| RawItem {
             module: module.clone(),
             name,
@@ -121,16 +181,22 @@ impl Collector<'_> {
             supertraits: Vec::new(),
             methods: Vec::new(),
             flow: Vec::new(),
+            sig_hash: Fingerprint::default(),
+            body_hash: Fingerprint::default(),
         };
         match item {
             Item::Mod(m) => {
                 if self.skip(&m.attrs) {
                     return;
                 }
+                // `mod x;` (no content) is folded by `module` with the other
+                // declarations; the file it names is a module of its own.
                 if let Some((_, items)) = &m.content {
                     let mut path = module.clone();
                     path.push(m.ident.to_string());
-                    self.module(path, &m.attrs, items, span_of(m.span()), vis_of(&m.vis));
+                    let (sig, body) =
+                        self.module(path, &m.attrs, Some(&m.vis), items, span_of(m.span()), vis_of(&m.vis));
+                    fold_member(fold, "mod", &m.ident.to_string(), sig, body);
                 }
             }
             Item::Struct(s) => {
@@ -140,13 +206,15 @@ impl Collector<'_> {
                 let mut it = base(s.ident.to_string(), SymbolKind::Struct, &s.vis, &s.attrs, s.span());
                 it.generics = generics_of(&s.generics);
                 it.members = fields_of(&s.fields);
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) = data_type(item, &s.generics, Shape::Fields(&s.fields));
+                self.push_item(it, fold);
             }
             Item::Union(u) => {
                 let mut it = base(u.ident.to_string(), SymbolKind::Union, &u.vis, &u.attrs, u.span());
                 it.generics = generics_of(&u.generics);
                 it.members = fields_of(&Fields::Named(u.fields.clone()));
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) = data_type(item, &u.generics, Shape::Named(&u.fields));
+                self.push_item(it, fold);
             }
             Item::Enum(e) => {
                 if self.skip(&e.attrs) {
@@ -173,7 +241,8 @@ impl Collector<'_> {
                         refs,
                     });
                 }
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) = data_type(item, &e.generics, Shape::Variants(&e.variants));
+                self.push_item(it, fold);
             }
             Item::Trait(t) => {
                 if self.skip(&t.attrs) {
@@ -198,7 +267,15 @@ impl Collector<'_> {
                             match &f.default {
                                 Some(block) => {
                                     let params = params_of(&f.sig);
+                                    let mut sig_fp = Fingerprinter::sig();
+                                    sig_fp.section("trait");
+                                    sig_fp.ident(&t.ident.to_string());
+                                    fingerprint::feed(&mut sig_fp, &t.generics);
+                                    fingerprint::feed(&mut sig_fp, &t.generics.where_clause);
+                                    let (sig_hash, body_hash) = callable(sig_fp, &f.attrs, None, &f.sig, block);
                                     it.methods.push(RawFn {
+                                        sig_hash,
+                                        body_hash,
                                         name: f.sig.ident.to_string(),
                                         vis: Visibility::Public,
                                         span: span_of(f.span()),
@@ -243,14 +320,24 @@ impl Collector<'_> {
                         _ => {}
                     }
                 }
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) = trait_hashes(t);
+                self.push_item(it, fold);
             }
             Item::Type(t) => {
                 let mut it = base(t.ident.to_string(), SymbolKind::TypeAlias, &t.vis, &t.attrs, t.span());
                 it.generics = generics_of(&t.generics);
                 it.signature = Some(clip(&format!("type {} = {}", t.ident, tokens(&t.ty)), SIG_MAX));
                 type_refs(&t.ty, &mut it.sig_refs);
-                self.raw.items.push(it);
+                let mut sig = Fingerprinter::sig();
+                sig.section("type");
+                fingerprint::feed(&mut sig, item);
+                let mut body = Fingerprinter::body();
+                body.section("type");
+                fingerprint::feed(&mut body, &t.generics);
+                fingerprint::feed(&mut body, &t.generics.where_clause);
+                fingerprint::feed(&mut body, &t.ty);
+                (it.sig_hash, it.body_hash) = (sig.finish(), body.finish());
+                self.push_item(it, fold);
             }
             Item::Fn(f) => {
                 if self.skip(&f.attrs) {
@@ -262,19 +349,25 @@ impl Collector<'_> {
                 it.tags.extend(fn_tags(&f.sig, &[]));
                 sig_refs(&f.sig, &mut it.sig_refs);
                 it.flow = FlowWalker::new(params_of(&f.sig)).block(&f.block);
-                self.raw.items.push(it);
+                let mut sig = Fingerprinter::sig();
+                sig.section("fn");
+                (it.sig_hash, it.body_hash) = callable(sig, &f.attrs, Some(&f.vis), &f.sig, &f.block);
+                self.push_item(it, fold);
             }
             Item::Const(k) => {
                 let mut it = base(k.ident.to_string(), SymbolKind::Const, &k.vis, &k.attrs, k.span());
                 it.signature = Some(clip(&format!("const {}: {}", k.ident, tokens(&k.ty)), SIG_MAX));
                 type_refs(&k.ty, &mut it.sig_refs);
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) = value("const", &k.attrs, &k.vis, None, &k.ident, &k.ty, &k.expr);
+                self.push_item(it, fold);
             }
             Item::Static(s) => {
                 let mut it = base(s.ident.to_string(), SymbolKind::Static, &s.vis, &s.attrs, s.span());
                 it.signature = Some(clip(&format!("static {}: {}", s.ident, tokens(&s.ty)), SIG_MAX));
                 type_refs(&s.ty, &mut it.sig_refs);
-                self.raw.items.push(it);
+                (it.sig_hash, it.body_hash) =
+                    value("static", &s.attrs, &s.vis, Some(&s.mutability), &s.ident, &s.ty, &s.expr);
+                self.push_item(it, fold);
             }
             Item::Macro(m) => {
                 if let Some(ident) = &m.ident {
@@ -283,7 +376,19 @@ impl Collector<'_> {
                     } else {
                         syn::Visibility::Inherited
                     };
-                    self.raw.items.push(base(ident.to_string(), SymbolKind::Macro, &vis, &m.attrs, m.span()));
+                    let mut it = base(ident.to_string(), SymbolKind::Macro, &vis, &m.attrs, m.span());
+                    let mut sig = Fingerprinter::sig();
+                    sig.section("macro");
+                    fingerprint::attrs(&mut sig, &m.attrs);
+                    sig.ident(&ident.to_string());
+                    let mut body = Fingerprinter::body();
+                    body.section("macro");
+                    fingerprint::feed(&mut body, &m.mac.tokens);
+                    (it.sig_hash, it.body_hash) = (sig.finish(), body.finish());
+                    self.push_item(it, fold);
+                } else {
+                    // A macro invocation at item level (`thread_local! { .. }`).
+                    fingerprint::feed(fold, item);
                 }
             }
             Item::Impl(i) => {
@@ -291,35 +396,239 @@ impl Collector<'_> {
                     return;
                 }
                 let self_ty = first_path(&i.self_ty);
-                let trait_ = i.trait_.as_ref().map(|(_, p, _)| (path_segs(p), tokens(p)));
+                let trait_ = i.trait_.as_ref().map(|(_, p, _)| (path_segs(p), trait_text(p)));
                 let is_trait_impl = trait_.is_some();
                 let mut methods = Vec::new();
+                fold.section("impl");
+                impl_header(fold, i);
                 for ii in &i.items {
-                    if let ImplItem::Fn(f) = ii {
-                        if self.skip(&f.attrs) {
-                            continue;
-                        }
-                        let mut refs = Vec::new();
-                        sig_refs(&f.sig, &mut refs);
-                        let vis = if is_trait_impl { Visibility::Public } else { vis_of(&f.vis) };
-                        methods.push(RawFn {
-                            name: f.sig.ident.to_string(),
-                            span: span_of(f.span()),
-                            signature: clip(&format!("{}{}", vis_prefix(&f.vis), tokens(&f.sig)), SIG_MAX),
-                            doc: doc_of(&f.attrs),
-                            generics: generics_of(&f.sig.generics),
-                            tags: fn_tags(&f.sig, &f.attrs),
-                            sig_refs: refs,
-                            flow: FlowWalker::new(params_of(&f.sig)).block(&f.block),
-                            vis,
-                        });
+                    let ImplItem::Fn(f) = ii else {
+                        // Associated types and constants belong to the impl.
+                        fingerprint::feed(fold, ii);
+                        continue;
+                    };
+                    if self.skip(&f.attrs) {
+                        continue;
                     }
+                    let mut sig_fp = Fingerprinter::sig();
+                    impl_header(&mut sig_fp, i);
+                    sig_fp.section("fn");
+                    let (sig_hash, body_hash) = callable(sig_fp, &f.attrs, Some(&f.vis), &f.sig, &f.block);
+                    fold_member(fold, "fn", &f.sig.ident.to_string(), sig_hash, body_hash);
+                    let mut refs = Vec::new();
+                    sig_refs(&f.sig, &mut refs);
+                    let vis = if is_trait_impl { Visibility::Public } else { vis_of(&f.vis) };
+                    methods.push(RawFn {
+                        name: f.sig.ident.to_string(),
+                        span: span_of(f.span()),
+                        signature: clip(&format!("{}{}", vis_prefix(&f.vis), tokens(&f.sig)), SIG_MAX),
+                        doc: doc_of(&f.attrs),
+                        generics: generics_of(&f.sig.generics),
+                        tags: fn_tags(&f.sig, &f.attrs),
+                        sig_refs: refs,
+                        flow: FlowWalker::new(params_of(&f.sig)).block(&f.block),
+                        vis,
+                        sig_hash,
+                        body_hash,
+                    });
                 }
                 self.raw.impls.push(RawImpl { module: module.clone(), self_ty, trait_, methods });
             }
-            _ => {}
+            // `use`, `extern crate`, foreign blocks, ...: part of the module.
+            other => fingerprint::feed(fold, other),
         }
     }
+}
+
+/// The trait of an impl as written, which becomes part of its methods' ids
+/// (`Db#[`From<String>`]from().`). Spacing comes from [`tokens`], and a
+/// trailing comma in a generic or array list (`Handler<Msg,>`, which
+/// rustfmt writes when it breaks the list) is dropped, so formatting never
+/// changes an id. A comma before `)` is kept: `(T,)` is a tuple.
+fn trait_text(p: &syn::Path) -> String {
+    let mut out = tokens(p);
+    for (from, to) in [(",>", ">"), (", >", ">"), (",]", "]"), (", ]", "]")] {
+        while out.contains(from) {
+            out = out.replace(from, to);
+        }
+    }
+    out
+}
+
+// ----------------------------------------------------------- fingerprints
+
+/// The outer attributes of the item kinds `module` folds as declarations.
+fn item_attrs(item: &Item) -> &[Attribute] {
+    match item {
+        Item::Use(u) => &u.attrs,
+        Item::ExternCrate(e) => &e.attrs,
+        Item::Mod(m) => &m.attrs,
+        _ => &[],
+    }
+}
+
+/// Fold a member's identity and fingerprints into its container's body.
+fn fold_member(fold: &mut Fingerprinter, keyword: &str, name: &str, sig: Fingerprint, body: Fingerprint) {
+    fold.section(keyword);
+    fold.ident(name);
+    fold.fingerprint(sig);
+    fold.fingerprint(body);
+}
+
+/// A function or method: `sig` already holds its context (the impl or trait
+/// header, if any); the attributes, visibility and signature are added. The
+/// body is the block alone, so the name never reaches it.
+fn callable(
+    mut sig: Fingerprinter,
+    attrs: &[Attribute],
+    vis: Option<&syn::Visibility>,
+    signature: &syn::Signature,
+    block: &Block,
+) -> (Fingerprint, Fingerprint) {
+    fingerprint::attrs(&mut sig, attrs);
+    sig.section("vis");
+    if let Some(v) = vis {
+        fingerprint::feed(&mut sig, v);
+    }
+    sig.section("sig");
+    fingerprint::feed(&mut sig, signature);
+    let mut body = Fingerprinter::body();
+    body.section("block");
+    fingerprint::feed_canonical(&mut body, block, Canon::visit_block_mut);
+    (sig.finish(), body.finish())
+}
+
+/// The header of an impl block (attributes, `unsafe`, generics, trait, self
+/// type, `where`), part of each of its methods' contract.
+fn impl_header(fp: &mut Fingerprinter, i: &syn::ItemImpl) {
+    fp.section("impl");
+    fingerprint::attrs(fp, &i.attrs);
+    fingerprint::feed(fp, &i.defaultness);
+    fingerprint::feed(fp, &i.unsafety);
+    fingerprint::feed(fp, &i.generics);
+    fp.section("trait");
+    if let Some((bang, path, _)) = &i.trait_ {
+        fingerprint::feed(fp, bang);
+        fingerprint::feed(fp, path);
+    }
+    fp.section("self");
+    fingerprint::feed(fp, &i.self_ty);
+    fingerprint::feed(fp, &i.generics.where_clause);
+}
+
+/// The fields or variants of a data type, the body of its fingerprint.
+enum Shape<'a> {
+    Fields(&'a Fields),
+    Named(&'a syn::FieldsNamed),
+    Variants(&'a Punctuated<syn::Variant, syn::Token![,]>),
+}
+
+/// A struct, enum or union: the whole declaration is the contract; the
+/// shape (generics and fields or variants, without the name) is the body.
+/// Fields and variants are fed one by one, each with its own separator, so
+/// the trailing comma of a field list is never part of the stream.
+fn data_type(item: &Item, generics: &Generics, shape: Shape<'_>) -> (Fingerprint, Fingerprint) {
+    let mut sig = Fingerprinter::sig();
+    sig.section("data");
+    fingerprint::feed(&mut sig, item);
+    let mut body = Fingerprinter::body();
+    body.section("data");
+    fingerprint::feed(&mut body, generics);
+    fingerprint::feed(&mut body, &generics.where_clause);
+    let fields = |fp: &mut Fingerprinter, label: &str, fields: &mut dyn Iterator<Item = &syn::Field>| {
+        fp.section(label);
+        for f in fields {
+            fp.section("field");
+            fingerprint::feed(fp, f);
+        }
+    };
+    match shape {
+        Shape::Fields(Fields::Named(n)) | Shape::Named(n) => fields(&mut body, "named", &mut n.named.iter()),
+        Shape::Fields(Fields::Unnamed(u)) => fields(&mut body, "unnamed", &mut u.unnamed.iter()),
+        Shape::Fields(Fields::Unit) => body.section("unit"),
+        Shape::Variants(vs) => {
+            for v in vs {
+                body.section("variant");
+                fingerprint::attrs(&mut body, &v.attrs);
+                body.ident(&v.ident.to_string());
+                match &v.fields {
+                    Fields::Named(n) => fields(&mut body, "named", &mut n.named.iter()),
+                    Fields::Unnamed(u) => fields(&mut body, "unnamed", &mut u.unnamed.iter()),
+                    Fields::Unit => body.section("unit"),
+                }
+                if let Some((_, discriminant)) = &v.discriminant {
+                    body.section("discriminant");
+                    fingerprint::feed_canonical(&mut body, discriminant, Canon::visit_expr_mut);
+                }
+            }
+        }
+    }
+    (sig.finish(), body.finish())
+}
+
+/// A trait: the header plus every member's signature is the contract; every
+/// member in full (default bodies included) is the body.
+fn trait_hashes(t: &syn::ItemTrait) -> (Fingerprint, Fingerprint) {
+    let mut sig = Fingerprinter::sig();
+    sig.section("trait");
+    fingerprint::attrs(&mut sig, &t.attrs);
+    fingerprint::feed(&mut sig, &t.vis);
+    fingerprint::feed(&mut sig, &t.unsafety);
+    fingerprint::feed(&mut sig, &t.auto_token);
+    sig.ident(&t.ident.to_string());
+    fingerprint::feed(&mut sig, &t.generics);
+    sig.section("supertraits");
+    fingerprint::feed(&mut sig, &t.supertraits);
+    fingerprint::feed(&mut sig, &t.generics.where_clause);
+    let mut body = Fingerprinter::body();
+    body.section("trait");
+    fingerprint::feed(&mut body, &t.generics);
+    fingerprint::feed(&mut body, &t.generics.where_clause);
+    for ti in &t.items {
+        sig.section("item");
+        match ti {
+            TraitItem::Fn(f) => {
+                fingerprint::attrs(&mut sig, &f.attrs);
+                fingerprint::feed(&mut sig, &f.sig);
+            }
+            TraitItem::Const(k) => {
+                fingerprint::attrs(&mut sig, &k.attrs);
+                sig.ident(&k.ident.to_string());
+                fingerprint::feed(&mut sig, &k.generics);
+                fingerprint::feed(&mut sig, &k.ty);
+            }
+            other => fingerprint::feed(&mut sig, other),
+        }
+        body.section("item");
+        fingerprint::feed_canonical(&mut body, ti, Canon::visit_trait_item_mut);
+    }
+    (sig.finish(), body.finish())
+}
+
+/// A constant or static: everything but the value is the contract; the
+/// value is the body.
+fn value(
+    keyword: &str,
+    attrs: &[Attribute],
+    vis: &syn::Visibility,
+    mutability: Option<&syn::StaticMutability>,
+    ident: &syn::Ident,
+    ty: &Type,
+    expr: &Expr,
+) -> (Fingerprint, Fingerprint) {
+    let mut sig = Fingerprinter::sig();
+    sig.section(keyword);
+    fingerprint::attrs(&mut sig, attrs);
+    fingerprint::feed(&mut sig, vis);
+    if let Some(m) = mutability {
+        fingerprint::feed(&mut sig, m);
+    }
+    sig.ident(&ident.to_string());
+    fingerprint::feed(&mut sig, ty);
+    let mut body = Fingerprinter::body();
+    body.section(keyword);
+    fingerprint::feed_canonical(&mut body, expr, Canon::visit_expr_mut);
+    (sig.finish(), body.finish())
 }
 
 // ---------------------------------------------------------------- helpers

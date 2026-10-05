@@ -14,6 +14,9 @@ for every function body.
   `pub use` re-exports), `crate`/`self`/`super`/`Self`, sibling crates and
   receiver types.
 - **Honest confidence.** Every call is `exact`, `inferred` or `external`.
+- **`sym:` ids and fingerprints.** Every symbol gets a kind-explicit id
+  (`sym:cargo shop . db/Db#insert().`) plus `sig_hash` and `body_hash`,
+  which ignore comments, whitespace, rustfmt rewrites and moves.
 - **Hardened** for large trees: `.gitignore`-aware loading, big-stack
   collection with a per-file panic guard, linear glob resolution.
   VisionClaw (934 files) extracts and renders in about 1 s.

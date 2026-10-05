@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::flow::Flow;
+use crate::hash::Fingerprint;
 use crate::path::SourcePath;
 use crate::sym::{Descriptor, SymbolId};
 
@@ -201,6 +202,14 @@ pub struct Symbol {
     pub file: SourcePath,
     /// Where in the file.
     pub span: Span,
+    /// Fingerprint of the symbol's contract (name, visibility, attributes,
+    /// generics, parameters, return type; see `sealmap-frontend`'s
+    /// `fingerprint` module for the per-kind rules). Whitespace, comments and
+    /// position never affect it.
+    pub sig_hash: Fingerprint,
+    /// Fingerprint of the symbol's implementation (its body). Excludes the
+    /// name, so a renamed symbol keeps it.
+    pub body_hash: Fingerprint,
     /// Enclosing symbol (the type for a method, the module for an item).
     pub parent: Option<SymbolId>,
     /// One-line signature, e.g. `pub fn connect(&self, addr: &str) -> Result<Conn>`.
@@ -221,7 +230,8 @@ pub struct Symbol {
 
 impl Symbol {
     /// A symbol with only the required fields set; everything else empty /
-    /// private. Frontends fill in the rest.
+    /// private, and both fingerprints unset ([`Fingerprint::is_unset`]).
+    /// Frontends fill in the rest.
     pub fn new(id: SymbolId, name: impl Into<String>, kind: SymbolKind, file: SourcePath) -> Self {
         Self {
             parent: id.parent(),
@@ -231,6 +241,8 @@ impl Symbol {
             visibility: Visibility::Private,
             file,
             span: Span::default(),
+            sig_hash: Fingerprint::default(),
+            body_hash: Fingerprint::default(),
             signature: None,
             doc: None,
             generics: Vec::new(),

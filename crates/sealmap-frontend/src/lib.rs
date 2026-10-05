@@ -11,6 +11,7 @@
 //! | [`lower`] | flow normalisation: raw steps plus a call resolver → a model [`Flow`](sealmap_model::Flow) |
 //! | [`confidence`] | the confidence lattice, the external-call policy ([`ExternalCalls`]) and call-edge aggregation |
 //! | [`labels`] | label rules: compact token spacing, clipping limits, call, condition and deferred-closure labels |
+//! | [`fingerprint`] | per-symbol `sig_hash` / `body_hash` over a language-neutral token stream |
 //! | [`ids`] | the `sym:` id builder (package, module, item, method and trait-impl ids) |
 //! | [`isolate`] | per-file collection on big stacks with a panic guard |
 //!
@@ -48,6 +49,7 @@
 #![deny(missing_docs)]
 
 pub mod confidence;
+pub mod fingerprint;
 pub mod ids;
 pub mod isolate;
 pub mod labels;

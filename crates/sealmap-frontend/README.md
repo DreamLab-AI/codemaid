@@ -14,6 +14,7 @@ ids and confidences by the same rules:
 | `lower` | flow normalisation: raw steps plus a call resolver → a model `Flow` |
 | `confidence` | the confidence lattice, the external-call policy, call-edge aggregation |
 | `labels` | label rules: token spacing, clipping limits, call/condition/closure labels |
+| `fingerprint` | per-symbol `sig_hash` / `body_hash`: BLAKE3 over a language-neutral, comment- and whitespace-free token stream |
 | `ids` | the `sym:` symbol-id builder |
 | `isolate` | per-file collection on big stacks with a panic guard (feature `parallel`: rayon) |
 

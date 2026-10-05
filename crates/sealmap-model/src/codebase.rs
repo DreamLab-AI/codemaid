@@ -38,11 +38,15 @@ impl Codebase {
     }
 
     /// Add a symbol. If the id already exists the two are merged: the first
-    /// definition wins for scalar fields, list fields are concatenated. This
-    /// handles e.g. `#[cfg]`-gated duplicate definitions deterministically.
+    /// definition wins for scalar fields, list fields are concatenated, and
+    /// the fingerprints are folded with [`Fingerprint::merge`](crate::Fingerprint::merge)
+    /// so an edit to either definition shows. This handles e.g.
+    /// `#[cfg]`-gated duplicate definitions deterministically.
     pub fn add_symbol(&mut self, symbol: Symbol) {
         match self.symbols.get_mut(&symbol.id) {
             Some(existing) => {
+                existing.sig_hash = existing.sig_hash.merge(symbol.sig_hash);
+                existing.body_hash = existing.body_hash.merge(symbol.body_hash);
                 existing.members.extend(symbol.members);
                 for tag in symbol.tags {
                     if !existing.tags.contains(&tag) {

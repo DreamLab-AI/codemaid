@@ -12,6 +12,9 @@ flow of every function. It is the shared vocabulary of
 - **`sym:` symbol ids**: kind-explicit, SCIP-style, no file path
   (`sym:cargo shop . db/Db#[Store]put().`). Printing is injective and parsing
   is its exact inverse.
+- **Fingerprints** (`Fingerprint`): every symbol carries a `sig_hash` (its
+  contract) and a `body_hash` (its implementation), so a tool can tell
+  "unchanged", "behaviour changed" and "contract changed" apart.
 - **Ordered collections only**, so iteration order is a function of the data.
 - **Normalised paths** (`SourcePath`): relative, `/`-separated, no `.`/`..`.
 - **Stable hashing** (`ContentHash`): BLAKE3 over newline-normalised text.

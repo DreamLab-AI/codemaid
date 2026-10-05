@@ -233,6 +233,8 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             let mut s =
                 Symbol::new(id.clone(), m.path.last().cloned().unwrap_or_default(), SymbolKind::Module, f.path.clone());
             s.span = m.span;
+            s.sig_hash = m.sig_hash;
+            s.body_hash = m.body_hash;
             s.doc = m.doc.clone();
             s.visibility = m.vis.clone();
             s.tags = m.tags.clone();
@@ -256,6 +258,8 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             let mut s = Symbol::new(id.clone(), &it.name, it.kind, f.path.clone());
             s.visibility = it.vis.clone();
             s.span = it.span;
+            s.sig_hash = it.sig_hash;
+            s.body_hash = it.body_hash;
             s.signature = it.signature.clone();
             s.doc = it.doc.clone();
             s.generics = it.generics.clone();
@@ -696,6 +700,8 @@ impl Resolver {
         s.parent = Some(parent.clone());
         s.visibility = m.vis.clone();
         s.span = m.span;
+        s.sig_hash = m.sig_hash;
+        s.body_hash = m.body_hash;
         s.signature = Some(m.signature.clone());
         s.doc = m.doc.clone();
         s.generics = m.generics.clone();

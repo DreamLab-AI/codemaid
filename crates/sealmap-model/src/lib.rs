@@ -45,7 +45,10 @@
 //!
 //! Every symbol is named by a `sym:` id (see [`sym`]): kind-explicit,
 //! SCIP-style, with no file path, so moving code between files never changes
-//! an id.
+//! an id. Beside the id, every symbol carries two [`Fingerprint`]s:
+//! `sig_hash` over its contract and `body_hash` over its implementation, so a
+//! tool can tell "unchanged", "behaviour changed" (body only) and "contract
+//! changed" (signature) apart, and can match a renamed symbol by its body.
 //!
 //! ## Example
 //!
@@ -84,7 +87,7 @@ mod symbol;
 
 pub use codebase::{Codebase, CodebaseStats};
 pub use flow::{Arm, Call, CallKind, Exit, Flow, Step};
-pub use hash::ContentHash;
+pub use hash::{ContentHash, Fingerprint};
 pub use path::{PathError, SourcePath};
 pub use source::{LoadOptions, SourceFile, SourceSet};
 pub use sym::{Descriptor, IdError, Package, Suffix, SymbolId, Version};

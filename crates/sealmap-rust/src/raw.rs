@@ -5,7 +5,7 @@
 //! pass. The flow part of it (steps, calls, receivers) is the shared IR from
 //! `sealmap-frontend`; the item, `use` and `impl` tables are Rust's own.
 
-use sealmap_model::{ContentHash, MemberKind, SourcePath, Span, SymbolKind, Visibility};
+use sealmap_model::{ContentHash, Fingerprint, MemberKind, SourcePath, Span, SymbolKind, Visibility};
 
 pub(crate) use sealmap_frontend::raw::{Callee, RawCall, RawStep, Recv, Segs};
 
@@ -33,6 +33,8 @@ pub(crate) struct RawModule {
     pub vis: Visibility,
     pub uses: Vec<RawUse>,
     pub tags: Vec<String>,
+    pub sig_hash: Fingerprint,
+    pub body_hash: Fingerprint,
 }
 
 #[derive(Debug, Clone)]
@@ -63,6 +65,8 @@ pub(crate) struct RawFn {
     pub tags: Vec<String>,
     pub sig_refs: Vec<Segs>,
     pub flow: Vec<RawStep>,
+    pub sig_hash: Fingerprint,
+    pub body_hash: Fingerprint,
 }
 
 #[derive(Debug, Clone)]
@@ -85,6 +89,8 @@ pub(crate) struct RawItem {
     pub methods: Vec<RawFn>,
     /// Body flow (free functions only).
     pub flow: Vec<RawStep>,
+    pub sig_hash: Fingerprint,
+    pub body_hash: Fingerprint,
 }
 
 #[derive(Debug, Clone)]

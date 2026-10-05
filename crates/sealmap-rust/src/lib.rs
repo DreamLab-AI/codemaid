@@ -34,6 +34,17 @@
 //! targets are packages of their own (`shop_main`, `test_it`, ...), so a
 //! binary and the library never share an id.
 //!
+//! ## Fingerprints
+//!
+//! Every symbol carries `sig_hash` (its contract) and `body_hash` (its
+//! implementation), computed with `sealmap_frontend::fingerprint` from syn's
+//! token streams. Comments, doc comments, whitespace, lint attributes and the
+//! rewrites rustfmt makes (trailing commas, braces around a closure or match
+//! arm body, `use` order) never change them; neither does moving an item
+//! within or between files. Reflowing tokio, VisionClaw and sealmap itself
+//! with an aggressive rustfmt configuration changes no id and no
+//! fingerprint.
+//!
 //! ## What "resolved" means here
 //!
 //! There is no type checker. Every call and relation carries a
@@ -102,6 +113,7 @@
 #![deny(missing_docs)]
 
 mod collect;
+mod fingerprint;
 mod layout;
 mod raw;
 mod resolve;
