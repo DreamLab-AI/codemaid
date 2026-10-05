@@ -61,7 +61,7 @@ fn one_document_per_source_file_plus_reserved_files() {
 fn documents_carry_front_matter_structure_and_sequences() {
     let c = corpus(SHOP);
     let doc = c.document("src/orders.rs.md").unwrap();
-    assert!(doc.starts_with("---\nsealmap: 1\nsource: src/orders.rs\nmodule: \"sym:cargo shop . orders/\"\n"));
+    assert!(doc.starts_with("---\nsealmap: 2\nsource: src/orders.rs\nmodule: \"sym:cargo shop . orders/\"\n"));
     assert!(doc.contains("## structure\n```mermaid\nclassDiagram"));
     let (orders, db, module) =
         (mid("sym:cargo shop . orders/Orders#"), mid("sym:cargo shop . db/Db#"), mid("sym:cargo shop . orders/"));
@@ -181,4 +181,33 @@ fn colliding_paths_get_distinct_diagram_ids() {
     let (outer, inner) = (mid("sym:cargo a . b__c#"), mid("sym:cargo a . b/c#"));
     assert_ne!(outer, inner);
     assert!(seq.contains(&format!("{outer}->>{inner}")), "{seq}");
+}
+
+/// Schema v2: every symbol in `_model.json` carries its `sym:` id, span and
+/// both fingerprints; the index carries them per fragment; the JSON reads
+/// back through the version check.
+#[test]
+fn schema_v2_json_carries_ids_spans_and_fingerprints() {
+    let c = corpus(SHOP);
+    let model: serde_json::Value = serde_json::from_str(c.document("_model.json").unwrap()).unwrap();
+    assert_eq!(model["schema_version"], sealmap_model::MODEL_SCHEMA_VERSION);
+    let symbols = model["symbols"].as_object().unwrap();
+    assert!(!symbols.is_empty());
+    for (id, s) in symbols {
+        assert!(id.starts_with("sym:cargo shop . ") || id == "sym:cargo shop .", "{id}");
+        assert_eq!(s["id"], id.as_str());
+        assert!(s["span"]["start_line"].as_u64().unwrap() >= 1, "{id}");
+        for h in ["sig_hash", "body_hash"] {
+            let f = s[h].as_str().unwrap();
+            assert!(f.starts_with("blake3-16:") && f.len() == 42 && !f.ends_with(&"0".repeat(32)), "{id} {h}");
+        }
+    }
+    let index: serde_json::Value = serde_json::from_str(c.document("_index.json").unwrap()).unwrap();
+    assert_eq!(index["schema_version"], sealmap_corpus::CORPUS_SCHEMA_VERSION);
+    let place = c.index.fragment("sym:cargo shop . orders/Orders#place().").unwrap();
+    let sym = &symbols["sym:cargo shop . orders/Orders#place()."];
+    assert_eq!(place.sig_hash.to_string(), sym["sig_hash"].as_str().unwrap());
+    assert_eq!(place.body_hash.to_string(), sym["body_hash"].as_str().unwrap());
+    let back = sealmap_model::Codebase::from_json(c.document("_model.json").unwrap()).unwrap();
+    assert_eq!(serde_json::to_string(&back).unwrap() + "\n", c.document("_model.json").unwrap());
 }

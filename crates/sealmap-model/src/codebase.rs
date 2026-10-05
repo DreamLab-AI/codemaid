@@ -15,7 +15,7 @@ use crate::symbol::{Relation, RelationKind, Symbol, SymbolKind};
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct Codebase {
     /// Schema version, see [`MODEL_SCHEMA_VERSION`](crate::MODEL_SCHEMA_VERSION).
-    pub schema: u32,
+    pub schema_version: u32,
     /// Human name of the codebase (workspace or package name).
     pub name: String,
     /// Files keyed by path.
@@ -29,7 +29,33 @@ pub struct Codebase {
 impl Codebase {
     /// An empty codebase called `name`.
     pub fn new(name: impl Into<String>) -> Self {
-        Self { schema: crate::MODEL_SCHEMA_VERSION, name: name.into(), ..Self::default() }
+        Self { schema_version: crate::MODEL_SCHEMA_VERSION, name: name.into(), ..Self::default() }
+    }
+
+    /// Read a model serialised as JSON, refusing any schema version other
+    /// than [`MODEL_SCHEMA_VERSION`](crate::MODEL_SCHEMA_VERSION).
+    ///
+    /// ```
+    /// use sealmap_model::{Codebase, ModelJsonError};
+    ///
+    /// let json = serde_json::to_string(&Codebase::new("demo")).unwrap();
+    /// assert_eq!(Codebase::from_json(&json).unwrap().name, "demo");
+    ///
+    /// let v1 = r#"{"schema":1,"name":"old","files":{},"symbols":{},"relations":[]}"#;
+    /// assert!(matches!(Codebase::from_json(v1), Err(ModelJsonError::Version { found: Some(1), .. })));
+    /// ```
+    pub fn from_json(text: &str) -> Result<Self, ModelJsonError> {
+        #[derive(Deserialize)]
+        struct Probe {
+            schema_version: Option<u32>,
+            schema: Option<u32>,
+        }
+        let probe: Probe = serde_json::from_str(text).map_err(ModelJsonError::Json)?;
+        let found = probe.schema_version.or(probe.schema);
+        if found != Some(crate::MODEL_SCHEMA_VERSION) {
+            return Err(ModelJsonError::Version { found, expected: crate::MODEL_SCHEMA_VERSION });
+        }
+        serde_json::from_str(text).map_err(ModelJsonError::Json)
     }
 
     /// Add or replace a file.
@@ -145,6 +171,22 @@ impl Codebase {
         }
         stats
     }
+}
+
+/// Why [`Codebase::from_json`] refused its input.
+#[derive(Debug, thiserror::Error)]
+pub enum ModelJsonError {
+    /// Not JSON, or not the shape of a [`Codebase`].
+    #[error("invalid model JSON: {0}")]
+    Json(serde_json::Error),
+    /// A schema version this build does not read.
+    #[error("model schema version {found:?} is not supported (expected {expected})")]
+    Version {
+        /// The version found (`schema_version`, or v1's `schema`), if any.
+        found: Option<u32>,
+        /// The version this build reads.
+        expected: u32,
+    },
 }
 
 /// Summary counts for a [`Codebase`].

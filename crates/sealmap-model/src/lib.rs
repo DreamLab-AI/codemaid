@@ -85,7 +85,7 @@ mod source;
 pub mod sym;
 mod symbol;
 
-pub use codebase::{Codebase, CodebaseStats};
+pub use codebase::{Codebase, CodebaseStats, ModelJsonError};
 pub use flow::{Arm, Call, CallKind, Exit, Flow, Step};
 pub use hash::{ContentHash, Fingerprint};
 pub use path::{PathError, SourcePath};
@@ -96,8 +96,16 @@ pub use symbol::{Confidence, Member, MemberKind, Relation, RelationKind, Span, S
 /// Version of the serialised model schema (the JSON shape of [`Codebase`]).
 ///
 /// Bumped whenever a field is added, removed or changes meaning, so agents and
-/// tools reading a persisted model can refuse a schema they do not understand.
-pub const MODEL_SCHEMA_VERSION: u32 = 1;
+/// tools reading a persisted model can refuse a schema they do not understand
+/// ([`Codebase::from_json`] does).
+///
+/// | Version | Change |
+/// |---|---|
+/// | 1 | `::` path ids, field `schema` (sealmap 0.1) |
+/// | 2 | `sym:` ids, `sig_hash` / `body_hash` on every symbol, field `schema_version` |
+///
+/// Version 1 has no reader: nothing outside this workspace consumed it.
+pub const MODEL_SCHEMA_VERSION: u32 = 2;
 
 /// Compiles and runs the README examples as doctests.
 #[cfg(doctest)]

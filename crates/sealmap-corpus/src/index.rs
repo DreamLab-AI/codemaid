@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use sealmap_model::{Codebase, CodebaseStats, Confidence, ContentHash, SourcePath, Span, SymbolId};
+use sealmap_model::{Codebase, CodebaseStats, Confidence, ContentHash, Fingerprint, SourcePath, Span, SymbolId};
 use serde::{Deserialize, Serialize};
 
 /// Kind of diagram fragment.
@@ -45,6 +45,10 @@ pub struct FragmentEntry {
     pub symbol: SymbolId,
     /// Source span of that symbol.
     pub span: Span,
+    /// The symbol's contract fingerprint (see `sealmap_model::Symbol`).
+    pub sig_hash: Fingerprint,
+    /// The symbol's implementation fingerprint.
+    pub body_hash: Fingerprint,
     /// Mermaid ids of participants / classes, in diagram order.
     pub participants: Vec<SymbolId>,
     /// Calls, in source order (sequence fragments only).
@@ -82,7 +86,7 @@ pub struct DocumentEntry {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
     /// [`crate::CORPUS_SCHEMA_VERSION`].
-    pub schema: u32,
+    pub schema_version: u32,
     /// Generator name and version, e.g. `sealmap-corpus 0.1.0`.
     pub generator: String,
     /// Codebase name.
@@ -96,7 +100,7 @@ pub struct Index {
 impl Index {
     pub(crate) fn new(cb: &Codebase) -> Self {
         Self {
-            schema: crate::CORPUS_SCHEMA_VERSION,
+            schema_version: crate::CORPUS_SCHEMA_VERSION,
             generator: format!("sealmap-corpus {}", env!("CARGO_PKG_VERSION")),
             codebase: cb.name.clone(),
             stats: cb.stats(),

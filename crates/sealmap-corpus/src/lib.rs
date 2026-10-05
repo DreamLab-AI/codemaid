@@ -95,8 +95,13 @@ use sealmap_model::{Codebase, SourcePath, Symbol, SymbolId};
 pub use contract::{Drift, DriftEntry, Report, corpus_hash, read_dir_corpus, verify, verify_against, write};
 pub use index::{CallRef, DocumentEntry, FragmentEntry, FragmentKind, Index};
 
-/// Version of the corpus layout and front-matter schema.
-pub const CORPUS_SCHEMA_VERSION: u32 = 1;
+/// Version of the corpus layout, front-matter and `_index.json` schema.
+///
+/// | Version | Change |
+/// |---|---|
+/// | 1 | `::` path ids, field `schema` (sealmap 0.1) |
+/// | 2 | `sym:` ids, quoted `module:` front matter, fragment `sig_hash` / `body_hash`, field `schema_version` |
+pub const CORPUS_SCHEMA_VERSION: u32 = 2;
 
 /// Suffix appended to a source path to name its document.
 pub const DOC_SUFFIX: &str = ".md";
