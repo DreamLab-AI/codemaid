@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-rust/src/fingerprint.rs
 module: "sym:cargo sealmap_rust . fingerprint/"
 language: rust
-source_hash: blake3:be7b0f8ab506a757dac7c88428ce5b09d0b8b77c95ea6bfa6db82835754a4844
+source_hash: blake3:95bb4aeb313f47f054ab564086e2064b4ceaed5d302ccc5c18ec8679a898f9f6
 lines: 337
 fragments: 16
 ---
@@ -42,8 +42,8 @@ classDiagram
     -unblock(e: &Expr) Option#lt;Expr#gt;
     ~unparsable(crate) #40;Fingerprint, Fingerprint#41;
   }
-  class sealmap_frontend__fingerprint___tFingerprinter["Fingerprinter"] {
-    <<struct in crates/sealmap-frontend/src/fingerprint.rs>>
+  class sealmap_extract__fingerprint___tFingerprinter["Fingerprinter"] {
+    <<struct in crates/sealmap-extract/src/fingerprint.rs>>
   }
   class sealmap_model__hash___tFingerprint["Fingerprint"] {
     <<struct in crates/sealmap-model/src/hash.rs>>
@@ -90,7 +90,7 @@ classDiagram
   class _syn__visit_mut__VisitMut["syn::visit_mut::VisitMut"] {
     <<external>>
   }
-  sealmap_rust__fingerprint ..> sealmap_frontend__fingerprint___tFingerprinter
+  sealmap_rust__fingerprint ..> sealmap_extract__fingerprint___tFingerprinter
   sealmap_rust__fingerprint ..> sealmap_model__hash___tFingerprint
   sealmap_rust__fingerprint ..> sealmap_rust__fingerprint___tCanon
   sealmap_rust__fingerprint ..> _proc_macro2__Delimiter
@@ -137,7 +137,7 @@ sequenceDiagram
   participant sealmap_rust__fingerprint___tCanon as Canon
   participant _syn as syn ext
   participant sealmap_rust__fingerprint as fingerprint mod
-  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_mut::visit_expr_closure_mut(self, c)
+  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_expr_closure_mut(self, c)
   opt matches!(c.output, syn::ReturnType::Default)
     sealmap_rust__fingerprint___tCanon->>sealmap_rust__fingerprint: unblock(&c.body)
   end
@@ -150,7 +150,7 @@ sequenceDiagram
   participant sealmap_rust__fingerprint___tCanon as Canon
   participant _syn as syn ext
   participant sealmap_rust__fingerprint as fingerprint mod
-  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_mut::visit_arm_mut(self, a)
+  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_arm_mut(self, a)
   sealmap_rust__fingerprint___tCanon->>sealmap_rust__fingerprint: unblock(&a.body)
 ```
 
@@ -160,7 +160,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__fingerprint___tCanon as Canon
   participant _syn as syn ext
-  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_mut::visit_pat_or_mut(self, p)
+  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_pat_or_mut(self, p)
 ```
 
 ## `sym:cargo sealmap_rust . fingerprint/Canon#[VisitMut]visit_block_mut().`
@@ -169,7 +169,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__fingerprint___tCanon as Canon
   participant _syn as syn ext
-  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_mut::visit_block_mut(self, b)
+  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_block_mut(self, b)
 ```
 
 ## `sym:cargo sealmap_rust . fingerprint/Canon#[VisitMut]visit_macro_mut().`
@@ -181,7 +181,7 @@ sequenceDiagram
   participant _proc_macro2 as proc_macro2 ext
   sealmap_rust__fingerprint___tCanon->>_syn: Macro::parse_body_with(parser)
   opt let Ok(args) = m.parse_body_with(parser)
-    sealmap_rust__fingerprint___tCanon->>_proc_macro2: TokenStream::TokenStream::new()
+    sealmap_rust__fingerprint___tCanon->>_proc_macro2: TokenStream::new()
     sealmap_rust__fingerprint___tCanon->>_syn: Macro::into_iter()
   end
 ```
@@ -192,7 +192,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__fingerprint___tCanon as Canon
   participant _syn as syn ext
-  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_mut::visit_use_group_mut(self, g)
+  sealmap_rust__fingerprint___tCanon->>_syn: visit_mut::visit_use_group_mut(self, g)
 ```
 
 ## `sym:cargo sealmap_rust . fingerprint/attrs().`
@@ -201,8 +201,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__fingerprint as fingerprint mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;attrs#quot;)
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;attrs#quot;)
   loop for a in attrs
     sealmap_rust__fingerprint->>sealmap_rust__fingerprint: ignored_path(path())
     opt !ignored_path(a.path())
@@ -217,15 +217,15 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__fingerprint as fingerprint mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unparsable#quot;)
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: ident(name)
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unparsable#quot;)
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: literal(text)
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;unparsable#quot;)
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: ident(name)
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;unparsable#quot;)
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: literal(text)
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . fingerprint/feed_stream().`
@@ -259,7 +259,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__fingerprint as fingerprint mod
   participant _proc_macro2 as proc_macro2 ext
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   sealmap_rust__fingerprint->>_proc_macro2: TokenStream::into_iter()
   loop each via filter
     sealmap_rust__fingerprint->>sealmap_rust__fingerprint: is_punct(t, ',')
@@ -267,16 +267,16 @@ sequenceDiagram
   loop while i<trees.len()
     sealmap_rust__fingerprint->>sealmap_rust__fingerprint: ignored_attr_len(&_)
     alt TokenTree::Ident(id)
-      sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: ident(&text)
+      sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: ident(&text)
     else TokenTree::Punct(p)
-      sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: punct(as_char())
+      sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: punct(as_char())
     else TokenTree::Literal(l)
-      sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: literal(&to_string())
+      sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: literal(&to_string())
     else TokenTree::Group(g)
       sealmap_rust__fingerprint->>sealmap_rust__fingerprint: is_argument_list(and_then(), and_then())
-      sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: open(d)
+      sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: open(d)
       sealmap_rust__fingerprint->>sealmap_rust__fingerprint: feed_trees(fp, stream(), delimiter(), args)
-      sealmap_rust__fingerprint->>sealmap_frontend__fingerprint___tFingerprinter: close(d)
+      sealmap_rust__fingerprint->>sealmap_extract__fingerprint___tFingerprinter: close(d)
     end
   end
 ```

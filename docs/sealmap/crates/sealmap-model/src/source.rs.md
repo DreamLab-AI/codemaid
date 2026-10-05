@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-model/src/source.rs
 module: "sym:cargo sealmap_model . source/"
 language: rust
-source_hash: blake3:0a5a68257491d5f4efd1d9bfd175dc6afe2213f41769393917261c56e5dca49f
+source_hash: blake3:f205e3912840aacb8347cfe87cfe9494206786eec882d6ea6de0fa172cf3bf26
 lines: 187
 fragments: 5
 ---
@@ -109,7 +109,7 @@ sequenceDiagram
   participant _ignore as ignore ext
   participant sealmap_model__path___tSourcePath as SourcePath
   participant sealmap_model__hash as hash mod
-  sealmap_model__source___tSourceSet->>_ignore: WalkBuilder::WalkBuilder::new(root)
+  sealmap_model__source___tSourceSet->>_ignore: WalkBuilder::new(root)
   loop for entry in walker
     sealmap_model__source___tSourceSet->>sealmap_model__path___tSourcePath: SourcePath::relative_to(path, root)
     sealmap_model__source___tSourceSet->>sealmap_model__hash: normalise_newlines(&text)

@@ -4,14 +4,14 @@ kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-41 files · 619 symbols · 1691 relations · 256 flows · 1177 calls
+41 files · 619 symbols · 1695 relations · 256 flows · 1180 calls
 
 ## crates
 ```mermaid
 flowchart LR
   sealmap(["sealmap"])
   sealmap_corpus(["sealmap_corpus"])
-  sealmap_frontend(["sealmap_frontend"])
+  sealmap_extract(["sealmap_extract"])
   sealmap_main(["sealmap_main"])
   sealmap_mermaid(["sealmap_mermaid"])
   sealmap_model(["sealmap_model"])
@@ -32,7 +32,7 @@ flowchart LR
   syn{{"syn"}}
   toml{{"toml"}}
   sealmap -->|"9"| sealmap_corpus
-  sealmap -->|"1"| sealmap_frontend
+  sealmap -->|"1"| sealmap_extract
   sealmap -->|"1"| sealmap_mermaid
   sealmap -->|"8"| sealmap_model
   sealmap -->|"4"| sealmap_rust
@@ -40,13 +40,13 @@ flowchart LR
   sealmap_corpus -->|"148"| sealmap_model
   sealmap_corpus -->|"4"| serde
   sealmap_corpus -->|"3"| serde_json
-  sealmap_frontend -->|"4"| blake3
-  sealmap_frontend -->|"2"| rayon
-  sealmap_frontend -->|"68"| sealmap_model
+  sealmap_extract -->|"4"| blake3
+  sealmap_extract -->|"2"| rayon
+  sealmap_extract -->|"68"| sealmap_model
   sealmap_main -->|"3"| clap
   sealmap_main -->|"4"| sealmap
   sealmap_main -->|"7"| sealmap_corpus
-  sealmap_main -->|"1"| sealmap_frontend
+  sealmap_main -->|"1"| sealmap_extract
   sealmap_main -->|"3"| sealmap_model
   sealmap_main -->|"3"| sealmap_rust
   sealmap_main -->|"1"| serde_json
@@ -62,8 +62,8 @@ flowchart LR
   sealmap_rust -->|"15"| Segs
   sealmap_rust -->|"23"| proc_macro2
   sealmap_rust -->|"6"| quote
-  sealmap_rust -->|"130"| sealmap_frontend
-  sealmap_rust -->|"130"| sealmap_model
+  sealmap_rust -->|"132"| sealmap_extract
+  sealmap_rust -->|"132"| sealmap_model
   sealmap_rust -->|"123"| syn
   sealmap_rust -->|"1"| toml
 ```
@@ -99,21 +99,21 @@ flowchart LR
   sealmap_corpus__structure -->|"2"| sealmap_corpus__naming
 ```
 
-## modules: sealmap_frontend
+## modules: sealmap_extract
 ```mermaid
 flowchart LR
-  sealmap_frontend["sealmap_frontend"]
-  sealmap_frontend__confidence["confidence"]
-  sealmap_frontend__fingerprint["fingerprint"]
-  sealmap_frontend__ids["ids"]
-  sealmap_frontend__isolate["isolate"]
-  sealmap_frontend__labels["labels"]
-  sealmap_frontend__lower["lower"]
-  sealmap_frontend__raw["raw"]
-  sealmap_frontend -->|"2"| sealmap_frontend__confidence
-  sealmap_frontend -->|"5"| sealmap_frontend__raw
-  sealmap_frontend__lower -->|"5"| sealmap_frontend__raw
-  sealmap_frontend__raw -->|"5"| sealmap_frontend__labels
+  sealmap_extract["sealmap_extract"]
+  sealmap_extract__confidence["confidence"]
+  sealmap_extract__fingerprint["fingerprint"]
+  sealmap_extract__ids["ids"]
+  sealmap_extract__isolate["isolate"]
+  sealmap_extract__labels["labels"]
+  sealmap_extract__lower["lower"]
+  sealmap_extract__raw["raw"]
+  sealmap_extract -->|"2"| sealmap_extract__confidence
+  sealmap_extract -->|"5"| sealmap_extract__raw
+  sealmap_extract__lower -->|"5"| sealmap_extract__raw
+  sealmap_extract__raw -->|"5"| sealmap_extract__labels
 ```
 
 ## modules: sealmap_mermaid
@@ -285,21 +285,21 @@ erDiagram
   sealmap_corpus__sequence___tCtx ||..|| sealmap_corpus___tCorpusOptions : "opts"
 ```
 
-## data: sealmap_frontend
+## data: sealmap_extract
 ```mermaid
 erDiagram
-  sealmap_frontend___tDiagnostic["Diagnostic"] {
+  sealmap_extract___tDiagnostic["Diagnostic"] {
     SourcePath file
     String message
   }
-  sealmap_frontend___tExtraction["Extraction"] {
+  sealmap_extract___tExtraction["Extraction"] {
     Codebase codebase
     Vec[Diagnostic] diagnostics
   }
-  sealmap_frontend__fingerprint___tDelim["Delim"]
-  sealmap_frontend__fingerprint___tToken["Token"]
-  sealmap_frontend__raw___tCallee["Callee"]
-  sealmap_frontend__raw___tRawCall["RawCall"] {
+  sealmap_extract__fingerprint___tDelim["Delim"]
+  sealmap_extract__fingerprint___tToken["Token"]
+  sealmap_extract__raw___tCallee["Callee"]
+  sealmap_extract__raw___tRawCall["RawCall"] {
     Callee callee
     String label
     CallKind kind
@@ -307,14 +307,14 @@ erDiagram
     bool fallible
     u32 line
   }
-  sealmap_frontend__raw___tRawStep["RawStep"]
-  sealmap_frontend__raw___tRecv["Recv"]
-  sealmap_frontend___tExtraction ||--o{ sealmap_frontend___tDiagnostic : "diagnostics"
-  sealmap_frontend__fingerprint___tToken ||--|| sealmap_frontend__fingerprint___tDelim : "Open"
-  sealmap_frontend__fingerprint___tToken ||--|| sealmap_frontend__fingerprint___tDelim : "Close"
-  sealmap_frontend__raw___tCallee ||--|| sealmap_frontend__raw___tRecv : "Method"
-  sealmap_frontend__raw___tRawCall ||--|| sealmap_frontend__raw___tCallee : "callee"
-  sealmap_frontend__raw___tRawStep ||--|| sealmap_frontend__raw___tRawCall : "Call"
+  sealmap_extract__raw___tRawStep["RawStep"]
+  sealmap_extract__raw___tRecv["Recv"]
+  sealmap_extract___tExtraction ||--o{ sealmap_extract___tDiagnostic : "diagnostics"
+  sealmap_extract__fingerprint___tToken ||--|| sealmap_extract__fingerprint___tDelim : "Open"
+  sealmap_extract__fingerprint___tToken ||--|| sealmap_extract__fingerprint___tDelim : "Close"
+  sealmap_extract__raw___tCallee ||--|| sealmap_extract__raw___tRecv : "Method"
+  sealmap_extract__raw___tRawCall ||--|| sealmap_extract__raw___tCallee : "callee"
+  sealmap_extract__raw___tRawStep ||--|| sealmap_extract__raw___tRawCall : "Call"
 ```
 
 ## data: sealmap_main

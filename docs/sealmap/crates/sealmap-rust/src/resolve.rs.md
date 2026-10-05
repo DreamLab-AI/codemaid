@@ -3,8 +3,8 @@ sealmap: 2
 source: crates/sealmap-rust/src/resolve.rs
 module: "sym:cargo sealmap_rust . resolve/"
 language: rust
-source_hash: blake3:5e9ccaf5b9ae4345bb76ad5f91e280ae04901c83c5d46056ca2bf3345778a750
-lines: 851
+source_hash: blake3:d506ce4c1327427e09c6339ad5d915c5e27b34697d46829ae7970933df72a01e
+lines: 865
 fragments: 22
 ---
 # `sym:cargo sealmap_rust . resolve/` · crates/sealmap-rust/src/resolve.rs
@@ -74,8 +74,8 @@ classDiagram
     -module_sym(segments: &[String]) SymbolId
     -undefined_member(ty: &SymbolId, name: &str) SymbolId
   }
-  class sealmap_frontend___tDiagnostic["Diagnostic"] {
-    <<struct in crates/sealmap-frontend/src/lib.rs>>
+  class sealmap_extract___tDiagnostic["Diagnostic"] {
+    <<struct in crates/sealmap-extract/src/lib.rs>>
   }
   class sealmap_model__codebase___tCodebase["Codebase"] {
     <<struct in crates/sealmap-model/src/codebase.rs>>
@@ -134,7 +134,7 @@ classDiagram
   class sealmap_model__symbol___tSymbolKind["SymbolKind"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  sealmap_rust__resolve ..> sealmap_frontend___tDiagnostic
+  sealmap_rust__resolve ..> sealmap_extract___tDiagnostic
   sealmap_rust__resolve ..> sealmap_model__codebase___tCodebase
   sealmap_rust__resolve ..> sealmap_model__sym___tPackage
   sealmap_rust__resolve ..> sealmap_model__sym___tSymbolId
@@ -167,7 +167,7 @@ classDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/build().`
-`pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Codebase, Vec<Diagnostic>)` · L211-L316
+`pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Codebase, Vec<Diagnostic>)` · L212-L317
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve as resolve mod
@@ -175,8 +175,8 @@ sequenceDiagram
   participant sealmap_model__codebase___tCodebase as Codebase
   participant sealmap_model__symbol___tSymbol as Symbol
   participant sealmap_model__symbol___tRelation as Relation
-  participant sealmap_frontend__ids as ids mod
-  participant sealmap_frontend__confidence as confidence mod
+  participant sealmap_extract__ids as ids mod
+  participant sealmap_extract__confidence as confidence mod
   sealmap_rust__resolve->>sealmap_rust__resolve___tResolver: Resolver::new(&files)
   sealmap_rust__resolve->>sealmap_model__codebase___tCodebase: Codebase::new(name)
   loop for f in &files
@@ -204,7 +204,7 @@ sequenceDiagram
     end
     loop for it in &f.items
       sealmap_rust__resolve->>sealmap_rust__resolve: module_sym(&it.module)
-      sealmap_rust__resolve->>sealmap_frontend__ids: ids::item_id(&module, it.kind, &it.name)
+      sealmap_rust__resolve->>sealmap_extract__ids: ids::item_id(&module, it.kind, &it.name)
       sealmap_rust__resolve->>sealmap_model__symbol___tSymbol: Symbol::new(clone(), &it.name, it.kind, clone())
       opt via map
         sealmap_rust__resolve->>sealmap_rust__resolve___tResolver: member(&module, m, Some())
@@ -228,7 +228,7 @@ sequenceDiagram
         sealmap_rust__resolve->>sealmap_rust__resolve___tResolver: flow(&ctx, &it.flow, opts)
       end
       loop for m in &it.methods
-        sealmap_rust__resolve->>sealmap_frontend__ids: ids::method_id(&id, None, &m.name)
+        sealmap_rust__resolve->>sealmap_extract__ids: ids::method_id(&id, None, &m.name)
         sealmap_rust__resolve->>sealmap_rust__resolve___tResolver: method_symbol(&mid, &id, m, f, &ctx, opts, &cb)
         sealmap_rust__resolve->>sealmap_model__codebase___tCodebase: add_symbol(ms)
       end
@@ -252,51 +252,51 @@ sequenceDiagram
       end
     end
   end
-  sealmap_rust__resolve->>sealmap_frontend__confidence: aggregate_calls(&cb)
+  sealmap_rust__resolve->>sealmap_extract__confidence: aggregate_calls(&cb)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/module_sym().`
-`fn module_sym(segments: &[String]) -> SymbolId` · L318-L323
+`fn module_sym(segments: &[String]) -> SymbolId` · L319-L324
 > The id of the module at `segments` (crate name first), in the `cargo` package named by the crate.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
   sealmap_rust__resolve->>sealmap_rust__resolve: crate_package(krate)
-  sealmap_rust__resolve->>sealmap_frontend__ids: ids::module_id(&crate_package(), rest)
+  sealmap_rust__resolve->>sealmap_extract__ids: ids::module_id(&crate_package(), rest)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/crate_package().`
-`fn crate_package(krate: &str) -> Package` · L325-L327
+`fn crate_package(krate: &str) -> Package` · L326-L328
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
-  sealmap_rust__resolve->>sealmap_frontend__ids: ids::package(#quot;cargo#quot;, krate)
+  participant sealmap_extract__ids as ids mod
+  sealmap_rust__resolve->>sealmap_extract__ids: ids::package(#quot;cargo#quot;, krate)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/impl_method().`
-`fn impl_method(module: &SymbolId, ty: &SymbolId, imp: &RawImpl, name: &str) -> SymbolId` · L329-L335
+`fn impl_method(module: &SymbolId, ty: &SymbolId, imp: &RawImpl, name: &str) -> SymbolId` · L330-L336
 > The id of method `name` from impl block `imp` whose self type resolved to `ty`.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
-  sealmap_rust__resolve->>sealmap_frontend__ids: ids::impl_method_id(module, ty, &self_ty, trait_, name)
+  participant sealmap_extract__ids as ids mod
+  sealmap_rust__resolve->>sealmap_extract__ids: ids::impl_method_id(module, ty, &self_ty, trait_, name)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/undefined_member().`
-`fn undefined_member(ty: &SymbolId, name: &str) -> SymbolId` · L337-L341
+`fn undefined_member(ty: &SymbolId, name: &str) -> SymbolId` · L338-L342
 > The id of member `name` of `ty` when the codebase does not define it: a method under a global type, or the path extended by the name.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
-  sealmap_rust__resolve->>sealmap_frontend__ids: ids::method_id(ty, None, name)
+  participant sealmap_extract__ids as ids mod
+  sealmap_rust__resolve->>sealmap_extract__ids: ids::method_id(ty, None, name)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/keep_ref().`
-`fn keep_ref(id: &SymbolId) -> bool` · L343-L348
+`fn keep_ref(id: &SymbolId) -> bool` · L344-L349
 > Keep a resolved reference as a relation target? Drops std and prelude.
 ```mermaid
 sequenceDiagram
@@ -306,22 +306,22 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#new().`
-`fn new(files: &[RawFile]) -> Self` · L417-L512
+`fn new(files: &[RawFile]) -> Self` · L418-L513
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
   loop for f in files
     loop for m in &f.modules
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve: module_sym(&m.path)
     end
     loop for it in &f.items
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve: module_sym(&it.module)
-      sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::item_id(&module, it.kind, &it.name)
+      sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::item_id(&module, it.kind, &it.name)
       opt it.kind == SymbolKind::Trait
         loop for m in &it.methods
-          sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::method_id(&id, None, &m.name)
+          sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::method_id(&id, None, &m.name)
         end
       end
     end
@@ -350,26 +350,26 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#resolve().`
-`fn resolve(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>, ns: Ns,) -> (SymbolId, Confidence)` · L514-L533
+`fn resolve(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>, ns: Ns,) -> (SymbolId, Confidence)` · L515-L534
 > Resolve `segs` as written in `module`, looking the final segment up in `ns` first.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
   participant sealmap_model__sym___tSymbolId as SymbolId
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
   sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: walk(module, segs, self_ty, ns, 0, true)
   alt Some(id)
     sealmap_rust__resolve___tResolver->>sealmap_model__sym___tSymbolId: ~root()
   else None
-    sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::path_id(segs)
+    sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::path_id(segs)
     opt via unwrap_or_else
-      sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::unresolved_method_id(#quot;#quot;)
+      sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::unresolved_method_id(#quot;#quot;)
     end
   end
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#resolve_internal().`
-`fn resolve_internal(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L535-L537
+`fn resolve_internal(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L536-L538
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
@@ -377,14 +377,15 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#walk().`
-`fn walk(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>, ns: Ns, depth: u8, use_globs: bool,) -> Option<SymbolId>` · L544-L612
+`fn walk(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>, ns: Ns, depth: u8, use_globs: bool,) -> Option<SymbolId>` · L545-L626
 > `use_globs` is false only while the glob table itself is being built.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
   participant sealmap_model__sym___tSymbolId as SymbolId
   participant sealmap_rust__resolve as resolve mod
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
+  participant sealmap_model__sym___tDescriptor as Descriptor
   opt depth> 8 || segs.is_empty()
     Note over sealmap_rust__resolve___tResolver: return None
   end
@@ -398,7 +399,7 @@ sequenceDiagram
     alt if let Some(u) = self.uses.get(module).and_then(| us | …
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: walk(module, &full, self_ty, ns, _, use_globs)
       opt via or_else
-        sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::path_id(&full)
+        sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::path_id(&full)
       end
       Note over sealmap_rust__resolve___tResolver: return self.walk(module, &full, self_ty, ns, depth + 1,…
     else if let Some(id) = use_globs.then(| | self.glob(module, …
@@ -408,21 +409,30 @@ sequenceDiagram
     else if self.crates.contains(name)
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve: module_sym(&_)
     else
-      sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::path_id(segs)
+      sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::path_id(segs)
       Note over sealmap_rust__resolve___tResolver: return ids::path_id(segs)
     end
   end
   loop for (i, seg) in rest.iter().enumerate()
     sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: item(&cur, seg, ns_at())
-    opt self.uses.get(&cur).is_some_and(| us | us.iter().any…
+    alt if self.uses.get(&cur).is_some_and(| us | us.iter().any…
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: walk(&cur, &_, self_ty, ns, _, use_globs)
       Note over sealmap_rust__resolve___tResolver: return self.walk(&cur, &rest [i..], self_ty, ns, depth …
+    else if i + 1 == rest.len() && self.internal.contains(&cur) …
+      opt via is_some_and
+        sealmap_rust__resolve___tResolver->>sealmap_model__sym___tDescriptor: ~suffix()
+      end
+      alt Ns::Value
+        sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::method_id(&cur, None, seg)
+      else Ns::Type
+        sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::item_id(&cur, TypeAlias, seg)
+      end
     end
   end
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#glob().`
-`fn glob(&self, module: &SymbolId, name: &str, ns: Ns) -> Option<SymbolId>` · L614-L633
+`fn glob(&self, module: &SymbolId, name: &str, ns: Ns) -> Option<SymbolId>` · L628-L647
 > Find `name` through `module`'s glob imports, following glob chains (`pub use inner::*` re-exports) breadth-first.
 ```mermaid
 sequenceDiagram
@@ -436,7 +446,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#refs().`
-`fn refs(&self, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId>` · L635-L655
+`fn refs(&self, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId>` · L649-L669
 > Resolve a list of raw type refs to kept relation targets.
 ```mermaid
 sequenceDiagram
@@ -452,7 +462,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#member().`
-`fn member(&self, module: &SymbolId, m: &RawMember, owner: Option<&SymbolId>) -> Member` · L663-L672
+`fn member(&self, module: &SymbolId, m: &RawMember, owner: Option<&SymbolId>) -> Member` · L677-L686
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
@@ -460,7 +470,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#add_uses().`
-`fn add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>,)` · L674-L686
+`fn add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>,)` · L688-L700
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
@@ -474,7 +484,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#method_symbol().`
-`fn method_symbol(&self, id: &SymbolId, parent: &SymbolId, m: &RawFn, f: &RawFile, ctx: &FlowCtx<'_>, opts: &RustOptions, cb: &mut Codebase,) -> Symbol` · L688-L714
+`fn method_symbol(&self, id: &SymbolId, parent: &SymbolId, m: &RawFn, f: &RawFile, ctx: &FlowCtx<'_>, opts: &RustOptions, cb: &mut Codebase,) -> Symbol` · L702-L728
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
@@ -487,23 +497,23 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#flow().`
-`fn flow(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Option<Flow>` · L716-L718
+`fn flow(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Option<Flow>` · L730-L732
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
-  participant sealmap_frontend__lower as lower mod
+  participant sealmap_extract__lower as lower mod
   opt closure
     sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: call(ctx, c, opts)
   end
-  sealmap_rust__resolve___tResolver->>sealmap_frontend__lower: lower::lower_flow(raw, &|..|)
+  sealmap_rust__resolve___tResolver->>sealmap_extract__lower: lower::lower_flow(raw, &|..|)
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#call().`
-`fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call>` · L720-L745
+`fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call>` · L734-L759
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
-  participant sealmap_frontend__confidence___tExternalCalls as ExternalCalls
+  participant sealmap_extract__confidence___tExternalCalls as ExternalCalls
   participant sealmap_rust__resolve as resolve mod
   alt Callee::Path(segs)
     sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: local(ctx.module, &_)
@@ -518,19 +528,19 @@ sequenceDiagram
   else Callee::Method { recv, name }
     sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: method(ctx, recv, name)?
   end
-  sealmap_rust__resolve___tResolver->>sealmap_frontend__confidence___tExternalCalls: ~keeps(confidence, |..|)
+  sealmap_rust__resolve___tResolver->>sealmap_extract__confidence___tExternalCalls: ~keeps(confidence, |..|)
   opt via keeps
     sealmap_rust__resolve___tResolver->>sealmap_rust__resolve: keep_ref(&target)
   end
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#method().`
-`fn method(&self, ctx: &FlowCtx<'_>, recv: &Recv, name: &str) -> Option<(SymbolId, Confidence)>` · L747-L785
+`fn method(&self, ctx: &FlowCtx<'_>, recv: &Recv, name: &str) -> Option<(SymbolId, Confidence)>` · L761-L799
 > Resolve a method call.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
   participant sealmap_rust__resolve as resolve mod
   alt Recv::SelfField(field)
     alt Some((module, refs))
@@ -549,24 +559,24 @@ sequenceDiagram
     alt self.internal_origin(ctx, origin)
       sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: by_name_only(name)
     else
-      sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::unresolved_method_id(name)
+      sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::unresolved_method_id(name)
     end
     Note over sealmap_rust__resolve___tResolver: return Some(if self.internal_origin(ctx, origin) { self…
   end
   opt let-else
-    sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::unresolved_method_id(name)
+    sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::unresolved_method_id(name)
     Note over sealmap_rust__resolve___tResolver: return Some((ids::unresolved_method_id(name), Confidenc…
   end
   opt let Some(id) = self.methods.get(&ty).and_then(| m | …
     Note over sealmap_rust__resolve___tResolver: return Some((id.clone(), Confidence::Exact))
   end
   opt self.trait_methods.get(&ty).is_some_and(| n | n.cont…
-    sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::method_id(&ty, None, name)
+    sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::method_id(&ty, None, name)
     Note over sealmap_rust__resolve___tResolver: return Some((ids::method_id(&ty, None, name), Confidenc…
   end
   loop for tr in self.impls.get(&ty).into_iter().flatten()
     opt self.trait_methods.get(tr).is_some_and(| n | n.conta…
-      sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::method_id(tr, None, name)
+      sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::method_id(tr, None, name)
       Note over sealmap_rust__resolve___tResolver: return Some((ids::method_id(tr, None, name), Confidence…
     end
   end
@@ -574,7 +584,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#internal_origin().`
-`fn internal_origin(&self, ctx: &FlowCtx<'_>, origin: &Recv) -> bool` · L787-L809
+`fn internal_origin(&self, ctx: &FlowCtx<'_>, origin: &Recv) -> bool` · L801-L823
 > Does a [`Recv::Derived`] value come from code in the analysed codebase? `self`, a field or typed value whose type mentions an internal type, an internal functi…
 ```mermaid
 sequenceDiagram
@@ -592,7 +602,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#receiver_type().`
-`fn receiver_type(&self, module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L811-L829
+`fn receiver_type(&self, module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L825-L843
 > The type a method is called on, from the declared type's paths (outermost first).
 ```mermaid
 sequenceDiagram
@@ -609,12 +619,12 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . resolve/Resolver#by_name_only().`
-`fn by_name_only(&self, name: &str) -> (SymbolId, Confidence)` · L831-L843
+`fn by_name_only(&self, name: &str) -> (SymbolId, Confidence)` · L845-L857
 > Unknown receiver: accept a unique, distinctive internal method name.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
-  participant sealmap_frontend__ids as ids mod
+  participant sealmap_extract__ids as ids mod
   opt !COMMON_METHODS.contains(&name)
     opt let Some(ids) = self.by_name.get(name)
       opt ids.len() == 1
@@ -624,5 +634,5 @@ sequenceDiagram
       end
     end
   end
-  sealmap_rust__resolve___tResolver->>sealmap_frontend__ids: ids::unresolved_method_id(name)
+  sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::unresolved_method_id(name)
 ```

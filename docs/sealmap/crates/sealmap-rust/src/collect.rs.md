@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-rust/src/collect.rs
 module: "sym:cargo sealmap_rust . collect/"
 language: rust
-source_hash: blake3:228f88133c9b9afccc12513fa4b6870ed4aef0450ebcde50e64b4400e9900959
+source_hash: blake3:0ef8975ba4871bb384a59efb2f0c83e0fd33e07d89ad02fa15cbd23795b030cf
 lines: 1472
 fragments: 50
 ---
@@ -88,8 +88,8 @@ classDiagram
     -vis_of(v: &syn::Visibility) Visibility
     -vis_prefix(v: &syn::Visibility) String
   }
-  class sealmap_frontend__fingerprint___tFingerprinter["Fingerprinter"] {
-    <<struct in crates/sealmap-frontend/src/fingerprint.rs>>
+  class sealmap_extract__fingerprint___tFingerprinter["Fingerprinter"] {
+    <<struct in crates/sealmap-extract/src/fingerprint.rs>>
   }
   class sealmap_model__flow___tCallKind["CallKind"] {
     <<enum in crates/sealmap-model/src/flow.rs>>
@@ -208,7 +208,7 @@ classDiagram
   class _syn__Variant["syn::Variant"] {
     <<external>>
   }
-  sealmap_rust__collect ..> sealmap_frontend__fingerprint___tFingerprinter
+  sealmap_rust__collect ..> sealmap_extract__fingerprint___tFingerprinter
   sealmap_rust__collect ..> sealmap_model__flow___tCallKind
   sealmap_rust__collect ..> sealmap_model__hash___tFingerprint
   sealmap_rust__collect ..> sealmap_model__path___tSourcePath
@@ -244,7 +244,7 @@ classDiagram
   sealmap_rust__collect ..> _syn__UseTree
   sealmap_rust__collect ..> _syn__Visibility
   sealmap_rust__collect ..> _syn__punctuated__Punctuated
-  sealmap_rust__collect___tCollector ..> sealmap_frontend__fingerprint___tFingerprinter
+  sealmap_rust__collect___tCollector ..> sealmap_extract__fingerprint___tFingerprinter
   sealmap_rust__collect___tCollector ..> sealmap_model__hash___tFingerprint
   sealmap_rust__collect___tCollector ..> sealmap_model__symbol___tSpan
   sealmap_rust__collect___tCollector ..> sealmap_model__symbol___tVisibility
@@ -310,19 +310,19 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tCollector as Collector
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
   participant sealmap_rust__collect as collect mod
-  participant _sealmap_model as sealmap_model ext
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;mod#quot;)
+  participant sealmap_model__hash___tFingerprint as Fingerprint
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;mod#quot;)
   sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;vis#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;vis#quot;)
   opt let Some(v) = syn_vis
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig, v)
   end
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;name#quot;)
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: ident(map_or())
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;name#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: ident(map_or())
   loop for item in items
     opt let Item::Use(u) = item
       sealmap_rust__collect___tCollector->>sealmap_rust__collect: flatten_use(&u.tree, &new(), &uses)
@@ -330,29 +330,29 @@ sequenceDiagram
   end
   sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(attrs)
   sealmap_rust__collect___tCollector->>sealmap_rust__collect: tags_of(attrs)
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;mod#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect___tCollector->>sealmap_model__hash___tFingerprint: ~Fingerprint::default()
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;mod#quot;)
   loop for item in items
     alt Item::Use(_) | Item::ExternCrate(_) | Item::Mod(syn::It…
       sealmap_rust__collect___tCollector->>sealmap_rust__collect: item_attrs(item)
       sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(item_attrs())
       opt !self.skip(item_attrs(item))
-        sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+        sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
         sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&d, item, visit_item_mut)
-        sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+        sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
       end
     else _
       sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: item(&path, item, &body)
     end
   end
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;declarations#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;declarations#quot;)
   loop for d in declarations
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(d)
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: fingerprint(d)
   end
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . collect/Collector#local_uses().`
@@ -362,7 +362,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect___tCollector as Collector
   participant _syn as syn ext
-  sealmap_rust__collect___tCollector->>_syn: Visit::Visit::visit_block(&found, block)
+  sealmap_rust__collect___tCollector->>_syn: Visit::visit_block(&found, block)
   opt found.0.is_empty()
     Note over sealmap_rust__collect___tCollector: return
   end
@@ -396,10 +396,10 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect___tCollector as Collector
   participant sealmap_rust__collect as collect mod
-  participant _sealmap_model as sealmap_model ext
+  participant sealmap_model__hash___tFingerprint as Fingerprint
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__labels as labels mod
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
   opt closure
@@ -407,8 +407,8 @@ sequenceDiagram
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(attrs)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: tags_of(attrs)
-    sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
-    sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
+    sealmap_rust__collect___tCollector->>sealmap_model__hash___tFingerprint: ~Fingerprint::default()
+    sealmap_rust__collect___tCollector->>sealmap_model__hash___tFingerprint: ~Fingerprint::default()
   end
   alt Item::Mod(m)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&m.attrs)
@@ -447,11 +447,11 @@ sequenceDiagram
       end
       alt Fields::Unnamed(u)
         sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(u)
-        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect___tCollector->>sealmap_extract__labels: squeeze(&tokens())
       else Fields::Named(n)
         sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(n)
-        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
-        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&squeeze(), LABEL_MAX)
+        sealmap_rust__collect___tCollector->>sealmap_extract__labels: squeeze(&tokens())
+        sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&squeeze(), LABEL_MAX)
       end
       sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
     end
@@ -471,13 +471,13 @@ sequenceDiagram
     loop for ti in &t.items
       alt TraitItem::Fn(f)
         sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&f.sig)
-        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&tokens(), SIG_MAX)
+        sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&tokens(), SIG_MAX)
         sealmap_rust__collect___tCollector->>sealmap_rust__collect: sig_refs(&f.sig, &refs)
         alt Some(block)
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: params_of(&f.sig)
-          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
-          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+          sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+          sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+          sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: ident(&to_string())
           sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig_fp, &t.generics)
           sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig_fp, &t.generics.where_clause)
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: callable(sig_fp, &f.attrs, None, &f.sig, block)
@@ -493,7 +493,7 @@ sequenceDiagram
       else TraitItem::Type(ty)
         opt via then
           sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&ty.bounds)
-          sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
+          sealmap_rust__collect___tCollector->>sealmap_extract__labels: squeeze(&tokens())
         end
         sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
       else TraitItem::Const(k)
@@ -507,18 +507,18 @@ sequenceDiagram
   else Item::Type(t)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&t.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&t.ty)
-    sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
+    sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&t.ty, &it.sig_refs)
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;type#quot;)
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;type#quot;)
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig, item)
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;type#quot;)
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;type#quot;)
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics.where_clause)
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.ty)
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
+    sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Fn(f)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&f.attrs)
@@ -528,7 +528,7 @@ sequenceDiagram
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&f.sig.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: vis_prefix(&f.vis)
     sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&f.sig)
-    sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
+    sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: fn_tags(&f.sig, &_)
   else Item::Impl(i)
     opt self.skip(&i.attrs)
@@ -554,11 +554,11 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(name)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(sig)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(body)
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ident(name)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: fingerprint(sig)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: fingerprint(body)
 ```
 
 ## `sym:cargo sealmap_rust . collect/callable().`
@@ -568,19 +568,19 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__fingerprint as fingerprint mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;vis#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;vis#quot;)
   opt let Some(v) = vis
     sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, v)
   end
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;sig#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;sig#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, signature)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;block#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;block#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, block, visit_block_m…
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . collect/impl_header().`
@@ -589,19 +589,19 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;impl#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;impl#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(fp, &i.attrs)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.defaultness)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.unsafety)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.generics)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;trait#quot;)
   opt let Some((bang, path, _)) = &i.trait_
     sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, bang)
     sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, path)
   end
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;self#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;self#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.self_ty)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.generics.where_clause)
 ```
@@ -612,40 +612,40 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;data#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;data#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, item)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;data#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;data#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, generics)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &generics.where_clause)
   opt closure
-    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ~section(label)
+    sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ~section(label)
     loop for f in fields
-      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ~section(#quot;field#quot;)
+      sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ~section(#quot;field#quot;)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, f)
     end
   end
   alt Shape::Fields(Fields::Unit)
-    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unit#quot;)
+    sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;unit#quot;)
   else Shape::Variants(vs)
     loop for v in vs
-      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;variant#quot;)
+      sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;variant#quot;)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&body, &v.attrs)
-      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+      sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ident(&to_string())
       opt Fields::Unit
-        sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unit#quot;)
+        sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;unit#quot;)
       end
       opt let Some((_, discriminant)) = &v.discriminant
-        sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;discriminant#quot;)
+        sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;discriminant#quot;)
         sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, discriminant, visit_…
       end
     end
   end
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . collect/trait_hashes().`
@@ -654,41 +654,41 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;trait#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &t.attrs)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.vis)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.unsafety)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.auto_token)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ident(&to_string())
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.generics)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;supertraits#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;supertraits#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.supertraits)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.generics.where_clause)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;trait#quot;)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics.where_clause)
   loop for ti in &t.items
-    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;item#quot;)
+    sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;item#quot;)
     alt TraitItem::Fn(f)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &f.attrs)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &f.sig)
     else TraitItem::Const(k)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &k.attrs)
-      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+      sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ident(&to_string())
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &k.generics)
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &k.ty)
     else other
       sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, other)
     end
-    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;item#quot;)
+    sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(#quot;item#quot;)
     sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, ti, visit_trait_item…
   end
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . collect/value().`
@@ -697,24 +697,24 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_extract__fingerprint___tFingerprinter as Fingerprinter
   participant sealmap_rust__fingerprint as fingerprint mod
   participant _syn as syn ext
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(keyword)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, vis)
   opt let Some(m) = mutability
     sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, m)
   end
   sealmap_rust__collect->>_syn: Ident::to_string()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: ident(&to_string())
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, ty)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: section(keyword)
   sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, expr, visit_expr_mut)
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
-  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_extract__fingerprint___tFingerprinter: finish()
 ```
 
 ## `sym:cargo sealmap_rust . collect/span_of().`
@@ -771,11 +771,11 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   opt text.is_empty()
     Note over sealmap_rust__collect: return None
   end
-  sealmap_rust__collect->>sealmap_frontend__labels: clip(first, DOC_SUMMARY_MAX)
+  sealmap_rust__collect->>sealmap_extract__labels: clip(first, DOC_SUMMARY_MAX)
 ```
 
 ## `sym:cargo sealmap_rust . collect/tags_of().`
@@ -785,12 +785,12 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   loop for a in attrs
     opt multi || KEEP.iter().any(| k | p.is_ident(k))
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(&a.meta)
-      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
-      sealmap_rust__collect->>sealmap_frontend__labels: clip(&t, LABEL_MAX)
+      sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_extract__labels: clip(&t, LABEL_MAX)
     end
   end
 ```
@@ -809,17 +809,17 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   opt via map
     alt GenericParam::Type(t)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(t)
-      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
     else GenericParam::Lifetime(l)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(l)
-      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
     else GenericParam::Const(c)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(c)
-      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
     end
   end
 ```
@@ -847,7 +847,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant _syn as syn ext
-  sealmap_rust__collect->>_syn: Visit::Visit::visit_type(&V(), ty)
+  sealmap_rust__collect->>_syn: Visit::visit_type(&V(), ty)
 ```
 
 ## `sym:cargo sealmap_rust . collect/sig_refs().`
@@ -1072,9 +1072,9 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
   participant sealmap_rust__collect as collect mod
-  participant sealmap_frontend__raw as raw mod
+  participant sealmap_extract__raw as raw mod
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   alt Expr::Call(c)
     loop for a in &c.args
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: arg(a, out, &deferred)
@@ -1083,13 +1083,13 @@ sequenceDiagram
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: path_segs(&p.path)
       opt !name.starts_with(| ch: char | ch.is_uppercase())
         sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: call(Path(), &shown, &c.args, Function, span())
-        sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
+        sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: place_deferred(&name, deferred, LOOPING, out)
         Note over sealmap_rust__collect___tFlowWalker: return
       end
     else other
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(other, out)
     end
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(#quot;#quot;, deferred, LOOPING, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: place_deferred(#quot;#quot;, deferred, LOOPING, out)
   else Expr::MethodCall(m)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&m.receiver, out)
     loop for a in &m.args
@@ -1097,18 +1097,18 @@ sequenceDiagram
     end
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: recv(&m.receiver)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: call(_, &name, &m.args, Method, span())
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: place_deferred(&name, deferred, LOOPING, out)
   else Expr::Await(a)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&a.base, out)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: is_call(&a.base)
     opt is_call(&a.base)
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: last_call_mut(out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: last_call_mut(out)
     end
   else Expr::Try(t)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&t.expr, out)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: is_call(&t.expr)
     opt is_call(&t.expr)
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: last_call_mut(out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: last_call_mut(out)
     end
   else Expr::If(i)
     loop while let Some(ifx) = cur.take()
@@ -1121,32 +1121,32 @@ sequenceDiagram
         sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(other)
       end
     end
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: push_arms(arms, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__raw: push_arms(arms, out)
   else Expr::Match(m)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&m.expr, out)
     opt via map
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&a.pat)
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: squeeze(&tokens())
       opt let Some((_, g)) = &a.guard
         sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(g)
-        sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: squeeze(&tokens())
       end
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind_destructured(&a.pat, &m.expr, false)
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(&a.body)
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&label, LABEL_MAX)
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: clip(&label, LABEL_MAX)
     end
   else Expr::ForLoop(f)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&f.expr, out)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&f.pat)
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: squeeze(&tokens())
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&f.expr)
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: squeeze(&tokens())
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: clip(&_, LABEL_MAX)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind_destructured(&f.pat, &f.expr, true)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&f.body)
   else Expr::While(w)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: cond_label(&w.cond)
-    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+    sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: clip(&_, LABEL_MAX)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: cond(&w.cond, &body)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&w.body)
   else Expr::Loop(l)
@@ -1169,8 +1169,8 @@ sequenceDiagram
     end
     opt via map_or_else
       sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(e)
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
-      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: squeeze(&tokens())
+      sealmap_rust__collect___tFlowWalker->>sealmap_extract__labels: clip(&_, LABEL_MAX)
     end
   else Expr::Macro(m)
     sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: mac(&m.mac, out)
@@ -1312,7 +1312,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant _syn as syn ext
-  sealmap_rust__collect->>_syn: Visit::Visit::visit_pat(&Names(), pat)
+  sealmap_rust__collect->>_syn: Visit::visit_pat(&Names(), pat)
 ```
 
 ## `sym:cargo sealmap_rust . collect/call().`
@@ -1321,10 +1321,10 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant _syn as syn ext
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   participant _proc_macro2 as proc_macro2 ext
   sealmap_rust__collect->>_syn: Punctuated::iter()
-  sealmap_rust__collect->>sealmap_frontend__labels: call_label(name, &sketch)
+  sealmap_rust__collect->>sealmap_extract__labels: call_label(name, &sketch)
   sealmap_rust__collect->>_proc_macro2: Span::start()
 ```
 
@@ -1335,10 +1335,10 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   alt Expr::Lit(l)
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(l)
-    sealmap_rust__collect->>sealmap_frontend__labels: clip(&tokens(), ARG_LITERAL_MAX)
+    sealmap_rust__collect->>sealmap_extract__labels: clip(&tokens(), ARG_LITERAL_MAX)
   else Expr::Reference(r)
     sealmap_rust__collect->>sealmap_rust__collect: arg_sketch(&r.expr)
   else Expr::Field(f)
@@ -1356,17 +1356,17 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   alt Expr::Let(l)
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(&l.pat)
-    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(&l.expr)
-    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
   else other
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(other)
-    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_extract__labels: squeeze(&tokens())
   end
-  sealmap_rust__collect->>sealmap_frontend__labels: condition_label(&text)
+  sealmap_rust__collect->>sealmap_extract__labels: condition_label(&text)
 ```
 
 ## `sym:cargo sealmap_rust . collect/is_call().`

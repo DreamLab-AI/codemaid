@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-model/src/hash.rs
 module: "sym:cargo sealmap_model . hash/"
 language: rust
-source_hash: blake3:e49a53c9dc04b70c0c0a69d1751ac3ffb681a783462bcbe561c6a9ccc46a1cb8
+source_hash: blake3:9f6ed72ca28fa074cd46e0c305382f50ce246cc9aaf298bb6538bc18ff044990
 lines: 189
 fragments: 6
 ---
@@ -91,7 +91,7 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_model__hash___tFingerprint as Fingerprint
   participant _blake3 as blake3 ext
-  sealmap_model__hash___tFingerprint->>_blake3: Hasher::Hasher::new_derive_key(#quot;sealmap sm1 …)
+  sealmap_model__hash___tFingerprint->>_blake3: Hasher::new_derive_key(#quot;sealmap sm1 …)
   sealmap_model__hash___tFingerprint->>_blake3: Hasher::update(&lo.0)
   sealmap_model__hash___tFingerprint->>_blake3: Hasher::update(&hi.0)
   sealmap_model__hash___tFingerprint->>_blake3: Hasher::finalize()
@@ -104,6 +104,6 @@ sequenceDiagram
   participant sealmap_model__hash___tFingerprint as Fingerprint
   participant _serde as serde ext
   opt via ok_or_else
-    sealmap_model__hash___tFingerprint->>_serde: Error::Error::custom(_)
+    sealmap_model__hash___tFingerprint->>_serde: Error::custom(_)
   end
 ```

@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-rust/src/tidy.rs
 module: "sym:cargo sealmap_rust . tidy/"
 language: rust
-source_hash: blake3:e49801d4de7f4610834dc6976ce0ea3b51accae8e8731b5d903782c5092f13eb
+source_hash: blake3:1d84f2a659e19f14583d5bf0a1b67932d3d22b67dfd7589cfca56e5aa84453a1
 lines: 9
 fragments: 2
 ---
@@ -31,7 +31,7 @@ classDiagram
 sequenceDiagram
   participant sealmap_rust__tidy as tidy mod
   participant _quote as quote ext
-  participant sealmap_frontend__labels as labels mod
+  participant sealmap_extract__labels as labels mod
   sealmap_rust__tidy->>_quote: ToTokens::to_token_stream()
-  sealmap_rust__tidy->>sealmap_frontend__labels: squeeze(&to_string())
+  sealmap_rust__tidy->>sealmap_extract__labels: squeeze(&to_string())
 ```

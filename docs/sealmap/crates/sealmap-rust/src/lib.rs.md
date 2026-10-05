@@ -3,12 +3,12 @@ sealmap: 2
 source: crates/sealmap-rust/src/lib.rs
 module: "sym:cargo sealmap_rust ."
 language: rust
-source_hash: blake3:d040c9f637192fd8d0baf869a1f1470c8bc2e5fb280cb6f9cce8715b3fa38ec6
+source_hash: blake3:ec7765a2e213aba6140b5b0e662dcfd64d31618e6c96ff8619e3f68ec7bbe6e1
 lines: 210
 fragments: 5
 ---
 # `sym:cargo sealmap_rust .` · crates/sealmap-rust/src/lib.rs
-> A pure-Rust frontend that turns Rust source into a [`sealmap_model::Codebase`]: modules, types, traits, functions and methods, the relations between them, and …
+> A pure-Rust language adapter that turns Rust source into a [`sealmap_model::Codebase`]: modules, types, traits, functions and methods, the relations between th…
 
 ## structure
 ```mermaid
@@ -40,8 +40,8 @@ classDiagram
     +mod resolve
     +mod tidy
   }
-  class sealmap_frontend___tExtraction["Extraction"] {
-    <<struct in crates/sealmap-frontend/src/lib.rs>>
+  class sealmap_extract___tExtraction["Extraction"] {
+    <<struct in crates/sealmap-extract/src/lib.rs>>
   }
   class sealmap_model__source___tSourceSet["SourceSet"] {
     <<struct in crates/sealmap-model/src/source.rs>>
@@ -55,17 +55,17 @@ classDiagram
   class sealmap_rust__layout___tFileRole["FileRole"] {
     <<struct in crates/sealmap-rust/src/layout.rs>>
   }
-  class sealmap_frontend__confidence___tExternalCalls["ExternalCalls"] {
-    <<enum in crates/sealmap-frontend/src/confidence.rs>>
+  class sealmap_extract__confidence___tExternalCalls["ExternalCalls"] {
+    <<enum in crates/sealmap-extract/src/confidence.rs>>
   }
-  sealmap_rust ..> sealmap_frontend___tExtraction
+  sealmap_rust ..> sealmap_extract___tExtraction
   sealmap_rust ..> sealmap_model__source___tSourceSet
   sealmap_rust ..> sealmap_rust___tJob
   sealmap_rust ..> sealmap_rust___tRustOptions
   sealmap_rust ..> sealmap_rust__raw___tRawFile
   sealmap_rust___tJob ..> sealmap_model__path___tSourcePath
   sealmap_rust___tJob ..> sealmap_rust__layout___tFileRole
-  sealmap_rust___tRustOptions *-- sealmap_frontend__confidence___tExternalCalls : external_calls
+  sealmap_rust___tRustOptions *-- sealmap_extract__confidence___tExternalCalls : external_calls
 ```
 
 ## `sym:cargo sealmap_rust . extract().`
@@ -87,13 +87,13 @@ sequenceDiagram
 
 ## `sym:cargo sealmap_rust . collect_all().`
 `fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile>` · L167-L177
-> Pass 1 over every file, isolated per file (big stacks, panic guard; see [`sealmap_frontend::isolate`]).
+> Pass 1 over every file, isolated per file (big stacks, panic guard; see [`sealmap_extract::isolate`]).
 ```mermaid
 sequenceDiagram
   participant sealmap_rust as sealmap_rust mod
-  participant sealmap_frontend__isolate as isolate mod
+  participant sealmap_extract__isolate as isolate mod
   participant sealmap_rust__collect as collect mod
-  sealmap_rust->>sealmap_frontend__isolate: map_isolated(jobs, COLLECT_STACK_BYTES, |..|, |..|)
+  sealmap_rust->>sealmap_extract__isolate: map_isolated(jobs, COLLECT_STACK_BYTES, |..|, |..|)
   opt via map_isolated
     sealmap_rust->>sealmap_rust__collect: collect::collect_file(p, r, t, options)
   end

@@ -113,9 +113,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_mermaid__sequence___tSeqBuilder as SeqBuilder
-  participant _sealmap_mermaid as sealmap_mermaid ext
   participant sealmap_mermaid__escape as escape mod
-  sealmap_mermaid__sequence___tSeqBuilder->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+  sealmap_mermaid__sequence___tSeqBuilder->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
   sealmap_mermaid__sequence___tSeqBuilder->>sealmap_mermaid__escape: escape_text(label)
 ```
 
@@ -143,13 +142,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_mermaid__sequence___tSeqBuilder as SeqBuilder
-  participant _sealmap_mermaid as sealmap_mermaid ext
   participant sealmap_mermaid__escape as escape mod
   opt arms.is_empty()
     Note over sealmap_mermaid__sequence___tSeqBuilder: return self
   end
   opt via map
-    sealmap_mermaid__sequence___tSeqBuilder->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+    sealmap_mermaid__sequence___tSeqBuilder->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
     sealmap_mermaid__sequence___tSeqBuilder->>sealmap_mermaid__escape: escape_text(&label)
   end
 ```

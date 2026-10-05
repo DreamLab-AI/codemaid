@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-model/src/sym.rs
 module: "sym:cargo sealmap_model . sym/"
 language: rust
-source_hash: blake3:9da5a8e4e1ecf33aa4ea5eb372f47aa1ad5e4820f0e7ea0731dfb2906e543aa5
+source_hash: blake3:c6f426eb9516620eace067b563ddbec99474694a54e5a4e42fdd46b976c9edcc
 lines: 1168
 fragments: 32
 ---

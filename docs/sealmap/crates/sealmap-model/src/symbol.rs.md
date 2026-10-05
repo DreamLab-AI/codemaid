@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap-model/src/symbol.rs
 module: "sym:cargo sealmap_model . symbol/"
 language: rust
-source_hash: blake3:5ae15b00bf188cda3635a124ea517fd55f84095749187840d4d4e3e790ae838d
+source_hash: blake3:7496128eb887ef2474b66afbeaed9c1bd07273dad3e86aa4911bae85c7379be0
 lines: 341
 fragments: 3
 ---
@@ -170,9 +170,10 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_model__symbol___tSymbol as Symbol
   participant sealmap_model__sym___tSymbolId as SymbolId
-  participant _sealmap_model as sealmap_model ext
+  participant sealmap_model__symbol___tSpan as Span
+  participant sealmap_model__hash___tFingerprint as Fingerprint
   sealmap_model__symbol___tSymbol->>sealmap_model__sym___tSymbolId: parent()
-  sealmap_model__symbol___tSymbol->>_sealmap_model: ~Span::Span::default()
-  sealmap_model__symbol___tSymbol->>_sealmap_model: ~Fingerprint::Fingerprint::default()
-  sealmap_model__symbol___tSymbol->>_sealmap_model: ~Fingerprint::Fingerprint::default()
+  sealmap_model__symbol___tSymbol->>sealmap_model__symbol___tSpan: ~Span::default()
+  sealmap_model__symbol___tSymbol->>sealmap_model__hash___tFingerprint: ~Fingerprint::default()
+  sealmap_model__symbol___tSymbol->>sealmap_model__hash___tFingerprint: ~Fingerprint::default()
 ```

@@ -1,26 +1,26 @@
 ---
 sealmap: 2
-source: crates/sealmap-frontend/src/labels.rs
-module: "sym:cargo sealmap_frontend . labels/"
+source: crates/sealmap-extract/src/labels.rs
+module: "sym:cargo sealmap_extract . labels/"
 language: rust
-source_hash: blake3:5ebe7e82cd01012619e4cfdf3af5077d817e9cb374d1886529cd419471c39026
+source_hash: blake3:24feab9b3605943cdc36d404f19c2b33a83d22afa3d6da033a7ca7f811b90d04
 lines: 189
 fragments: 4
 ---
-# `sym:cargo sealmap_frontend . labels/` · crates/sealmap-frontend/src/labels.rs
+# `sym:cargo sealmap_extract . labels/` · crates/sealmap-extract/src/labels.rs
 > Label rules: how source text becomes the short strings on diagram arrows and fragments.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_frontend__labels___tDeferredShape["DeferredShape"] {
+  class sealmap_extract__labels___tDeferredShape["DeferredShape"] {
     <<enum>>
     Parallel
     Loop
     Optional
   }
-  class sealmap_frontend__labels["sealmap_frontend::labels"] {
+  class sealmap_extract__labels["sealmap_extract::labels"] {
     <<module>>
     +const ARG_LITERAL_MAX: usize
     +const DOC_SUMMARY_MAX: usize
@@ -35,32 +35,32 @@ classDiagram
     +deferred_shape(callee: &str, looping: &[&str]) DeferredShape
     +squeeze(raw: &str) String
   }
-  sealmap_frontend__labels ..> sealmap_frontend__labels___tDeferredShape
+  sealmap_extract__labels ..> sealmap_extract__labels___tDeferredShape
 ```
 
-## `sym:cargo sealmap_frontend . labels/squeeze().`
+## `sym:cargo sealmap_extract . labels/squeeze().`
 `pub fn squeeze(raw: &str) -> String` · L56-L79
 > Apply the spacing rules until the string stops changing.
 ```mermaid
 sequenceDiagram
-  participant sealmap_frontend__labels as labels mod
-  sealmap_frontend__labels->>sealmap_frontend__labels: call_parens(&s)
+  participant sealmap_extract__labels as labels mod
+  sealmap_extract__labels->>sealmap_extract__labels: call_parens(&s)
 ```
 
-## `sym:cargo sealmap_frontend . labels/call_label().`
+## `sym:cargo sealmap_extract . labels/call_label().`
 `pub fn call_label(name: &str, args: &[String]) -> String` · L113-L118
 > The message for a call: `name(arg, arg)`, clipped to [`LABEL_MAX`].
 ```mermaid
 sequenceDiagram
-  participant sealmap_frontend__labels as labels mod
-  sealmap_frontend__labels->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+  participant sealmap_extract__labels as labels mod
+  sealmap_extract__labels->>sealmap_extract__labels: clip(&_, LABEL_MAX)
 ```
 
-## `sym:cargo sealmap_frontend . labels/condition_label().`
+## `sym:cargo sealmap_extract . labels/condition_label().`
 `pub fn condition_label(text: &str) -> String` · L120-L124
 > The label for a condition (`if` / `while` guard), clipped as if it were prefixed with `if ` so that the guard and the `if` arm agree.
 ```mermaid
 sequenceDiagram
-  participant sealmap_frontend__labels as labels mod
-  sealmap_frontend__labels->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+  participant sealmap_extract__labels as labels mod
+  sealmap_extract__labels->>sealmap_extract__labels: clip(&_, LABEL_MAX)
 ```

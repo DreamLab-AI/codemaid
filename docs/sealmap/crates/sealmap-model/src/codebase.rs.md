@@ -143,9 +143,9 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_model__codebase___tCodebase as Codebase
-  participant _sealmap_model as sealmap_model ext
+  participant sealmap_model__codebase___tCodebaseStats as CodebaseStats
   participant sealmap_model__flow___tFlow as Flow
-  sealmap_model__codebase___tCodebase->>_sealmap_model: ~CodebaseStats::CodebaseStats::default()
+  sealmap_model__codebase___tCodebase->>sealmap_model__codebase___tCodebaseStats: ~CodebaseStats::default()
   loop for sym in self.symbols.values()
     opt let Some(flow) = &sym.flow
       sealmap_model__codebase___tCodebase->>sealmap_model__flow___tFlow: ~call_count()

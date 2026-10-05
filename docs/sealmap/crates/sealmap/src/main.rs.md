@@ -3,7 +3,7 @@ sealmap: 2
 source: crates/sealmap/src/main.rs
 module: "sym:cargo sealmap_main ."
 language: rust
-source_hash: blake3:0e8c2311d0889a2e2d80d29925ab8fa4d8cbf5cf2cb4f991bbffb20137b3eb7f
+source_hash: blake3:956d2f85783223c4e3bf99234f0f1e6a1e7045ae28628c24ce805fa2f666a4b3
 lines: 182
 fragments: 4
 ---
@@ -68,8 +68,8 @@ classDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_main as sealmap_main mod
-  participant _sealmap_main as sealmap_main ext
-  sealmap_main->>_sealmap_main: ~Cli::Cli::parse()
+  participant sealmap_main___tCli as Cli
+  sealmap_main->>sealmap_main___tCli: ~Cli::parse()
   sealmap_main->>sealmap_main: run(cli)
 ```
 
@@ -78,14 +78,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_main as sealmap_main mod
-  participant _sealmap as sealmap ext
+  participant sealmap___tOptions as Options
   participant sealmap_rust as sealmap_rust mod
   participant _serde_json as serde_json ext
   participant sealmap_corpus as sealmap_corpus mod
   participant sealmap_model__codebase___tCodebase as Codebase
   participant sealmap_corpus__contract as contract mod
   participant sealmap_corpus__index___tIndex as Index
-  sealmap_main->>_sealmap: ~Options::Options::default()
+  sealmap_main->>sealmap___tOptions: ~Options::default()
   opt other
     Note over sealmap_main: return Err(format!(#quot;--external must be all, non-std or …
   end

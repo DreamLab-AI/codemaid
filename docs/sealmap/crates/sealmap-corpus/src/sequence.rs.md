@@ -3,8 +3,8 @@ sealmap: 2
 source: crates/sealmap-corpus/src/sequence.rs
 module: "sym:cargo sealmap_corpus . sequence/"
 language: rust
-source_hash: blake3:542ad5e9f93a10124a0bcc2962eb577ad6d2be0796da817d107f54fc2d2fd3f5
-lines: 151
+source_hash: blake3:f68162dfb4d79fe2296e2b5413dc685629c4eafe8a2b1a6216fae29333548389
+lines: 156
 fragments: 4
 ---
 # `sym:cargo sealmap_corpus . sequence/` · crates/sealmap-corpus/src/sequence.rs
@@ -86,7 +86,7 @@ sequenceDiagram
   participant sealmap_model__codebase___tCodebase as Codebase
   participant sealmap_corpus__naming as naming mod
   participant sealmap_corpus__sequence___tCtx as Ctx
-  participant _sealmap_mermaid as sealmap_mermaid ext
+  participant sealmap_mermaid__sequence___tSeqBuilder as SeqBuilder
   participant sealmap_mermaid__sequence___tSequenceDiagram as SequenceDiagram
   opt flow.call_count()<opts.min_calls
     Note over sealmap_corpus__sequence: return None
@@ -94,7 +94,7 @@ sequenceDiagram
   sealmap_corpus__sequence->>sealmap_model__codebase___tCodebase: owner_of(&sym.id)
   sealmap_corpus__sequence->>sealmap_corpus__naming: alias_for(cb, &caller)
   sealmap_corpus__sequence->>sealmap_corpus__sequence___tCtx: lane(_)
-  sealmap_corpus__sequence->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+  sealmap_corpus__sequence->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
   sealmap_corpus__sequence->>sealmap_corpus__sequence___tCtx: steps(&flow.steps, &body)
   sealmap_corpus__sequence->>sealmap_mermaid__sequence___tSequenceDiagram: SequenceDiagram::new()
   loop for (id, alias, external) in &ctx.lanes
@@ -113,13 +113,12 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_corpus . sequence/Ctx#steps().`
-`fn steps(&mut self, steps: &[Step], out: &mut SeqBuilder)` · L66-L118
+`fn steps(&mut self, steps: &[Step], out: &mut SeqBuilder)` · L66-L123
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__sequence___tCtx as Ctx
   participant sealmap_corpus__naming as naming mod
   participant sealmap_mermaid__sequence___tSeqBuilder as SeqBuilder
-  participant _sealmap_mermaid as sealmap_mermaid ext
   sealmap_corpus__sequence___tCtx->>sealmap_corpus__naming: ident(&self.caller)
   loop for step in steps
     alt Step::Call(c)
@@ -132,14 +131,14 @@ sequenceDiagram
     else Step::Parallel { arms }
       sealmap_corpus__sequence___tCtx->>sealmap_corpus__sequence___tCtx: arms(Par, arms, out)
     else Step::Loop { label, body }
-      sealmap_corpus__sequence___tCtx->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+      sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
       sealmap_corpus__sequence___tCtx->>sealmap_corpus__sequence___tCtx: steps(body, &inner)
       sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: is_empty()
       opt !inner.is_empty()
         sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: block(Loop, label, |..|)
       end
     else Step::Optional { label, body }
-      sealmap_corpus__sequence___tCtx->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+      sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
       sealmap_corpus__sequence___tCtx->>sealmap_corpus__sequence___tCtx: steps(body, &inner)
       sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: is_empty()
       opt !inner.is_empty()
@@ -152,14 +151,13 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_corpus . sequence/Ctx#arms().`
-`fn arms(&mut self, kind: BlockKind, arms: &[sealmap_model::Arm], out: &mut SeqBuilder)` · L120-L150
+`fn arms(&mut self, kind: BlockKind, arms: &[sealmap_model::Arm], out: &mut SeqBuilder)` · L125-L155
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__sequence___tCtx as Ctx
-  participant _sealmap_mermaid as sealmap_mermaid ext
   participant sealmap_mermaid__sequence___tSeqBuilder as SeqBuilder
   loop for arm in arms
-    sealmap_corpus__sequence___tCtx->>_sealmap_mermaid: ~SeqBuilder::SeqBuilder::default()
+    sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: ~SeqBuilder::default()
     sealmap_corpus__sequence___tCtx->>sealmap_corpus__sequence___tCtx: steps(&arm.steps, &inner)
     sealmap_corpus__sequence___tCtx->>sealmap_mermaid__sequence___tSeqBuilder: is_empty()
   end
