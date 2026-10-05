@@ -21,7 +21,7 @@ Sections:
   `<<kind in path>>` are defined in another file; `<<external>>` ones are outside
   the codebase. Edges: `..|>` implements, `<|--` extends, `*--` owns,
   `o--` holds via Option/Arc/Rc/&/collection, `..>` uses in a signature.
-- ``## `path::to::fn` ``: `sequenceDiagram` of one function's calls in source
+- ``## `sym:cargo crate . path/Type#fn().` ``: `sequenceDiagram` of one function's calls in source
   order. The first lane is the function's owner (its type, or its module).
   `alt`/`else` = if/match arms, `opt` = if-without-else, `if let` or closure,
   `loop` = for/while/loop or per-element closure, `par` = spawned task.
@@ -31,9 +31,23 @@ Sections:
 
 ## Ids
 
-Every diagram id is the canonical symbol path with `::` replaced by `__`
-(`my_crate::net::Client` → `my_crate__net__Client`). The same symbol has the
-same id in every diagram, so fragments can be merged by id.
+Every symbol is named by a `sym:` id with no file path, so moving code
+between files keeps it: `sym:cargo <crate> . <module>/<Type>#<method>().`.
+The suffix gives the kind: `/` module, `#` type or trait, `().` function or
+method, `.` const or static, `!` macro; `[Trait]` marks a trait-impl
+method (`Db#[Store]put().`). `sym:extern a::b` is a path outside the code
+whose kinds are unknown; `sym:? name` is a method on a receiver of unknown
+type. Names outside `[A-Za-z0-9_+$-]` are quoted in backticks.
+
+Every diagram id is derived from the `sym:` id by an injective encoding:
+`__` before a module, `___t` before a type, `___f` before a function, and
+so on (`my_crate__net___tClient___fconnect`). The same symbol has the same
+diagram id everywhere, and no two symbols share one, so fragments can be
+merged by id.
+
+In `_model.json` every symbol also carries `sig_hash` (its contract) and
+`body_hash` (its implementation); comments, formatting and moves change
+neither.
 
 ## Merging
 

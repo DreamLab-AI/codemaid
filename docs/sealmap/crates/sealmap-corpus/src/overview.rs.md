@@ -1,13 +1,13 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-corpus/src/overview.rs
-module: sealmap_corpus::overview
+module: "sym:cargo sealmap_corpus . overview/"
 language: rust
-source_hash: blake3:072cd647f0e3f2fd62c3952facc96a717afd8aa28c23dca0bc9f12f94e789cfd
-lines: 259
+source_hash: blake3:7f78e627ded9d9d91e4c4f39eacf2d18e848bfcffe2cfad5537b54111b3bacfd
+lines: 261
 fragments: 9
 ---
-# `sealmap_corpus::overview` · crates/sealmap-corpus/src/overview.rs
+# `sym:cargo sealmap_corpus . overview/` · crates/sealmap-corpus/src/overview.rs
 > `_overview.md`: cross-cutting diagrams for the whole codebase.
 
 ## structure
@@ -25,34 +25,34 @@ classDiagram
     -module_graph(cb: &Codebase, krate: &str, opts: &CorpusOptions) Option#lt;String#gt;
     -module_of(cb: &Codebase, id: &SymbolId) Option#lt;SymbolId#gt;
     ~render(crate) String
-    -root(id: &SymbolId) &str
+    -root(id: &SymbolId) String
     -trait_map(cb: &Codebase, opts: &CorpusOptions) Option#lt;String#gt;
   }
-  class sealmap_corpus__CorpusOptions["CorpusOptions"] {
+  class sealmap_corpus___tCorpusOptions["CorpusOptions"] {
     <<struct in crates/sealmap-corpus/src/lib.rs>>
   }
-  class sealmap_mermaid__er__Cardinality["Cardinality"] {
+  class sealmap_mermaid__er___tCardinality["Cardinality"] {
     <<enum in crates/sealmap-mermaid/src/er.rs>>
   }
-  class sealmap_model__codebase__Codebase["Codebase"] {
+  class sealmap_model__codebase___tCodebase["Codebase"] {
     <<struct in crates/sealmap-model/src/codebase.rs>>
   }
-  class sealmap_model__symbol__SymbolId["SymbolId"] {
-    <<struct in crates/sealmap-model/src/symbol.rs>>
+  class sealmap_model__sym___tSymbolId["SymbolId"] {
+    <<struct in crates/sealmap-model/src/sym.rs>>
   }
-  sealmap_corpus__overview ..> sealmap_corpus__CorpusOptions
-  sealmap_corpus__overview ..> sealmap_mermaid__er__Cardinality
-  sealmap_corpus__overview ..> sealmap_model__codebase__Codebase
-  sealmap_corpus__overview ..> sealmap_model__symbol__SymbolId
+  sealmap_corpus__overview ..> sealmap_corpus___tCorpusOptions
+  sealmap_corpus__overview ..> sealmap_mermaid__er___tCardinality
+  sealmap_corpus__overview ..> sealmap_model__codebase___tCodebase
+  sealmap_corpus__overview ..> sealmap_model__sym___tSymbolId
 ```
 
-## `sealmap_corpus::overview::render`
+## `sym:cargo sealmap_corpus . overview/render().`
 `pub(crate) fn render(cb: &Codebase, opts: &CorpusOptions) -> String` · L14-L42
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_model__codebase__Codebase as Codebase
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: stats()
+  participant sealmap_model__codebase___tCodebase as Codebase
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: stats()
   sealmap_corpus__overview->>sealmap_corpus__overview: crates_of(cb)
   sealmap_corpus__overview->>sealmap_corpus__overview: crate_graph(cb, &crates, opts)
   loop for krate in &crates
@@ -64,16 +64,16 @@ sequenceDiagram
   sealmap_corpus__overview->>sealmap_corpus__overview: trait_map(cb, opts)
 ```
 
-## `sealmap_corpus::overview::root`
-`fn root(id: &SymbolId) -> &str` · L44-L46
+## `sym:cargo sealmap_corpus . overview/root().`
+`fn root(id: &SymbolId) -> String` · L44-L46
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_model__symbol__SymbolId as SymbolId
-  sealmap_corpus__overview->>sealmap_model__symbol__SymbolId: as_str()
+  participant sealmap_model__sym___tSymbolId as SymbolId
+  sealmap_corpus__overview->>sealmap_model__sym___tSymbolId: root()
 ```
 
-## `sealmap_corpus::overview::crates_of`
+## `sym:cargo sealmap_corpus . overview/crates_of().`
 `fn crates_of(cb: &Codebase) -> BTreeSet<String>` · L48-L50
 ```mermaid
 sequenceDiagram
@@ -83,25 +83,25 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_corpus::overview::module_of`
+## `sym:cargo sealmap_corpus . overview/module_of().`
 `fn module_of(cb: &Codebase, id: &SymbolId) -> Option<SymbolId>` · L52-L56
 > Module that physically contains a symbol (its file's module).
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_model__codebase__Codebase as Codebase
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: symbol(id)?
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: file(&s.file)
+  participant sealmap_model__codebase___tCodebase as Codebase
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: symbol(id)?
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: file(&s.file)
 ```
 
-## `sealmap_corpus::overview::crate_graph`
-`fn crate_graph(cb: &Codebase, crates: &BTreeSet<String>, opts: &CorpusOptions) -> Option<String>` · L77-L128
+## `sym:cargo sealmap_corpus . overview/crate_graph().`
+`fn crate_graph(cb: &Codebase, crates: &BTreeSet<String>, opts: &CorpusOptions) -> Option<String>` · L77-L129
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_mermaid__flowchart__Flowchart as Flowchart
-  participant sealmap_model__path__SourcePath as SourcePath
-  participant sealmap_mermaid__escape__Ident as Ident
+  participant sealmap_mermaid__flowchart___tFlowchart as Flowchart
+  participant sealmap_model__path___tSourcePath as SourcePath
+  participant sealmap_mermaid__escape___tIdent as Ident
   loop for r in cb.relations.iter().filter(| r | STRUCTURAL.co…
     sealmap_corpus__overview->>sealmap_corpus__overview: root(&r.from)
     sealmap_corpus__overview->>sealmap_corpus__overview: root(&r.to)
@@ -110,50 +110,51 @@ sequenceDiagram
     Note over sealmap_corpus__overview: return None
   end
   sealmap_corpus__overview->>sealmap_corpus__overview: heaviest(edges, opts.max_edges)
-  sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: Flowchart::new(LR)
+  sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: Flowchart::new(LR)
   loop for k in crates
     loop each via find
       sealmap_corpus__overview->>sealmap_corpus__overview: root(&file.module)
     end
     opt via map
-      sealmap_corpus__overview->>sealmap_model__path__SourcePath: ~components()
+      sealmap_corpus__overview->>sealmap_model__path___tSourcePath: ~components()
     end
   end
   loop for (group, ks) in &groups
     alt multi
-      sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(&_)
-      sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: subgraph(new(), group, None, |..|)
+      sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(&_)
+      sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: subgraph(new(), group, None, |..|)
       opt via subgraph
         loop for k in ks
-          sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(k)
-          sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: ~node(new(), k, Stadium)
+          sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(k)
+          sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: ~node(new(), k, Stadium)
         end
       end
     else
       loop for k in ks
-        sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(k)
-        sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: node(new(), k, Stadium)
+        sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(k)
+        sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: node(new(), k, Stadium)
       end
     end
   end
   loop for e in &externals
-    sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(e)
-    sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: node(new(), e, Hexagon)
+    sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(e)
+    sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: node(new(), e, Hexagon)
   end
   loop for ((a, b), n) in &edges
-    sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(a)
-    sealmap_corpus__overview->>sealmap_mermaid__escape__Ident: Ident::new(b)
-    sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: edge(&new(), &new(), Solid, Some())
+    sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(a)
+    sealmap_corpus__overview->>sealmap_mermaid__escape___tIdent: Ident::new(b)
+    sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: edge(&new(), &new(), Solid, Some())
   end
-  sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: render()
+  sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: render()
 ```
 
-## `sealmap_corpus::overview::module_graph`
-`fn module_graph(cb: &Codebase, krate: &str, opts: &CorpusOptions) -> Option<String>` · L130-L162
+## `sym:cargo sealmap_corpus . overview/module_graph().`
+`fn module_graph(cb: &Codebase, krate: &str, opts: &CorpusOptions) -> Option<String>` · L131-L164
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_mermaid__flowchart__Flowchart as Flowchart
+  participant sealmap_mermaid__flowchart___tFlowchart as Flowchart
+  participant sealmap_model__sym___tSymbolId as SymbolId
   participant sealmap_corpus__naming as naming mod
   loop each via filter
     sealmap_corpus__overview->>sealmap_corpus__overview: root(m)
@@ -169,25 +170,26 @@ sequenceDiagram
     sealmap_corpus__overview->>sealmap_corpus__overview: module_of(cb, &r.to)
   end
   sealmap_corpus__overview->>sealmap_corpus__overview: heaviest(edges, opts.max_edges)
-  sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: Flowchart::new(LR)
+  sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: Flowchart::new(LR)
   loop for m in &modules
+    sealmap_corpus__overview->>sealmap_model__sym___tSymbolId: descriptors()
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(m)
-    sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: node(ident(), label, Rect)
+    sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: node(ident(), &label, Rect)
   end
   loop for ((a, b), n) in &edges
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(a)
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(b)
-    sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: edge(&ident(), &ident(), Solid, Some())
+    sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: edge(&ident(), &ident(), Solid, Some())
   end
-  sealmap_corpus__overview->>sealmap_mermaid__flowchart__Flowchart: render()
+  sealmap_corpus__overview->>sealmap_mermaid__flowchart___tFlowchart: render()
 ```
 
-## `sealmap_corpus::overview::data_model`
-`fn data_model(cb: &Codebase, krate: &str, opts: &CorpusOptions) -> Option<String>` · L164-L210
+## `sym:cargo sealmap_corpus . overview/data_model().`
+`fn data_model(cb: &Codebase, krate: &str, opts: &CorpusOptions) -> Option<String>` · L166-L212
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_mermaid__er__ErDiagram as ErDiagram
+  participant sealmap_mermaid__er___tErDiagram as ErDiagram
   participant sealmap_corpus__naming as naming mod
   loop each via filter
     sealmap_corpus__overview->>sealmap_corpus__overview: root(&s.id)
@@ -202,59 +204,59 @@ sequenceDiagram
   opt rels.is_empty()
     Note over sealmap_corpus__overview: return None
   end
-  sealmap_corpus__overview->>sealmap_mermaid__er__ErDiagram: ErDiagram::new()
+  sealmap_corpus__overview->>sealmap_mermaid__er___tErDiagram: ErDiagram::new()
   loop for id in &keep
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(id)
-    sealmap_corpus__overview->>sealmap_mermaid__er__ErDiagram: entity(clone(), &s.name)
+    sealmap_corpus__overview->>sealmap_mermaid__er___tErDiagram: entity(clone(), &s.name)
     loop for m in s.members.iter().filter(| m | m.kind == Member…
-      sealmap_corpus__overview->>sealmap_mermaid__er__ErDiagram: attr(&e, unwrap_or(), &m.name, None)
+      sealmap_corpus__overview->>sealmap_mermaid__er___tErDiagram: attr(&e, unwrap_or(), &m.name, None)
     end
   end
   loop for (from, field, to, card, owned) in &rels
     opt keep.contains(from) && keep.contains(to)
       sealmap_corpus__overview->>sealmap_corpus__naming: ident(from)
       sealmap_corpus__overview->>sealmap_corpus__naming: ident(to)
-      sealmap_corpus__overview->>sealmap_mermaid__er__ErDiagram: relation(&ident(), One, &ident(), _, _, field)
+      sealmap_corpus__overview->>sealmap_mermaid__er___tErDiagram: relation(&ident(), One, &ident(), _, _, field)
     end
   end
-  sealmap_corpus__overview->>sealmap_mermaid__er__ErDiagram: render()
+  sealmap_corpus__overview->>sealmap_mermaid__er___tErDiagram: render()
 ```
 
-## `sealmap_corpus::overview::trait_map`
-`fn trait_map(cb: &Codebase, opts: &CorpusOptions) -> Option<String>` · L228-L259
+## `sym:cargo sealmap_corpus . overview/trait_map().`
+`fn trait_map(cb: &Codebase, opts: &CorpusOptions) -> Option<String>` · L230-L261
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__overview as overview mod
-  participant sealmap_model__codebase__Codebase as Codebase
-  participant sealmap_mermaid__class__ClassDiagram as ClassDiagram
+  participant sealmap_model__codebase___tCodebase as Codebase
+  participant sealmap_mermaid__class___tClassDiagram as ClassDiagram
   participant sealmap_corpus__naming as naming mod
-  participant sealmap_mermaid__class__Class as Class
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: symbols_of_kind(Trait)
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: relations_of_kind(Implements)
-  sealmap_corpus__overview->>sealmap_model__codebase__Codebase: relations_of_kind(Extends)
+  participant sealmap_mermaid__class___tClass as Class
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: symbols_of_kind(Trait)
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: relations_of_kind(Implements)
+  sealmap_corpus__overview->>sealmap_model__codebase___tCodebase: relations_of_kind(Extends)
   opt impls.is_empty()
     Note over sealmap_corpus__overview: return None
   end
-  sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: ClassDiagram::new(LR)
+  sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: ClassDiagram::new(LR)
   loop for t in &traits
     opt impls.iter().any(| r | &r.to == * t || &r.from == * …
       sealmap_corpus__overview->>sealmap_corpus__naming: ident(t)
-      sealmap_corpus__overview->>sealmap_mermaid__class__Class: Class::new(ident(), &_.name)
-      sealmap_corpus__overview->>sealmap_mermaid__class__Class: annotation(#quot;trait#quot;)
-      sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: class(c)
+      sealmap_corpus__overview->>sealmap_mermaid__class___tClass: Class::new(ident(), &_.name)
+      sealmap_corpus__overview->>sealmap_mermaid__class___tClass: annotation(#quot;trait#quot;)
+      sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: class(c)
     end
   end
   loop for r in &impls
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(&r.from)
-    sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: has_class(&ident())
+    sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: has_class(&ident())
     opt !d.has_class(&ident(&r.from))
       sealmap_corpus__overview->>sealmap_corpus__naming: ident(&r.from)
-      sealmap_corpus__overview->>sealmap_mermaid__class__Class: Class::new(ident(), name())
-      sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: class(new())
+      sealmap_corpus__overview->>sealmap_mermaid__class___tClass: Class::new(ident(), &name())
+      sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: class(new())
     end
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(&r.from)
     sealmap_corpus__overview->>sealmap_corpus__naming: ident(&r.to)
-    sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: relation(&ident(), &ident(), kind, None)
+    sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: relation(&ident(), &ident(), kind, None)
   end
-  sealmap_corpus__overview->>sealmap_mermaid__class__ClassDiagram: render()
+  sealmap_corpus__overview->>sealmap_mermaid__class___tClassDiagram: render()
 ```

@@ -119,14 +119,14 @@ cheap and checkable.
 
 ## Crates
 
-**Today (0.1, in this tree; renamed from `codemaid-*`):**
+**Today (in this tree: 0.1 plus step 2, ids and hashes; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
 | [`sealmap`](crates/sealmap) | facade and CLI | all below, clap |
-| [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow` | serde, blake3, ignore |
-| [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart | **none** |
-| [`sealmap-frontend`](crates/sealmap-frontend) | logic shared by every frontend: raw flow IR, flow lowering, call aggregation, confidence policy, label rules, id builder, panic-isolated collection | sealmap-model, rayon (opt.) |
+| [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow`; the `sym:` id grammar; per-symbol `sig_hash` / `body_hash`; schema v2 | serde, blake3, ignore |
+| [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
+| [`sealmap-frontend`](crates/sealmap-frontend) | logic shared by every frontend: raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust frontend (syn), workspace-wide resolution | sealmap-frontend, syn, toml |
 | [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
 
@@ -136,7 +136,6 @@ cheap and checkable.
 |---|---|
 | `sealmap-ts` | TypeScript/TSX frontend on oxc, with synthesised ids for anonymous route handlers |
 | `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
-| `sealmap-frontend` gains | `sym:` ids, signature and body hashing (step 2), so both frontends hash the same way |
 | `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
 
 Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full

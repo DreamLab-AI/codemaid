@@ -1,10 +1,10 @@
 ---
-sealmap: 1
+sealmap: 2
 kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-37 files · 443 symbols · 1217 relations · 161 flows · 745 calls
+41 files · 619 symbols · 1691 relations · 256 flows · 1177 calls
 
 ## crates
 ```mermaid
@@ -30,17 +30,19 @@ flowchart LR
   serde{{"serde"}}
   serde_json{{"serde_json"}}
   syn{{"syn"}}
+  toml{{"toml"}}
   sealmap -->|"9"| sealmap_corpus
   sealmap -->|"1"| sealmap_frontend
   sealmap -->|"1"| sealmap_mermaid
   sealmap -->|"8"| sealmap_model
   sealmap -->|"4"| sealmap_rust
   sealmap_corpus -->|"69"| sealmap_mermaid
-  sealmap_corpus -->|"144"| sealmap_model
+  sealmap_corpus -->|"148"| sealmap_model
   sealmap_corpus -->|"4"| serde
-  sealmap_corpus -->|"2"| serde_json
-  sealmap_frontend -->|"1"| rayon
-  sealmap_frontend -->|"44"| sealmap_model
+  sealmap_corpus -->|"3"| serde_json
+  sealmap_frontend -->|"4"| blake3
+  sealmap_frontend -->|"2"| rayon
+  sealmap_frontend -->|"68"| sealmap_model
   sealmap_main -->|"3"| clap
   sealmap_main -->|"4"| sealmap
   sealmap_main -->|"7"| sealmap_corpus
@@ -48,19 +50,22 @@ flowchart LR
   sealmap_main -->|"3"| sealmap_model
   sealmap_main -->|"3"| sealmap_rust
   sealmap_main -->|"1"| serde_json
-  sealmap_model -->|"1"| blake3
+  sealmap_mermaid -->|"6"| sealmap_model
+  sealmap_model -->|"6"| blake3
   sealmap_model -->|"1"| ignore
-  sealmap_model -->|"12"| serde
+  sealmap_model -->|"21"| serde
+  sealmap_model -->|"2"| serde_json
   sealmap_rust -->|"1"| Callee
   sealmap_rust -->|"1"| RawCall
   sealmap_rust -->|"11"| RawStep
-  sealmap_rust -->|"5"| Recv
-  sealmap_rust -->|"12"| Segs
-  sealmap_rust -->|"6"| proc_macro2
-  sealmap_rust -->|"3"| quote
-  sealmap_rust -->|"73"| sealmap_frontend
-  sealmap_rust -->|"104"| sealmap_model
-  sealmap_rust -->|"62"| syn
+  sealmap_rust -->|"7"| Recv
+  sealmap_rust -->|"15"| Segs
+  sealmap_rust -->|"23"| proc_macro2
+  sealmap_rust -->|"6"| quote
+  sealmap_rust -->|"130"| sealmap_frontend
+  sealmap_rust -->|"130"| sealmap_model
+  sealmap_rust -->|"123"| syn
+  sealmap_rust -->|"1"| toml
 ```
 
 ## modules: sealmap_corpus
@@ -99,6 +104,7 @@ flowchart LR
 flowchart LR
   sealmap_frontend["sealmap_frontend"]
   sealmap_frontend__confidence["confidence"]
+  sealmap_frontend__fingerprint["fingerprint"]
   sealmap_frontend__ids["ids"]
   sealmap_frontend__isolate["isolate"]
   sealmap_frontend__labels["labels"]
@@ -107,6 +113,7 @@ flowchart LR
   sealmap_frontend -->|"2"| sealmap_frontend__confidence
   sealmap_frontend -->|"5"| sealmap_frontend__raw
   sealmap_frontend__lower -->|"5"| sealmap_frontend__raw
+  sealmap_frontend__raw -->|"5"| sealmap_frontend__labels
 ```
 
 ## modules: sealmap_mermaid
@@ -118,6 +125,7 @@ flowchart LR
   sealmap_mermaid__escape["escape"]
   sealmap_mermaid__flowchart["flowchart"]
   sealmap_mermaid__sequence["sequence"]
+  sealmap_mermaid__symbol["symbol"]
   sealmap_mermaid__writer["writer"]
   sealmap_mermaid -->|"5"| sealmap_mermaid__class
   sealmap_mermaid -->|"2"| sealmap_mermaid__er
@@ -134,6 +142,7 @@ flowchart LR
   sealmap_mermaid__flowchart -->|"5"| sealmap_mermaid__writer
   sealmap_mermaid__sequence -->|"16"| sealmap_mermaid__escape
   sealmap_mermaid__sequence -->|"8"| sealmap_mermaid__writer
+  sealmap_mermaid__symbol -->|"4"| sealmap_mermaid__escape
 ```
 
 ## modules: sealmap_model
@@ -145,23 +154,30 @@ flowchart LR
   sealmap_model__hash["hash"]
   sealmap_model__path["path"]
   sealmap_model__source["source"]
+  sealmap_model__sym["sym"]
   sealmap_model__symbol["symbol"]
-  sealmap_model -->|"2"| sealmap_model__codebase
+  sealmap_model -->|"3"| sealmap_model__codebase
   sealmap_model -->|"6"| sealmap_model__flow
-  sealmap_model -->|"1"| sealmap_model__hash
+  sealmap_model -->|"2"| sealmap_model__hash
   sealmap_model -->|"2"| sealmap_model__path
   sealmap_model -->|"3"| sealmap_model__source
-  sealmap_model -->|"10"| sealmap_model__symbol
+  sealmap_model -->|"10"| sealmap_model__sym
+  sealmap_model -->|"9"| sealmap_model__symbol
   sealmap_model__codebase -->|"1"| sealmap_model__flow
+  sealmap_model__codebase -->|"1"| sealmap_model__hash
   sealmap_model__codebase -->|"4"| sealmap_model__path
   sealmap_model__codebase -->|"4"| sealmap_model__source
-  sealmap_model__codebase -->|"28"| sealmap_model__symbol
-  sealmap_model__flow -->|"6"| sealmap_model__symbol
+  sealmap_model__codebase -->|"10"| sealmap_model__sym
+  sealmap_model__codebase -->|"18"| sealmap_model__symbol
+  sealmap_model__flow -->|"3"| sealmap_model__sym
+  sealmap_model__flow -->|"3"| sealmap_model__symbol
   sealmap_model__source -->|"6"| sealmap_model__hash
   sealmap_model__source -->|"12"| sealmap_model__path
-  sealmap_model__source -->|"3"| sealmap_model__symbol
+  sealmap_model__source -->|"3"| sealmap_model__sym
   sealmap_model__symbol -->|"2"| sealmap_model__flow
+  sealmap_model__symbol -->|"2"| sealmap_model__hash
   sealmap_model__symbol -->|"3"| sealmap_model__path
+  sealmap_model__symbol -->|"14"| sealmap_model__sym
 ```
 
 ## modules: sealmap_rust
@@ -169,6 +185,7 @@ flowchart LR
 flowchart LR
   sealmap_rust["sealmap_rust"]
   sealmap_rust__collect["collect"]
+  sealmap_rust__fingerprint["fingerprint"]
   sealmap_rust__layout["layout"]
   sealmap_rust__raw["raw"]
   sealmap_rust__resolve["resolve"]
@@ -178,22 +195,23 @@ flowchart LR
   sealmap_rust -->|"1"| sealmap_rust__raw
   sealmap_rust -->|"1"| sealmap_rust__resolve
   sealmap_rust__collect -->|"3"| sealmap_rust
+  sealmap_rust__collect -->|"22"| sealmap_rust__fingerprint
   sealmap_rust__collect -->|"3"| sealmap_rust__layout
-  sealmap_rust__collect -->|"6"| sealmap_rust__raw
-  sealmap_rust__collect -->|"11"| sealmap_rust__tidy
+  sealmap_rust__collect -->|"7"| sealmap_rust__raw
+  sealmap_rust__collect -->|"12"| sealmap_rust__tidy
   sealmap_rust__raw -->|"2"| sealmap_rust__layout
   sealmap_rust__resolve -->|"5"| sealmap_rust
-  sealmap_rust__resolve -->|"7"| sealmap_rust__raw
+  sealmap_rust__resolve -->|"8"| sealmap_rust__raw
 ```
 
 ## data: sealmap_corpus
 ```mermaid
 erDiagram
-  sealmap_corpus__Corpus["Corpus"] {
+  sealmap_corpus___tCorpus["Corpus"] {
     BTreeMap[SourcePath_String] files "BTreeMap<SourcePath, String>"
     Index index
   }
-  sealmap_corpus__CorpusOptions["CorpusOptions"] {
+  sealmap_corpus___tCorpusOptions["CorpusOptions"] {
     usize min_calls
     usize max_messages
     usize max_edges
@@ -203,23 +221,23 @@ erDiagram
     bool emit_model
     bool pretty_json
   }
-  sealmap_corpus__ExternalLanes["ExternalLanes"]
-  sealmap_corpus__contract__Drift["Drift"]
-  sealmap_corpus__contract__DriftEntry["DriftEntry"] {
+  sealmap_corpus___tExternalLanes["ExternalLanes"]
+  sealmap_corpus__contract___tDrift["Drift"]
+  sealmap_corpus__contract___tDriftEntry["DriftEntry"] {
     SourcePath path
     Drift drift
   }
-  sealmap_corpus__contract__Report["Report"] {
+  sealmap_corpus__contract___tReport["Report"] {
     Vec[DriftEntry] entries
     usize checked
   }
-  sealmap_corpus__index__CallRef["CallRef"] {
+  sealmap_corpus__index___tCallRef["CallRef"] {
     SymbolId target
     Confidence confidence
     u32 line
     Option[String] expands
   }
-  sealmap_corpus__index__DocumentEntry["DocumentEntry"] {
+  sealmap_corpus__index___tDocumentEntry["DocumentEntry"] {
     SourcePath source
     SourcePath document
     SymbolId module
@@ -227,26 +245,28 @@ erDiagram
     ContentHash document_hash
     Vec[FragmentEntry] fragments
   }
-  sealmap_corpus__index__FragmentEntry["FragmentEntry"] {
+  sealmap_corpus__index___tFragmentEntry["FragmentEntry"] {
     String id
     FragmentKind kind
     SourcePath document
     SymbolId symbol
     Span span
+    Fingerprint sig_hash
+    Fingerprint body_hash
     Vec[SymbolId] participants
     Vec[CallRef] calls
     usize truncated
     ContentHash hash
   }
-  sealmap_corpus__index__FragmentKind["FragmentKind"]
-  sealmap_corpus__index__Index["Index"] {
-    u32 schema
+  sealmap_corpus__index___tFragmentKind["FragmentKind"]
+  sealmap_corpus__index___tIndex["Index"] {
+    u32 schema_version
     String generator
     String codebase
     CodebaseStats stats
     Vec[DocumentEntry] documents
   }
-  sealmap_corpus__sequence__Ctx["Ctx"] {
+  sealmap_corpus__sequence___tCtx["Ctx"] {
     __aCodebase cb "&'a Codebase"
     __aCorpusOptions opts "&'a CorpusOptions"
     SymbolId caller
@@ -254,30 +274,32 @@ erDiagram
     usize budget
     usize dropped
   }
-  sealmap_corpus__Corpus ||--|| sealmap_corpus__index__Index : "index"
-  sealmap_corpus__CorpusOptions ||--|| sealmap_corpus__ExternalLanes : "external_lanes"
-  sealmap_corpus__contract__DriftEntry ||--|| sealmap_corpus__contract__Drift : "drift"
-  sealmap_corpus__contract__Report ||--o{ sealmap_corpus__contract__DriftEntry : "entries"
-  sealmap_corpus__index__DocumentEntry ||--o{ sealmap_corpus__index__FragmentEntry : "fragments"
-  sealmap_corpus__index__FragmentEntry ||--|| sealmap_corpus__index__FragmentKind : "kind"
-  sealmap_corpus__index__FragmentEntry ||--o{ sealmap_corpus__index__CallRef : "calls"
-  sealmap_corpus__index__Index ||--o{ sealmap_corpus__index__DocumentEntry : "documents"
-  sealmap_corpus__sequence__Ctx ||..|| sealmap_corpus__CorpusOptions : "opts"
+  sealmap_corpus___tCorpus ||--|| sealmap_corpus__index___tIndex : "index"
+  sealmap_corpus___tCorpusOptions ||--|| sealmap_corpus___tExternalLanes : "external_lanes"
+  sealmap_corpus__contract___tDriftEntry ||--|| sealmap_corpus__contract___tDrift : "drift"
+  sealmap_corpus__contract___tReport ||--o{ sealmap_corpus__contract___tDriftEntry : "entries"
+  sealmap_corpus__index___tDocumentEntry ||--o{ sealmap_corpus__index___tFragmentEntry : "fragments"
+  sealmap_corpus__index___tFragmentEntry ||--|| sealmap_corpus__index___tFragmentKind : "kind"
+  sealmap_corpus__index___tFragmentEntry ||--o{ sealmap_corpus__index___tCallRef : "calls"
+  sealmap_corpus__index___tIndex ||--o{ sealmap_corpus__index___tDocumentEntry : "documents"
+  sealmap_corpus__sequence___tCtx ||..|| sealmap_corpus___tCorpusOptions : "opts"
 ```
 
 ## data: sealmap_frontend
 ```mermaid
 erDiagram
-  sealmap_frontend__Diagnostic["Diagnostic"] {
+  sealmap_frontend___tDiagnostic["Diagnostic"] {
     SourcePath file
     String message
   }
-  sealmap_frontend__Extraction["Extraction"] {
+  sealmap_frontend___tExtraction["Extraction"] {
     Codebase codebase
     Vec[Diagnostic] diagnostics
   }
-  sealmap_frontend__raw__Callee["Callee"]
-  sealmap_frontend__raw__RawCall["RawCall"] {
+  sealmap_frontend__fingerprint___tDelim["Delim"]
+  sealmap_frontend__fingerprint___tToken["Token"]
+  sealmap_frontend__raw___tCallee["Callee"]
+  sealmap_frontend__raw___tRawCall["RawCall"] {
     Callee callee
     String label
     CallKind kind
@@ -285,22 +307,24 @@ erDiagram
     bool fallible
     u32 line
   }
-  sealmap_frontend__raw__RawStep["RawStep"]
-  sealmap_frontend__raw__Recv["Recv"]
-  sealmap_frontend__Extraction ||--o{ sealmap_frontend__Diagnostic : "diagnostics"
-  sealmap_frontend__raw__Callee ||--|| sealmap_frontend__raw__Recv : "Method"
-  sealmap_frontend__raw__RawCall ||--|| sealmap_frontend__raw__Callee : "callee"
-  sealmap_frontend__raw__RawStep ||--|| sealmap_frontend__raw__RawCall : "Call"
+  sealmap_frontend__raw___tRawStep["RawStep"]
+  sealmap_frontend__raw___tRecv["Recv"]
+  sealmap_frontend___tExtraction ||--o{ sealmap_frontend___tDiagnostic : "diagnostics"
+  sealmap_frontend__fingerprint___tToken ||--|| sealmap_frontend__fingerprint___tDelim : "Open"
+  sealmap_frontend__fingerprint___tToken ||--|| sealmap_frontend__fingerprint___tDelim : "Close"
+  sealmap_frontend__raw___tCallee ||--|| sealmap_frontend__raw___tRecv : "Method"
+  sealmap_frontend__raw___tRawCall ||--|| sealmap_frontend__raw___tCallee : "callee"
+  sealmap_frontend__raw___tRawStep ||--|| sealmap_frontend__raw___tRawCall : "Call"
 ```
 
 ## data: sealmap_main
 ```mermaid
 erDiagram
-  sealmap_main__Cli["Cli"] {
+  sealmap_main___tCli["Cli"] {
     Cmd cmd
   }
-  sealmap_main__Cmd["Cmd"]
-  sealmap_main__Common["Common"] {
+  sealmap_main___tCmd["Cmd"]
+  sealmap_main___tCommon["Common"] {
     PathBuf path
     Vec[String] repos
     PathBuf out
@@ -313,51 +337,51 @@ erDiagram
     bool no_model
     bool pretty
   }
-  sealmap_main__Cli ||--|| sealmap_main__Cmd : "cmd"
-  sealmap_main__Cmd ||--|| sealmap_main__Common : "Generate"
-  sealmap_main__Cmd ||--|| sealmap_main__Common : "Verify"
-  sealmap_main__Cmd ||--|| sealmap_main__Common : "Model"
+  sealmap_main___tCli ||--|| sealmap_main___tCmd : "cmd"
+  sealmap_main___tCmd ||--|| sealmap_main___tCommon : "Generate"
+  sealmap_main___tCmd ||--|| sealmap_main___tCommon : "Verify"
+  sealmap_main___tCmd ||--|| sealmap_main___tCommon : "Model"
 ```
 
 ## data: sealmap_mermaid
 ```mermaid
 erDiagram
-  sealmap_mermaid__class__Class["Class"] {
+  sealmap_mermaid__class___tClass["Class"] {
     Ident id
     String label
     Option[String] annotation
     Vec[String] members
   }
-  sealmap_mermaid__class__ClassDiagram["ClassDiagram"] {
+  sealmap_mermaid__class___tClassDiagram["ClassDiagram"] {
     Option[Direction] direction_
     Vec[Class] classes
     Vec[ClassRelation] relations
   }
-  sealmap_mermaid__class__ClassRelation["ClassRelation"] {
+  sealmap_mermaid__class___tClassRelation["ClassRelation"] {
     Ident from
     Ident to
     ClassRelationKind kind
     Option[String] label
   }
-  sealmap_mermaid__class__ClassRelationKind["ClassRelationKind"]
-  sealmap_mermaid__class__Direction["Direction"]
-  sealmap_mermaid__er__Attr["Attr"] {
+  sealmap_mermaid__class___tClassRelationKind["ClassRelationKind"]
+  sealmap_mermaid__class___tDirection["Direction"]
+  sealmap_mermaid__er___tAttr["Attr"] {
     String ty
     String name
     Option[__staticstr] key "Option<&'static str>"
     Option[String] comment
   }
-  sealmap_mermaid__er__Cardinality["Cardinality"]
-  sealmap_mermaid__er__Entity["Entity"] {
+  sealmap_mermaid__er___tCardinality["Cardinality"]
+  sealmap_mermaid__er___tEntity["Entity"] {
     Ident id
     String label
     Vec[Attr] attrs
   }
-  sealmap_mermaid__er__ErDiagram["ErDiagram"] {
+  sealmap_mermaid__er___tErDiagram["ErDiagram"] {
     Vec[Entity] entities
     Vec[Rel] rels
   }
-  sealmap_mermaid__er__Rel["Rel"] {
+  sealmap_mermaid__er___tRel["Rel"] {
     Ident from
     Cardinality from_card
     Ident to
@@ -365,75 +389,75 @@ erDiagram
     bool identifying
     String label
   }
-  sealmap_mermaid__escape__Ident["Ident"] {
+  sealmap_mermaid__escape___tIdent["Ident"] {
     String _0
   }
-  sealmap_mermaid__flowchart__EdgeStyle["EdgeStyle"]
-  sealmap_mermaid__flowchart__Flowchart["Flowchart"] {
+  sealmap_mermaid__flowchart___tEdgeStyle["EdgeStyle"]
+  sealmap_mermaid__flowchart___tFlowchart["Flowchart"] {
     Direction direction_
     Vec[Stmt] body
   }
-  sealmap_mermaid__flowchart__NodeShape["NodeShape"]
-  sealmap_mermaid__flowchart__Stmt["Stmt"]
-  sealmap_mermaid__sequence__Arrow["Arrow"]
-  sealmap_mermaid__sequence__BlockKind["BlockKind"]
-  sealmap_mermaid__sequence__Item["Item"]
-  sealmap_mermaid__sequence__SeqBuilder["SeqBuilder"] {
+  sealmap_mermaid__flowchart___tNodeShape["NodeShape"]
+  sealmap_mermaid__flowchart___tStmt["Stmt"]
+  sealmap_mermaid__sequence___tArrow["Arrow"]
+  sealmap_mermaid__sequence___tBlockKind["BlockKind"]
+  sealmap_mermaid__sequence___tItem["Item"]
+  sealmap_mermaid__sequence___tSeqBuilder["SeqBuilder"] {
     Vec[Item] items
   }
-  sealmap_mermaid__sequence__SequenceDiagram["SequenceDiagram"] {
+  sealmap_mermaid__sequence___tSequenceDiagram["SequenceDiagram"] {
     Option[String] title
     bool autonumber_
     Vec[(Ident_String_bool)] participants "Vec<(Ident, String, bool)>"
     SeqBuilder body
   }
-  sealmap_mermaid__class__Class ||--|| sealmap_mermaid__escape__Ident : "id"
-  sealmap_mermaid__class__ClassDiagram ||--o| sealmap_mermaid__class__Direction : "direction"
-  sealmap_mermaid__class__ClassDiagram ||--o{ sealmap_mermaid__class__Class : "classes"
-  sealmap_mermaid__class__ClassDiagram ||--o{ sealmap_mermaid__class__ClassRelation : "relations"
-  sealmap_mermaid__class__ClassRelation ||--|| sealmap_mermaid__escape__Ident : "from"
-  sealmap_mermaid__class__ClassRelation ||--|| sealmap_mermaid__escape__Ident : "to"
-  sealmap_mermaid__class__ClassRelation ||--|| sealmap_mermaid__class__ClassRelationKind : "kind"
-  sealmap_mermaid__er__Entity ||--|| sealmap_mermaid__escape__Ident : "id"
-  sealmap_mermaid__er__Entity ||--o{ sealmap_mermaid__er__Attr : "attrs"
-  sealmap_mermaid__er__ErDiagram ||--o{ sealmap_mermaid__er__Entity : "entities"
-  sealmap_mermaid__er__ErDiagram ||--o{ sealmap_mermaid__er__Rel : "rels"
-  sealmap_mermaid__er__Rel ||--|| sealmap_mermaid__escape__Ident : "from"
-  sealmap_mermaid__er__Rel ||--|| sealmap_mermaid__er__Cardinality : "from_card"
-  sealmap_mermaid__er__Rel ||--|| sealmap_mermaid__escape__Ident : "to"
-  sealmap_mermaid__er__Rel ||--|| sealmap_mermaid__er__Cardinality : "to_card"
-  sealmap_mermaid__flowchart__Flowchart ||--|| sealmap_mermaid__class__Direction : "direction"
-  sealmap_mermaid__flowchart__Flowchart ||--o{ sealmap_mermaid__flowchart__Stmt : "body"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__escape__Ident : "Node"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__flowchart__NodeShape : "Node"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__escape__Ident : "Edge"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__flowchart__EdgeStyle : "Edge"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__escape__Ident : "Subgraph"
-  sealmap_mermaid__flowchart__Stmt ||--|| sealmap_mermaid__class__Direction : "Subgraph"
-  sealmap_mermaid__sequence__Item ||--|| sealmap_mermaid__escape__Ident : "Message"
-  sealmap_mermaid__sequence__Item ||--|| sealmap_mermaid__sequence__Arrow : "Message"
-  sealmap_mermaid__sequence__Item ||--|| sealmap_mermaid__escape__Ident : "Note"
-  sealmap_mermaid__sequence__Item ||--|| sealmap_mermaid__sequence__BlockKind : "Block"
-  sealmap_mermaid__sequence__SeqBuilder ||--o{ sealmap_mermaid__sequence__Item : "items"
-  sealmap_mermaid__sequence__SequenceDiagram ||--o{ sealmap_mermaid__escape__Ident : "participants"
-  sealmap_mermaid__sequence__SequenceDiagram ||--|| sealmap_mermaid__sequence__SeqBuilder : "body"
+  sealmap_mermaid__class___tClass ||--|| sealmap_mermaid__escape___tIdent : "id"
+  sealmap_mermaid__class___tClassDiagram ||--o| sealmap_mermaid__class___tDirection : "direction"
+  sealmap_mermaid__class___tClassDiagram ||--o{ sealmap_mermaid__class___tClass : "classes"
+  sealmap_mermaid__class___tClassDiagram ||--o{ sealmap_mermaid__class___tClassRelation : "relations"
+  sealmap_mermaid__class___tClassRelation ||--|| sealmap_mermaid__escape___tIdent : "from"
+  sealmap_mermaid__class___tClassRelation ||--|| sealmap_mermaid__escape___tIdent : "to"
+  sealmap_mermaid__class___tClassRelation ||--|| sealmap_mermaid__class___tClassRelationKind : "kind"
+  sealmap_mermaid__er___tEntity ||--|| sealmap_mermaid__escape___tIdent : "id"
+  sealmap_mermaid__er___tEntity ||--o{ sealmap_mermaid__er___tAttr : "attrs"
+  sealmap_mermaid__er___tErDiagram ||--o{ sealmap_mermaid__er___tEntity : "entities"
+  sealmap_mermaid__er___tErDiagram ||--o{ sealmap_mermaid__er___tRel : "rels"
+  sealmap_mermaid__er___tRel ||--|| sealmap_mermaid__escape___tIdent : "from"
+  sealmap_mermaid__er___tRel ||--|| sealmap_mermaid__er___tCardinality : "from_card"
+  sealmap_mermaid__er___tRel ||--|| sealmap_mermaid__escape___tIdent : "to"
+  sealmap_mermaid__er___tRel ||--|| sealmap_mermaid__er___tCardinality : "to_card"
+  sealmap_mermaid__flowchart___tFlowchart ||--|| sealmap_mermaid__class___tDirection : "direction"
+  sealmap_mermaid__flowchart___tFlowchart ||--o{ sealmap_mermaid__flowchart___tStmt : "body"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__escape___tIdent : "Node"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__flowchart___tNodeShape : "Node"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__escape___tIdent : "Edge"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__flowchart___tEdgeStyle : "Edge"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__escape___tIdent : "Subgraph"
+  sealmap_mermaid__flowchart___tStmt ||--|| sealmap_mermaid__class___tDirection : "Subgraph"
+  sealmap_mermaid__sequence___tItem ||--|| sealmap_mermaid__escape___tIdent : "Message"
+  sealmap_mermaid__sequence___tItem ||--|| sealmap_mermaid__sequence___tArrow : "Message"
+  sealmap_mermaid__sequence___tItem ||--|| sealmap_mermaid__escape___tIdent : "Note"
+  sealmap_mermaid__sequence___tItem ||--|| sealmap_mermaid__sequence___tBlockKind : "Block"
+  sealmap_mermaid__sequence___tSeqBuilder ||--o{ sealmap_mermaid__sequence___tItem : "items"
+  sealmap_mermaid__sequence___tSequenceDiagram ||--o{ sealmap_mermaid__escape___tIdent : "participants"
+  sealmap_mermaid__sequence___tSequenceDiagram ||--|| sealmap_mermaid__sequence___tSeqBuilder : "body"
 ```
 
 ## data: sealmap_model
 ```mermaid
 erDiagram
-  sealmap_model__codebase__Codebase["Codebase"] {
-    u32 schema
+  sealmap_model__codebase___tCodebase["Codebase"] {
+    u32 schema_version
     String name
     BTreeMap[SourcePath_SourceFile] files "BTreeMap<SourcePath, SourceFile>"
     BTreeMap[SymbolId_Symbol] symbols "BTreeMap<SymbolId, Symbol>"
     BTreeSet[Relation] relations
   }
-  sealmap_model__flow__Arm["Arm"] {
+  sealmap_model__flow___tArm["Arm"] {
     String label
     Vec[Step] steps
   }
-  sealmap_model__flow__Call["Call"] {
+  sealmap_model__flow___tCall["Call"] {
     SymbolId target
     String label
     CallKind kind
@@ -442,33 +466,64 @@ erDiagram
     bool fallible
     u32 line
   }
-  sealmap_model__flow__CallKind["CallKind"]
-  sealmap_model__flow__Exit["Exit"] {
+  sealmap_model__flow___tCallKind["CallKind"]
+  sealmap_model__flow___tExit["Exit"] {
     String label
     u32 line
   }
-  sealmap_model__flow__Flow["Flow"] {
+  sealmap_model__flow___tFlow["Flow"] {
     Vec[Step] steps
   }
-  sealmap_model__flow__Step["Step"]
-  sealmap_model__hash__ContentHash["ContentHash"] {
+  sealmap_model__flow___tStep["Step"]
+  sealmap_model__hash___tContentHash["ContentHash"] {
     String _0
   }
-  sealmap_model__path__SourcePath["SourcePath"] {
+  sealmap_model__hash___tFingerprint["Fingerprint"] {
+    _[u8_16] _0 "[u8#59; 16]"
+  }
+  sealmap_model__path___tSourcePath["SourcePath"] {
     String _0
   }
-  sealmap_model__source__SourceFile["SourceFile"] {
+  sealmap_model__source___tSourceFile["SourceFile"] {
     SourcePath path
     String language
     SymbolId module
     ContentHash hash
     u32 lines
   }
-  sealmap_model__source__SourceSet["SourceSet"] {
+  sealmap_model__source___tSourceSet["SourceSet"] {
     BTreeMap[SourcePath_String] files "BTreeMap<SourcePath, String>"
   }
-  sealmap_model__symbol__Confidence["Confidence"]
-  sealmap_model__symbol__Member["Member"] {
+  sealmap_model__sym___tDescriptor["Descriptor"] {
+    String name
+    Suffix suffix
+  }
+  sealmap_model__sym___tDescriptorKind["DescriptorKind"]
+  sealmap_model__sym___tDescriptorView["DescriptorView"] {
+    Cow[_a_str] name "Cow<'a, str>"
+    DescriptorKind kind
+    Option[__astr] disambiguator "Option<&'a str>"
+  }
+  sealmap_model__sym___tGlobalView["GlobalView"] {
+    __astr manager "&'a str"
+    Cow[_a_str] package "Cow<'a, str>"
+    Option[Cow[_a_str]] version "Option<Cow<'a, str>>"
+    Vec[DescriptorView[_a]] descriptors "Vec<DescriptorView<'a>>"
+  }
+  sealmap_model__sym___tIdView["IdView"]
+  sealmap_model__sym___tPackage["Package"] {
+    String manager
+    String name
+    Version version
+  }
+  sealmap_model__sym___tRepr["Repr"]
+  sealmap_model__sym___tSuffix["Suffix"]
+  sealmap_model__sym___tSymbolId["SymbolId"] {
+    Arc[str] _0
+  }
+  sealmap_model__sym___tVersion["Version"]
+  sealmap_model__symbol___tConfidence["Confidence"]
+  sealmap_model__symbol___tMember["Member"] {
     String name
     MemberKind kind
     Option[String] ty
@@ -476,27 +531,29 @@ erDiagram
     Span span
     Vec[SymbolId] refs
   }
-  sealmap_model__symbol__MemberKind["MemberKind"]
-  sealmap_model__symbol__Relation["Relation"] {
+  sealmap_model__symbol___tMemberKind["MemberKind"]
+  sealmap_model__symbol___tRelation["Relation"] {
     SymbolId from
     SymbolId to
     RelationKind kind
     Confidence confidence
   }
-  sealmap_model__symbol__RelationKind["RelationKind"]
-  sealmap_model__symbol__Span["Span"] {
+  sealmap_model__symbol___tRelationKind["RelationKind"]
+  sealmap_model__symbol___tSpan["Span"] {
     u32 start_line
     u32 start_col
     u32 end_line
     u32 end_col
   }
-  sealmap_model__symbol__Symbol["Symbol"] {
+  sealmap_model__symbol___tSymbol["Symbol"] {
     SymbolId id
     String name
     SymbolKind kind
     Visibility visibility
     SourcePath file
     Span span
+    Fingerprint sig_hash
+    Fingerprint body_hash
     Option[SymbolId] parent
     Option[String] signature
     Option[String] doc
@@ -505,66 +562,72 @@ erDiagram
     Vec[Member] members
     Option[Flow] flow
   }
-  sealmap_model__symbol__SymbolId["SymbolId"] {
-    String _0
-  }
-  sealmap_model__symbol__SymbolKind["SymbolKind"]
-  sealmap_model__symbol__Visibility["Visibility"]
-  sealmap_model__codebase__Codebase ||--o{ sealmap_model__path__SourcePath : "files"
-  sealmap_model__codebase__Codebase ||--o{ sealmap_model__source__SourceFile : "files"
-  sealmap_model__codebase__Codebase ||--o{ sealmap_model__symbol__SymbolId : "symbols"
-  sealmap_model__codebase__Codebase ||--o{ sealmap_model__symbol__Symbol : "symbols"
-  sealmap_model__codebase__Codebase ||--o{ sealmap_model__symbol__Relation : "relations"
-  sealmap_model__flow__Arm ||--o{ sealmap_model__flow__Step : "steps"
-  sealmap_model__flow__Call ||--|| sealmap_model__symbol__SymbolId : "target"
-  sealmap_model__flow__Call ||--|| sealmap_model__flow__CallKind : "kind"
-  sealmap_model__flow__Call ||--|| sealmap_model__symbol__Confidence : "confidence"
-  sealmap_model__flow__Flow ||--o{ sealmap_model__flow__Step : "steps"
-  sealmap_model__flow__Step ||--|| sealmap_model__flow__Call : "Call"
-  sealmap_model__flow__Step ||--|| sealmap_model__flow__Arm : "Branch"
-  sealmap_model__flow__Step ||--|| sealmap_model__flow__Arm : "Parallel"
-  sealmap_model__flow__Step ||--|| sealmap_model__flow__Exit : "Return"
-  sealmap_model__source__SourceFile ||--|| sealmap_model__path__SourcePath : "path"
-  sealmap_model__source__SourceFile ||--|| sealmap_model__symbol__SymbolId : "module"
-  sealmap_model__source__SourceFile ||--|| sealmap_model__hash__ContentHash : "hash"
-  sealmap_model__source__SourceSet ||--o{ sealmap_model__path__SourcePath : "files"
-  sealmap_model__symbol__Member ||--|| sealmap_model__symbol__MemberKind : "kind"
-  sealmap_model__symbol__Member ||--|| sealmap_model__symbol__Visibility : "visibility"
-  sealmap_model__symbol__Member ||--|| sealmap_model__symbol__Span : "span"
-  sealmap_model__symbol__Member ||--o{ sealmap_model__symbol__SymbolId : "refs"
-  sealmap_model__symbol__Relation ||--|| sealmap_model__symbol__SymbolId : "from"
-  sealmap_model__symbol__Relation ||--|| sealmap_model__symbol__SymbolId : "to"
-  sealmap_model__symbol__Relation ||--|| sealmap_model__symbol__RelationKind : "kind"
-  sealmap_model__symbol__Relation ||--|| sealmap_model__symbol__Confidence : "confidence"
-  sealmap_model__symbol__Symbol ||--|| sealmap_model__symbol__SymbolId : "id"
-  sealmap_model__symbol__Symbol ||--|| sealmap_model__symbol__SymbolKind : "kind"
-  sealmap_model__symbol__Symbol ||--|| sealmap_model__symbol__Visibility : "visibility"
-  sealmap_model__symbol__Symbol ||--|| sealmap_model__path__SourcePath : "file"
-  sealmap_model__symbol__Symbol ||--|| sealmap_model__symbol__Span : "span"
-  sealmap_model__symbol__Symbol ||--o| sealmap_model__symbol__SymbolId : "parent"
-  sealmap_model__symbol__Symbol ||--o{ sealmap_model__symbol__Member : "members"
-  sealmap_model__symbol__Symbol ||--o| sealmap_model__flow__Flow : "flow"
+  sealmap_model__symbol___tSymbolKind["SymbolKind"]
+  sealmap_model__symbol___tVisibility["Visibility"]
+  sealmap_model__codebase___tCodebase ||--o{ sealmap_model__path___tSourcePath : "files"
+  sealmap_model__codebase___tCodebase ||--o{ sealmap_model__source___tSourceFile : "files"
+  sealmap_model__codebase___tCodebase ||--o{ sealmap_model__sym___tSymbolId : "symbols"
+  sealmap_model__codebase___tCodebase ||--o{ sealmap_model__symbol___tSymbol : "symbols"
+  sealmap_model__codebase___tCodebase ||--o{ sealmap_model__symbol___tRelation : "relations"
+  sealmap_model__flow___tArm ||--o{ sealmap_model__flow___tStep : "steps"
+  sealmap_model__flow___tCall ||--|| sealmap_model__sym___tSymbolId : "target"
+  sealmap_model__flow___tCall ||--|| sealmap_model__flow___tCallKind : "kind"
+  sealmap_model__flow___tCall ||--|| sealmap_model__symbol___tConfidence : "confidence"
+  sealmap_model__flow___tFlow ||--o{ sealmap_model__flow___tStep : "steps"
+  sealmap_model__flow___tStep ||--|| sealmap_model__flow___tCall : "Call"
+  sealmap_model__flow___tStep ||--|| sealmap_model__flow___tArm : "Branch"
+  sealmap_model__flow___tStep ||--|| sealmap_model__flow___tArm : "Parallel"
+  sealmap_model__flow___tStep ||--|| sealmap_model__flow___tExit : "Return"
+  sealmap_model__source___tSourceFile ||--|| sealmap_model__path___tSourcePath : "path"
+  sealmap_model__source___tSourceFile ||--|| sealmap_model__sym___tSymbolId : "module"
+  sealmap_model__source___tSourceFile ||--|| sealmap_model__hash___tContentHash : "hash"
+  sealmap_model__source___tSourceSet ||--o{ sealmap_model__path___tSourcePath : "files"
+  sealmap_model__sym___tDescriptor ||--|| sealmap_model__sym___tSuffix : "suffix"
+  sealmap_model__sym___tDescriptorView ||--|| sealmap_model__sym___tDescriptorKind : "kind"
+  sealmap_model__sym___tGlobalView ||--o{ sealmap_model__sym___tDescriptorView : "descriptors"
+  sealmap_model__sym___tIdView ||--|| sealmap_model__sym___tGlobalView : "Global"
+  sealmap_model__sym___tPackage ||--|| sealmap_model__sym___tVersion : "version"
+  sealmap_model__sym___tRepr ||--|| sealmap_model__sym___tPackage : "Global"
+  sealmap_model__sym___tRepr ||--|| sealmap_model__sym___tDescriptor : "Global"
+  sealmap_model__symbol___tMember ||--|| sealmap_model__symbol___tMemberKind : "kind"
+  sealmap_model__symbol___tMember ||--|| sealmap_model__symbol___tVisibility : "visibility"
+  sealmap_model__symbol___tMember ||--|| sealmap_model__symbol___tSpan : "span"
+  sealmap_model__symbol___tMember ||--o{ sealmap_model__sym___tSymbolId : "refs"
+  sealmap_model__symbol___tRelation ||--|| sealmap_model__sym___tSymbolId : "from"
+  sealmap_model__symbol___tRelation ||--|| sealmap_model__sym___tSymbolId : "to"
+  sealmap_model__symbol___tRelation ||--|| sealmap_model__symbol___tRelationKind : "kind"
+  sealmap_model__symbol___tRelation ||--|| sealmap_model__symbol___tConfidence : "confidence"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__sym___tSymbolId : "id"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__symbol___tSymbolKind : "kind"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__symbol___tVisibility : "visibility"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__path___tSourcePath : "file"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__symbol___tSpan : "span"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__hash___tFingerprint : "sig_hash"
+  sealmap_model__symbol___tSymbol ||--|| sealmap_model__hash___tFingerprint : "body_hash"
+  sealmap_model__symbol___tSymbol ||--o| sealmap_model__sym___tSymbolId : "parent"
+  sealmap_model__symbol___tSymbol ||--o{ sealmap_model__symbol___tMember : "members"
+  sealmap_model__symbol___tSymbol ||--o| sealmap_model__flow___tFlow : "flow"
 ```
 
 ## data: sealmap_rust
 ```mermaid
 erDiagram
-  sealmap_rust__RustOptions["RustOptions"] {
+  sealmap_rust___tRustOptions["RustOptions"] {
     String name
     bool include_tests
     ExternalCalls external_calls
   }
-  sealmap_rust__collect__Collector["Collector"] {
+  sealmap_rust__collect___tCollector["Collector"] {
     __aRustOptions opts "&'a RustOptions"
     __amutRawFile raw "&'a mut RawFile"
   }
-  sealmap_rust__layout__FileRole["FileRole"] {
+  sealmap_rust__layout___tFileRole["FileRole"] {
     String crate_name
     Vec[String] module
     TargetKind target
   }
-  sealmap_rust__layout__TargetKind["TargetKind"]
-  sealmap_rust__raw__RawFile["RawFile"] {
+  sealmap_rust__layout___tTargetKind["TargetKind"]
+  sealmap_rust__raw___tRawFile["RawFile"] {
     SourcePath path
     FileRole role
     u32 text_lines
@@ -574,7 +637,7 @@ erDiagram
     Vec[RawImpl] impls
     Option[String] error
   }
-  sealmap_rust__raw__RawFn["RawFn"] {
+  sealmap_rust__raw___tRawFn["RawFn"] {
     String name
     Visibility vis
     Span span
@@ -584,14 +647,16 @@ erDiagram
     Vec[String] tags
     Vec[Segs] sig_refs
     Vec[RawStep] flow
+    Fingerprint sig_hash
+    Fingerprint body_hash
   }
-  sealmap_rust__raw__RawImpl["RawImpl"] {
+  sealmap_rust__raw___tRawImpl["RawImpl"] {
     Segs module
     Option[Segs] self_ty
     Option[(Segs_String)] trait_ "Option<(Segs, String)>"
     Vec[RawFn] methods
   }
-  sealmap_rust__raw__RawItem["RawItem"] {
+  sealmap_rust__raw___tRawItem["RawItem"] {
     Segs module
     String name
     SymbolKind kind
@@ -606,8 +671,10 @@ erDiagram
     Vec[Segs] supertraits
     Vec[RawFn] methods
     Vec[RawStep] flow
+    Fingerprint sig_hash
+    Fingerprint body_hash
   }
-  sealmap_rust__raw__RawMember["RawMember"] {
+  sealmap_rust__raw___tRawMember["RawMember"] {
     String name
     MemberKind kind
     Option[String] ty
@@ -615,40 +682,47 @@ erDiagram
     Span span
     Vec[Segs] refs
   }
-  sealmap_rust__raw__RawModule["RawModule"] {
+  sealmap_rust__raw___tRawModule["RawModule"] {
     Segs path
     Span span
     Option[String] doc
     Visibility vis
     Vec[RawUse] uses
     Vec[String] tags
+    Fingerprint sig_hash
+    Fingerprint body_hash
   }
-  sealmap_rust__raw__RawUse["RawUse"] {
+  sealmap_rust__raw___tRawUse["RawUse"] {
     String alias
     Segs target
   }
-  sealmap_rust__resolve__Resolver["Resolver"] {
+  sealmap_rust__resolve___tResolver["Resolver"] {
     BTreeSet[String] crates
-    BTreeMap[String_BTreeMap[String_SymbolId]] items "BTreeMap<String, BTreeMap<String, SymbolId>>"
-    BTreeMap[String_Vec[RawUse]] uses "BTreeMap<String, Vec<RawUse>>"
+    BTreeMap[SymbolId_BTreeMap[String_Slots]] items "BTreeMap<SymbolId, BTreeMap<String, Slots>>"
+    BTreeMap[SymbolId_Vec[RawUse]] uses "BTreeMap<SymbolId, Vec<RawUse>>"
     BTreeSet[SymbolId] internal
-    BTreeMap[SymbolId_(String_BTreeMap[String_Vec[Segs]])] fields "BTreeMap<SymbolId, (String, BTreeMap<String, Vec<Segs>>)>"
+    BTreeMap[SymbolId_(SymbolId_BTreeMap[String_Vec[Segs]])] fields "BTreeMap<SymbolId, (SymbolId, BTreeMap<String, Vec<Segs>>)>"
     BTreeMap[SymbolId_BTreeMap[String_SymbolId]] methods "BTreeMap<SymbolId, BTreeMap<String, SymbolId>>"
     BTreeMap[String_BTreeSet[SymbolId]] by_name "BTreeMap<String, BTreeSet<SymbolId>>"
     BTreeMap[SymbolId_BTreeSet[SymbolId]] impls "BTreeMap<SymbolId, BTreeSet<SymbolId>>"
     BTreeMap[SymbolId_BTreeSet[String]] trait_methods "BTreeMap<SymbolId, BTreeSet<String>>"
-    BTreeMap[String_Vec[String]] globs "BTreeMap<String, Vec<String>>"
+    BTreeMap[SymbolId_Vec[SymbolId]] globs "BTreeMap<SymbolId, Vec<SymbolId>>"
   }
-  sealmap_rust__collect__Collector ||..|| sealmap_rust__RustOptions : "opts"
-  sealmap_rust__collect__Collector ||..|| sealmap_rust__raw__RawFile : "raw"
-  sealmap_rust__layout__FileRole ||--|| sealmap_rust__layout__TargetKind : "target"
-  sealmap_rust__raw__RawFile ||--|| sealmap_rust__layout__FileRole : "role"
-  sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawModule : "modules"
-  sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawItem : "items"
-  sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawImpl : "impls"
-  sealmap_rust__raw__RawImpl ||--o{ sealmap_rust__raw__RawFn : "methods"
-  sealmap_rust__raw__RawItem ||--o{ sealmap_rust__raw__RawMember : "members"
-  sealmap_rust__raw__RawItem ||--o{ sealmap_rust__raw__RawFn : "methods"
-  sealmap_rust__raw__RawModule ||--o{ sealmap_rust__raw__RawUse : "uses"
-  sealmap_rust__resolve__Resolver ||--o{ sealmap_rust__raw__RawUse : "uses"
+  sealmap_rust__resolve___tSlots["Slots"] {
+    Option[SymbolId] ty
+    Option[SymbolId] value
+  }
+  sealmap_rust__collect___tCollector ||..|| sealmap_rust___tRustOptions : "opts"
+  sealmap_rust__collect___tCollector ||..|| sealmap_rust__raw___tRawFile : "raw"
+  sealmap_rust__layout___tFileRole ||--|| sealmap_rust__layout___tTargetKind : "target"
+  sealmap_rust__raw___tRawFile ||--|| sealmap_rust__layout___tFileRole : "role"
+  sealmap_rust__raw___tRawFile ||--o{ sealmap_rust__raw___tRawModule : "modules"
+  sealmap_rust__raw___tRawFile ||--o{ sealmap_rust__raw___tRawItem : "items"
+  sealmap_rust__raw___tRawFile ||--o{ sealmap_rust__raw___tRawImpl : "impls"
+  sealmap_rust__raw___tRawImpl ||--o{ sealmap_rust__raw___tRawFn : "methods"
+  sealmap_rust__raw___tRawItem ||--o{ sealmap_rust__raw___tRawMember : "members"
+  sealmap_rust__raw___tRawItem ||--o{ sealmap_rust__raw___tRawFn : "methods"
+  sealmap_rust__raw___tRawModule ||--o{ sealmap_rust__raw___tRawUse : "uses"
+  sealmap_rust__resolve___tResolver ||--o{ sealmap_rust__resolve___tSlots : "items"
+  sealmap_rust__resolve___tResolver ||--o{ sealmap_rust__raw___tRawUse : "uses"
 ```

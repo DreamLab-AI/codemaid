@@ -1,25 +1,25 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-model/src/flow.rs
-module: sealmap_model::flow
+module: "sym:cargo sealmap_model . flow/"
 language: rust
-source_hash: blake3:be872e716806a42fdfd7f9589f3b52c07a99cadfc4ea2052fb6c6c9f09d710cd
-lines: 206
+source_hash: blake3:dedf67b71b9a4d004936b3b7362287cdd96a13d62225f2b3c73077041f8f6f10
+lines: 205
 fragments: 4
 ---
-# `sealmap_model::flow` · crates/sealmap-model/src/flow.rs
+# `sym:cargo sealmap_model . flow/` · crates/sealmap-model/src/flow.rs
 > Ordered call/control flow of a function body: the raw material for sequence diagrams.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_model__flow__Arm["Arm"] {
+  class sealmap_model__flow___tArm["Arm"] {
     <<struct>>
     +label: String
     +steps: Vec#lt;Step#gt;
   }
-  class sealmap_model__flow__Call["Call"] {
+  class sealmap_model__flow___tCall["Call"] {
     <<struct>>
     +target: SymbolId
     +label: String
@@ -30,18 +30,18 @@ classDiagram
     +line: u32
     +new(target: SymbolId, label: impl Into#lt;String#gt;, confidence: Confidence) Self
   }
-  class sealmap_model__flow__CallKind["CallKind"] {
+  class sealmap_model__flow___tCallKind["CallKind"] {
     <<enum>>
     Function
     Method
     Macro
   }
-  class sealmap_model__flow__Exit["Exit"] {
+  class sealmap_model__flow___tExit["Exit"] {
     <<struct>>
     +label: String
     +line: u32
   }
-  class sealmap_model__flow__Flow["Flow"] {
+  class sealmap_model__flow___tFlow["Flow"] {
     <<struct>>
     +steps: Vec#lt;Step#gt;
     +call_count(&self) usize
@@ -50,7 +50,7 @@ classDiagram
     +is_empty(&self) bool
     +new(steps: Vec#lt;Step#gt;) Self
   }
-  class sealmap_model__flow__Step["Step"] {
+  class sealmap_model__flow___tStep["Step"] {
     <<enum>>
     Call#40;Call#41;
     Branch#123; #35;[doc = #quot; Arms in source order.Arms without calls are…
@@ -63,46 +63,46 @@ classDiagram
     <<module>>
     -collect_calls(steps: &'a [Step], out: &mut Vec#lt;&'a Call#gt;)
   }
-  class sealmap_model__symbol__Confidence["Confidence"] {
+  class sealmap_model__sym___tSymbolId["SymbolId"] {
+    <<struct in crates/sealmap-model/src/sym.rs>>
+  }
+  class sealmap_model__symbol___tConfidence["Confidence"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_model__symbol__SymbolId["SymbolId"] {
-    <<struct in crates/sealmap-model/src/symbol.rs>>
-  }
-  sealmap_model__flow ..> sealmap_model__flow__Call
-  sealmap_model__flow ..> sealmap_model__flow__Step
-  sealmap_model__flow__Arm o-- sealmap_model__flow__Step : steps
-  sealmap_model__flow__Call *-- sealmap_model__flow__CallKind : kind
-  sealmap_model__flow__Call *-- sealmap_model__symbol__Confidence : confidence
-  sealmap_model__flow__Call *-- sealmap_model__symbol__SymbolId : target
-  sealmap_model__flow__Flow ..> sealmap_model__flow__Call
-  sealmap_model__flow__Flow o-- sealmap_model__flow__Step : steps
-  sealmap_model__flow__Step o-- sealmap_model__flow__Arm : Branch, Parallel
-  sealmap_model__flow__Step *-- sealmap_model__flow__Call : Call
-  sealmap_model__flow__Step *-- sealmap_model__flow__Exit : Return
+  sealmap_model__flow ..> sealmap_model__flow___tCall
+  sealmap_model__flow ..> sealmap_model__flow___tStep
+  sealmap_model__flow___tArm o-- sealmap_model__flow___tStep : steps
+  sealmap_model__flow___tCall *-- sealmap_model__flow___tCallKind : kind
+  sealmap_model__flow___tCall *-- sealmap_model__sym___tSymbolId : target
+  sealmap_model__flow___tCall *-- sealmap_model__symbol___tConfidence : confidence
+  sealmap_model__flow___tFlow ..> sealmap_model__flow___tCall
+  sealmap_model__flow___tFlow o-- sealmap_model__flow___tStep : steps
+  sealmap_model__flow___tStep o-- sealmap_model__flow___tArm : Branch, Parallel
+  sealmap_model__flow___tStep *-- sealmap_model__flow___tCall : Call
+  sealmap_model__flow___tStep *-- sealmap_model__flow___tExit : Return
 ```
 
-## `sealmap_model::flow::Flow::calls`
-`pub fn calls(&self) -> impl Iterator<Item = &Call>` · L55-L60
+## `sym:cargo sealmap_model . flow/Flow#calls().`
+`pub fn calls(&self) -> impl Iterator<Item = &Call>` · L54-L59
 > Every call in depth-first source order.
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__flow__Flow as Flow
+  participant sealmap_model__flow___tFlow as Flow
   participant sealmap_model__flow as flow mod
-  sealmap_model__flow__Flow->>sealmap_model__flow: collect_calls(&self.steps, &out)
+  sealmap_model__flow___tFlow->>sealmap_model__flow: collect_calls(&self.steps, &out)
 ```
 
-## `sealmap_model::flow::Flow::call_count`
-`pub fn call_count(&self) -> usize` · L62-L65
+## `sym:cargo sealmap_model . flow/Flow#call_count().`
+`pub fn call_count(&self) -> usize` · L61-L64
 > Number of calls in the whole tree.
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__flow__Flow as Flow
-  sealmap_model__flow__Flow->>sealmap_model__flow__Flow: calls()
+  participant sealmap_model__flow___tFlow as Flow
+  sealmap_model__flow___tFlow->>sealmap_model__flow___tFlow: calls()
 ```
 
-## `sealmap_model::flow::collect_calls`
-`fn collect_calls<'a>(steps: &'a [Step], out: &mut Vec<&'a Call>)` · L85-L98
+## `sym:cargo sealmap_model . flow/collect_calls().`
+`fn collect_calls<'a>(steps: &'a [Step], out: &mut Vec<&'a Call>)` · L84-L97
 ```mermaid
 sequenceDiagram
   participant sealmap_model__flow as flow mod

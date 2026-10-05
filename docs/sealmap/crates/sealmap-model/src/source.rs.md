@@ -1,19 +1,19 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-model/src/source.rs
-module: sealmap_model::source
+module: "sym:cargo sealmap_model . source/"
 language: rust
-source_hash: blake3:246c5cf2052103eb63127f2470838188916e55d6e5913571cc1fed18b66ea870
+source_hash: blake3:0a5a68257491d5f4efd1d9bfd175dc6afe2213f41769393917261c56e5dca49f
 lines: 187
 fragments: 5
 ---
-# `sealmap_model::source` · crates/sealmap-model/src/source.rs
+# `sym:cargo sealmap_model . source/` · crates/sealmap-model/src/source.rs
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_model__source__LoadOptions["LoadOptions"] {
+  class sealmap_model__source___tLoadOptions["LoadOptions"] {
     <<struct>>
     +extensions: Vec#lt;String#gt;
     +skip_dirs: Vec#lt;String#gt;
@@ -22,7 +22,7 @@ classDiagram
     +respect_ignore_files: bool
     +Default::default() Self
   }
-  class sealmap_model__source__SourceFile["SourceFile"] {
+  class sealmap_model__source___tSourceFile["SourceFile"] {
     <<struct>>
     +path: SourcePath
     +language: String
@@ -31,7 +31,7 @@ classDiagram
     +lines: u32
     +new(path: SourcePath, language: impl Into#lt;String#gt;, module: SymbolId, text: &str) Self
   }
-  class sealmap_model__source__SourceSet["SourceSet"] {
+  class sealmap_model__source___tSourceSet["SourceSet"] {
     <<struct>>
     -files: BTreeMap#lt;SourcePath, String#gt;
     +get(&self, path: &SourcePath) Option#lt;&str#gt;
@@ -45,73 +45,73 @@ classDiagram
     +paths(&self) impl Iterator#lt;Item = &SourcePath#gt;
     +retain(&mut self, mut keep: impl FnMut#40;&SourcePath#41; -> bool)
   }
-  class sealmap_model__hash__ContentHash["ContentHash"] {
+  class sealmap_model__hash___tContentHash["ContentHash"] {
     <<struct in crates/sealmap-model/src/hash.rs>>
   }
-  class sealmap_model__path__SourcePath["SourcePath"] {
+  class sealmap_model__path___tSourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  class sealmap_model__symbol__SymbolId["SymbolId"] {
-    <<struct in crates/sealmap-model/src/symbol.rs>>
+  class sealmap_model__sym___tSymbolId["SymbolId"] {
+    <<struct in crates/sealmap-model/src/sym.rs>>
   }
-  class sealmap_model__path__PathError["PathError"] {
+  class sealmap_model__path___tPathError["PathError"] {
     <<enum in crates/sealmap-model/src/path.rs>>
   }
-  sealmap_model__source__SourceFile *-- sealmap_model__hash__ContentHash : hash
-  sealmap_model__source__SourceFile *-- sealmap_model__path__SourcePath : path
-  sealmap_model__source__SourceFile *-- sealmap_model__symbol__SymbolId : module
-  sealmap_model__source__SourceSet ..> sealmap_model__path__PathError
-  sealmap_model__source__SourceSet o-- sealmap_model__path__SourcePath : files
-  sealmap_model__source__SourceSet ..> sealmap_model__source__LoadOptions
+  sealmap_model__source___tSourceFile *-- sealmap_model__hash___tContentHash : hash
+  sealmap_model__source___tSourceFile *-- sealmap_model__path___tSourcePath : path
+  sealmap_model__source___tSourceFile *-- sealmap_model__sym___tSymbolId : module
+  sealmap_model__source___tSourceSet ..> sealmap_model__path___tPathError
+  sealmap_model__source___tSourceSet o-- sealmap_model__path___tSourcePath : files
+  sealmap_model__source___tSourceSet ..> sealmap_model__source___tLoadOptions
 ```
 
-## `sealmap_model::source::SourceFile::new`
+## `sym:cargo sealmap_model . source/SourceFile#new().`
 `pub fn new(path: SourcePath, language: impl Into<String>, module: SymbolId, text: &str) -> Self` · L30-L39
 > Describe `text` as the file at `path`.
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__source__SourceFile as SourceFile
-  participant sealmap_model__hash__ContentHash as ContentHash
-  sealmap_model__source__SourceFile->>sealmap_model__hash__ContentHash: ContentHash::of_text(text)
+  participant sealmap_model__source___tSourceFile as SourceFile
+  participant sealmap_model__hash___tContentHash as ContentHash
+  sealmap_model__source___tSourceFile->>sealmap_model__hash___tContentHash: ContentHash::of_text(text)
 ```
 
-## `sealmap_model::source::SourceSet::insert`
+## `sym:cargo sealmap_model . source/SourceSet#insert().`
 `pub fn insert(&mut self, path: impl AsRef<str>, text: impl AsRef<str>) -> Result<(), crate::PathError>` · L104-L110
 > Insert or replace a file.
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__source__SourceSet as SourceSet
-  participant sealmap_model__path__SourcePath as SourcePath
+  participant sealmap_model__source___tSourceSet as SourceSet
+  participant sealmap_model__path___tSourcePath as SourcePath
   participant sealmap_model__hash as hash mod
-  sealmap_model__source__SourceSet->>sealmap_model__path__SourcePath: SourcePath::new(path)?
-  sealmap_model__source__SourceSet->>sealmap_model__hash: normalise_newlines(as_ref())
+  sealmap_model__source___tSourceSet->>sealmap_model__path___tSourcePath: SourcePath::new(path)?
+  sealmap_model__source___tSourceSet->>sealmap_model__hash: normalise_newlines(as_ref())
 ```
 
-## `sealmap_model::source::SourceSet::get_str`
+## `sym:cargo sealmap_model . source/SourceSet#get_str().`
 `pub fn get_str(&self, path: &str) -> Option<&str>` · L117-L120
 > Text of the file at a raw path string (normalised first).
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__source__SourceSet as SourceSet
-  participant sealmap_model__path__SourcePath as SourcePath
-  sealmap_model__source__SourceSet->>sealmap_model__path__SourcePath: SourcePath::new(path)
+  participant sealmap_model__source___tSourceSet as SourceSet
+  participant sealmap_model__path___tSourcePath as SourcePath
+  sealmap_model__source___tSourceSet->>sealmap_model__path___tSourcePath: SourcePath::new(path)
   opt via and_then
-    sealmap_model__source__SourceSet->>sealmap_model__source__SourceSet: get(&p)
+    sealmap_model__source___tSourceSet->>sealmap_model__source___tSourceSet: get(&p)
   end
 ```
 
-## `sealmap_model::source::SourceSet::load_dir`
+## `sym:cargo sealmap_model . source/SourceSet#load_dir().`
 `pub fn load_dir(root: &Path, options: &LoadOptions) -> io::Result<Self>` · L147-L186
 > Recursively load every matching file under `root`.
 ```mermaid
 sequenceDiagram
-  participant sealmap_model__source__SourceSet as SourceSet
-  participant ignore as ignore ext
-  participant sealmap_model__path__SourcePath as SourcePath
+  participant sealmap_model__source___tSourceSet as SourceSet
+  participant _ignore as ignore ext
+  participant sealmap_model__path___tSourcePath as SourcePath
   participant sealmap_model__hash as hash mod
-  sealmap_model__source__SourceSet->>ignore: WalkBuilder::WalkBuilder::new(root)
+  sealmap_model__source___tSourceSet->>_ignore: WalkBuilder::WalkBuilder::new(root)
   loop for entry in walker
-    sealmap_model__source__SourceSet->>sealmap_model__path__SourcePath: SourcePath::relative_to(path, root)
-    sealmap_model__source__SourceSet->>sealmap_model__hash: normalise_newlines(&text)
+    sealmap_model__source___tSourceSet->>sealmap_model__path___tSourcePath: SourcePath::relative_to(path, root)
+    sealmap_model__source___tSourceSet->>sealmap_model__hash: normalise_newlines(&text)
   end
 ```

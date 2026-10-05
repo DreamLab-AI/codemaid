@@ -1,19 +1,19 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-mermaid/src/writer.rs
-module: sealmap_mermaid::writer
+module: "sym:cargo sealmap_mermaid . writer/"
 language: rust
 source_hash: blake3:c5e0f8a6eee8df7ddb76e69364fcb940b40926861e92ea129d435e58b222f904
 lines: 73
 fragments: 1
 ---
-# `sealmap_mermaid::writer` · crates/sealmap-mermaid/src/writer.rs
+# `sym:cargo sealmap_mermaid . writer/` · crates/sealmap-mermaid/src/writer.rs
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_mermaid__writer__CodeWriter["CodeWriter"] {
+  class sealmap_mermaid__writer___tCodeWriter["CodeWriter"] {
     <<struct>>
     -buf: String
     -depth: usize

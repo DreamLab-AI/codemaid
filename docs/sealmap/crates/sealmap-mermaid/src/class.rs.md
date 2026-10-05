@@ -1,19 +1,19 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-mermaid/src/class.rs
-module: sealmap_mermaid::class
+module: "sym:cargo sealmap_mermaid . class/"
 language: rust
-source_hash: blake3:e4397011d22e899be6e4eb5e37bb9c1bba78d66eb8d7a6e706f2dfdec9d5a38d
+source_hash: blake3:9ffc2b8e89e2d5c584a35c79cdf301ad2fa364fe104244d93932ac7fe241ce3e
 lines: 260
 fragments: 7
 ---
-# `sealmap_mermaid::class` · crates/sealmap-mermaid/src/class.rs
+# `sym:cargo sealmap_mermaid . class/` · crates/sealmap-mermaid/src/class.rs
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_mermaid__class__Class["Class"] {
+  class sealmap_mermaid__class___tClass["Class"] {
     <<struct>>
     -id: Ident
     -label: String
@@ -28,7 +28,7 @@ classDiagram
     +raw_member(&mut self, line: &str) &mut Self
     -write(&self, w: &mut CodeWriter)
   }
-  class sealmap_mermaid__class__ClassDiagram["ClassDiagram"] {
+  class sealmap_mermaid__class___tClassDiagram["ClassDiagram"] {
     <<struct>>
     -direction: Option#lt;Direction#gt;
     -classes: Vec#lt;Class#gt;
@@ -41,14 +41,14 @@ classDiagram
     +relation_count(&self) usize
     +render(&self) String
   }
-  class sealmap_mermaid__class__ClassRelation["ClassRelation"] {
+  class sealmap_mermaid__class___tClassRelation["ClassRelation"] {
     <<struct>>
     +from: Ident
     +to: Ident
     +kind: ClassRelationKind
     +label: Option#lt;String#gt;
   }
-  class sealmap_mermaid__class__ClassRelationKind["ClassRelationKind"] {
+  class sealmap_mermaid__class___tClassRelationKind["ClassRelationKind"] {
     <<enum>>
     Inheritance
     Composition
@@ -57,7 +57,7 @@ classDiagram
     Dependency
     Realization
   }
-  class sealmap_mermaid__class__Direction["Direction"] {
+  class sealmap_mermaid__class___tDirection["Direction"] {
     <<enum>>
     TB
     BT
@@ -69,122 +69,122 @@ classDiagram
     <<module>>
     -vis_marker(c: char) &'static str
   }
-  class sealmap_mermaid__escape__Ident["Ident"] {
+  class sealmap_mermaid__escape___tIdent["Ident"] {
     <<struct in crates/sealmap-mermaid/src/escape.rs>>
   }
-  class sealmap_mermaid__writer__CodeWriter["CodeWriter"] {
+  class sealmap_mermaid__writer___tCodeWriter["CodeWriter"] {
     <<struct in crates/sealmap-mermaid/src/writer.rs>>
   }
-  sealmap_mermaid__class__Class *-- sealmap_mermaid__escape__Ident : id
-  sealmap_mermaid__class__Class ..> sealmap_mermaid__writer__CodeWriter
-  sealmap_mermaid__class__ClassDiagram o-- sealmap_mermaid__class__Class : classes
-  sealmap_mermaid__class__ClassDiagram o-- sealmap_mermaid__class__ClassRelation : relations
-  sealmap_mermaid__class__ClassDiagram ..> sealmap_mermaid__class__ClassRelationKind
-  sealmap_mermaid__class__ClassDiagram o-- sealmap_mermaid__class__Direction : direction
-  sealmap_mermaid__class__ClassDiagram ..> sealmap_mermaid__escape__Ident
-  sealmap_mermaid__class__ClassRelation *-- sealmap_mermaid__class__ClassRelationKind : kind
-  sealmap_mermaid__class__ClassRelation *-- sealmap_mermaid__escape__Ident : from, to
+  sealmap_mermaid__class___tClass *-- sealmap_mermaid__escape___tIdent : id
+  sealmap_mermaid__class___tClass ..> sealmap_mermaid__writer___tCodeWriter
+  sealmap_mermaid__class___tClassDiagram o-- sealmap_mermaid__class___tClass : classes
+  sealmap_mermaid__class___tClassDiagram o-- sealmap_mermaid__class___tClassRelation : relations
+  sealmap_mermaid__class___tClassDiagram ..> sealmap_mermaid__class___tClassRelationKind
+  sealmap_mermaid__class___tClassDiagram o-- sealmap_mermaid__class___tDirection : direction
+  sealmap_mermaid__class___tClassDiagram ..> sealmap_mermaid__escape___tIdent
+  sealmap_mermaid__class___tClassRelation *-- sealmap_mermaid__class___tClassRelationKind : kind
+  sealmap_mermaid__class___tClassRelation *-- sealmap_mermaid__escape___tIdent : from, to
 ```
 
-## `sealmap_mermaid::class::Class::new`
+## `sym:cargo sealmap_mermaid . class/Class#new().`
 `pub fn new(id: Ident, label: &str) -> Self` · L49-L55
 > A class with display `label` (generics may be written with `<>`).
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__Class as Class
+  participant sealmap_mermaid__class___tClass as Class
   participant sealmap_mermaid__escape as escape mod
-  sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_text(label)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_text(label)
 ```
 
-## `sealmap_mermaid::class::Class::annotation`
+## `sym:cargo sealmap_mermaid . class/Class#annotation().`
 `pub fn annotation(&mut self, text: &str) -> &mut Self` · L62-L66
 > `<<annotation>>`, e.g.
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__Class as Class
+  participant sealmap_mermaid__class___tClass as Class
   participant sealmap_mermaid__escape as escape mod
-  sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_text(text)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_text(text)
 ```
 
-## `sealmap_mermaid::class::Class::field`
+## `sym:cargo sealmap_mermaid . class/Class#field().`
 `pub fn field(&mut self, vis: char, name: &str, ty: &str) -> &mut Self` · L68-L79
 > A field line: `<vis>name: Type`.
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__Class as Class
+  participant sealmap_mermaid__class___tClass as Class
   participant sealmap_mermaid__class as class mod
   participant sealmap_mermaid__escape as escape mod
-  sealmap_mermaid__class__Class->>sealmap_mermaid__class: vis_marker(vis)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__class: vis_marker(vis)
   alt ty.is_empty()
-    sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(name, true)
+    sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(name, true)
   else
-    sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(name, true)
-    sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(ty, true)
+    sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(name, true)
+    sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(ty, true)
   end
 ```
 
-## `sealmap_mermaid::class::Class::method`
+## `sym:cargo sealmap_mermaid . class/Class#method().`
 `pub fn method(&mut self, vis: char, name: &str, params: &str, ret: &str) -> &mut Self` · L81-L93
 > A method line: `<vis>name(params) Ret`.
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__Class as Class
+  participant sealmap_mermaid__class___tClass as Class
   participant sealmap_mermaid__class as class mod
   participant sealmap_mermaid__escape as escape mod
-  sealmap_mermaid__class__Class->>sealmap_mermaid__class: vis_marker(vis)
-  sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(params, true)
-  sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(name, true)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__class: vis_marker(vis)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(params, true)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(name, true)
   opt !ret.is_empty()
-    sealmap_mermaid__class__Class->>sealmap_mermaid__escape: escape_type(ret, true)
+    sealmap_mermaid__class___tClass->>sealmap_mermaid__escape: escape_type(ret, true)
   end
 ```
 
-## `sealmap_mermaid::class::Class::write`
+## `sym:cargo sealmap_mermaid . class/Class#write().`
 `fn write(&self, w: &mut CodeWriter)` · L106-L126
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__Class as Class
-  participant sealmap_mermaid__escape__Ident as Ident
-  participant sealmap_mermaid__writer__CodeWriter as CodeWriter
-  sealmap_mermaid__class__Class->>sealmap_mermaid__escape__Ident: as_str()
+  participant sealmap_mermaid__class___tClass as Class
+  participant sealmap_mermaid__escape___tIdent as Ident
+  participant sealmap_mermaid__writer___tCodeWriter as CodeWriter
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__escape___tIdent: as_str()
   opt self.annotation.is_none() && self.members.is_empty()
-    sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: line(head)
-    Note over sealmap_mermaid__class__Class: return
+    sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: line(head)
+    Note over sealmap_mermaid__class___tClass: return
   end
-  sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: line(_)
-  sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: indented(|..|)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: line(_)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: indented(|..|)
   opt via indented
     opt let Some(a) = &self.annotation
-      sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: line(_)
+      sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: line(_)
     end
     loop for m in &self.members
-      sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: line(m)
+      sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: line(m)
     end
   end
-  sealmap_mermaid__class__Class->>sealmap_mermaid__writer__CodeWriter: line(#quot;}#quot;)
+  sealmap_mermaid__class___tClass->>sealmap_mermaid__writer___tCodeWriter: line(#quot;}#quot;)
 ```
 
-## `sealmap_mermaid::class::ClassDiagram::render`
+## `sym:cargo sealmap_mermaid . class/ClassDiagram#render().`
 `pub fn render(&self) -> String` · L231-L259
 > Render to Mermaid text.
 ```mermaid
 sequenceDiagram
-  participant sealmap_mermaid__class__ClassDiagram as ClassDiagram
-  participant sealmap_mermaid__writer__CodeWriter as CodeWriter
-  sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: CodeWriter::new()
-  sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: line(#quot;classDiagram#quot;)
-  sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: indented(|..|)
+  participant sealmap_mermaid__class___tClassDiagram as ClassDiagram
+  participant sealmap_mermaid__writer___tCodeWriter as CodeWriter
+  sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: CodeWriter::new()
+  sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: line(#quot;classDiagram#quot;)
+  sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: indented(|..|)
   opt via indented
     opt let Some(d) = self.direction
-      sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: line(_)
+      sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: line(_)
     end
     loop for r in &self.relations
       alt Some(label)
-        sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: line(_)
+        sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: line(_)
       else None
-        sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: line(_)
+        sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: line(_)
       end
     end
   end
-  sealmap_mermaid__class__ClassDiagram->>sealmap_mermaid__writer__CodeWriter: finish()
+  sealmap_mermaid__class___tClassDiagram->>sealmap_mermaid__writer___tCodeWriter: finish()
 ```

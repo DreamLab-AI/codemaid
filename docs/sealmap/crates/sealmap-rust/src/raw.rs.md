@@ -1,20 +1,20 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-rust/src/raw.rs
-module: sealmap_rust::raw
+module: "sym:cargo sealmap_rust . raw/"
 language: rust
-source_hash: blake3:9a5ad4b728504596abca168b1b0f669a240a4506a262fa7a99624cc58f7e4f0d
-lines: 97
+source_hash: blake3:7850aaafb3d38e757115516f78e573b3003f3ff892db40c10c789fc44db72883
+lines: 103
 fragments: 1
 ---
-# `sealmap_rust::raw` · crates/sealmap-rust/src/raw.rs
+# `sym:cargo sealmap_rust . raw/` · crates/sealmap-rust/src/raw.rs
 > Pass-1 output: plain, unresolved data extracted from one file.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_rust__raw__RawFile["RawFile"] {
+  class sealmap_rust__raw___tRawFile["RawFile"] {
     <<struct>>
     +path: SourcePath
     +role: FileRole
@@ -25,7 +25,7 @@ classDiagram
     +impls: Vec#lt;RawImpl#gt;
     +error: Option#lt;String#gt;
   }
-  class sealmap_rust__raw__RawFn["RawFn"] {
+  class sealmap_rust__raw___tRawFn["RawFn"] {
     <<struct>>
     +name: String
     +vis: Visibility
@@ -36,15 +36,17 @@ classDiagram
     +tags: Vec#lt;String#gt;
     +sig_refs: Vec#lt;Segs#gt;
     +flow: Vec#lt;RawStep#gt;
+    +sig_hash: Fingerprint
+    +body_hash: Fingerprint
   }
-  class sealmap_rust__raw__RawImpl["RawImpl"] {
+  class sealmap_rust__raw___tRawImpl["RawImpl"] {
     <<struct>>
     +module: Segs
     +self_ty: Option#lt;Segs#gt;
     +trait_: Option#lt;#40;Segs, String#41;#gt;
     +methods: Vec#lt;RawFn#gt;
   }
-  class sealmap_rust__raw__RawItem["RawItem"] {
+  class sealmap_rust__raw___tRawItem["RawItem"] {
     <<struct>>
     +module: Segs
     +name: String
@@ -60,8 +62,10 @@ classDiagram
     +supertraits: Vec#lt;Segs#gt;
     +methods: Vec#lt;RawFn#gt;
     +flow: Vec#lt;RawStep#gt;
+    +sig_hash: Fingerprint
+    +body_hash: Fingerprint
   }
-  class sealmap_rust__raw__RawMember["RawMember"] {
+  class sealmap_rust__raw___tRawMember["RawMember"] {
     <<struct>>
     +name: String
     +kind: MemberKind
@@ -70,7 +74,7 @@ classDiagram
     +span: Span
     +refs: Vec#lt;Segs#gt;
   }
-  class sealmap_rust__raw__RawModule["RawModule"] {
+  class sealmap_rust__raw___tRawModule["RawModule"] {
     <<struct>>
     +path: Segs
     +span: Span
@@ -78,65 +82,73 @@ classDiagram
     +vis: Visibility
     +uses: Vec#lt;RawUse#gt;
     +tags: Vec#lt;String#gt;
+    +sig_hash: Fingerprint
+    +body_hash: Fingerprint
   }
-  class sealmap_rust__raw__RawUse["RawUse"] {
+  class sealmap_rust__raw___tRawUse["RawUse"] {
     <<struct>>
     +alias: String
     +target: Segs
   }
-  class sealmap_model__hash__ContentHash["ContentHash"] {
+  class sealmap_model__hash___tContentHash["ContentHash"] {
     <<struct in crates/sealmap-model/src/hash.rs>>
   }
-  class sealmap_model__path__SourcePath["SourcePath"] {
+  class sealmap_model__path___tSourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  class sealmap_rust__layout__FileRole["FileRole"] {
+  class sealmap_rust__layout___tFileRole["FileRole"] {
     <<struct in crates/sealmap-rust/src/layout.rs>>
   }
-  class sealmap_frontend__raw__RawStep["RawStep"] {
+  class sealmap_frontend__raw___tRawStep["RawStep"] {
     <<enum in crates/sealmap-frontend/src/raw.rs>>
   }
-  class sealmap_frontend__raw__Segs["Segs"] {
+  class sealmap_frontend__raw___tSegs["Segs"] {
     <<type in crates/sealmap-frontend/src/raw.rs>>
   }
-  class sealmap_model__symbol__Span["Span"] {
+  class sealmap_model__hash___tFingerprint["Fingerprint"] {
+    <<struct in crates/sealmap-model/src/hash.rs>>
+  }
+  class sealmap_model__symbol___tSpan["Span"] {
     <<struct in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_model__symbol__Visibility["Visibility"] {
+  class sealmap_model__symbol___tVisibility["Visibility"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_model__symbol__SymbolKind["SymbolKind"] {
+  class sealmap_model__symbol___tSymbolKind["SymbolKind"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_model__symbol__MemberKind["MemberKind"] {
+  class sealmap_model__symbol___tMemberKind["MemberKind"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  sealmap_rust__raw__RawFile *-- sealmap_model__hash__ContentHash : hash
-  sealmap_rust__raw__RawFile *-- sealmap_model__path__SourcePath : path
-  sealmap_rust__raw__RawFile *-- sealmap_rust__layout__FileRole : role
-  sealmap_rust__raw__RawFile o-- sealmap_rust__raw__RawImpl : impls
-  sealmap_rust__raw__RawFile o-- sealmap_rust__raw__RawItem : items
-  sealmap_rust__raw__RawFile o-- sealmap_rust__raw__RawModule : modules
-  sealmap_rust__raw__RawFn o-- sealmap_frontend__raw__RawStep : flow
-  sealmap_rust__raw__RawFn o-- sealmap_frontend__raw__Segs : sig_refs
-  sealmap_rust__raw__RawFn *-- sealmap_model__symbol__Span : span
-  sealmap_rust__raw__RawFn *-- sealmap_model__symbol__Visibility : vis
-  sealmap_rust__raw__RawImpl o-- sealmap_frontend__raw__Segs : module, self_ty, trait_
-  sealmap_rust__raw__RawImpl o-- sealmap_rust__raw__RawFn : methods
-  sealmap_rust__raw__RawItem o-- sealmap_frontend__raw__RawStep : flow
-  sealmap_rust__raw__RawItem o-- sealmap_frontend__raw__Segs : module, sig_refs, supertraits
-  sealmap_rust__raw__RawItem *-- sealmap_model__symbol__Span : span
-  sealmap_rust__raw__RawItem *-- sealmap_model__symbol__SymbolKind : kind
-  sealmap_rust__raw__RawItem *-- sealmap_model__symbol__Visibility : vis
-  sealmap_rust__raw__RawItem o-- sealmap_rust__raw__RawFn : methods
-  sealmap_rust__raw__RawItem o-- sealmap_rust__raw__RawMember : members
-  sealmap_rust__raw__RawMember o-- sealmap_frontend__raw__Segs : refs
-  sealmap_rust__raw__RawMember *-- sealmap_model__symbol__MemberKind : kind
-  sealmap_rust__raw__RawMember *-- sealmap_model__symbol__Span : span
-  sealmap_rust__raw__RawMember *-- sealmap_model__symbol__Visibility : vis
-  sealmap_rust__raw__RawModule *-- sealmap_frontend__raw__Segs : path
-  sealmap_rust__raw__RawModule *-- sealmap_model__symbol__Span : span
-  sealmap_rust__raw__RawModule *-- sealmap_model__symbol__Visibility : vis
-  sealmap_rust__raw__RawModule o-- sealmap_rust__raw__RawUse : uses
-  sealmap_rust__raw__RawUse *-- sealmap_frontend__raw__Segs : target
+  sealmap_rust__raw___tRawFile *-- sealmap_model__hash___tContentHash : hash
+  sealmap_rust__raw___tRawFile *-- sealmap_model__path___tSourcePath : path
+  sealmap_rust__raw___tRawFile *-- sealmap_rust__layout___tFileRole : role
+  sealmap_rust__raw___tRawFile o-- sealmap_rust__raw___tRawImpl : impls
+  sealmap_rust__raw___tRawFile o-- sealmap_rust__raw___tRawItem : items
+  sealmap_rust__raw___tRawFile o-- sealmap_rust__raw___tRawModule : modules
+  sealmap_rust__raw___tRawFn o-- sealmap_frontend__raw___tRawStep : flow
+  sealmap_rust__raw___tRawFn o-- sealmap_frontend__raw___tSegs : sig_refs
+  sealmap_rust__raw___tRawFn *-- sealmap_model__hash___tFingerprint : sig_hash, body_hash
+  sealmap_rust__raw___tRawFn *-- sealmap_model__symbol___tSpan : span
+  sealmap_rust__raw___tRawFn *-- sealmap_model__symbol___tVisibility : vis
+  sealmap_rust__raw___tRawImpl o-- sealmap_frontend__raw___tSegs : module, self_ty, trait_
+  sealmap_rust__raw___tRawImpl o-- sealmap_rust__raw___tRawFn : methods
+  sealmap_rust__raw___tRawItem o-- sealmap_frontend__raw___tRawStep : flow
+  sealmap_rust__raw___tRawItem o-- sealmap_frontend__raw___tSegs : module, sig_refs, supertraits
+  sealmap_rust__raw___tRawItem *-- sealmap_model__hash___tFingerprint : sig_hash, body_hash
+  sealmap_rust__raw___tRawItem *-- sealmap_model__symbol___tSpan : span
+  sealmap_rust__raw___tRawItem *-- sealmap_model__symbol___tSymbolKind : kind
+  sealmap_rust__raw___tRawItem *-- sealmap_model__symbol___tVisibility : vis
+  sealmap_rust__raw___tRawItem o-- sealmap_rust__raw___tRawFn : methods
+  sealmap_rust__raw___tRawItem o-- sealmap_rust__raw___tRawMember : members
+  sealmap_rust__raw___tRawMember o-- sealmap_frontend__raw___tSegs : refs
+  sealmap_rust__raw___tRawMember *-- sealmap_model__symbol___tMemberKind : kind
+  sealmap_rust__raw___tRawMember *-- sealmap_model__symbol___tSpan : span
+  sealmap_rust__raw___tRawMember *-- sealmap_model__symbol___tVisibility : vis
+  sealmap_rust__raw___tRawModule *-- sealmap_frontend__raw___tSegs : path
+  sealmap_rust__raw___tRawModule *-- sealmap_model__hash___tFingerprint : sig_hash, body_hash
+  sealmap_rust__raw___tRawModule *-- sealmap_model__symbol___tSpan : span
+  sealmap_rust__raw___tRawModule *-- sealmap_model__symbol___tVisibility : vis
+  sealmap_rust__raw___tRawModule o-- sealmap_rust__raw___tRawUse : uses
+  sealmap_rust__raw___tRawUse *-- sealmap_frontend__raw___tSegs : target
 ```

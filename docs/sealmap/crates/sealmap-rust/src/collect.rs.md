@@ -1,43 +1,54 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-rust/src/collect.rs
-module: sealmap_rust::collect
+module: "sym:cargo sealmap_rust . collect/"
 language: rust
-source_hash: blake3:0c4248d8454c8345199f280e8f31530451dda357105dd6875488f58c9e5ff217
-lines: 995
-fragments: 36
+source_hash: blake3:228f88133c9b9afccc12513fa4b6870ed4aef0450ebcde50e64b4400e9900959
+lines: 1472
+fragments: 50
 ---
-# `sealmap_rust::collect` · crates/sealmap-rust/src/collect.rs
+# `sym:cargo sealmap_rust . collect/` · crates/sealmap-rust/src/collect.rs
 > Pass 1: parse one file with `syn` and collect unresolved raw data.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_rust__collect__Collector["Collector#lt;'a#gt;"] {
+  class sealmap_rust__collect___tCollector["Collector#lt;'a#gt;"] {
     <<struct>>
     -opts: &'a RustOptions
     -raw: &'a mut RawFile
-    -item(&mut self, module: &Segs, item: &Item)
-    -module(&mut self, path: Segs, attrs: &[Attribute], items: &[Item], span: Span, vis: Visibility)
+    -item(&mut self, module: &Segs, item: &Item, fold: &mut Fingerprinter)
+    -local_uses(&mut self, module: &Segs, block: &Block)
+    -module(&mut self, path: Segs, attrs: &[Attribute], syn_vis: Option#lt;&syn::Visibility#gt;, items: &[Item], span: Span, vis: Visibility,) #40;Fingerprint, Fingerprint#41;
+    -push_item(&mut self, it: RawItem, fold: &mut Fingerprinter)
     -skip(&self, attrs: &[Attribute]) bool
   }
-  class sealmap_rust__collect__FlowWalker["FlowWalker"] {
+  class sealmap_rust__collect___tFlowWalker["FlowWalker"] {
     <<struct>>
     -env: BTreeMap#lt;String, Recv#gt;
     -depth: u32
     -arg(&mut self, a: &Expr, out: &mut Vec#lt;RawStep#gt;, deferred: &mut Vec#lt;Vec#lt;RawStep#gt;#gt;)
     -bind(&mut self, pat: &Pat, init: Option#lt;&Expr#gt;)
+    -bind_destructured(&mut self, pat: &Pat, scrutinee: &Expr, iterated: bool)
     -block(&mut self, b: &Block) Vec#lt;RawStep#gt;
     -cond(&mut self, cond: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -expr(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -expr_inner(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
+    -forget(&mut self, pat: &Pat)
     -mac(&mut self, m: &syn::Macro, out: &mut Vec#lt;RawStep#gt;)
     -new(env: BTreeMap#lt;String, Recv#gt;) Self
+    -origin(&self, e: &Expr) Recv
     -recv(&self, e: &Expr) Recv
     -stmts(&mut self, stmts: &[Stmt], out: &mut Vec#lt;RawStep#gt;)
     -sub(&mut self, e: &Expr) Vec#lt;RawStep#gt;
     -sub_block(&mut self, b: &Block) Vec#lt;RawStep#gt;
+  }
+  class sealmap_rust__collect___tShape["Shape#lt;'a#gt;"] {
+    <<enum>>
+    Fields#40;&'a Fields#41;
+    Named#40;&'a syn::FieldsNamed#41;
+    Variants#40;&'a Punctuated#lt;syn::Variant, syn::Token![,]#gt;#41;
   }
   class sealmap_rust__collect["sealmap_rust::collect"] {
     <<module>>
@@ -45,381 +56,681 @@ classDiagram
     ~const MAX_EXPR_DEPTH: u32
     -arg_sketch(e: &Expr) String
     -call(callee: Callee, name: &str, args: &Punctuated#lt;Expr, syn::Token![,]#gt;, kind: CallKind, span: PmSpan) RawStep
+    -callable(mut sig: Fingerprinter, attrs: &[Attribute], vis: Option#lt;&syn::Visibility#gt;, signature: &syn::Signature, block: &Block,) #40;Fingerprint, Fingerprint#41;
     ~collect_file(crate) RawFile
     -cond_label(cond: &Expr) String
     -constructed_type(e: &Expr) Option#lt;Segs#gt;
+    -data_type(item: &Item, generics: &Generics, shape: Shape#lt;'_#gt;) #40;Fingerprint, Fingerprint#41;
     -doc_of(attrs: &[Attribute]) Option#lt;String#gt;
     ~failed_file(crate) RawFile
     -fields_of(fields: &Fields) Vec#lt;RawMember#gt;
     -first_path(ty: &Type) Option#lt;Segs#gt;
     -flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec#lt;RawUse#gt;)
     -fn_tags(sig: &syn::Signature, attrs: &[Attribute]) Vec#lt;String#gt;
+    -fold_member(fold: &mut Fingerprinter, keyword: &str, name: &str, sig: Fingerprint, body: Fingerprint)
     -generics_of(g: &Generics) Vec#lt;String#gt;
+    -impl_header(fp: &mut Fingerprinter, i: &syn::ItemImpl)
     -is_call(e: &Expr) bool
     -is_test_attr(a: &Attribute) bool
+    -item_attrs(item: &Item) &[Attribute]
     -params_of(sig: &syn::Signature) BTreeMap#lt;String, Recv#gt;
     ~path_segs(crate) Segs
+    -pattern_names(pat: &Pat, out: &mut Vec#lt;String#gt;)
+    -peel(pat: &Pat, refs: &[Segs], iterated: bool) Option#lt;Vec#lt;Segs#gt;#gt;
     -sig_refs(sig: &syn::Signature, out: &mut Vec#lt;Segs#gt;)
     -span_of(s: PmSpan) Span
     -tags_of(attrs: &[Attribute]) Vec#lt;String#gt;
+    -trait_hashes(t: &syn::ItemTrait) #40;Fingerprint, Fingerprint#41;
+    -trait_text(p: &syn::Path) String
+    -turbofish_refs(args: &Punctuated#lt;syn::GenericArgument, syn::Token![,]#gt;) Option#lt;Vec#lt;Segs#gt;#gt;
     -type_refs(ty: &Type, out: &mut Vec#lt;Segs#gt;)
+    -value(keyword: &str, attrs: &[Attribute], vis: &syn::Visibility, mutability: Option#lt;&syn::StaticMutability#gt;, ident: &syn::Ident, ty: &Type, expr: &Expr,) #40;Fingerprint, Fingerprint#41;
     -vis_of(v: &syn::Visibility) Visibility
     -vis_prefix(v: &syn::Visibility) String
   }
-  class Callee {
-    <<external>>
+  class sealmap_frontend__fingerprint___tFingerprinter["Fingerprinter"] {
+    <<struct in crates/sealmap-frontend/src/fingerprint.rs>>
   }
-  class RawStep {
-    <<external>>
-  }
-  class Recv {
-    <<external>>
-  }
-  class Segs {
-    <<external>>
-  }
-  class proc_macro2__Span["proc_macro2::Span"] {
-    <<external>>
-  }
-  class sealmap_model__flow__CallKind["CallKind"] {
+  class sealmap_model__flow___tCallKind["CallKind"] {
     <<enum in crates/sealmap-model/src/flow.rs>>
   }
-  class sealmap_model__path__SourcePath["SourcePath"] {
+  class sealmap_model__hash___tFingerprint["Fingerprint"] {
+    <<struct in crates/sealmap-model/src/hash.rs>>
+  }
+  class sealmap_model__path___tSourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  class sealmap_model__symbol__Span["Span"] {
+  class sealmap_model__symbol___tSpan["Span"] {
     <<struct in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_model__symbol__Visibility["Visibility"] {
+  class sealmap_model__symbol___tVisibility["Visibility"] {
     <<enum in crates/sealmap-model/src/symbol.rs>>
   }
-  class sealmap_rust__RustOptions["RustOptions"] {
+  class sealmap_rust___tRustOptions["RustOptions"] {
     <<struct in crates/sealmap-rust/src/lib.rs>>
   }
-  class sealmap_rust__layout__FileRole["FileRole"] {
+  class sealmap_rust__layout___tFileRole["FileRole"] {
     <<struct in crates/sealmap-rust/src/layout.rs>>
   }
-  class sealmap_rust__raw__RawFile["RawFile"] {
+  class sealmap_rust__raw___tRawFile["RawFile"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
   }
-  class sealmap_rust__raw__RawMember["RawMember"] {
+  class sealmap_rust__raw___tRawMember["RawMember"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
   }
-  class sealmap_rust__raw__RawUse["RawUse"] {
+  class sealmap_rust__raw___tRawUse["RawUse"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
   }
-  class syn__Attribute["syn::Attribute"] {
+  class _Callee["Callee"] {
     <<external>>
   }
-  class syn__Expr["syn::Expr"] {
+  class _RawStep["RawStep"] {
     <<external>>
   }
-  class syn__Fields["syn::Fields"] {
+  class _Recv["Recv"] {
     <<external>>
   }
-  class syn__Generics["syn::Generics"] {
+  class _Segs["Segs"] {
     <<external>>
   }
-  class syn__Path["syn::Path"] {
+  class _proc_macro2__Span["proc_macro2::Span"] {
     <<external>>
   }
-  class syn__Signature["syn::Signature"] {
+  class _syn__Attribute["syn::Attribute"] {
     <<external>>
   }
-  class syn__Token["syn::Token"] {
+  class _syn__Block["syn::Block"] {
     <<external>>
   }
-  class syn__Type["syn::Type"] {
+  class _syn__Expr["syn::Expr"] {
     <<external>>
   }
-  class syn__UseTree["syn::UseTree"] {
+  class _syn__Fields["syn::Fields"] {
     <<external>>
   }
-  class syn__Visibility["syn::Visibility"] {
+  class _syn__GenericArgument["syn::GenericArgument"] {
     <<external>>
   }
-  class syn__punctuated__Punctuated["syn::punctuated::Punctuated"] {
+  class _syn__Generics["syn::Generics"] {
     <<external>>
   }
-  class syn__Item["syn::Item"] {
+  class _syn__Ident["syn::Ident"] {
     <<external>>
   }
-  class syn__Block["syn::Block"] {
+  class _syn__Item["syn::Item"] {
     <<external>>
   }
-  class syn__Macro["syn::Macro"] {
+  class _syn__ItemImpl["syn::ItemImpl"] {
     <<external>>
   }
-  class syn__Pat["syn::Pat"] {
+  class _syn__ItemTrait["syn::ItemTrait"] {
     <<external>>
   }
-  class syn__Stmt["syn::Stmt"] {
+  class _syn__Pat["syn::Pat"] {
     <<external>>
   }
-  sealmap_rust__collect ..> Callee
-  sealmap_rust__collect ..> RawStep
-  sealmap_rust__collect ..> Recv
-  sealmap_rust__collect ..> Segs
-  sealmap_rust__collect ..> proc_macro2__Span
-  sealmap_rust__collect ..> sealmap_model__flow__CallKind
-  sealmap_rust__collect ..> sealmap_model__path__SourcePath
-  sealmap_rust__collect ..> sealmap_model__symbol__Span
-  sealmap_rust__collect ..> sealmap_model__symbol__Visibility
-  sealmap_rust__collect ..> sealmap_rust__RustOptions
-  sealmap_rust__collect ..> sealmap_rust__layout__FileRole
-  sealmap_rust__collect ..> sealmap_rust__raw__RawFile
-  sealmap_rust__collect ..> sealmap_rust__raw__RawMember
-  sealmap_rust__collect ..> sealmap_rust__raw__RawUse
-  sealmap_rust__collect ..> syn__Attribute
-  sealmap_rust__collect ..> syn__Expr
-  sealmap_rust__collect ..> syn__Fields
-  sealmap_rust__collect ..> syn__Generics
-  sealmap_rust__collect ..> syn__Path
-  sealmap_rust__collect ..> syn__Signature
-  sealmap_rust__collect ..> syn__Token
-  sealmap_rust__collect ..> syn__Type
-  sealmap_rust__collect ..> syn__UseTree
-  sealmap_rust__collect ..> syn__Visibility
-  sealmap_rust__collect ..> syn__punctuated__Punctuated
-  sealmap_rust__collect__Collector ..> Segs
-  sealmap_rust__collect__Collector ..> sealmap_model__symbol__Span
-  sealmap_rust__collect__Collector ..> sealmap_model__symbol__Visibility
-  sealmap_rust__collect__Collector o-- sealmap_rust__RustOptions : opts
-  sealmap_rust__collect__Collector o-- sealmap_rust__raw__RawFile : raw
-  sealmap_rust__collect__Collector ..> syn__Attribute
-  sealmap_rust__collect__Collector ..> syn__Item
-  sealmap_rust__collect__FlowWalker ..> RawStep
-  sealmap_rust__collect__FlowWalker o-- Recv : env
-  sealmap_rust__collect__FlowWalker ..> syn__Block
-  sealmap_rust__collect__FlowWalker ..> syn__Expr
-  sealmap_rust__collect__FlowWalker ..> syn__Macro
-  sealmap_rust__collect__FlowWalker ..> syn__Pat
-  sealmap_rust__collect__FlowWalker ..> syn__Stmt
+  class _syn__Path["syn::Path"] {
+    <<external>>
+  }
+  class _syn__Signature["syn::Signature"] {
+    <<external>>
+  }
+  class _syn__StaticMutability["syn::StaticMutability"] {
+    <<external>>
+  }
+  class _syn__Token["syn::Token"] {
+    <<external>>
+  }
+  class _syn__Type["syn::Type"] {
+    <<external>>
+  }
+  class _syn__UseTree["syn::UseTree"] {
+    <<external>>
+  }
+  class _syn__Visibility["syn::Visibility"] {
+    <<external>>
+  }
+  class _syn__punctuated__Punctuated["syn::punctuated::Punctuated"] {
+    <<external>>
+  }
+  class sealmap_rust__raw___tRawItem["RawItem"] {
+    <<struct in crates/sealmap-rust/src/raw.rs>>
+  }
+  class _syn__Macro["syn::Macro"] {
+    <<external>>
+  }
+  class _syn__Stmt["syn::Stmt"] {
+    <<external>>
+  }
+  class _syn__FieldsNamed["syn::FieldsNamed"] {
+    <<external>>
+  }
+  class _syn__Variant["syn::Variant"] {
+    <<external>>
+  }
+  sealmap_rust__collect ..> sealmap_frontend__fingerprint___tFingerprinter
+  sealmap_rust__collect ..> sealmap_model__flow___tCallKind
+  sealmap_rust__collect ..> sealmap_model__hash___tFingerprint
+  sealmap_rust__collect ..> sealmap_model__path___tSourcePath
+  sealmap_rust__collect ..> sealmap_model__symbol___tSpan
+  sealmap_rust__collect ..> sealmap_model__symbol___tVisibility
+  sealmap_rust__collect ..> sealmap_rust___tRustOptions
+  sealmap_rust__collect ..> sealmap_rust__collect___tShape
+  sealmap_rust__collect ..> sealmap_rust__layout___tFileRole
+  sealmap_rust__collect ..> sealmap_rust__raw___tRawFile
+  sealmap_rust__collect ..> sealmap_rust__raw___tRawMember
+  sealmap_rust__collect ..> sealmap_rust__raw___tRawUse
+  sealmap_rust__collect ..> _Callee
+  sealmap_rust__collect ..> _RawStep
+  sealmap_rust__collect ..> _Recv
+  sealmap_rust__collect ..> _Segs
+  sealmap_rust__collect ..> _proc_macro2__Span
+  sealmap_rust__collect ..> _syn__Attribute
+  sealmap_rust__collect ..> _syn__Block
+  sealmap_rust__collect ..> _syn__Expr
+  sealmap_rust__collect ..> _syn__Fields
+  sealmap_rust__collect ..> _syn__GenericArgument
+  sealmap_rust__collect ..> _syn__Generics
+  sealmap_rust__collect ..> _syn__Ident
+  sealmap_rust__collect ..> _syn__Item
+  sealmap_rust__collect ..> _syn__ItemImpl
+  sealmap_rust__collect ..> _syn__ItemTrait
+  sealmap_rust__collect ..> _syn__Pat
+  sealmap_rust__collect ..> _syn__Path
+  sealmap_rust__collect ..> _syn__Signature
+  sealmap_rust__collect ..> _syn__StaticMutability
+  sealmap_rust__collect ..> _syn__Token
+  sealmap_rust__collect ..> _syn__Type
+  sealmap_rust__collect ..> _syn__UseTree
+  sealmap_rust__collect ..> _syn__Visibility
+  sealmap_rust__collect ..> _syn__punctuated__Punctuated
+  sealmap_rust__collect___tCollector ..> sealmap_frontend__fingerprint___tFingerprinter
+  sealmap_rust__collect___tCollector ..> sealmap_model__hash___tFingerprint
+  sealmap_rust__collect___tCollector ..> sealmap_model__symbol___tSpan
+  sealmap_rust__collect___tCollector ..> sealmap_model__symbol___tVisibility
+  sealmap_rust__collect___tCollector o-- sealmap_rust___tRustOptions : opts
+  sealmap_rust__collect___tCollector o-- sealmap_rust__raw___tRawFile : raw
+  sealmap_rust__collect___tCollector ..> sealmap_rust__raw___tRawItem
+  sealmap_rust__collect___tCollector ..> _Segs
+  sealmap_rust__collect___tCollector ..> _syn__Attribute
+  sealmap_rust__collect___tCollector ..> _syn__Block
+  sealmap_rust__collect___tCollector ..> _syn__Item
+  sealmap_rust__collect___tCollector ..> _syn__Visibility
+  sealmap_rust__collect___tFlowWalker ..> _RawStep
+  sealmap_rust__collect___tFlowWalker o-- _Recv : env
+  sealmap_rust__collect___tFlowWalker ..> _syn__Block
+  sealmap_rust__collect___tFlowWalker ..> _syn__Expr
+  sealmap_rust__collect___tFlowWalker ..> _syn__Macro
+  sealmap_rust__collect___tFlowWalker ..> _syn__Pat
+  sealmap_rust__collect___tFlowWalker ..> _syn__Stmt
+  sealmap_rust__collect___tShape *-- _syn__Fields : Fields
+  sealmap_rust__collect___tShape *-- _syn__FieldsNamed : Named
+  sealmap_rust__collect___tShape *-- _syn__Token : Variants
+  sealmap_rust__collect___tShape *-- _syn__Variant : Variants
+  sealmap_rust__collect___tShape *-- _syn__punctuated__Punctuated : Variants
 ```
 
-## `sealmap_rust::collect::collect_file`
-`pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts: &RustOptions) -> RawFile` · L29-L52
+## `sym:cargo sealmap_rust . collect/collect_file().`
+`pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts: &RustOptions) -> RawFile` · L32-L55
 > Parse `text` and collect everything pass 2 needs.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_model__hash__ContentHash as ContentHash
-  participant syn as syn ext
-  participant sealmap_model__symbol__Span as Span
-  participant sealmap_rust__collect__Collector as Collector
-  sealmap_rust__collect->>sealmap_model__hash__ContentHash: ContentHash::of_text(text)
-  sealmap_rust__collect->>syn: syn::parse_file(text)
+  participant sealmap_model__hash___tContentHash as ContentHash
+  participant _syn as syn ext
+  participant sealmap_model__symbol___tSpan as Span
+  participant sealmap_rust__collect___tCollector as Collector
+  sealmap_rust__collect->>sealmap_model__hash___tContentHash: ContentHash::of_text(text)
+  sealmap_rust__collect->>_syn: syn::parse_file(text)
   opt Err(e)
     sealmap_rust__collect->>sealmap_rust__collect: failed_file(path, role, text, msg)
     Note over sealmap_rust__collect: return failed_file(path, role, text, msg)
   end
-  sealmap_rust__collect->>sealmap_model__symbol__Span: Span::new(1, 1, max(), 1)
-  sealmap_rust__collect->>sealmap_rust__collect__Collector: module(clone(), &file.attrs, &file.items, span, Public)
+  sealmap_rust__collect->>sealmap_model__symbol___tSpan: Span::new(1, 1, max(), 1)
+  sealmap_rust__collect->>sealmap_rust__collect___tCollector: module(clone(), &file.attrs, None, &file.items, span, P…
 ```
 
-## `sealmap_rust::collect::failed_file`
-`pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error: String) -> RawFile` · L54-L76
+## `sym:cargo sealmap_rust . collect/failed_file().`
+`pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error: String) -> RawFile` · L57-L82
 > The stand-in for a file that could not be collected (parse error or an internal panic): just its module symbol, tagged `parse_error`, so the 1:1 contract still…
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_model__hash__ContentHash as ContentHash
-  participant sealmap_model__symbol__Span as Span
-  sealmap_rust__collect->>sealmap_model__hash__ContentHash: ContentHash::of_text(text)
-  sealmap_rust__collect->>sealmap_model__symbol__Span: Span::new(1, 1, max(), 1)
+  participant sealmap_rust__fingerprint as fingerprint mod
+  participant sealmap_model__hash___tContentHash as ContentHash
+  participant sealmap_model__symbol___tSpan as Span
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::unparsable(map_or(), text)
+  sealmap_rust__collect->>sealmap_model__hash___tContentHash: ContentHash::of_text(text)
+  sealmap_rust__collect->>sealmap_model__symbol___tSpan: Span::new(1, 1, max(), 1)
 ```
 
-## `sealmap_rust::collect::Collector::module`
-`fn module(&mut self, path: Segs, attrs: &[Attribute], items: &[Item], span: Span, vis: Visibility)` · L84-L102
+## `sym:cargo sealmap_rust . collect/Collector#module().`
+`fn module(&mut self, path: Segs, attrs: &[Attribute], syn_vis: Option<&syn::Visibility>, items: &[Item], span: Span, vis: Visibility,) -> (Fingerprint, Fingerprint)` · L90-L153
+> Collect a module and everything in it.
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__Collector as Collector
+  participant sealmap_rust__collect___tCollector as Collector
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
   participant sealmap_rust__collect as collect mod
+  participant _sealmap_model as sealmap_model ext
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;mod#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;vis#quot;)
+  opt let Some(v) = syn_vis
+    sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig, v)
+  end
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;name#quot;)
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: ident(map_or())
   loop for item in items
     opt let Item::Use(u) = item
-      sealmap_rust__collect__Collector->>sealmap_rust__collect: flatten_use(&u.tree, &new(), &uses)
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: flatten_use(&u.tree, &new(), &uses)
     end
   end
-  sealmap_rust__collect__Collector->>sealmap_rust__collect: doc_of(attrs)
-  sealmap_rust__collect__Collector->>sealmap_rust__collect: tags_of(attrs)
+  sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(attrs)
+  sealmap_rust__collect___tCollector->>sealmap_rust__collect: tags_of(attrs)
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;mod#quot;)
   loop for item in items
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: item(&path, item)
+    alt Item::Use(_) | Item::ExternCrate(_) | Item::Mod(syn::It…
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: item_attrs(item)
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(item_attrs())
+      opt !self.skip(item_attrs(item))
+        sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+        sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&d, item, visit_item_mut)
+        sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+      end
+    else _
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: item(&path, item, &body)
+    end
+  end
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;declarations#quot;)
+  loop for d in declarations
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(d)
+  end
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+```
+
+## `sym:cargo sealmap_rust . collect/Collector#local_uses().`
+`fn local_uses(&mut self, module: &Segs, block: &Block)` · L155-L176
+> Add the `use` declarations inside a function body to `module`'s imports.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect___tCollector as Collector
+  participant _syn as syn ext
+  sealmap_rust__collect___tCollector->>_syn: Visit::Visit::visit_block(&found, block)
+  opt found.0.is_empty()
+    Note over sealmap_rust__collect___tCollector: return
   end
 ```
 
-## `sealmap_rust::collect::Collector::skip`
-`fn skip(&self, attrs: &[Attribute]) -> bool` · L104-L106
+## `sym:cargo sealmap_rust . collect/Collector#push_item().`
+`fn push_item(&mut self, it: RawItem, fold: &mut Fingerprinter)` · L178-L182
+> Record a collected item and fold it into its module's body.
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__Collector as Collector
-  participant syn as syn ext
-  sealmap_rust__collect__Collector->>syn: Attribute::iter()
+  participant sealmap_rust__collect___tCollector as Collector
+  participant sealmap_model__symbol___tSymbolKind as SymbolKind
+  participant sealmap_rust__collect as collect mod
+  sealmap_rust__collect___tCollector->>sealmap_model__symbol___tSymbolKind: ~keyword()
+  sealmap_rust__collect___tCollector->>sealmap_rust__collect: fold_member(fold, keyword(), &it.name, it.sig_hash, it.…
 ```
 
-## `sealmap_rust::collect::Collector::item`
-`fn item(&mut self, module: &Segs, item: &Item)` · L108-L322
+## `sym:cargo sealmap_rust . collect/Collector#skip().`
+`fn skip(&self, attrs: &[Attribute]) -> bool` · L184-L186
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__Collector as Collector
+  participant sealmap_rust__collect___tCollector as Collector
+  participant _syn as syn ext
+  sealmap_rust__collect___tCollector->>_syn: Attribute::iter()
+```
+
+## `sym:cargo sealmap_rust . collect/Collector#item().`
+`fn item(&mut self, module: &Segs, item: &Item, fold: &mut Fingerprinter)` · L188-L466
+> Collect one item of `module`, folding what it contributes into the module's body fingerprint `fold`.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect___tCollector as Collector
   participant sealmap_rust__collect as collect mod
+  participant _sealmap_model as sealmap_model ext
   participant sealmap_rust__tidy as tidy mod
   participant sealmap_frontend__labels as labels mod
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   opt closure
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_of(vis)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: doc_of(attrs)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: tags_of(attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: vis_of(vis)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: tags_of(attrs)
+    sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
+    sealmap_rust__collect___tCollector->>_sealmap_model: ~Fingerprint::Fingerprint::default()
   end
   alt Item::Mod(m)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&m.attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&m.attrs)
     opt self.skip(&m.attrs)
-      Note over sealmap_rust__collect__Collector: return
+      Note over sealmap_rust__collect___tCollector: return
     end
     opt let Some((_, items)) = &m.content
-      sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
-      sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_of(&m.vis)
-      sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: module(path, &m.attrs, items, span_of(), vis_of())
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: vis_of(&m.vis)
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: module(path, &m.attrs, Some(), items, span_of(), vis_of…
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: fold_member(fold, #quot;mod#quot;, &to_string(), sig, body)
     end
   else Item::Struct(s)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&s.attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&s.attrs)
     opt self.skip(&s.attrs)
-      Note over sealmap_rust__collect__Collector: return
+      Note over sealmap_rust__collect___tCollector: return
     end
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&s.generics)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: fields_of(&s.fields)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&s.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: fields_of(&s.fields)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: data_type(item, &s.generics, Fields())
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Union(u)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&u.generics)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: fields_of(&Named())
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&u.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: fields_of(&Named())
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: data_type(item, &u.generics, Named())
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Enum(e)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&e.attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&e.attrs)
     opt self.skip(&e.attrs)
-      Note over sealmap_rust__collect__Collector: return
+      Note over sealmap_rust__collect___tCollector: return
     end
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&e.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&e.generics)
     loop for v in &e.variants
       loop for f in v.fields.iter()
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&f.ty, &refs)
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&f.ty, &refs)
       end
       alt Fields::Unnamed(u)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(u)
-        sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(u)
+        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
       else Fields::Named(n)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(n)
-        sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
-        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&squeeze(), LABEL_MAX)
+        sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(n)
+        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&squeeze(), LABEL_MAX)
       end
-      sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
+      sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
     end
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: data_type(item, &e.generics, Variants())
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Trait(t)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&t.attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&t.attrs)
     opt self.skip(&t.attrs)
-      Note over sealmap_rust__collect__Collector: return
+      Note over sealmap_rust__collect___tCollector: return
     end
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&t.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&t.generics)
     loop for b in &t.supertraits
       opt let TypeParamBound::Trait(tb) = b
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: path_segs(&tb.path)
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: path_segs(&tb.path)
       end
     end
     loop for ti in &t.items
       alt TraitItem::Fn(f)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&tokens(), SIG_MAX)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: sig_refs(&f.sig, &refs)
+        sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&f.sig)
+        sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&tokens(), SIG_MAX)
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: sig_refs(&f.sig, &refs)
         alt Some(block)
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: params_of(&f.sig)
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: doc_of(&f.attrs)
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&f.sig.generics)
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: fn_tags(&f.sig, &f.attrs)
-          sealmap_rust__collect__Collector->>sealmap_rust__collect__FlowWalker: FlowWalker::new(params)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: params_of(&f.sig)
+          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+          sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+          sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig_fp, &t.generics)
+          sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig_fp, &t.generics.where_clause)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: callable(sig_fp, &f.attrs, None, &f.sig, block)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: local_uses(module, block)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(&f.attrs)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&f.sig.generics)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: fn_tags(&f.sig, &f.attrs)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect___tFlowWalker: FlowWalker::new(params)
         else None
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
         end
       else TraitItem::Type(ty)
         opt via then
-          sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&ty.bounds)
-          sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
+          sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&ty.bounds)
+          sealmap_rust__collect___tCollector->>sealmap_frontend__labels: squeeze(&tokens())
         end
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
       else TraitItem::Const(k)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&k.ty, &refs)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&k.ty)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&k.ty, &refs)
+        sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&k.ty)
+        sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
       end
     end
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: trait_hashes(t)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Type(t)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&t.generics)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&t.ty)
-    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&t.ty, &it.sig_refs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&t.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&t.ty)
+    sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&t.ty, &it.sig_refs)
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;type#quot;)
+    sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&sig, item)
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;type#quot;)
+    sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics.where_clause)
+    sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.ty)
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+    sealmap_rust__collect___tCollector->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Fn(f)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&f.attrs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&f.attrs)
     opt self.skip(&f.attrs)
-      Note over sealmap_rust__collect__Collector: return
+      Note over sealmap_rust__collect___tCollector: return
     end
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&f.sig.generics)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_prefix(&f.vis)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: fn_tags(&f.sig, &_)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: sig_refs(&f.sig, &it.sig_refs)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: params_of(&f.sig)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__FlowWalker: FlowWalker::new(params_of())
-  else Item::Const(k)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&k.ty)
-    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&k.ty, &it.sig_refs)
-  else Item::Static(s)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&s.ty)
-    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&s.ty, &it.sig_refs)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&f.sig.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: vis_prefix(&f.vis)
+    sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&f.sig)
+    sealmap_rust__collect___tCollector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: fn_tags(&f.sig, &_)
   else Item::Impl(i)
-    sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&i.attrs)
     opt self.skip(&i.attrs)
-      Note over sealmap_rust__collect__Collector: return
-    end
-    sealmap_rust__collect__Collector->>sealmap_rust__collect: first_path(&i.self_ty)
-    opt via map
-      sealmap_rust__collect__Collector->>sealmap_rust__collect: path_segs(p)
-      sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(p)
-    end
-    loop for ii in &i.items
-      opt let ImplItem::Fn(f) = ii
-        sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&f.attrs)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: sig_refs(&f.sig, &refs)
-        opt not is_trait_impl
-          sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_of(&f.vis)
-        end
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_prefix(&f.vis)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: doc_of(&f.attrs)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&f.sig.generics)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: fn_tags(&f.sig, &f.attrs)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect: params_of(&f.sig)
-        sealmap_rust__collect__Collector->>sealmap_rust__collect__FlowWalker: FlowWalker::new(params_of())
-      end
+      Note over sealmap_rust__collect___tCollector: return
     end
   end
+  Note over sealmap_rust__collect___tCollector: +55 more calls in _index.json
 ```
 
-## `sealmap_rust::collect::span_of`
-`fn span_of(s: PmSpan) -> Span` · L327-L330
+## `sym:cargo sealmap_rust . collect/trait_text().`
+`fn trait_text(p: &syn::Path) -> String` · L469-L482
+> The trait of an impl as written, which becomes part of its methods' ids (`Db#[`From<String>`]from().`).
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant proc_macro2 as proc_macro2 ext
-  participant sealmap_model__symbol__Span as Span
-  sealmap_rust__collect->>proc_macro2: Span::start()
-  sealmap_rust__collect->>proc_macro2: Span::end()
-  sealmap_rust__collect->>sealmap_model__symbol__Span: Span::new(_, _, _, _)
+  participant sealmap_rust__tidy as tidy mod
+  sealmap_rust__collect->>sealmap_rust__tidy: tokens(p)
 ```
 
-## `sealmap_rust::collect::vis_of`
-`fn vis_of(v: &syn::Visibility) -> Visibility` · L332-L339
+## `sym:cargo sealmap_rust . collect/fold_member().`
+`fn fold_member(fold: &mut Fingerprinter, keyword: &str, name: &str, sig: Fingerprint, body: Fingerprint)` · L496-L502
+> Fold a member's identity and fingerprints into its container's body.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(name)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(sig)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: fingerprint(body)
+```
+
+## `sym:cargo sealmap_rust . collect/callable().`
+`fn callable(mut sig: Fingerprinter, attrs: &[Attribute], vis: Option<&syn::Visibility>, signature: &syn::Signature, block: &Block,) -> (Fingerprint, Fingerprint)` · L504-L525
+> A function or method: `sig` already holds its context (the impl or trait header, if any); the attributes, visibility and signature are added.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_rust__fingerprint as fingerprint mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;vis#quot;)
+  opt let Some(v) = vis
+    sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, v)
+  end
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;sig#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, signature)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;block#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, block, visit_block_m…
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+```
+
+## `sym:cargo sealmap_rust . collect/impl_header().`
+`fn impl_header(fp: &mut Fingerprinter, i: &syn::ItemImpl)` · L527-L543
+> The header of an impl block (attributes, `unsafe`, generics, trait, self type, `where`), part of each of its methods' contract.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;impl#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(fp, &i.attrs)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.defaultness)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.unsafety)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.generics)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  opt let Some((bang, path, _)) = &i.trait_
+    sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, bang)
+    sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, path)
+  end
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;self#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.self_ty)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, &i.generics.where_clause)
+```
+
+## `sym:cargo sealmap_rust . collect/data_type().`
+`fn data_type(item: &Item, generics: &Generics, shape: Shape<'_>) -> (Fingerprint, Fingerprint)` · L552-L593
+> A struct, enum or union: the whole declaration is the contract; the shape (generics and fields or variants, without the name) is the body.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;data#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, item)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;data#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, generics)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &generics.where_clause)
+  opt closure
+    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ~section(label)
+    loop for f in fields
+      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ~section(#quot;field#quot;)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(fp, f)
+    end
+  end
+  alt Shape::Fields(Fields::Unit)
+    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unit#quot;)
+  else Shape::Variants(vs)
+    loop for v in vs
+      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;variant#quot;)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&body, &v.attrs)
+      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+      opt Fields::Unit
+        sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;unit#quot;)
+      end
+      opt let Some((_, discriminant)) = &v.discriminant
+        sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;discriminant#quot;)
+        sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, discriminant, visit_…
+      end
+    end
+  end
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+```
+
+## `sym:cargo sealmap_rust . collect/trait_hashes().`
+`fn trait_hashes(t: &syn::ItemTrait) -> (Fingerprint, Fingerprint)` · L595-L632
+> A trait: the header plus every member's signature is the contract; every member in full (default bodies included) is the body.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &t.attrs)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.vis)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.unsafety)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.auto_token)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.generics)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;supertraits#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.supertraits)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &t.generics.where_clause)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;trait#quot;)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.generics.where_clause)
+  loop for ti in &t.items
+    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;item#quot;)
+    alt TraitItem::Fn(f)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &f.attrs)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &f.sig)
+    else TraitItem::Const(k)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, &k.attrs)
+      sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &k.generics)
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, &k.ty)
+    else other
+      sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, other)
+    end
+    sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(#quot;item#quot;)
+    sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, ti, visit_trait_item…
+  end
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+```
+
+## `sym:cargo sealmap_rust . collect/value().`
+`fn value(keyword: &str, attrs: &[Attribute], vis: &syn::Visibility, mutability: Option<&syn::StaticMutability>, ident: &syn::Ident, ty: &Type, expr: &Expr,) -> (Fingerprint, Fingerprint)` · L634-L658
+> A constant or static: everything but the value is the contract; the value is the body.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__fingerprint___tFingerprinter as Fingerprinter
+  participant sealmap_rust__fingerprint as fingerprint mod
+  participant _syn as syn ext
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::sig()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::attrs(&sig, attrs)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, vis)
+  opt let Some(m) = mutability
+    sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, m)
+  end
+  sealmap_rust__collect->>_syn: Ident::to_string()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: ident(&to_string())
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed(&sig, ty)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: Fingerprinter::body()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: section(keyword)
+  sealmap_rust__collect->>sealmap_rust__fingerprint: fingerprint::feed_canonical(&body, expr, visit_expr_mut)
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+  sealmap_rust__collect->>sealmap_frontend__fingerprint___tFingerprinter: finish()
+```
+
+## `sym:cargo sealmap_rust . collect/span_of().`
+`fn span_of(s: PmSpan) -> Span` · L662-L665
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant _proc_macro2 as proc_macro2 ext
+  participant sealmap_model__symbol___tSpan as Span
+  sealmap_rust__collect->>_proc_macro2: Span::start()
+  sealmap_rust__collect->>_proc_macro2: Span::end()
+  sealmap_rust__collect->>sealmap_model__symbol___tSpan: Span::new(_, _, _, _)
+```
+
+## `sym:cargo sealmap_rust . collect/vis_of().`
+`fn vis_of(v: &syn::Visibility) -> Visibility` · L667-L674
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -429,8 +740,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::vis_prefix`
-`fn vis_prefix(v: &syn::Visibility) -> String` · L341-L346
+## `sym:cargo sealmap_rust . collect/vis_prefix().`
+`fn vis_prefix(v: &syn::Visibility) -> String` · L676-L681
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -440,22 +751,22 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::is_test_attr`
-`fn is_test_attr(a: &Attribute) -> bool` · L348-L354
+## `sym:cargo sealmap_rust . collect/is_test_attr().`
+`fn is_test_attr(a: &Attribute) -> bool` · L683-L689
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant syn as syn ext
+  participant _syn as syn ext
   participant sealmap_rust__tidy as tidy mod
-  sealmap_rust__collect->>syn: Attribute::path()
+  sealmap_rust__collect->>_syn: Attribute::path()
   opt p.is_ident(#quot;test#quot;) || p.segments.last().is_some_and(…
     Note over sealmap_rust__collect: return true
   end
   sealmap_rust__collect->>sealmap_rust__tidy: tokens(&a.meta)
 ```
 
-## `sealmap_rust::collect::doc_of`
-`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L356-L388
+## `sym:cargo sealmap_rust . collect/doc_of().`
+`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L691-L723
 > First sentence of the doc comment, at most 160 chars.
 ```mermaid
 sequenceDiagram
@@ -467,8 +778,8 @@ sequenceDiagram
   sealmap_rust__collect->>sealmap_frontend__labels: clip(first, DOC_SUMMARY_MAX)
 ```
 
-## `sealmap_rust::collect::tags_of`
-`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L390-L403
+## `sym:cargo sealmap_rust . collect/tags_of().`
+`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L725-L738
 > Attributes worth keeping as tags.
 ```mermaid
 sequenceDiagram
@@ -484,16 +795,16 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::fn_tags`
-`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L405-L417
+## `sym:cargo sealmap_rust . collect/fn_tags().`
+`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L740-L752
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   sealmap_rust__collect->>sealmap_rust__collect: tags_of(attrs)
 ```
 
-## `sealmap_rust::collect::generics_of`
-`fn generics_of(g: &Generics) -> Vec<String>` · L419-L428
+## `sym:cargo sealmap_rust . collect/generics_of().`
+`fn generics_of(g: &Generics) -> Vec<String>` · L754-L763
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -513,14 +824,14 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::fields_of`
-`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L430-L447
+## `sym:cargo sealmap_rust . collect/fields_of().`
+`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L765-L782
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant syn as syn ext
+  participant _syn as syn ext
   participant sealmap_rust__tidy as tidy mod
-  sealmap_rust__collect->>syn: Fields::iter()
+  sealmap_rust__collect->>_syn: Fields::iter()
   opt via map
     sealmap_rust__collect->>sealmap_rust__collect: type_refs(&f.ty, &refs)
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(&f.ty)
@@ -529,18 +840,18 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::type_refs`
-`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L453-L466
+## `sym:cargo sealmap_rust . collect/type_refs().`
+`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L788-L801
 > Every path mentioned in a type, outermost first.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant syn as syn ext
-  sealmap_rust__collect->>syn: Visit::Visit::visit_type(&V(), ty)
+  participant _syn as syn ext
+  sealmap_rust__collect->>_syn: Visit::Visit::visit_type(&V(), ty)
 ```
 
-## `sealmap_rust::collect::sig_refs`
-`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L468-L477
+## `sym:cargo sealmap_rust . collect/sig_refs().`
+`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L803-L812
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -554,8 +865,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::first_path`
-`fn first_path(ty: &Type) -> Option<Segs>` · L479-L488
+## `sym:cargo sealmap_rust . collect/first_path().`
+`fn first_path(ty: &Type) -> Option<Segs>` · L814-L823
 > Outermost path of a type, looking through references and parens.
 ```mermaid
 sequenceDiagram
@@ -571,8 +882,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::params_of`
-`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L490-L507
+## `sym:cargo sealmap_rust . collect/params_of().`
+`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L825-L842
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -585,8 +896,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::flatten_use`
-`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L509-L542
+## `sym:cargo sealmap_rust . collect/flatten_use().`
+`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L844-L877
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -599,319 +910,426 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::block`
-`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L584-L588
+## `sym:cargo sealmap_rust . collect/FlowWalker#block().`
+`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L919-L923
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
-  sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.stmts, &out)
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.stmts, &out)
 ```
 
-## `sealmap_rust::collect::FlowWalker::stmts`
-`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L590-L610
+## `sym:cargo sealmap_rust . collect/FlowWalker#stmts().`
+`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L925-L945
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   loop for s in stmts
     alt Stmt::Local(l)
       opt let Some(init) = &l.init
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&init.expr, out)
+        sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&init.expr, out)
         opt let Some((_, diverge)) = &init.diverge
-          sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(diverge)
+          sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(diverge)
         end
       end
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: bind(&l.pat, map())
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind(&l.pat, map())
     else Stmt::Expr(e, _)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     else Stmt::Macro(m)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: mac(&m.mac, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: mac(&m.mac, out)
     end
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::bind`
-`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L612-L640
+## `sym:cargo sealmap_rust . collect/FlowWalker#bind().`
+`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L947-L984
 > Record the type of a `let` binding when it is evident.
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   participant sealmap_rust__collect as collect mod
   alt Pat::Type(pt)
     alt Pat::Ident(id)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: type_refs(&pt.ty, &refs)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: type_refs(&pt.ty, &refs)
     else _
-      Note over sealmap_rust__collect__FlowWalker: return
+      Note over sealmap_rust__collect___tFlowWalker: return
     end
-  else _
-    Note over sealmap_rust__collect__FlowWalker: return
+  else other
+    alt Some(e)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind_destructured(other, e, false)
+    else None
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: forget(other)
+    end
+    Note over sealmap_rust__collect___tFlowWalker: return
+  end
+  opt None if init.is_some()
+    opt via map_or
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(e)
+    end
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::sub`
-`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L642-L646
+## `sym:cargo sealmap_rust . collect/FlowWalker#bind_destructured().`
+`fn bind_destructured(&mut self, pat: &Pat, scrutinee: &Expr, iterated: bool)` · L986-L1010
+> Bind the names a destructuring pattern (`Some(x)`, `(a, b)`, `Foo { bar, ..
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
-  sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, &out)
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  participant sealmap_rust__collect as collect mod
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: pattern_names(pat, &names)
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(scrutinee)
+  opt (Recv::Typed(refs), 1)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: peel(pat, refs, iterated)
+  end
 ```
 
-## `sealmap_rust::collect::FlowWalker::sub_block`
-`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L648-L653
+## `sym:cargo sealmap_rust . collect/FlowWalker#origin().`
+`fn origin(&self, e: &Expr) -> Recv` · L1012-L1052
+> Where the value of `e` comes from, for [`Recv::Derived`]: the receiver at the root of its method chain, field accesses, `?`, `.await` and borrows, or the path …
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
-  sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: block(b)
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  participant sealmap_rust__collect as collect mod
+  alt Expr::Field(f)
+    opt _
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&f.base)
+    end
+  else Expr::MethodCall(m)
+    opt via and_then
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: turbofish_refs(&t.args)
+    end
+    opt None
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&m.receiver)
+    end
+  else Expr::Call(c)
+    opt Expr::Path(p)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: constructed_type(e)
+      opt None
+        opt via and_then
+          opt syn::PathArguments::AngleBracketed(a)
+            sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: turbofish_refs(&a.args)
+          end
+        end
+        opt via map_or_else
+          sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: path_segs(&p.path)
+        end
+      end
+    end
+  else Expr::Try(t)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&t.expr)
+  else Expr::Await(a)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&a.base)
+  else Expr::Paren(p)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&p.expr)
+  else Expr::Reference(r)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&r.expr)
+  else Expr::Unary(u)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&u.expr)
+  else Expr::Index(i)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: origin(&i.expr)
+  end
 ```
 
-## `sealmap_rust::collect::FlowWalker::expr`
-`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L655-L662
+## `sym:cargo sealmap_rust . collect/FlowWalker#forget().`
+`fn forget(&mut self, pat: &Pat)` · L1054-L1062
+> Drop what is known about the names `pat` binds (a shadowing binding without a value).
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  participant sealmap_rust__collect as collect mod
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: pattern_names(pat, &names)
+```
+
+## `sym:cargo sealmap_rust . collect/FlowWalker#sub().`
+`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L1064-L1068
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, &out)
+```
+
+## `sym:cargo sealmap_rust . collect/FlowWalker#sub_block().`
+`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L1070-L1075
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: block(b)
+```
+
+## `sym:cargo sealmap_rust . collect/FlowWalker#expr().`
+`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1077-L1084
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   opt self.depth>= MAX_EXPR_DEPTH
-    Note over sealmap_rust__collect__FlowWalker: return
+    Note over sealmap_rust__collect___tFlowWalker: return
   end
-  sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr_inner(e, out)
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr_inner(e, out)
 ```
 
-## `sealmap_rust::collect::FlowWalker::expr_inner`
-`fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L664-L867
+## `sym:cargo sealmap_rust . collect/FlowWalker#expr_inner().`
+`fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1086-L1293
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   participant sealmap_rust__collect as collect mod
   participant sealmap_frontend__raw as raw mod
   participant sealmap_rust__tidy as tidy mod
   participant sealmap_frontend__labels as labels mod
   alt Expr::Call(c)
     loop for a in &c.args
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: arg(a, out, &deferred)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: arg(a, out, &deferred)
     end
     alt Expr::Path(p)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: path_segs(&p.path)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: path_segs(&p.path)
       opt !name.starts_with(| ch: char | ch.is_uppercase())
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: call(Path(), &shown, &c.args, Function, span())
-        sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
-        Note over sealmap_rust__collect__FlowWalker: return
+        sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: call(Path(), &shown, &c.args, Function, span())
+        sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
+        Note over sealmap_rust__collect___tFlowWalker: return
       end
     else other
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(other, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(other, out)
     end
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(#quot;#quot;, deferred, LOOPING, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(#quot;#quot;, deferred, LOOPING, out)
   else Expr::MethodCall(m)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&m.receiver, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&m.receiver, out)
     loop for a in &m.args
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: arg(a, out, &deferred)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: arg(a, out, &deferred)
     end
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: recv(&m.receiver)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: call(_, &name, &m.args, Method, span())
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: recv(&m.receiver)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: call(_, &name, &m.args, Method, span())
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
   else Expr::Await(a)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&a.base, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: is_call(&a.base)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&a.base, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: is_call(&a.base)
     opt is_call(&a.base)
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: last_call_mut(out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: last_call_mut(out)
     end
   else Expr::Try(t)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&t.expr, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: is_call(&t.expr)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&t.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: is_call(&t.expr)
     opt is_call(&t.expr)
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: last_call_mut(out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: last_call_mut(out)
     end
   else Expr::If(i)
     loop while let Some(ifx) = cur.take()
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: cond_label(&ifx.cond)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: cond(&ifx.cond, &cond_steps)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&ifx.then_branch)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: cond_label(&ifx.cond)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: cond(&ifx.cond, &cond_steps)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&ifx.then_branch)
       alt Some(Expr::Block(b))
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&b.block)
+        sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&b.block)
       else Some(other)
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(other)
+        sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(other)
       end
     end
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: push_arms(arms, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__raw: push_arms(arms, out)
   else Expr::Match(m)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&m.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&m.expr, out)
     opt via map
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&a.pat)
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&a.pat)
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
       opt let Some((_, g)) = &a.guard
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(g)
-        sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(g)
+        sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
       end
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(&a.body)
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&label, LABEL_MAX)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind_destructured(&a.pat, &m.expr, false)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(&a.body)
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&label, LABEL_MAX)
     end
   else Expr::ForLoop(f)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&f.expr, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&f.pat)
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&f.expr)
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&f.body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&f.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&f.pat)
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(&f.expr)
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind_destructured(&f.pat, &f.expr, true)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&f.body)
   else Expr::While(w)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: cond_label(&w.cond)
-    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: cond(&w.cond, &body)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&w.body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect: cond_label(&w.cond)
+    sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: cond(&w.cond, &body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&w.body)
   else Expr::Loop(l)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&l.body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&l.body)
   else Expr::Block(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.block.stmts, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.block.stmts, out)
   else Expr::Unsafe(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.block.stmts, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.block.stmts, out)
   else Expr::Async(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.block.stmts, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.block.stmts, out)
   else Expr::TryBlock(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.block.stmts, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.block.stmts, out)
   else Expr::Const(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&b.block.stmts, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&b.block.stmts, out)
   else Expr::Closure(c)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(&c.body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(&c.body)
   else Expr::Return(r)
     opt let Some(e) = &r.expr
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
     opt via map_or_else
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(e)
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
-      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__tidy: tokens(e)
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect___tFlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
     end
   else Expr::Macro(m)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: mac(&m.mac, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: mac(&m.mac, out)
   else Expr::Binary(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&b.left, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&b.right, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&b.left, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&b.right, out)
   else Expr::Assign(a)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&a.right, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&a.left, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&a.right, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&a.left, out)
   else Expr::Unary(u)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&u.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&u.expr, out)
   else Expr::Paren(p)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&p.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&p.expr, out)
   else Expr::Group(g)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&g.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&g.expr, out)
   else Expr::Reference(r)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&r.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&r.expr, out)
   else Expr::Field(f)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&f.base, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&f.base, out)
   else Expr::Index(i)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&i.expr, out)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&i.index, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&i.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&i.index, out)
   else Expr::Cast(c)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&c.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&c.expr, out)
   else Expr::Let(l)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&l.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&l.expr, out)
   else Expr::Tuple(t)
     loop each via for_each
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
   else Expr::Array(a)
     loop each via for_each
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
   else Expr::Repeat(r)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&r.expr, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&r.expr, out)
   else Expr::Range(r)
     opt let Some(s) = &r.start
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(s, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(s, out)
     end
     opt let Some(e) = &r.end
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
   else Expr::Struct(s)
     loop for f in &s.fields
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&f.expr, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(&f.expr, out)
     end
     opt let Some(rest) = &s.rest
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(rest, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(rest, out)
     end
   else Expr::Break(b)
     opt let Some(e) = &b.expr
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
   else Expr::Yield(y)
     opt let Some(e) = &y.expr
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(e, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(e, out)
     end
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::cond`
-`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L869-L875
+## `sym:cargo sealmap_rust . collect/FlowWalker#cond().`
+`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L1295-L1301
 > Condition of `if` / `while`: `let` scrutinee or boolean expression.
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
-  sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(cond, out)
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(cond, out)
   opt let Expr::Let(l) = cond
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: bind(&l.pat, Some())
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: bind(&l.pat, Some())
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::arg`
-`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L877-L897
+## `sym:cargo sealmap_rust . collect/FlowWalker#arg().`
+`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L1303-L1323
 > Walk a call argument.
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   alt Expr::Closure(c)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(&c.body)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub(&c.body)
   else Expr::Async(b)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&b.block)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: sub_block(&b.block)
   else other
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(other, out)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(other, out)
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::mac`
-`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L899-L911
+## `sym:cargo sealmap_rust . collect/FlowWalker#mac().`
+`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L1325-L1337
 > Calls inside macro arguments (`vec![f()]`, `assert!(g())`, `format!("{}", h())`).
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
-  participant syn as syn ext
-  sealmap_rust__collect__FlowWalker->>syn: Macro::parse_body_with(parser)
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
+  participant _syn as syn ext
+  sealmap_rust__collect___tFlowWalker->>_syn: Macro::parse_body_with(parser)
   alt let Ok(args) = m.parse_body_with(parser)
     loop for a in &args
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(a, out)
+      sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: expr(a, out)
     end
   else if let Ok(stmts) = m.parse_body_with(Block::parse_withi…
-    sealmap_rust__collect__FlowWalker->>syn: Macro::parse_body_with(parse_within)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: stmts(&stmts, out)
+    sealmap_rust__collect___tFlowWalker->>_syn: Macro::parse_body_with(parse_within)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: stmts(&stmts, out)
   end
 ```
 
-## `sealmap_rust::collect::FlowWalker::recv`
-`fn recv(&self, e: &Expr) -> Recv` · L913-L929
+## `sym:cargo sealmap_rust . collect/FlowWalker#recv().`
+`fn recv(&self, e: &Expr) -> Recv` · L1339-L1355
 ```mermaid
 sequenceDiagram
-  participant sealmap_rust__collect__FlowWalker as FlowWalker
+  participant sealmap_rust__collect___tFlowWalker as FlowWalker
   alt Expr::Paren(p)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: recv(&p.expr)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: recv(&p.expr)
   else Expr::Reference(r)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: recv(&r.expr)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: recv(&r.expr)
   else Expr::Unary(u)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: recv(&u.expr)
+    sealmap_rust__collect___tFlowWalker->>sealmap_rust__collect___tFlowWalker: recv(&u.expr)
   end
 ```
 
-## `sealmap_rust::collect::call`
-`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L932-L935
+## `sym:cargo sealmap_rust . collect/turbofish_refs().`
+`fn turbofish_refs(args: &Punctuated<syn::GenericArgument, syn::Token![,]>) -> Option<Vec<Segs>>` · L1382-L1393
+> The type paths of a turbofish with exactly one type argument (`::<Config>`, `::<Vec<Job>>`).
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant syn as syn ext
-  participant sealmap_frontend__labels as labels mod
-  participant proc_macro2 as proc_macro2 ext
-  sealmap_rust__collect->>syn: Punctuated::iter()
-  sealmap_rust__collect->>sealmap_frontend__labels: call_label(name, &sketch)
-  sealmap_rust__collect->>proc_macro2: Span::start()
+  participant _syn as syn ext
+  sealmap_rust__collect->>_syn: Punctuated::iter()
+  opt let-else
+    Note over sealmap_rust__collect: return None
+  end
+  sealmap_rust__collect->>sealmap_rust__collect: type_refs(ty, &refs)
 ```
 
-## `sealmap_rust::collect::arg_sketch`
-`fn arg_sketch(e: &Expr) -> String` · L937-L957
+## `sym:cargo sealmap_rust . collect/pattern_names().`
+`fn pattern_names(pat: &Pat, out: &mut Vec<String>)` · L1395-L1407
+> The names a pattern binds, in source order.
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant _syn as syn ext
+  sealmap_rust__collect->>_syn: Visit::Visit::visit_pat(&Names(), pat)
+```
+
+## `sym:cargo sealmap_rust . collect/call().`
+`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L1409-L1412
+```mermaid
+sequenceDiagram
+  participant sealmap_rust__collect as collect mod
+  participant _syn as syn ext
+  participant sealmap_frontend__labels as labels mod
+  participant _proc_macro2 as proc_macro2 ext
+  sealmap_rust__collect->>_syn: Punctuated::iter()
+  sealmap_rust__collect->>sealmap_frontend__labels: call_label(name, &sketch)
+  sealmap_rust__collect->>_proc_macro2: Span::start()
+```
+
+## `sym:cargo sealmap_rust . collect/arg_sketch().`
+`fn arg_sketch(e: &Expr) -> String` · L1414-L1434
 > A compact stand-in for an argument: identifiers and short literals are kept, everything else becomes `_`.
 ```mermaid
 sequenceDiagram
@@ -932,8 +1350,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::cond_label`
-`fn cond_label(cond: &Expr) -> String` · L959-L965
+## `sym:cargo sealmap_rust . collect/cond_label().`
+`fn cond_label(cond: &Expr) -> String` · L1436-L1442
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -951,8 +1369,8 @@ sequenceDiagram
   sealmap_rust__collect->>sealmap_frontend__labels: condition_label(&text)
 ```
 
-## `sealmap_rust::collect::is_call`
-`fn is_call(e: &Expr) -> bool` · L967-L975
+## `sym:cargo sealmap_rust . collect/is_call().`
+`fn is_call(e: &Expr) -> bool` · L1444-L1452
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -965,8 +1383,8 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_rust::collect::constructed_type`
-`fn constructed_type(e: &Expr) -> Option<Segs>` · L977-L995
+## `sym:cargo sealmap_rust . collect/constructed_type().`
+`fn constructed_type(e: &Expr) -> Option<Segs>` · L1454-L1472
 > `Foo::new(..)`, `Foo { ..
 ```mermaid
 sequenceDiagram

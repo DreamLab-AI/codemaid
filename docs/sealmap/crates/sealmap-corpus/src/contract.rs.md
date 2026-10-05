@@ -1,20 +1,20 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-corpus/src/contract.rs
-module: sealmap_corpus::contract
+module: "sym:cargo sealmap_corpus . contract/"
 language: rust
 source_hash: blake3:5dbda05b5570872402ab655b7be92d887beda9ce813d056e708d4ef30c3ffd26
 lines: 183
-fragments: 8
+fragments: 7
 ---
-# `sealmap_corpus::contract` · crates/sealmap-corpus/src/contract.rs
+# `sym:cargo sealmap_corpus . contract/` · crates/sealmap-corpus/src/contract.rs
 > The 1:1 contract: verify a corpus directory against freshly generated output, and write a directory into compliance.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_corpus__contract__Drift["Drift"] {
+  class sealmap_corpus__contract___tDrift["Drift"] {
     <<enum>>
     Missing
     Orphaned
@@ -22,12 +22,12 @@ classDiagram
     Modified
     +Display::fmt(&self, f: &mut fmt::Formatter#lt;'_#gt;) fmt::Result
   }
-  class sealmap_corpus__contract__DriftEntry["DriftEntry"] {
+  class sealmap_corpus__contract___tDriftEntry["DriftEntry"] {
     <<struct>>
     +path: SourcePath
     +drift: Drift
   }
-  class sealmap_corpus__contract__Report["Report"] {
+  class sealmap_corpus__contract___tReport["Report"] {
     <<struct>>
     +entries: Vec#lt;DriftEntry#gt;
     +checked: usize
@@ -44,26 +44,26 @@ classDiagram
     +verify_against(expected: &Corpus, actual: &BTreeMap#lt;SourcePath, String#gt;) Report
     +write(dir: &Path, expected: &Corpus) io::Result#lt;Report#gt;
   }
-  class sealmap_corpus__Corpus["Corpus"] {
+  class sealmap_corpus___tCorpus["Corpus"] {
     <<struct in crates/sealmap-corpus/src/lib.rs>>
   }
-  class sealmap_model__hash__ContentHash["ContentHash"] {
+  class sealmap_model__hash___tContentHash["ContentHash"] {
     <<struct in crates/sealmap-model/src/hash.rs>>
   }
-  class sealmap_model__path__SourcePath["SourcePath"] {
+  class sealmap_model__path___tSourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  sealmap_corpus__contract ..> sealmap_corpus__Corpus
-  sealmap_corpus__contract ..> sealmap_corpus__contract__Report
-  sealmap_corpus__contract ..> sealmap_model__hash__ContentHash
-  sealmap_corpus__contract ..> sealmap_model__path__SourcePath
-  sealmap_corpus__contract__DriftEntry *-- sealmap_corpus__contract__Drift : drift
-  sealmap_corpus__contract__DriftEntry *-- sealmap_model__path__SourcePath : path
-  sealmap_corpus__contract__Report ..> sealmap_corpus__contract__Drift
-  sealmap_corpus__contract__Report o-- sealmap_corpus__contract__DriftEntry : entries
+  sealmap_corpus__contract ..> sealmap_corpus___tCorpus
+  sealmap_corpus__contract ..> sealmap_corpus__contract___tReport
+  sealmap_corpus__contract ..> sealmap_model__hash___tContentHash
+  sealmap_corpus__contract ..> sealmap_model__path___tSourcePath
+  sealmap_corpus__contract___tDriftEntry *-- sealmap_corpus__contract___tDrift : drift
+  sealmap_corpus__contract___tDriftEntry *-- sealmap_model__path___tSourcePath : path
+  sealmap_corpus__contract___tReport ..> sealmap_corpus__contract___tDrift
+  sealmap_corpus__contract___tReport o-- sealmap_corpus__contract___tDriftEntry : entries
 ```
 
-## `sealmap_corpus::contract::verify_against`
+## `sym:cargo sealmap_corpus . contract/verify_against().`
 `pub fn verify_against(expected: &Corpus, actual: &BTreeMap<SourcePath, String>) -> Report` · L72-L105
 > Compare `expected` (freshly generated) with `actual` (file path → text as found on disk or elsewhere).
 ```mermaid
@@ -85,7 +85,7 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_corpus::contract::read_dir_corpus`
+## `sym:cargo sealmap_corpus . contract/read_dir_corpus().`
 `pub fn read_dir_corpus(dir: &Path) -> io::Result<BTreeMap<SourcePath, String>>` · L107-L115
 > Read every file under `dir` (UTF-8 only) keyed by relative path.
 ```mermaid
@@ -96,22 +96,22 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_corpus::contract::read_rec`
+## `sym:cargo sealmap_corpus . contract/read_rec().`
 `fn read_rec(root: &Path, dir: &Path, out: &mut BTreeMap<SourcePath, String>) -> io::Result<()>` · L117-L131
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__contract as contract mod
-  participant sealmap_model__path__SourcePath as SourcePath
+  participant sealmap_model__path___tSourcePath as SourcePath
   loop for e in entries
     alt ty.is_dir()
       sealmap_corpus__contract->>sealmap_corpus__contract: read_rec(root, &path(), out)?
     else if ty.is_file()
-      sealmap_corpus__contract->>sealmap_model__path__SourcePath: SourcePath::relative_to(&path(), root)
+      sealmap_corpus__contract->>sealmap_model__path___tSourcePath: SourcePath::relative_to(&path(), root)
     end
   end
 ```
 
-## `sealmap_corpus::contract::verify`
+## `sym:cargo sealmap_corpus . contract/verify().`
 `pub fn verify(dir: &Path, expected: &Corpus) -> io::Result<Report>` · L133-L136
 > Verify the corpus in `dir` against `expected`.
 ```mermaid
@@ -121,7 +121,7 @@ sequenceDiagram
   sealmap_corpus__contract->>sealmap_corpus__contract: verify_against(expected, &_)
 ```
 
-## `sealmap_corpus::contract::write`
+## `sym:cargo sealmap_corpus . contract/write().`
 `pub fn write(dir: &Path, expected: &Corpus) -> io::Result<Report>` · L138-L160
 > Bring `dir` into compliance with `expected`: write missing, stale and modified files, delete orphaned generated documents (and nothing else).
 ```mermaid
@@ -135,23 +135,12 @@ sequenceDiagram
   end
 ```
 
-## `sealmap_corpus::contract::remove_empty_parents`
-`fn remove_empty_parents(root: &Path, file: &Path)` · L162-L170
-```mermaid
-sequenceDiagram
-  participant sealmap_corpus__contract as contract mod
-  participant sealmap_model__symbol__SymbolId as SymbolId
-  loop while let Some(dir) = cur
-    sealmap_corpus__contract->>sealmap_model__symbol__SymbolId: ~parent()
-  end
-```
-
-## `sealmap_corpus::contract::corpus_hash`
+## `sym:cargo sealmap_corpus . contract/corpus_hash().`
 `pub fn corpus_hash(corpus: &Corpus) -> ContentHash` · L172-L183
 > Hash of a whole corpus (all paths and contents), for cheap equality checks across machines.
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus__contract as contract mod
-  participant sealmap_model__hash__ContentHash as ContentHash
-  sealmap_corpus__contract->>sealmap_model__hash__ContentHash: ContentHash::of_bytes(as_bytes())
+  participant sealmap_model__hash___tContentHash as ContentHash
+  sealmap_corpus__contract->>sealmap_model__hash___tContentHash: ContentHash::of_bytes(as_bytes())
 ```

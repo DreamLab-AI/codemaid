@@ -1,48 +1,49 @@
 ---
-sealmap: 1
+sealmap: 2
 source: crates/sealmap-frontend/src/lib.rs
-module: sealmap_frontend
+module: "sym:cargo sealmap_frontend ."
 language: rust
-source_hash: blake3:415a52feeeac8ba8ca4bd453a257b72faa69663e114fe63ef4fd90e5d752c4d1
-lines: 83
+source_hash: blake3:76c5be7bce4fe9c246f744d6055d498f156ec6c4dd3aeedd9796f5142e10e4b3
+lines: 86
 fragments: 1
 ---
-# `sealmap_frontend` · crates/sealmap-frontend/src/lib.rs
+# `sym:cargo sealmap_frontend .` · crates/sealmap-frontend/src/lib.rs
 > The language-neutral half of a sealmap frontend.
 
 ## structure
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_frontend__Diagnostic["Diagnostic"] {
+  class sealmap_frontend___tDiagnostic["Diagnostic"] {
     <<struct>>
     +file: SourcePath
     +message: String
   }
-  class sealmap_frontend__Extraction["Extraction"] {
+  class sealmap_frontend___tExtraction["Extraction"] {
     <<struct>>
     +codebase: Codebase
     +diagnostics: Vec#lt;Diagnostic#gt;
   }
-  class sealmap_frontend__ReadmeDoctests["ReadmeDoctests"] {
+  class sealmap_frontend___tReadmeDoctests["ReadmeDoctests"] {
     <<struct>>
   }
   class sealmap_frontend {
     <<module>>
     +mod confidence
+    +mod fingerprint
     +mod ids
     +mod isolate
     +mod labels
     +mod lower
     +mod raw
   }
-  class sealmap_model__path__SourcePath["SourcePath"] {
+  class sealmap_model__path___tSourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  class sealmap_model__codebase__Codebase["Codebase"] {
+  class sealmap_model__codebase___tCodebase["Codebase"] {
     <<struct in crates/sealmap-model/src/codebase.rs>>
   }
-  sealmap_frontend__Diagnostic *-- sealmap_model__path__SourcePath : file
-  sealmap_frontend__Extraction o-- sealmap_frontend__Diagnostic : diagnostics
-  sealmap_frontend__Extraction *-- sealmap_model__codebase__Codebase : codebase
+  sealmap_frontend___tDiagnostic *-- sealmap_model__path___tSourcePath : file
+  sealmap_frontend___tExtraction o-- sealmap_frontend___tDiagnostic : diagnostics
+  sealmap_frontend___tExtraction *-- sealmap_model__codebase___tCodebase : codebase
 ```
