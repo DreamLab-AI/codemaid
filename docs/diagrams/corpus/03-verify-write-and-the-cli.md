@@ -149,8 +149,9 @@ for anything watching the directory (`crates/sealmap-corpus/src/contract.rs:138`
 `write_converges_and_is_idempotent` pins that a second `write` changes
 nothing (`crates/sealmap-corpus/tests/contract.rs:138`).
 
-**Invariant:** `write` deletes only Markdown files that start with the
-generator marker, never anything else in the directory
+**Invariant:** `write` deletes only Markdown files whose YAML front matter
+opens on the first line (`---`) and whose first key is the `sealmap: `
+marker; a file that merely mentions the marker anywhere else is never touched
 (`crates/sealmap-corpus/src/contract.rs:99`, `crates/sealmap-corpus/src/document.rs:153`-`155`).
 
 ## COR-03.4 Reading a directory

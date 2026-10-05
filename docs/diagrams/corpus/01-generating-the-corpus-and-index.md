@@ -108,8 +108,9 @@ be misread as structure or comments (`crates/sealmap-corpus/src/document.rs:124`
 and headings use a longer code fence when an id holds backticks
 (`crates/sealmap-corpus/src/document.rs:130`-`134`).
 
-**Invariant:** every generated document begins with the `sealmap: ` marker
-line, and `write` only ever deletes files that carry it
+**Invariant:** every generated document opens with `---` front matter whose
+first key is the `sealmap: ` marker, and `write` only ever deletes files
+whose front matter starts that way
 (`crates/sealmap-corpus/src/document.rs:10`-`12`).
 
 ## COR-01.3 The index as types

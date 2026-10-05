@@ -211,6 +211,14 @@ implements; a receiver with no type evidence falls back to a name match;
 values the walker could only describe as computed or returned are not
 resolved at all.
 
+**Debt:** a method called on a returned or computed receiver, as in
+`a.b().c()` or `(x + y).m()`, is never bound to an internal method: the
+match yields no type (`crates/sealmap-rust/src/resolve.rs:856`) and the call
+falls through to an external, unresolved id
+(`crates/sealmap-rust/src/resolve.rs:858`), so builder chains and fluent APIs
+lose their internal edges. Fixing it needs return-type inference, which the
+adapter does not do.
+
 **Why it is this way.** Smart pointers and lock guards are looked through, but
 any other wrapper (`Vec`, `Option`, `Mutex`) is itself the receiver
 (`crates/sealmap-rust/src/resolve.rs:899`-`901`), so `vec.len()` is a std call,
