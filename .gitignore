@@ -1,3 +1,5 @@
 /target
 /docs/diagrams/rendered/
 /.sealmap/
+/deprecated/*/target
+/deprecated/*/Cargo.lock

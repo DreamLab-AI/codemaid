@@ -128,7 +128,7 @@ sealmap: sealed LED-01 (ledger/01-accounts.md) with 1 symbol(s) into ./docs/diag
 $ cat docs/diagrams/seals.lock
 version = 1
 algorithm = "sm1"
-generator = "sealmap 0.1.0"
+generator = "sealmap 0.2.0"
 
 [[topic]]
 id = "LED-01"
@@ -239,25 +239,25 @@ cheap and checkable.
 
 ## Crates
 
-**Today (in this tree: 0.1 plus step 2, ids and hashes, and step 3: the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
+**Today (0.2.0 on crates.io: ids and hashes, the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
 | [`sealmap`](crates/sealmap) | facade and CLI | all below, clap |
 | [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow`; the `sym:` id grammar; per-symbol `sig_hash` / `body_hash`; schema v2 | serde, blake3, ignore |
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
-| [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
+| [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend`, now a deprecated forwarding shim): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
 | [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign`; the `pack` module: review packs and change selection | sealmap-dense, serde_json, toml, blake3 |
 | [`sealmap-dense`](crates/sealmap-dense) | the agent projection: Rust-like skeletons with `L<start>-<end>` spans, indented call trees (each callable expanded once; `^` / `↺` / `…` marks; `~` inferred, `?` external), a short-name `_index.txt`, and byte-budgeted slices that refuse rather than truncate | sealmap-model |
 
-**Planned for 0.2:**
+**Planned:**
 
 | Crate | Role |
 |---|---|
 | `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
 
-Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full
+Each crate is published on crates.io under `MIT OR Apache-2.0`, with full
 rustdoc. Depend on the facade for the common path. A project that only needs
 safe Mermaid output can depend on `sealmap-mermaid` alone.
 
@@ -350,21 +350,21 @@ A diagrams-only `--review` mode is designed but not built
 
 ## Status and roadmap
 
-**v0.1** is working. It is dogfooded on its own source, and the Rust language
+**0.2.0** is released. It is dogfooded on its own source, and the Rust language
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
-to 3 of the 0.2 plan are done in this tree and not yet released.
+to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
 1. **Done.** Rename to `sealmap-*`; dual licence; land the hardening; extract the
-   shared core, now `sealmap-extract` (published as `sealmap-frontend` 0.1.0).
+   shared core, now `sealmap-extract` (once `sealmap-frontend`, now a deprecated shim).
 2. **Done.** `sym:` id grammar (SCIP-descriptor style), signature and body
    hashes, schema v2, injective Mermaid ids, the `Path::parent` resolver fix,
    and CI on the MSRV.
-3. **Done, unreleased.** Seal surface: the lock, `resolve`, `stale`,
+3. **Done, released in 0.2.0.** Seal surface: the lock, `resolve`, `stale`,
    `seal-check`, `verify`, `seal sign` and `pack`; `sealmap-dense` and
-   `sealmap dense`; the committed generated corpus is retired. The first 0.2
-   crates.io release follows.
+   `sealmap dense`; the committed generated corpus is retired. Published to
+   crates.io as 0.2.0.
 4. **E0:** replay 100 real commits and count topics flagged per commit, file
    level against sealed, with no LLM involved. This is the first headline
    number.

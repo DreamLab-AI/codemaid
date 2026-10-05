@@ -464,7 +464,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "sealmap-corpus",
@@ -478,7 +478,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-corpus"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "blake3",
  "proptest",
@@ -494,7 +494,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-dense"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sealmap-model",
  "sealmap-rust",
@@ -502,7 +502,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-extract"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "blake3",
  "rayon",
@@ -511,7 +511,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-mermaid"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "proptest",
  "sealmap-model",
@@ -519,7 +519,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-model"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "blake3",
  "ignore",
@@ -531,7 +531,7 @@ dependencies = [
 
 [[package]]
 name = "sealmap-rust"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",

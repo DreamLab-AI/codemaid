@@ -1,0 +1,23 @@
+[package]
+name = "sealmap-frontend"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+description = "Deprecated: renamed to sealmap-extract. This crate only re-exports it."
+repository = "https://github.com/DreamLab-AI/sealmap"
+homepage = "https://github.com/DreamLab-AI/sealmap"
+documentation = "https://docs.rs/sealmap-extract"
+readme = "README.md"
+authors = ["jjohare"]
+keywords = ["sealmap", "deprecated"]
+categories = ["development-tools"]
+
+[badges]
+maintenance = { status = "deprecated" }
+
+# Not a member of the sealmap workspace.
+[workspace]
+
+[dependencies]
+sealmap-extract = { path = "../../crates/sealmap-extract", version = "0.2.0" }

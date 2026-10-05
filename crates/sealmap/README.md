@@ -26,7 +26,7 @@ cite (see the
 |---|---|
 | [`sealmap-model`](https://crates.io/crates/sealmap-model) | language-neutral code model |
 | [`sealmap-mermaid`](https://crates.io/crates/sealmap-mermaid) | typed Mermaid writers and injective diagram ids (no dependencies without the default `model` feature) |
-| [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0) |
+| [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend`, now a deprecated forwarding shim) |
 | [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust language adapter (syn) |
 | [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index and write; the seal lock, `verify`, `seal_check`, `stale`, `resolve`, `sign`; review packs (`pack`) |
 | [`sealmap-dense`](https://crates.io/crates/sealmap-dense) | compact agent projection: skeletons, call trees, short-name index, budgeted slices (`sealmap::dense`) |

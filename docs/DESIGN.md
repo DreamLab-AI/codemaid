@@ -299,8 +299,8 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
    `verify` / `pack`, and `sealmap-dense`. Retire the committed corpus.
    **First crates.io publish (0.2).** *Status: done in the tree (the seal
    module, `resolve`, `stale`, `seal-check`, `verify`, `seal sign`, the
-   retirement, `sealmap-dense`, `sealmap dense` and `pack`); the publish
-   remains.*
+   retirement, `sealmap-dense`, `sealmap dense` and `pack`); published
+   as 0.2.0.*
 4. **E0-R** on VisionClaw and agentbox. This is the first headline number.
 5. **`sealmap` skill** (skill-builder): seal workflow, tiers, edge-check,
    bench. Amend diagrams-as-code and build-with-quality. Write the routing ADR.
