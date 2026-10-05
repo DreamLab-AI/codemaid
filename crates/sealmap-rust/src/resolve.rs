@@ -8,6 +8,7 @@ use sealmap_model::{
     SymbolKind,
 };
 
+use crate::layout::Plan;
 use crate::raw::*;
 use crate::{Diagnostic, RustOptions};
 
@@ -209,8 +210,8 @@ const COMMON_METHODS: &[&str] = &[
     "as_mut",
 ];
 
-pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Codebase, Vec<Diagnostic>) {
-    let r = Resolver::new(&files);
+pub(crate) fn build(name: &str, files: Vec<RawFile>, plan: &Plan, opts: &RustOptions) -> (Codebase, Vec<Diagnostic>) {
+    let r = Resolver::new(&files, plan);
     let mut cb = Codebase::new(name);
     let mut diags = Vec::new();
 
@@ -447,7 +448,9 @@ impl Fields {
 }
 
 /// Lookup tables built from all raw files before any resolution.
-struct Resolver {
+struct Resolver<'p> {
+    /// Which crates each crate's code can name (for name-only guesses).
+    plan: &'p Plan,
     crates: BTreeSet<String>,
     /// module id → item name → definitions (items, submodules).
     items: BTreeMap<SymbolId, BTreeMap<String, Slots>>,
@@ -472,9 +475,10 @@ struct Resolver {
     globs: BTreeMap<SymbolId, Vec<SymbolId>>,
 }
 
-impl Resolver {
-    fn new(files: &[RawFile]) -> Self {
+impl<'p> Resolver<'p> {
+    fn new(files: &[RawFile], plan: &'p Plan) -> Self {
         let mut r = Resolver {
+            plan,
             crates: files.iter().map(|f| f.role.crate_name.clone()).collect(),
             items: BTreeMap::new(),
             uses: BTreeMap::new(),
@@ -850,13 +854,13 @@ impl Resolver {
             Recv::SelfValue => ctx.self_ty.cloned(),
             Recv::SelfField(field) => match ctx.self_ty.and_then(|ty| self.fields.get(ty)?.field(field)) {
                 Some((module, params, refs)) => self.receiver_type(module, refs, None, params),
-                None => return Some(self.by_name_only(name)),
+                None => return Some(self.by_name_only(ctx, name)),
             },
             Recv::Typed(refs) => self.receiver_type(ctx.module, refs, ctx.self_ty, ctx.params),
-            Recv::Untyped => return Some(self.by_name_only(name)),
+            Recv::Untyped => return Some(self.by_name_only(ctx, name)),
             Recv::Derived(origin) => {
                 return Some(if self.internal_origin(ctx, origin) {
-                    self.by_name_only(name)
+                    self.by_name_only(ctx, name)
                 } else {
                     (ids::unresolved_method_id(name), Confidence::External)
                 });
@@ -931,15 +935,28 @@ impl Resolver {
         None
     }
 
-    /// Unknown receiver: accept a unique, distinctive internal method name.
-    fn by_name_only(&self, name: &str) -> (SymbolId, Confidence) {
+    /// Unknown receiver: accept a distinctive internal method name when
+    /// exactly one method of that name lives in a crate the calling crate can
+    /// reach (itself, its own library, its workspace dependencies; see
+    /// [`Plan::reach`]).
+    ///
+    /// The guess is local: a method in a crate the caller cannot name never
+    /// competes, so adding code elsewhere in the workspace cannot change it.
+    /// Two or more reachable candidates are a genuine ambiguity: no edge is
+    /// guessed and the call stays a method on an unknown receiver
+    /// (`sym:? name`, external), which the default policy drops.
+    fn by_name_only(&self, ctx: &FlowCtx<'_>, name: &str) -> (SymbolId, Confidence) {
         if !COMMON_METHODS.contains(&name) {
-            if let Some(ids) = self.by_name.get(name) {
-                if ids.len() == 1 {
-                    if let Some(id) = ids.iter().next() {
-                        return (id.clone(), Confidence::Inferred);
-                    }
-                }
+            let from = ctx.module.root();
+            let from = from.as_deref().unwrap_or("");
+            let mut reachable = self
+                .by_name
+                .get(name)
+                .into_iter()
+                .flatten()
+                .filter(|id| id.root().is_some_and(|to| self.plan.reaches(from, &to)));
+            if let (Some(id), None) = (reachable.next(), reachable.next()) {
+                return (id.clone(), Confidence::Inferred);
             }
         }
         (ids::unresolved_method_id(name), Confidence::External)

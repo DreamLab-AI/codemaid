@@ -137,3 +137,98 @@ fn struct_literal_receiver_is_typed() {
     assert_eq!(calls(&cb, "sym:cargo ledger . print_ref()."), std::slice::from_ref(&render));
     assert_eq!(calls(&cb, "sym:cargo ledger . Statement#blank()."), [render]);
 }
+
+/// The receiver of the guessed call: a value taken apart from internal code,
+/// whose type the walker cannot see.
+const LEDGER_CORE: &str = r#"
+    pub struct Journal { entries: Vec<Entry> }
+    pub struct Entry;
+    impl Entry { pub fn reconcile(&self) {} }
+    impl Journal {
+        pub fn first(&self) -> Option<&Entry> { self.entries.first() }
+        pub fn close(&self) { if let Some(e) = self.first() { e.reconcile(); } }
+    }
+    pub fn latest() -> Option<Entry> { None }
+"#;
+
+/// DEN-01.6 (d): a name-guessed edge must not depend on unrelated code.
+/// Adding `reconcile` methods to a crate the caller cannot reach (not a
+/// dependency) once removed a correct guessed edge.
+#[test]
+fn guessed_edges_ignore_crates_the_caller_cannot_reach() {
+    let core = [
+        ("Cargo.toml", "[workspace]\nmembers = ['core', 'reports']"),
+        ("core/Cargo.toml", "[package]\nname = 'ledger-core'"),
+        ("core/src/lib.rs", LEDGER_CORE),
+    ];
+    let first = exact("sym:cargo ledger_core . Journal#first().");
+    let guessed = ("sym:cargo ledger_core . Entry#reconcile().".to_owned(), Confidence::Inferred);
+    let alone = model(&core);
+    assert_eq!(calls(&alone, "sym:cargo ledger_core . Journal#close()."), [first.clone(), guessed.clone()]);
+
+    // An unrelated crate that depends on ledger-core, not the reverse, with
+    // two methods of the same name.
+    let mut with_reports = core.to_vec();
+    with_reports.extend([
+        ("reports/Cargo.toml", "[package]\nname = 'reports'\n[dependencies]\nledger-core = { path = '../core' }"),
+        (
+            "reports/src/lib.rs",
+            "pub struct Monthly; impl Monthly { pub fn reconcile(&self) {} }\npub struct Yearly; impl Yearly { pub fn reconcile(&self) {} }",
+        ),
+    ]);
+    let both = model(&with_reports);
+    assert_eq!(calls(&both, "sym:cargo ledger_core . Journal#close()."), [first, guessed]);
+}
+
+/// A guess that really is ambiguous, with two candidates the caller can
+/// reach, emits no edge rather than picking one.
+#[test]
+fn ambiguous_guesses_among_reachable_crates_emit_no_edge() {
+    let files = [
+        ("Cargo.toml", "[workspace]\nmembers = ['core', 'audit']"),
+        (
+            "core/Cargo.toml",
+            "[package]\nname = 'ledger-core'\n[dependencies]\naudit-trail = { path = '../audit', package = 'ledger-audit' }",
+        ),
+        ("core/src/lib.rs", LEDGER_CORE),
+        ("audit/Cargo.toml", "[package]\nname = 'ledger-audit'"),
+        ("audit/src/lib.rs", "pub struct Trail; impl Trail { pub fn reconcile(&self) {} }"),
+    ];
+    let first = exact("sym:cargo ledger_core . Journal#first().");
+    let cb = model(&files);
+    assert_eq!(calls(&cb, "sym:cargo ledger_core . Journal#close()."), std::slice::from_ref(&first));
+    // With every external call kept, the call is there as a method on an
+    // unknown receiver, never bound to either candidate.
+    let all = model_with(&files, ExternalCalls::All);
+    assert_eq!(
+        calls(&all, "sym:cargo ledger_core . Journal#close()."),
+        [first, ("sym:? reconcile".to_owned(), Confidence::External)]
+    );
+}
+
+/// A binary sees its own package's library, and workspace dependencies in
+/// any dependency table count.
+#[test]
+fn binaries_and_target_dependencies_reach_their_libraries() {
+    let files = [
+        ("Cargo.toml", "[workspace]\nmembers = ['core', 'cli']"),
+        ("core/Cargo.toml", "[package]\nname = 'ledger-core'"),
+        ("core/src/lib.rs", LEDGER_CORE),
+        (
+            "cli/Cargo.toml",
+            "[package]\nname = 'ledger-cli'\n[target.'cfg(unix)'.dependencies]\nledger-core = { workspace = true }",
+        ),
+        ("cli/src/lib.rs", "pub fn version() -> u8 { 1 }"),
+        (
+            "cli/src/main.rs",
+            "fn main() { if let Some(e) = ledger_core::latest() { e.reconcile(); } ledger_cli::version(); }",
+        ),
+    ];
+    let cb = model(&files);
+    let main = calls(&cb, "sym:cargo ledger_cli_main . main().");
+    assert!(
+        main.contains(&("sym:cargo ledger_core . Entry#reconcile().".to_owned(), Confidence::Inferred)),
+        "{main:?}"
+    );
+    assert!(main.contains(&exact("sym:cargo ledger_cli . version().")), "{main:?}");
+}

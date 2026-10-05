@@ -15,8 +15,9 @@
 //!
 //! 1. **Layout.** `Cargo.toml` files in the [`SourceSet`] define packages;
 //!    each `.rs` file is mapped to a crate and module path by Cargo's
-//!    conventions (`src/lib.rs`, `src/a/mod.rs`, `src/bin/x.rs`, ...). Without
-//!    any manifest, the whole set is one crate named after
+//!    conventions (`src/lib.rs`, `src/a/mod.rs`, `src/bin/x.rs`, ...). Each
+//!    manifest's dependency tables say which workspace crates a crate can
+//!    reach. Without any manifest, the whole set is one crate named after
 //!    [`RustOptions::name`].
 //! 2. **Collect (per file, parallel).** Each file is parsed and reduced to
 //!    plain data: items, `use` tables, impl blocks and unresolved call flows.
@@ -54,8 +55,10 @@
 //!
 //! * `exact`: resolved through explicit paths, imports or declared types to a
 //!   symbol defined in the analysed code;
-//! * `inferred`: matched by a weaker rule (a unique, distinctive method name
-//!   on an unknown receiver, or a method reached through deref);
+//! * `inferred`: matched by a weaker rule (a distinctive method name on an
+//!   unknown receiver, when exactly one method of that name lives in a crate
+//!   the caller can reach; or a method reached through deref). Two reachable
+//!   candidates are an ambiguity, and no edge is guessed;
 //! * `external`: outside the analysed code.
 //!
 //! Calls into `std`/`core`/`alloc`, prelude constructors (`Some`, `Ok`,
@@ -153,14 +156,15 @@ impl Default for RustOptions {
 pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction {
     let plan = layout::plan(sources, &options.name);
     let jobs: Vec<_> = plan
-        .into_iter()
+        .roles
+        .iter()
         .filter(|(_, role)| options.include_tests || role.target <= layout::TargetKind::Bin)
-        .filter_map(|(path, role)| sources.get(&path).map(|text| (path.clone(), role, text)))
+        .filter_map(|(path, role)| sources.get(path).map(|text| (path.clone(), role.clone(), text)))
         .collect();
 
     let files = collect_all(&jobs, options);
 
-    let (codebase, diagnostics) = resolve::build(&options.name, files, options);
+    let (codebase, diagnostics) = resolve::build(&options.name, files, &plan, options);
     Extraction { codebase, diagnostics }
 }
 
