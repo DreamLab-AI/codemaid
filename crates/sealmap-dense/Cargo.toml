@@ -1,0 +1,23 @@
+[package]
+name = "sealmap-dense"
+description = "Compact, deterministic agent projection of a sealmap code model: Rust-like skeletons with line spans, indented call trees, a short-name index and budgeted slices"
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sealmap-dense"
+authors.workspace = true
+keywords = ["codemap", "call-graph", "static-analysis", "llm", "repo-map"]
+categories.workspace = true
+
+[dependencies]
+sealmap-model.workspace = true
+
+[dev-dependencies]
+sealmap-rust.workspace = true
+
+[lints]
+workspace = true

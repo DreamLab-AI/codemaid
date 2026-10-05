@@ -103,9 +103,22 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | `sealmap-rust` | syn language adapter, hardened (§7) |
 | `sealmap-ts` | oxc language adapter (§8); **deferred** until E0-R shows the gain |
 | `sealmap-mermaid` | typed writers, short participant aliases (−26.5 % tokens), **injective** ids with a uniqueness assertion |
-| `sealmap-dense` | agent projection: indented call trees + skeletons with `L<start>-<end>` + `_index.txt`. 0.45× source, about 13 tokens per call edge against 42 |
+| `sealmap-dense` | **exists.** Agent projection: skeletons with `L<start>-<end>` and short names, indented call trees (each callable expanded once; `^` reference, `↺` cycle, `…` depth cut), `_index.txt`, and the budgeted `slice` that `pack` embeds. Measured `dense.txt` 0.17–0.29× source and 13–18 tokens per call edge against 34–53 for Mermaid (sealmap, tokio, VisionClaw; bytes / 4) |
 | `sealmap-corpus` | generate, the `seal` module (lock parse and canonical write), `resolve`, `seal-check`, `stale`, `pack`, `verify` |
 | `sealmap` | facade and CLI; `sealmap-ts` behind a default feature, because oxc needs MSRV 1.97 |
+
+**`sealmap-dense` as built (differs from the research estimate).** The
+research figure (0.45× source) projected every function's flow on its own. The
+crate instead draws trees from entry points and expands each callable once, so
+every call site appears exactly once; that, plus printing each signature once,
+brings `dense.txt` to 0.17–0.29× source. The `_index.txt` that resolves short
+names to `sym:` ids is nearly as large again (0.15–0.17× source, because the
+ids are long), so it is a separate file an agent loads only to resolve a name;
+`dense.txt` plus the index is still 0.32–0.46×. Slices carry their own index
+section. A tree header with no mark is an entry point (nothing internal calls
+it); `name …` continues a cut and `name ↺` is reachable only through a cycle.
+The depth limit barely moves the size (±3 % between 1 and 10 levels); the
+default is 3.
 
 ### CLI
 
@@ -117,6 +130,7 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | `verify` | `seal-check` across the corpus, plus coverage and lock faults |
 | `pack <topics\|--diff old new> [--review] [--max-bytes]` | deterministic blob. Refuses with a shard plan when over budget; never silently truncates; never includes the lock |
 | `generate [--check]` | writes `.sealmap/` |
+| `dense` | writes `dense.txt` and `_index.txt`; until the seal-surface merge, `cargo run -p sealmap --example dense` |
 | `export --scip` (later) | interop |
 
 Git stays out of the libraries. `--diff` takes two trees, and `--since` is CLI

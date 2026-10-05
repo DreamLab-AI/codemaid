@@ -4,13 +4,14 @@ kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-41 files · 627 symbols · 1720 relations · 259 flows · 1199 calls
+45 files · 697 symbols · 1899 relations · 288 flows · 1301 calls
 
 ## crates
 ```mermaid
 flowchart LR
   sealmap(["sealmap"])
   sealmap_corpus(["sealmap_corpus"])
+  sealmap_dense(["sealmap_dense"])
   sealmap_extract(["sealmap_extract"])
   sealmap_main(["sealmap_main"])
   sealmap_mermaid(["sealmap_mermaid"])
@@ -32,6 +33,7 @@ flowchart LR
   syn{{"syn"}}
   toml{{"toml"}}
   sealmap -->|"9"| sealmap_corpus
+  sealmap -->|"1"| sealmap_dense
   sealmap -->|"1"| sealmap_extract
   sealmap -->|"1"| sealmap_mermaid
   sealmap -->|"8"| sealmap_model
@@ -40,6 +42,7 @@ flowchart LR
   sealmap_corpus -->|"148"| sealmap_model
   sealmap_corpus -->|"4"| serde
   sealmap_corpus -->|"3"| serde_json
+  sealmap_dense -->|"83"| sealmap_model
   sealmap_extract -->|"4"| blake3
   sealmap_extract -->|"2"| rayon
   sealmap_extract -->|"68"| sealmap_model
@@ -63,7 +66,7 @@ flowchart LR
   sealmap_rust -->|"23"| proc_macro2
   sealmap_rust -->|"6"| quote
   sealmap_rust -->|"134"| sealmap_extract
-  sealmap_rust -->|"136"| sealmap_model
+  sealmap_rust -->|"135"| sealmap_model
   sealmap_rust -->|"124"| syn
   sealmap_rust -->|"1"| toml
 ```
@@ -97,6 +100,21 @@ flowchart LR
   sealmap_corpus__sequence -->|"9"| sealmap_corpus__naming
   sealmap_corpus__structure -->|"6"| sealmap_corpus
   sealmap_corpus__structure -->|"2"| sealmap_corpus__naming
+```
+
+## modules: sealmap_dense
+```mermaid
+flowchart LR
+  sealmap_dense["sealmap_dense"]
+  sealmap_dense__short["short"]
+  sealmap_dense__skeleton["skeleton"]
+  sealmap_dense__tree["tree"]
+  sealmap_dense -->|"7"| sealmap_dense__short
+  sealmap_dense -->|"7"| sealmap_dense__skeleton
+  sealmap_dense -->|"12"| sealmap_dense__tree
+  sealmap_dense__skeleton -->|"4"| sealmap_dense__short
+  sealmap_dense__tree -->|"10"| sealmap_dense__short
+  sealmap_dense__tree -->|"6"| sealmap_dense__skeleton
 ```
 
 ## modules: sealmap_extract
@@ -283,6 +301,50 @@ erDiagram
   sealmap_corpus__index___tFragmentEntry ||--o{ sealmap_corpus__index___tCallRef : "calls"
   sealmap_corpus__index___tIndex ||--o{ sealmap_corpus__index___tDocumentEntry : "documents"
   sealmap_corpus__sequence___tCtx ||..|| sealmap_corpus___tCorpusOptions : "opts"
+```
+
+## data: sealmap_dense
+```mermaid
+erDiagram
+  sealmap_dense___tDense["Dense"] {
+    __aCodebase cb "&'a Codebase"
+    ShortNames[_a] shorts "ShortNames<'a>"
+    Graph[_a] graph_ "Graph<'a>"
+  }
+  sealmap_dense__short___tShortNames["ShortNames"] {
+    BTreeMap[__aSymbolId_String] by_id "BTreeMap<&'a SymbolId, String>"
+    BTreeMap[String___aSymbolId] by_short "BTreeMap<String, &'a SymbolId>"
+  }
+  sealmap_dense__tree___tCallerWriter["CallerWriter"] {
+    __aCodebase cb "&'a Codebase"
+    __wShortNames[_a] shorts "&'w ShortNames<'a>"
+    __wGraph[_a] graph_ "&'w Graph<'a>"
+    usize max_depth
+    BTreeSet[__aSymbolId] listed "BTreeSet<&'a SymbolId>"
+    Vec[__aSymbolId] path "Vec<&'a SymbolId>"
+    String out
+  }
+  sealmap_dense__tree___tGraph["Graph"] {
+    BTreeMap[__aSymbolId___a[Step]] flows "BTreeMap<&'a SymbolId, &'a [Step]>"
+    BTreeMap[__aSymbolId_BTreeSet[__aSymbolId]] callees "BTreeMap<&'a SymbolId, BTreeSet<&'a SymbolId>>"
+    BTreeMap[__aSymbolId_BTreeMap[__aSymbolId_Confidence]] callers "BTreeMap<&'a SymbolId, BTreeMap<&'a SymbolId, Confidence>>"
+  }
+  sealmap_dense__tree___tTreeWriter["TreeWriter"] {
+    __aCodebase cb "&'a Codebase"
+    __wShortNames[_a] shorts "&'w ShortNames<'a>"
+    __wGraph[_a] graph_ "&'w Graph<'a>"
+    String out
+    usize max_depth
+    BTreeSet[__aSymbolId] expanded "BTreeSet<&'a SymbolId>"
+    BTreeSet[__aSymbolId] on_path "BTreeSet<&'a SymbolId>"
+    Option[VecDeque[__aSymbolId]] pending "Option<VecDeque<&'a SymbolId>>"
+  }
+  sealmap_dense___tDense ||--|| sealmap_dense__short___tShortNames : "shorts"
+  sealmap_dense___tDense ||--|| sealmap_dense__tree___tGraph : "graph"
+  sealmap_dense__tree___tCallerWriter ||..|| sealmap_dense__short___tShortNames : "shorts"
+  sealmap_dense__tree___tCallerWriter ||..|| sealmap_dense__tree___tGraph : "graph"
+  sealmap_dense__tree___tTreeWriter ||..|| sealmap_dense__short___tShortNames : "shorts"
+  sealmap_dense__tree___tTreeWriter ||..|| sealmap_dense__tree___tGraph : "graph"
 ```
 
 ## data: sealmap_extract

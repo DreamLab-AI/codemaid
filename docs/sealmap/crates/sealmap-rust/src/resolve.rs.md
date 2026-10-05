@@ -403,12 +403,9 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__resolve___tResolver as Resolver
-  participant sealmap_model__sym___tSymbolId as SymbolId
   participant sealmap_extract__ids as ids mod
   sealmap_rust__resolve___tResolver->>sealmap_rust__resolve___tResolver: walk(module, segs, self_ty, ns, 0, true)
-  alt Some(id)
-    sealmap_rust__resolve___tResolver->>sealmap_model__sym___tSymbolId: ~root()
-  else None
+  opt None
     sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::path_id(segs)
     opt via unwrap_or_else
       sealmap_rust__resolve___tResolver->>sealmap_extract__ids: ids::unresolved_method_id(#quot;#quot;)

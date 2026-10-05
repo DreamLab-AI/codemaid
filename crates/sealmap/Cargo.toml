@@ -26,11 +26,17 @@ sealmap-extract.workspace = true
 sealmap-mermaid.workspace = true
 sealmap-rust.workspace = true
 sealmap-corpus.workspace = true
+sealmap-dense.workspace = true
 serde_json.workspace = true
 clap = { workspace = true, optional = true }
 
 [[bin]]
 name = "sealmap"
+required-features = ["cli"]
+
+# CLI hook for `sealmap dense` until the subcommand lands (see examples/dense.rs).
+[[example]]
+name = "dense"
 required-features = ["cli"]
 
 [lints]

@@ -56,7 +56,7 @@ All figures come from the estate's own corpora (2026-10-05).
 | A hand-consolidated topic corpus is compact | **0.21–0.22×** source bytes, flat while the source grew 67 % |
 | …but file-granular staleness makes it expensive to keep true | a median code commit flags **10 of 45** topics, and p90 flags **40 of 45**. One 4,399-line hub file is cited by 39 topics |
 | A one-file-per-source Mermaid corpus is *not* a compression | **1.07×** source tokens |
-| A dense agent projection is | **0.45×** source, about 13 tokens per call edge against 42 for Mermaid |
+| A dense agent projection is | **0.17–0.29×** source (0.32–0.46× with its index), 13–18 tokens per call edge against 34–53 for Mermaid, on sealmap, tokio and VisionClaw ([`sealmap-dense`](crates/sealmap-dense)) |
 | Diagrams alone carry real review signal | a blind, diagrams-only critical review rediscovered 7 of 30 known tensions with no register visible (pilot, n = 1) |
 
 **The design follows from these numbers:**
@@ -181,7 +181,7 @@ cheap and checkable.
 
 ## Crates
 
-**Today (in this tree: 0.1 plus step 2, ids and hashes; renamed from `codemaid-*`):**
+**Today (in this tree: 0.1 plus step 2, ids and hashes, and `sealmap-dense` from step 3; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
@@ -191,13 +191,13 @@ cheap and checkable.
 | [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
 | [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
+| [`sealmap-dense`](crates/sealmap-dense) | the agent projection: Rust-like skeletons with `L<start>-<end>` spans, indented call trees (each callable expanded once; `^` / `↺` / `…` marks; `~` inferred, `?` external), a short-name `_index.txt`, and byte-budgeted slices that refuse rather than truncate | sealmap-model |
 
 **Planned for 0.2:**
 
 | Crate | Role |
 |---|---|
 | `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
-| `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
 | `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
 
 Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full
@@ -215,6 +215,9 @@ sealmap model    .  > model.json     # just the model
 
 # Several repositories as one codebase (cross-repo calls resolve):
 sealmap generate --repo api=../api --repo core=../core -o .sealmap
+
+# The dense agent projection (dense.txt + _index.txt); becomes `sealmap dense`:
+cargo run --release -p sealmap --example dense -- . -o .sealmap/dense --stats
 ```
 
 **Planned 0.2 CLI** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
@@ -276,7 +279,8 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
    hashes, schema v2, injective Mermaid ids, the `Path::parent` resolver fix,
    and CI on the MSRV.
 3. Seal surface (`resolve` / `stale` / `seal-check` / `verify` / `pack`) and
-   `sealmap-dense`; first crates.io release.
+   `sealmap-dense` (**the crate is done** in this tree; its CLI subcommand lands
+   with the seal surface); first crates.io release.
 4. **E0:** replay 100 real commits and count topics flagged per commit, file
    level against sealed, with no LLM involved. This is the first headline
    number.

@@ -468,6 +468,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "sealmap-corpus",
+ "sealmap-dense",
  "sealmap-extract",
  "sealmap-mermaid",
  "sealmap-model",
@@ -485,6 +486,14 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "sealmap-dense"
+version = "0.1.0"
+dependencies = [
+ "sealmap-model",
+ "sealmap-rust",
 ]
 
 [[package]]
