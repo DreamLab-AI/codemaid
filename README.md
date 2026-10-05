@@ -1,202 +1,230 @@
-# codemaid
+<div align="center">
 
-Deterministic, dense **codebase → Mermaid** generation for LLM agents, in pure Rust.
+# sealmap
 
-codemaid reads source code without compiling it, builds a language-neutral model
-(symbols, relations, and the ordered call flow of every function), and projects it
-into a **contract-enforced 1:1 corpus**: exactly one Markdown document of Mermaid
-diagrams per source file, plus machine-readable metadata that lets an orchestrating
-agent merge, inline and cross-reference diagrams by stable id.
+### Deterministic code maps and sealed diagram contracts for LLM development harnesses
 
-```text
-src/net/client.rs   ──►   codemaid/src/net/client.rs.md
-                           ├─ front matter (source, module, BLAKE3 source hash)
-                           ├─ structure: classDiagram of everything the file defines
-                           └─ one sequenceDiagram per function that makes calls
-                    +     codemaid/_index.json    fragment index and merge map
-                          codemaid/_model.json    full code model
-                          codemaid/_overview.md   crate/repo graph, module graphs,
-                                                  data models (erDiagram), trait maps
+[![Licence](https://img.shields.io/badge/Licence-MIT-blue?style=flat-square)](LICENSE)
+[![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange?style=flat-square)](Cargo.toml)
+[![Status](https://img.shields.io/badge/status-0.1%20%E2%86%92%200.2%20in%20progress-yellow?style=flat-square)](docs/DESIGN.md)
+
+*The seal and the distillation do the work, not a bigger model.*
+
+</div>
+
+---
+
+## What is sealmap?
+
+sealmap is the deterministic layer under an LLM diagrams-as-code workflow.
+
+**The workflow it serves.** Code and a dense corpus of Mermaid diagrams are
+written in lockstep, one subsystem topic at a time. The whole corpus is then
+analysed for a holistic view of the system. In the DreamLab estate this has
+proven to be one of the most effective ways to build large codebases with
+agents. It has one structural cost: **keeping the diagrams true**.
+
+**What sealmap does.** It reads source without compiling it and builds a
+language-neutral model: symbols, relations, and the ordered call flow of every
+function. From that model it provides five things:
+
+- **Stable symbol ids**, with no line numbers in them, so moving code never
+  breaks a citation.
+- **Two content hashes per symbol**, one for the signature and one for the
+  body, both insensitive to whitespace and comments.
+- **Seals.** A lockfile records that a hand-consolidated diagram topic was
+  reviewed against *these exact versions* of the functions it describes.
+  `sealmap verify` enforces that in CI, with no LLM involved.
+- **Precise staleness.** When code changes, only the topics whose sealed
+  symbols actually changed are flagged for another look. Topics that merely
+  share a file with the change are left alone.
+- **On-demand review packs.** A bounded, byte-identical blob is built from the
+  sealed topics, dense slices of the code they cite, and source windows. It
+  feeds an external reviewer, a seal review or a debugging session.
+
+**What stays with the LLM skill:** the narratives, the register of tensions
+and debt, the choice of what to merge, and the review that produces a seal.
+sealmap does the bookkeeping that makes that judgement cheap to keep true.
+
+## Why it exists (measured)
+
+All figures come from the estate's own corpora (2026-10-05).
+
+| Observation | Number |
+|---|---|
+| A hand-consolidated topic corpus is compact | **0.21–0.22×** source bytes, flat while the source grew 67 % |
+| …but file-granular staleness makes it expensive to keep true | a median code commit flags **10 of 45** topics, and p90 flags **40 of 45**. One 4,399-line hub file is cited by 39 topics |
+| A one-file-per-source Mermaid corpus is *not* a compression | **1.07×** source tokens |
+| A dense agent projection is | **0.45×** source, about 13 tokens per call edge against 42 for Mermaid |
+| Diagrams alone carry real review signal | a blind, diagrams-only critical review rediscovered 7 of 30 known tensions with no register visible (pilot, n = 1) |
+
+**The design follows from these numbers:**
+
+- Keep the human corpus consolidated and LLM-written.
+- Make its citations symbol-granular and sealed.
+- Generate everything mechanical on demand and never commit it.
+
+## How it works
+
+```mermaid
+flowchart LR
+  code[source tree] -->|extract| model[(code model<br/>ids · sig/body hashes)]
+  model --> gen[".sealmap/ (gitignored)<br/>dense projection · index · optional 1:1 Mermaid"]
+  topics["docs/diagrams/**<br/>authored topics citing sym: ids"] --> verify{sealmap verify}
+  lock["seals.lock<br/>topic → (id, sig, body)"] --> verify
+  model --> verify
+  verify -->|holds| ci[CI green]
+  verify -->|behaviour · contract · absent| stale[sealmap stale → re-review → re-seal]
+  topics --> pack[sealmap pack]
+  model --> pack
+  pack --> judge[external review · seal review · debugging]
 ```
 
-* **Dense:** per-function sequence diagrams with `alt`/`opt`/`loop`/`par` fragments,
-  std/prelude noise removed, compact labels, no styling.
-* **Deterministic:** the same sources give byte-identical output on every machine.
-* **Enforced:** `codemaid verify` fails CI when any document is missing, orphaned,
-  stale or hand-edited.
-* **Honest:** every call and relation is tagged `exact`, `inferred` or `external`.
-* **Fast:** tokio (497 files, ~6k symbols, 2.1k sequence diagrams) in about 1.3 s.
-* **Valid:** every diagram is built through typed, escaping writers. All 4,680
-  diagrams generated from tokio, axum, ripgrep, oxdraw and this repo parse in
-  Mermaid 12 (see [`tools/validate-mermaid.mjs`](tools/validate-mermaid.mjs)).
+| Layer | Artefact | Committed | Written by |
+|---|---|---|---|
+| **Authored** | consolidated topics, narratives, register; citations are `sym:` ids | yes | the LLM skill |
+| **Sealed** | `seals.lock`, plus a static `sealed:` pointer per topic | yes | the skill's seal step (a reviewed decision) |
+| **Generated** | model, index, dense projection, optional 1:1 Mermaid | **never** | `sealmap generate`, rebuilt in seconds |
+
+### What a seal check reports
+
+| Sealed symbol | Class | CI |
+|---|---|---|
+| id resolves, both hashes match (code moves included) | holds | pass |
+| signature same, body changed | behaviour | fail → cheap re-review |
+| signature changed | contract | fail → re-consolidate, ADR addendum |
+| id gone; another id has the same body | absent (rename suspected) | fail → confirm rename |
+| file no longer parses | unparsable | fail (fail closed) |
+| topic prose edited since sealing | prose changed | fail |
+
+Code, topic and lock land in **one commit**. No second "re-stamp" commit is
+needed.
+
+## Where sealmap sits in the estate
+
+sealmap is a component of
+**[VisionFlow](https://github.com/DreamLab-AI/VisionFlow)**. It is consumed by
+the [agentbox](https://github.com/DreamLab-AI/agentbox) skill harness, much as
+the Ontology Loom is: a deterministic scaffold that makes a model's judgement
+cheap and checkable.
+
+| Sibling | Relationship |
+|:--------|:-------------|
+| [agentbox](https://github.com/DreamLab-AI/agentbox) `diagrams-as-code` skill | Writes the authored corpus. With sealmap, its line-resolution role costs zero tokens and its citations become `sym:` ids |
+| agentbox `sealmap-review` skill (shipped) | Diagrams-only external review (Gemini 3.8 Flash, critical and pre-mortem lenses) and an inline check against the cited code. It will consume `sealmap pack --review` |
+| agentbox `build-with-quality` skill | Takes review findings as hypotheses to test. Gains a **re-seal** step driven by `sealmap stale` |
+| agentbox `sealmap` skill (planned) | The seal workflow, model tiering per step, and the A/B bench |
+| [diagram-ir](https://github.com/DreamLab-AI/diagram-ir) | The inverse direction: reads hand-written Mermaid back into an IR. The skill pairs it with `sealmap resolve` to catch invented edges |
+| [VisionFlow](https://github.com/DreamLab-AI/VisionFlow) | Ecosystem canon, and the largest Rust corpus sealmap is tested on |
 
 ## Crates
 
-| Crate | What it is | Deps |
+**Today (0.1, in this tree under the original names):**
+
+| Crate | Role | Deps |
 |---|---|---|
-| [`codemaid`](crates/codemaid) | Facade + `codemaid` CLI | all below, clap |
-| [`codemaid-model`](crates/codemaid-model) | Language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow`, `SourceSet` | serde, blake3 |
-| [`codemaid-mermaid`](crates/codemaid-mermaid) | Typed Mermaid writers: sequence, class, ER, flowchart | **none** |
-| [`codemaid-rust`](crates/codemaid-rust) | Rust frontend (syn), workspace-wide resolution | syn, toml, rayon (opt) |
-| [`codemaid-corpus`](crates/codemaid-corpus) | Projections, index, 1:1 contract (`verify`/`write`) | serde_json |
+| `codemaid` → **`sealmap`** | facade and CLI | all below, clap |
+| `codemaid-model` → **`sealmap-model`** | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow` | serde, blake3 |
+| `codemaid-mermaid` → **`sealmap-mermaid`** | typed, escaping Mermaid writers: sequence, class, ER, flowchart | **none** |
+| `codemaid-rust` → **`sealmap-rust`** | Rust frontend (syn), workspace-wide resolution | syn, toml, rayon (opt.) |
+| `codemaid-corpus` → **`sealmap-corpus`** | projections and index | serde_json |
 
-Depend on the facade for the common path, or pick crates individually: a project
-that only needs to emit safe Mermaid can depend on `codemaid-mermaid` alone.
+**Planned for 0.2:**
 
-## Use it
+| Crate | Role |
+|---|---|
+| `sealmap-frontend` | logic shared by every frontend: flow normalisation, call aggregation, labels, id builder and hashing. Parity between languages by construction |
+| `sealmap-ts` | TypeScript/TSX frontend on oxc, with synthesised ids for anonymous route handlers |
+| `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
+| `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
 
-### CLI
+Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full
+rustdoc. Depend on the facade for the common path. A project that only needs
+safe Mermaid output can depend on `sealmap-mermaid` alone.
+
+## Quickstart (0.1, today)
 
 ```sh
 cargo install --path crates/codemaid
 
-codemaid generate . -o docs/codemaid        # write / update the corpus
-codemaid verify   . -o docs/codemaid        # exit 1 on any drift (put this in CI)
-codemaid model    .  > model.json           # just the model
+codemaid generate . -o .sealmap       # write the 1:1 corpus, model and index
+codemaid verify   . -o .sealmap       # local consistency check
+codemaid model    .  > model.json     # just the model
 
 # Several repositories as one codebase (cross-repo calls resolve):
-codemaid generate --repo api=../api --repo core=../core -o corpus
+codemaid generate --repo api=../api --repo core=../core -o .sealmap
 ```
 
-Useful flags: `--tests` (include tests/examples/benches), `--external all|non-std|none`,
-`--owner-lanes`, `--min-calls N`, `--public-only`, `--no-model`, `--pretty`.
+**Planned 0.2 CLI** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
 
-### Library
-
-```rust
-use std::path::Path;
-
-let corpus = codemaid::generate_dir(Path::new("."), &codemaid::Options::default())?;
-codemaid::corpus::write(Path::new("docs/codemaid"), &corpus)?;
-# Ok::<(), std::io::Error>(())
+```sh
+sealmap resolve 'sym:rust:my_crate/net/Client#connect().'   # current span + hashes
+sealmap stale --since main                                 # topics needing a look
+sealmap verify                                             # the CI gate
+sealmap pack CP-03 CP-07 --max-bytes 1048576               # review blob
+sealmap pack --review                                      # diagrams only, for an outside reviewer
 ```
 
-Or step by step, entirely in memory:
+## Properties
 
-```rust
-use codemaid::model::SourceSet;
-use codemaid::rust::{RustOptions, extract};
-use codemaid::corpus::{CorpusOptions, generate};
+- **Deterministic.** The same sources give byte-identical output on every
+  machine, and `pack` is byte-identical for the same tree, lock and arguments.
+- **Honest.** Every call and relation is tagged `exact`, `inferred` or
+  `external`. Nothing is guessed silently, and an unparsable file fails a seal
+  rather than passing it.
+- **Valid.** Every diagram is built through typed, escaping writers. All 4,680
+  diagrams generated from tokio, axum, ripgrep, oxdraw and this repository parse
+  in Mermaid 12 ([`tools/validate-mermaid.mjs`](tools/validate-mermaid.mjs)).
+- **Bounded.** `pack` refuses an over-budget request with a shard plan rather
+  than truncating it.
+- **Fast:**
 
-let mut src = SourceSet::new();
-src.insert("src/lib.rs", "pub fn a() { b(); } fn b() {}")?;
-let model = extract(&src, &RustOptions::default()).codebase;
-let corpus = generate(&model, &CorpusOptions::default());
-println!("{}", corpus.document("src/lib.rs.md").unwrap());
-# Ok::<(), codemaid::model::PathError>(())
-```
+  | Codebase | Hardening prototype | Notes |
+  |---|---|---|
+  | VisionClaw (934 files) | **1.0 s** | v0.1 overflowed its stack after 48 s |
+  | tokio | 0.24 s | |
 
-## What the output looks like
+## What it does not do
 
-A sequence fragment from this repository's own corpus
-(`crates/codemaid-corpus/src/contract.rs.md`):
+- **It never compiles or type-checks.** Calls that need type inference are
+  resolved by name and receiver heuristics and tagged `inferred`.
+  Macro-generated items are not sealed.
+- **It never writes the diagrams people read.** Consolidation, narrative and
+  judgement are the LLM skill's job.
+- **It runs no model, makes no network calls, and spawns no processes** in the
+  libraries. The CLI only shells out to `git` for `--since`.
+- **It knows nothing about reviewers.** The lock holds opaque strings, and
+  reviewer policy (cross-family review, evidence) lives in the skill layer.
 
-````markdown
-## `codemaid_corpus::contract::verify_against`
-`pub fn verify_against(expected: &Corpus, actual: &BTreeMap<SourcePath, String>) -> Report` · L72-L105
-> Compare `expected` (freshly generated) with `actual` (file path → text as found on disk or elsewhere).
-```mermaid
-sequenceDiagram
-  participant codemaid_corpus__contract as contract mod
-  participant codemaid_corpus as codemaid_corpus mod
-  participant codemaid_corpus__document as document mod
-  loop for (path, want) in &expected.files
-    opt Some(have)
-      codemaid_corpus__contract->>codemaid_corpus: is_reserved(path)
-      opt not is_reserved(path)
-        codemaid_corpus__contract->>codemaid_corpus__document: front_matter_hash(want)
-        codemaid_corpus__contract->>codemaid_corpus__document: front_matter_hash(have)
-      end
-    end
-  end
-  loop for (path, text) in actual
-    codemaid_corpus__contract->>codemaid_corpus__document: is_generated(text)
-  end
-```
-````
+## Status and roadmap
 
-Reading conventions (also written into every corpus as `_README.md`):
+**v0.1** is working. It is dogfooded on its own source, and the Rust frontend
+has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. A hardening
+prototype fixes four faults found on large real repositories: stack depth,
+`.gitignore` handling, exponential glob resolution, and id collisions.
 
-| In a sequence | Means |
-|---|---|
-| first lane | the function's owner (its type, or its module) |
-| `alt`/`else` | `if`/`else if`/`else` or `match` arms |
-| `opt` | `if` without `else`, `if let`, a single live `match` arm, closures |
-| `loop` | `for`/`while`/`loop`, or per-element closures (`for_each`, `filter`, ...) |
-| `par` | spawned tasks (`tokio::spawn`, `thread::spawn`, ...) |
-| `~call()` | callee inferred, not proven |
-| `call()?` / `.await` | error propagates / awaited |
-| `Note over X: return …` | early exit |
-| lane `… ext` | external crate |
+The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
-## The 1:1 contract
+1. Rename to `sealmap-*`; dual licence; land the hardening; extract
+   `sealmap-frontend`.
+2. `sym:` id grammar (SCIP-descriptor style), signature and body hashes,
+   injective Mermaid ids.
+3. Seal surface (`resolve` / `stale` / `seal-check` / `verify` / `pack`) and
+   `sealmap-dense`; first crates.io release.
+4. **E0:** replay 100 real commits and count topics flagged per commit, file
+   level against sealed, with no LLM involved. This is the first headline
+   number.
+5. `sealmap-ts`, with a shared conformance suite as the parity gate.
+6. The pre-registered review A/B, dogfooded on this repository.
 
-For every source file `S` there is exactly one document `S.md`, and its front
-matter records the BLAKE3 hash of the newline-normalised source. `verify`
-regenerates in memory and compares:
+## Design and evidence
 
-| Drift | Meaning |
-|---|---|
-| `missing` | source exists, document does not |
-| `orphaned` | document exists, source does not |
-| `stale` | source changed since generation |
-| `modified` | source unchanged, document differs (hand edit, new generator or options) |
+- [`docs/DESIGN.md`](docs/DESIGN.md): the governing design. It covers the
+  layers, seal format, crate surface, skills, model-per-step tiering, evidence
+  plan and owner decisions.
+- [`docs/codemaid/`](docs/codemaid): the v0.1 self-corpus. It is retired at
+  0.2, when generated output moves to the gitignored `.sealmap/`.
 
-`write` fixes all four and only ever deletes files that carry the codemaid header.
-This repository dogfoods it: [`docs/codemaid`](docs/codemaid) is the corpus of
-codemaid itself, and CI runs `codemaid verify` on it.
+## Licence
 
-## Determinism
-
-* `BTreeMap`/`BTreeSet` everywhere; nothing iterates in hash order.
-* Paths are relative, `/`-separated and normalised; newlines are normalised before hashing.
-* BLAKE3 for content hashes, never `std`'s seeded hasher.
-* No timestamps, absolute paths or environment data in any output.
-* Parallel parsing (rayon) collects in input order; output is identical with
-  `--no-default-features`.
-
-## Ids and merging
-
-Every diagram id is the canonical symbol path with `::` replaced by `__`
-(`my_crate::net::Client` → `my_crate__net__Client`), identical in every document.
-`_index.json` lists each fragment's participants and calls; a call whose callee has
-its own sequence carries `"expands": "<fragment id>"`, which is all an orchestrator
-needs to inline sequences into each other or stitch flows across files and repos.
-
-## How resolution works (and its limits)
-
-The Rust frontend parses with `syn` and never runs `rustc`, so it works on code that
-does not build, without a toolchain. It resolves paths through local items, `use`
-imports (renames, globs, `self`, `pub use` re-exports), `crate`/`self`/`super`/`Self`
-and sibling workspace crates. Method calls are resolved from the receiver's declared
-or constructed type (`self`, `self.field`, typed parameters, `impl Trait` parameters,
-`let x = Foo::new()`), looking through `Box`/`Arc`/`Rc`, and through trait impls.
-
-Without a type checker some calls cannot be proven. Those are labelled rather than
-guessed: a unique, distinctive method name called on an untyped local is `inferred`
-(`~` in diagrams); calls on values of unknown type are dropped. Macro bodies are
-analysed when they parse as expressions or statements. `#[path]` module attributes
-and code generated by build scripts or proc macros are not followed.
-
-## Adding a language
-
-Frontends only have to produce a `codemaid_model::Codebase`; everything downstream
-is language-neutral. A TypeScript/JavaScript frontend on the pure-Rust
-[oxc](https://oxc.rs) parser is the natural next one.
-
-## Acknowledgements
-
-Design references, both MIT-licensed:
-
-* [oxdraw](https://github.com/rohanadwankar/oxdraw) © 2025 Rohan Adwankar: the idea of
-  keeping code-location metadata alongside Mermaid. codemaid generates only (no
-  editing) and makes the mapping deterministic and verifiable.
-* [ts-morph](https://github.com/dsherret/ts-morph) © 2017 David Sherret: the navigation-API
-  shape of the model, the in-memory file system (`SourceSet`) and the indentation
-  writer (`CodeWriter`).
-
-No code was copied from either project.
-
-## License
-
-MIT, see [LICENSE](LICENSE).
+MIT ([`LICENSE`](LICENSE)). The 0.2 release moves to `MIT OR Apache-2.0`.
