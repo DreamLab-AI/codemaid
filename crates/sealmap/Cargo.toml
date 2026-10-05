@@ -1,0 +1,34 @@
+[package]
+name = "sealmap"
+description = "Deterministic, dense codebase-to-Mermaid generation for LLM agents: sequence, class, ER and dependency diagrams in a contract-enforced 1:1 corpus"
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = ["cli", "parallel"]
+## The `sealmap` command-line tool.
+cli = ["dep:clap"]
+## Parallel parsing (output is identical either way).
+parallel = ["sealmap-rust/parallel"]
+
+[dependencies]
+sealmap-model.workspace = true
+sealmap-mermaid.workspace = true
+sealmap-rust.workspace = true
+sealmap-corpus.workspace = true
+serde_json.workspace = true
+clap = { workspace = true, optional = true }
+
+[[bin]]
+name = "sealmap"
+required-features = ["cli"]
+
+[lints]
+workspace = true

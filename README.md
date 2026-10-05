@@ -119,15 +119,15 @@ cheap and checkable.
 
 ## Crates
 
-**Today (0.1, in this tree under the original names):**
+**Today (0.1, in this tree; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
-| `codemaid` → **`sealmap`** | facade and CLI | all below, clap |
-| `codemaid-model` → **`sealmap-model`** | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow` | serde, blake3 |
-| `codemaid-mermaid` → **`sealmap-mermaid`** | typed, escaping Mermaid writers: sequence, class, ER, flowchart | **none** |
-| `codemaid-rust` → **`sealmap-rust`** | Rust frontend (syn), workspace-wide resolution | syn, toml, rayon (opt.) |
-| `codemaid-corpus` → **`sealmap-corpus`** | projections and index | serde_json |
+| [`sealmap`](crates/sealmap) | facade and CLI | all below, clap |
+| [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow` | serde, blake3, ignore |
+| [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart | **none** |
+| [`sealmap-rust`](crates/sealmap-rust) | Rust frontend (syn), workspace-wide resolution | syn, toml, rayon (opt.) |
+| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
 
 **Planned for 0.2:**
 
@@ -145,14 +145,14 @@ safe Mermaid output can depend on `sealmap-mermaid` alone.
 ## Quickstart (0.1, today)
 
 ```sh
-cargo install --path crates/codemaid
+cargo install --path crates/sealmap
 
-codemaid generate . -o .sealmap       # write the 1:1 corpus, model and index
-codemaid verify   . -o .sealmap       # local consistency check
-codemaid model    .  > model.json     # just the model
+sealmap generate .                   # write the 1:1 corpus, model and index to .sealmap/
+sealmap verify   .                   # local consistency check against .sealmap/
+sealmap model    .  > model.json     # just the model
 
 # Several repositories as one codebase (cross-repo calls resolve):
-codemaid generate --repo api=../api --repo core=../core -o .sealmap
+sealmap generate --repo api=../api --repo core=../core -o .sealmap
 ```
 
 **Planned 0.2 CLI** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
@@ -179,10 +179,10 @@ sealmap pack --review                                      # diagrams only, for 
   than truncating it.
 - **Fast:**
 
-  | Codebase | Hardening prototype | Notes |
+  | Codebase | Release build | Notes |
   |---|---|---|
-  | VisionClaw (934 files) | **1.0 s** | v0.1 overflowed its stack after 48 s |
-  | tokio | 0.24 s | |
+  | VisionClaw (934 files) | **1.05 s** | v0.1 overflowed its stack after 48 s |
+  | tokio 1.53.2 | 0.25 s | |
 
 ## What it does not do
 
@@ -199,8 +199,8 @@ sealmap pack --review                                      # diagrams only, for 
 ## Status and roadmap
 
 **v0.1** is working. It is dogfooded on its own source, and the Rust frontend
-has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. A hardening
-prototype fixes four faults found on large real repositories: stack depth,
+has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. The hardening
+has landed and fixes four faults found on large real repositories: stack depth,
 `.gitignore` handling, exponential glob resolution, and id collisions.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
@@ -222,7 +222,7 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 - [`docs/DESIGN.md`](docs/DESIGN.md): the governing design. It covers the
   layers, seal format, crate surface, skills, model-per-step tiering, evidence
   plan and owner decisions.
-- [`docs/codemaid/`](docs/codemaid): the v0.1 self-corpus. It is retired at
+- [`docs/sealmap/`](docs/sealmap): the v0.1 self-corpus. It is retired at
   0.2, when generated output moves to the gitignored `.sealmap/`.
 
 ## Licence

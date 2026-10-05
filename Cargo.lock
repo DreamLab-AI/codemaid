@@ -147,58 +147,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486"
 
 [[package]]
-name = "codemaid"
-version = "0.1.0"
-dependencies = [
- "clap",
- "codemaid-corpus",
- "codemaid-mermaid",
- "codemaid-model",
- "codemaid-rust",
- "serde_json",
-]
-
-[[package]]
-name = "codemaid-corpus"
-version = "0.1.0"
-dependencies = [
- "codemaid-mermaid",
- "codemaid-model",
- "codemaid-rust",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "codemaid-mermaid"
-version = "0.1.0"
-
-[[package]]
-name = "codemaid-model"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "ignore",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "codemaid-rust"
-version = "0.1.0"
-dependencies = [
- "codemaid-model",
- "proc-macro2",
- "quote",
- "rayon",
- "syn 2.0.119",
- "thiserror",
- "toml",
-]
-
-[[package]]
 name = "colorchoice"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -411,6 +359,58 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "sealmap"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "sealmap-corpus",
+ "sealmap-mermaid",
+ "sealmap-model",
+ "sealmap-rust",
+ "serde_json",
+]
+
+[[package]]
+name = "sealmap-corpus"
+version = "0.1.0"
+dependencies = [
+ "sealmap-mermaid",
+ "sealmap-model",
+ "sealmap-rust",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "sealmap-mermaid"
+version = "0.1.0"
+
+[[package]]
+name = "sealmap-model"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "ignore",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "sealmap-rust"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "rayon",
+ "sealmap-model",
+ "syn 2.0.119",
+ "thiserror",
+ "toml",
 ]
 
 [[package]]

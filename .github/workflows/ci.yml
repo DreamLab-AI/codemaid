@@ -21,8 +21,8 @@ jobs:
       - run: cargo doc --workspace --no-deps
         env:
           RUSTDOCFLAGS: -D warnings
-      # The 1:1 contract, dogfooded: docs/codemaid must match the sources.
-      - run: cargo run --release -p codemaid -- verify . -o docs/codemaid
+      # The 1:1 contract, dogfooded: docs/sealmap must match the sources.
+      - run: cargo run --release -p sealmap -- verify . --name sealmap -o docs/sealmap
 
   mermaid:
     runs-on: ubuntu-latest
@@ -32,4 +32,4 @@ jobs:
         with:
           node-version: 22
       - run: npm i --no-save mermaid@12 puppeteer
-      - run: node tools/validate-mermaid.mjs $(find docs/codemaid -name '*.md')
+      - run: node tools/validate-mermaid.mjs $(find docs/sealmap -name '*.md')

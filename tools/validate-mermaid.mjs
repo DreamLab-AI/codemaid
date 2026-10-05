@@ -1,5 +1,5 @@
 // Validate every ```mermaid block in the given Markdown files with real Mermaid in headless Chromium.
-// Usage: npm i mermaid puppeteer && node tools/validate-mermaid.mjs $(find docs/codemaid -name '*.md')
+// Usage: npm i mermaid puppeteer && node tools/validate-mermaid.mjs $(find docs/sealmap -name '*.md')
 // Env: CHROME=/path/to/chromium (default: puppeteer's bundled browser), MODE=render for a full render.
 import fs from 'fs';
 import { createRequire } from 'module';

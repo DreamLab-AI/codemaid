@@ -7,16 +7,16 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT"
-repository = "https://github.com/DreamLab-AI/codemaid"
+repository = "https://github.com/DreamLab-AI/sealmap"
 authors = ["jjohare"]
 keywords = ["mermaid", "diagram", "codemap", "static-analysis", "llm"]
 categories = ["development-tools", "visualization"]
 
 [workspace.dependencies]
-codemaid-model = { path = "crates/codemaid-model", version = "0.1.0" }
-codemaid-mermaid = { path = "crates/codemaid-mermaid", version = "0.1.0" }
-codemaid-rust = { path = "crates/codemaid-rust", version = "0.1.0", default-features = false }
-codemaid-corpus = { path = "crates/codemaid-corpus", version = "0.1.0" }
+sealmap-model = { path = "crates/sealmap-model", version = "0.1.0" }
+sealmap-mermaid = { path = "crates/sealmap-mermaid", version = "0.1.0" }
+sealmap-rust = { path = "crates/sealmap-rust", version = "0.1.0", default-features = false }
+sealmap-corpus = { path = "crates/sealmap-corpus", version = "0.1.0" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 blake3 = "1"
