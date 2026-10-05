@@ -3,9 +3,9 @@ codemaid: 1
 source: crates/codemaid-rust/src/resolve.rs
 module: codemaid_rust::resolve
 language: rust
-source_hash: blake3:9b71f45bca83d232f8eb99dc7bf444045393e146a7da34dca04cc59dd2ed7b27
-lines: 796
-fragments: 19
+source_hash: blake3:7f6b34419756017c247ec03298ba4f27a30614bff465a14b206a7f541ab39eb8
+lines: 845
+fragments: 18
 ---
 # `codemaid_rust::resolve` · crates/codemaid-rust/src/resolve.rs
 > Pass 2: resolve raw paths against the whole workspace and build the model.
@@ -30,12 +30,13 @@ classDiagram
     -by_name: BTreeMap#lt;String, BTreeSet#lt;SymbolId#gt;#gt;
     -impls: BTreeMap#lt;SymbolId, BTreeSet#lt;SymbolId#gt;#gt;
     -trait_methods: BTreeMap#lt;SymbolId, BTreeSet#lt;String#gt;#gt;
+    -globs: BTreeMap#lt;String, Vec#lt;String#gt;#gt;
     -add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &str, raw: &[Segs], self_ty: Option#lt;&SymbolId#gt;)
     -arms(&self, ctx: &FlowCtx#lt;'_#gt;, arms: &[#40;String, Vec#lt;RawStep#gt;#41;], opts: &RustOptions) Vec#lt;Arm#gt;
     -by_name_only(&self, name: &str) #40;SymbolId, Confidence#41;
     -call(&self, ctx: &FlowCtx#lt;'_#gt;, c: &RawCall, opts: &RustOptions) Option#lt;Call#gt;
     -flow(&self, ctx: &FlowCtx#lt;'_#gt;, raw: &[RawStep], opts: &RustOptions) Option#lt;Flow#gt;
-    -glob(&self, module: &str, name: &str, depth: u8) Option#lt;SymbolId#gt;
+    -glob(&self, module: &str, name: &str) Option#lt;SymbolId#gt;
     -local(&self, module: &str, name: &str) bool
     -member(&self, module: &str, m: &RawMember, owner: Option#lt;&SymbolId#gt;) Member
     -method(&self, ctx: &FlowCtx#lt;'_#gt;, recv: &Recv, name: &str) Option#lt;#40;SymbolId, Confidence#41;#gt;
@@ -46,7 +47,7 @@ classDiagram
     -resolve(&self, module: &str, segs: &[String], self_ty: Option#lt;&SymbolId#gt;) #40;SymbolId, Confidence#41;
     -resolve_internal(&self, module: &str, segs: &[String], self_ty: Option#lt;&SymbolId#gt;) Option#lt;SymbolId#gt;
     -steps(&self, ctx: &FlowCtx#lt;'_#gt;, raw: &[RawStep], opts: &RustOptions) Vec#lt;Step#gt;
-    -walk(&self, module: &str, segs: &[String], self_ty: Option#lt;&SymbolId#gt;, depth: u8) Option#lt;SymbolId#gt;
+    -walk(&self, module: &str, segs: &[String], self_ty: Option#lt;&SymbolId#gt;, depth: u8, use_globs: bool,) Option#lt;SymbolId#gt;
   }
   class codemaid_rust__resolve["codemaid_rust::resolve"] {
     <<module>>
@@ -257,7 +258,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::new`
-`fn new(files: &[RawFile]) -> Self` · L369-L447
+`fn new(files: &[RawFile]) -> Self` · L373-L471
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -275,6 +276,13 @@ sequenceDiagram
         loop for m in &it.methods
           codemaid_rust__resolve__Resolver->>codemaid_model__symbol__SymbolId: child(&m.name)
         end
+      end
+    end
+  end
+  loop for round in 0..2
+    loop for (module, uses) in &r.uses
+      loop for u in uses.iter().filter(| u | u.alias == #quot;*#quot;)
+        codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, &u.target, None, 0, _)
       end
     end
   end
@@ -298,28 +306,29 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::resolve`
-`fn resolve(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> (SymbolId, Confidence)` · L449-L461
+`fn resolve(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> (SymbolId, Confidence)` · L473-L485
 > Resolve `segs` as written in `module`.
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
   participant codemaid_model__symbol__SymbolId as SymbolId
-  codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, segs, self_ty, 0)
+  codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, segs, self_ty, 0, true)
   opt None
     codemaid_rust__resolve__Resolver->>codemaid_model__symbol__SymbolId: SymbolId::new(join())
   end
 ```
 
 ## `codemaid_rust::resolve::Resolver::resolve_internal`
-`fn resolve_internal(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L463-L465
+`fn resolve_internal(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L487-L489
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
-  codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, segs, self_ty, 0)
+  codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, segs, self_ty, 0, true)
 ```
 
 ## `codemaid_rust::resolve::Resolver::walk`
-`fn walk(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>, depth: u8) -> Option<SymbolId>` · L467-L519
+`fn walk(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>, depth: u8, use_globs: bool,) -> Option<SymbolId>` · L491-L557
+> `use_globs` is false only while the glob table itself is being built.
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -338,13 +347,15 @@ sequenceDiagram
     end
   else name
     alt if let Some(u) = self.uses.get(module).and_then(| us | …
-      codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, &full, self_ty, _)
+      codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, &full, self_ty, _, use_globs)
       opt via or_else
         codemaid_rust__resolve__Resolver->>codemaid_model__symbol__SymbolId: SymbolId::new(join())
       end
-      Note over codemaid_rust__resolve__Resolver: return self.walk(module, &full, self_ty, depth + 1).or_…
-    else if let Some(id) = self.glob(module, name, depth)
-      codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: glob(module, name, depth)
+      Note over codemaid_rust__resolve__Resolver: return self.walk(module, &full, self_ty, depth + 1, use…
+    else if let Some(id) = use_globs.then(| | self.glob(module, …
+      opt via then
+        codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: glob(module, name)
+      end
     else if self.crates.contains(name)
       codemaid_rust__resolve__Resolver->>codemaid_model__symbol__SymbolId: SymbolId::new(name)
     else
@@ -354,27 +365,14 @@ sequenceDiagram
   end
   loop for (i, seg) in rest.iter().enumerate()
     opt self.uses.get(&key).is_some_and(| us | us.iter().any…
-      codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(&key, &_, self_ty, _)
-      Note over codemaid_rust__resolve__Resolver: return self.walk(&key, &rest [i..], self_ty, depth + 1)
-    end
-  end
-```
-
-## `codemaid_rust::resolve::Resolver::glob`
-`fn glob(&self, module: &str, name: &str, depth: u8) -> Option<SymbolId>` · L521-L529
-```mermaid
-sequenceDiagram
-  participant codemaid_rust__resolve__Resolver as Resolver
-  loop for u in self.uses.get(module)?.iter().filter(| u | u.a…
-    codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(module, &u.target, None, _)?
-    opt let Some(id) = self.items.get(target.as_str()).and_t…
-      Note over codemaid_rust__resolve__Resolver: return Some(id.clone())
+      codemaid_rust__resolve__Resolver->>codemaid_rust__resolve__Resolver: walk(&key, &_, self_ty, _, use_globs)
+      Note over codemaid_rust__resolve__Resolver: return self.walk(&key, &rest [i..], self_ty, depth + 1,…
     end
   end
 ```
 
 ## `codemaid_rust::resolve::Resolver::refs`
-`fn refs(&self, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId>` · L531-L551
+`fn refs(&self, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId>` · L580-L600
 > Resolve a list of raw type refs to kept relation targets.
 ```mermaid
 sequenceDiagram
@@ -390,7 +388,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::member`
-`fn member(&self, module: &str, m: &RawMember, owner: Option<&SymbolId>) -> Member` · L559-L568
+`fn member(&self, module: &str, m: &RawMember, owner: Option<&SymbolId>) -> Member` · L608-L617
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -398,7 +396,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::add_uses`
-`fn add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>)` · L570-L575
+`fn add_uses(&self, cb: &mut Codebase, from: &SymbolId, module: &str, raw: &[Segs], self_ty: Option<&SymbolId>)` · L619-L624
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -412,7 +410,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::method_symbol`
-`fn method_symbol(&self, id: &SymbolId, parent: &SymbolId, m: &RawFn, f: &RawFile, ctx: &FlowCtx<'_>, opts: &RustOptions, cb: &mut Codebase,) -> Symbol` · L577-L601
+`fn method_symbol(&self, id: &SymbolId, parent: &SymbolId, m: &RawFn, f: &RawFile, ctx: &FlowCtx<'_>, opts: &RustOptions, cb: &mut Codebase,) -> Symbol` · L626-L650
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -425,7 +423,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::flow`
-`fn flow(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Option<Flow>` · L603-L614
+`fn flow(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Option<Flow>` · L652-L663
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -438,7 +436,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::steps`
-`fn steps(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Vec<Step>` · L616-L672
+`fn steps(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Vec<Step>` · L665-L721
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -460,7 +458,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::arms`
-`fn arms(&self, ctx: &FlowCtx<'_>, arms: &[(String, Vec<RawStep>)], opts: &RustOptions) -> Vec<Arm>` · L674-L679
+`fn arms(&self, ctx: &FlowCtx<'_>, arms: &[(String, Vec<RawStep>)], opts: &RustOptions) -> Vec<Arm>` · L723-L728
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -470,7 +468,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::call`
-`fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call>` · L681-L722
+`fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call>` · L730-L771
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__resolve__Resolver as Resolver
@@ -496,7 +494,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::method`
-`fn method(&self, ctx: &FlowCtx<'_>, recv: &Recv, name: &str) -> Option<(SymbolId, Confidence)>` · L724-L755
+`fn method(&self, ctx: &FlowCtx<'_>, recv: &Recv, name: &str) -> Option<(SymbolId, Confidence)>` · L773-L804
 > Resolve a method call.
 ```mermaid
 sequenceDiagram
@@ -534,7 +532,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::receiver_type`
-`fn receiver_type(&self, module: &str, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L757-L775
+`fn receiver_type(&self, module: &str, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId>` · L806-L824
 > The type a method is called on, from the declared type's paths (outermost first).
 ```mermaid
 sequenceDiagram
@@ -551,7 +549,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::resolve::Resolver::by_name_only`
-`fn by_name_only(&self, name: &str) -> (SymbolId, Confidence)` · L777-L788
+`fn by_name_only(&self, name: &str) -> (SymbolId, Confidence)` · L826-L837
 > Unknown receiver: accept a unique, distinctive internal method name.
 ```mermaid
 sequenceDiagram

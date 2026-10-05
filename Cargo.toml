@@ -26,6 +26,7 @@ proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1"
 toml = "0.8"
 rayon = "1"
+ignore = "0.4.23"
 clap = { version = "4", features = ["derive"] }
 
 [workspace.lints.rust]

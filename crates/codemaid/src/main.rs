@@ -150,8 +150,9 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
 fn load(c: &Common, opts: &Options) -> Result<(SourceSet, codemaid::rust::RustOptions), String> {
     let mut ro = opts.rust.clone();
     if c.repos.is_empty() {
-        let (sources, _) =
-            codemaid::rust::extract_dir(&c.path, &ro).map_err(|e| format!("{}: {e}", c.path.display()))?;
+        // Load only: `run` extracts once. (Calling `extract_dir` here ran the
+        // whole frontend twice and threw the first result away.)
+        let sources = codemaid::rust::load_dir(&c.path).map_err(|e| format!("{}: {e}", c.path.display()))?;
         if ro.name == "codebase" {
             ro.name = dir_name(&c.path);
         }

@@ -3,8 +3,8 @@ codemaid: 1
 source: crates/codemaid-corpus/src/structure.rs
 module: codemaid_corpus::structure
 language: rust
-source_hash: blake3:8edd75bfab1792f47c7d4bd57828a75deb8248c04c3ca30ee9bf014ba5b0a20b
-lines: 291
+source_hash: blake3:8f987ca96f822ea3bef4af533448837040458a50ae68e292438bc5f9b048f48c
+lines: 296
 fragments: 4
 ---
 # `codemaid_corpus::structure` · crates/codemaid-corpus/src/structure.rs
@@ -26,6 +26,9 @@ classDiagram
   class codemaid_corpus__CorpusOptions["CorpusOptions"] {
     <<struct in crates/codemaid-corpus/src/lib.rs>>
   }
+  class codemaid_corpus__Lookup["Lookup#lt;'a#gt;"] {
+    <<struct in crates/codemaid-corpus/src/lib.rs>>
+  }
   class codemaid_model__codebase__Codebase["Codebase"] {
     <<struct in crates/codemaid-model/src/codebase.rs>>
   }
@@ -36,24 +39,26 @@ classDiagram
     <<struct in crates/codemaid-model/src/symbol.rs>>
   }
   codemaid_corpus__structure ..> codemaid_corpus__CorpusOptions
+  codemaid_corpus__structure ..> codemaid_corpus__Lookup
   codemaid_corpus__structure ..> codemaid_model__codebase__Codebase
   codemaid_corpus__structure ..> codemaid_model__source__SourceFile
   codemaid_corpus__structure ..> codemaid_model__symbol__SymbolId
 ```
 
 ## `codemaid_corpus::structure::render`
-`pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> Option<(String, usize)>` · L12-L198
+`pub(crate) fn render(cb: &Codebase, lookup: &Lookup<'_>, file: &SourceFile, opts: &CorpusOptions,) -> Option<(String, usize)>` · L12-L203
 > Render the structure diagram for `file`.
 ```mermaid
 sequenceDiagram
   participant codemaid_corpus__structure as structure mod
-  participant codemaid_model__codebase__Codebase as Codebase
+  participant codemaid_corpus__Lookup as Lookup
   participant codemaid_mermaid__class__ClassDiagram as ClassDiagram
   participant codemaid_model__symbol__SymbolKind as SymbolKind
   participant codemaid_corpus__naming as naming mod
   participant codemaid_mermaid__class__Class as Class
+  participant codemaid_model__codebase__Codebase as Codebase
   participant codemaid_model__symbol__Visibility as Visibility
-  codemaid_corpus__structure->>codemaid_model__codebase__Codebase: symbols_in_file(&file.path)
+  codemaid_corpus__structure->>codemaid_corpus__Lookup: in_file(&file.path)
   codemaid_corpus__structure->>codemaid_mermaid__class__ClassDiagram: ClassDiagram::new(LR)
   loop for s in &here
     codemaid_corpus__structure->>codemaid_model__symbol__SymbolKind: ~is_type()
@@ -102,8 +107,8 @@ sequenceDiagram
     codemaid_corpus__structure->>codemaid_corpus__naming: ident(&module.id)
     codemaid_corpus__structure->>codemaid_mermaid__class__Class: Class::new(ident(), &to_string())
     codemaid_corpus__structure->>codemaid_mermaid__class__Class: annotation(#quot;module#quot;)
-    codemaid_corpus__structure->>codemaid_model__codebase__Codebase: children(&module.id)
-    loop for s in cb.children(&module.id).filter(| s | visible(s…
+    codemaid_corpus__structure->>codemaid_corpus__Lookup: children(&module.id)
+    loop for s in lookup.children(&module.id).filter(| s | visib…
       alt SymbolKind::Module
         codemaid_corpus__structure->>codemaid_model__symbol__Visibility: ~uml_marker()
         codemaid_corpus__structure->>codemaid_mermaid__class__Class: field(uml_marker(), &_, #quot;#quot;)
@@ -157,7 +162,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::structure::type_label`
-`fn type_label(cb: &Codebase, id: &SymbolId) -> String` · L200-L210
+`fn type_label(cb: &Codebase, id: &SymbolId) -> String` · L205-L215
 > Display label for a type: name with generics.
 ```mermaid
 sequenceDiagram
@@ -171,7 +176,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::structure::is_shared`
-`fn is_shared(cb: &Codebase, from: &SymbolId, fields: &str) -> bool` · L225-L248
+`fn is_shared(cb: &Codebase, from: &SymbolId, fields: &str) -> bool` · L230-L253
 > Is the field holding the target behind `Option`, `Arc`, `Rc`, a reference or a collection (aggregation rather than composition)?
 ```mermaid
 sequenceDiagram

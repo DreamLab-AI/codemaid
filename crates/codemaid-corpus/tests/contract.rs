@@ -149,3 +149,25 @@ fn write_converges_and_is_idempotent() {
 
     fs::remove_dir_all(&dir).unwrap();
 }
+
+/// `a::b__c` and `a::b::c` used to share the diagram id `a__b__c`, so a call
+/// from one to the other rendered as a self-message on a single lane.
+#[test]
+fn colliding_paths_get_distinct_diagram_ids() {
+    let mut src = SourceSet::new();
+    src.insert("Cargo.toml", "[package]\nname = \"a\"").unwrap();
+    src.insert("src/lib.rs", "pub mod b;\npub struct b__c;\nimpl b__c { pub fn go(&self) { b::c::run(); } }\n")
+        .unwrap();
+    src.insert("src/b.rs", "pub struct c;\nimpl c { pub fn run() {} }\n").unwrap();
+    let cb = extract(&src, &RustOptions::default()).codebase;
+    let doc = generate(&cb, &CorpusOptions::default()).document("src/lib.rs.md").unwrap().to_owned();
+    let seq = &doc[doc.find("sequenceDiagram").expect("a sequence diagram")..];
+    let seq = &seq[..seq.find("```").unwrap()];
+    let lanes: std::collections::BTreeSet<&str> = seq
+        .lines()
+        .filter_map(|l| l.trim().strip_prefix("participant "))
+        .map(|l| l.split_whitespace().next().unwrap())
+        .collect();
+    assert_eq!(lanes.len(), 2, "{seq}");
+    assert!(!seq.contains("a__b__c->>a__b__c"), "{seq}");
+}

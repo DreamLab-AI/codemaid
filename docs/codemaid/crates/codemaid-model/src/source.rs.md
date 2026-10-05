@@ -3,9 +3,9 @@ codemaid: 1
 source: crates/codemaid-model/src/source.rs
 module: codemaid_model::source
 language: rust
-source_hash: blake3:1348d2e4aeb837f6728445aeed4313a5ee2fa44da2210d4f23d722d01ae4c8fc
-lines: 179
-fragments: 6
+source_hash: blake3:6e223a4a2875bfde5fccde3148b3057694855178b0e52c6d10311269c3a0b42e
+lines: 187
+fragments: 5
 ---
 # `codemaid_model::source` · crates/codemaid-model/src/source.rs
 
@@ -19,6 +19,7 @@ classDiagram
     +skip_dirs: Vec#lt;String#gt;
     +max_file_bytes: u64
     +skip_hidden: bool
+    +respect_ignore_files: bool
     +Default::default() Self
   }
   class codemaid_model__source__SourceFile["SourceFile"] {
@@ -44,10 +45,6 @@ classDiagram
     +paths(&self) impl Iterator#lt;Item = &SourcePath#gt;
     +retain(&mut self, mut keep: impl FnMut#40;&SourcePath#41; -> bool)
   }
-  class codemaid_model__source["codemaid_model::source"] {
-    <<module>>
-    -walk(root: &Path, dir: &Path, options: &LoadOptions, set: &mut SourceSet) io::Result#lt;#40;#41;#gt;
-  }
   class codemaid_model__hash__ContentHash["ContentHash"] {
     <<struct in crates/codemaid-model/src/hash.rs>>
   }
@@ -60,8 +57,6 @@ classDiagram
   class codemaid_model__path__PathError["PathError"] {
     <<enum in crates/codemaid-model/src/path.rs>>
   }
-  codemaid_model__source ..> codemaid_model__source__LoadOptions
-  codemaid_model__source ..> codemaid_model__source__SourceSet
   codemaid_model__source__SourceFile *-- codemaid_model__hash__ContentHash : hash
   codemaid_model__source__SourceFile *-- codemaid_model__path__SourcePath : path
   codemaid_model__source__SourceFile *-- codemaid_model__symbol__SymbolId : module
@@ -81,7 +76,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_model::source::SourceSet::insert`
-`pub fn insert(&mut self, path: impl AsRef<str>, text: impl AsRef<str>) -> Result<(), crate::PathError>` · L98-L104
+`pub fn insert(&mut self, path: impl AsRef<str>, text: impl AsRef<str>) -> Result<(), crate::PathError>` · L104-L110
 > Insert or replace a file.
 ```mermaid
 sequenceDiagram
@@ -93,7 +88,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_model::source::SourceSet::get_str`
-`pub fn get_str(&self, path: &str) -> Option<&str>` · L111-L114
+`pub fn get_str(&self, path: &str) -> Option<&str>` · L117-L120
 > Text of the file at a raw path string (normalised first).
 ```mermaid
 sequenceDiagram
@@ -106,30 +101,17 @@ sequenceDiagram
 ```
 
 ## `codemaid_model::source::SourceSet::load_dir`
-`pub fn load_dir(root: &Path, options: &LoadOptions) -> io::Result<Self>` · L141-L149
+`pub fn load_dir(root: &Path, options: &LoadOptions) -> io::Result<Self>` · L147-L186
 > Recursively load every matching file under `root`.
 ```mermaid
 sequenceDiagram
   participant codemaid_model__source__SourceSet as SourceSet
-  participant codemaid_model__source as source mod
-  codemaid_model__source__SourceSet->>codemaid_model__source: walk(root, root, options, &set)?
-```
-
-## `codemaid_model::source::walk`
-`fn walk(root: &Path, dir: &Path, options: &LoadOptions, set: &mut SourceSet) -> io::Result<()>` · L152-L179
-```mermaid
-sequenceDiagram
-  participant codemaid_model__source as source mod
+  participant ignore as ignore ext
   participant codemaid_model__path__SourcePath as SourcePath
   participant codemaid_model__hash as hash mod
-  loop for entry in entries
-    alt ty.is_dir()
-      opt !options.skip_dirs.iter().any(| d | d == name.as_ref…
-        codemaid_model__source->>codemaid_model__source: walk(root, &path, options, set)?
-      end
-    else if ty.is_file()
-      codemaid_model__source->>codemaid_model__path__SourcePath: SourcePath::relative_to(&path, root)
-      codemaid_model__source->>codemaid_model__hash: normalise_newlines(&text)
-    end
+  codemaid_model__source__SourceSet->>ignore: WalkBuilder::WalkBuilder::new(root)
+  loop for entry in walker
+    codemaid_model__source__SourceSet->>codemaid_model__path__SourcePath: SourcePath::relative_to(path, root)
+    codemaid_model__source__SourceSet->>codemaid_model__hash: normalise_newlines(&text)
   end
 ```

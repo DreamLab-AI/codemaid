@@ -3,8 +3,8 @@ codemaid: 1
 source: crates/codemaid-corpus/src/lib.rs
 module: codemaid_corpus
 language: rust
-source_hash: blake3:8a278b17ac6fcfe085e189e29550eec523646b2667e0bea6d0ae839439811e4e
-lines: 212
+source_hash: blake3:e7687777ece2e3bdce7f5fb3d793cd0ae071e619c73016a93966a6a2c8b8c469
+lines: 249
 fragments: 6
 ---
 # `codemaid_corpus` · crates/codemaid-corpus/src/lib.rs
@@ -37,6 +37,14 @@ classDiagram
     CrateRoot
     Owner
   }
+  class codemaid_corpus__Lookup["Lookup#lt;'a#gt;"] {
+    <<struct>>
+    -by_file: BTreeMap#lt;&'a SourcePath, Vec#lt;&'a Symbol#gt;#gt;
+    -children: BTreeMap#lt;&'a SymbolId, Vec#lt;&'a Symbol#gt;#gt;
+    ~children(crate) impl Iterator#lt;Item = &'a Symbol#gt; + '_
+    ~in_file(crate) impl Iterator#lt;Item = &'a Symbol#gt; + '_
+    -new(cb: &'a Codebase) Self
+  }
   class codemaid_corpus {
     <<module>>
     +const CORPUS_SCHEMA_VERSION: u32
@@ -66,6 +74,12 @@ classDiagram
   class codemaid_corpus__index__Index["Index"] {
     <<struct in crates/codemaid-corpus/src/index.rs>>
   }
+  class codemaid_model__symbol__Symbol["Symbol"] {
+    <<struct in crates/codemaid-model/src/symbol.rs>>
+  }
+  class codemaid_model__symbol__SymbolId["SymbolId"] {
+    <<struct in crates/codemaid-model/src/symbol.rs>>
+  }
   codemaid_corpus ..> codemaid_corpus__Corpus
   codemaid_corpus ..> codemaid_corpus__CorpusOptions
   codemaid_corpus ..> codemaid_model__codebase__Codebase
@@ -74,6 +88,10 @@ classDiagram
   codemaid_corpus__Corpus *-- codemaid_corpus__index__Index : index
   codemaid_corpus__Corpus o-- codemaid_model__path__SourcePath : files
   codemaid_corpus__CorpusOptions *-- codemaid_corpus__ExternalLanes : external_lanes
+  codemaid_corpus__Lookup ..> codemaid_model__codebase__Codebase
+  codemaid_corpus__Lookup o-- codemaid_model__path__SourcePath : by_file
+  codemaid_corpus__Lookup o-- codemaid_model__symbol__Symbol : by_file, children
+  codemaid_corpus__Lookup o-- codemaid_model__symbol__SymbolId : children
 ```
 
 ## `codemaid_corpus::Corpus::document`
@@ -87,18 +105,22 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::generate`
-`pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus` · L172-L191
+`pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus` · L172-L193
 > Generate the full corpus in memory.
 ```mermaid
 sequenceDiagram
   participant codemaid_corpus as codemaid_corpus mod
+  participant codemaid_corpus__naming as naming mod
   participant codemaid_corpus__index__Index as Index
+  participant codemaid_corpus__Lookup as Lookup
   participant codemaid_corpus__document as document mod
   participant codemaid_model__path__SourcePath as SourcePath
   participant codemaid_corpus__overview as overview mod
+  codemaid_corpus->>codemaid_corpus__naming: naming::assert_unique_idents(codebase)
   codemaid_corpus->>codemaid_corpus__index__Index: Index::new(codebase)
+  codemaid_corpus->>codemaid_corpus__Lookup: Lookup::new(codebase)
   loop for file in codebase.files.values()
-    codemaid_corpus->>codemaid_corpus__document: document::render(codebase, file, options)
+    codemaid_corpus->>codemaid_corpus__document: document::render(codebase, &lookup, file, options)
   end
   codemaid_corpus->>codemaid_corpus__index__Index: link_expansions()
   opt closure
@@ -113,7 +135,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::document_path`
-`pub fn document_path(source: &SourcePath) -> SourcePath` · L193-L196
+`pub fn document_path(source: &SourcePath) -> SourcePath` · L230-L233
 > Map a source path to its document path (`src/a.rs` → `src/a.rs.md`).
 ```mermaid
 sequenceDiagram
@@ -123,7 +145,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::is_reserved`
-`pub fn is_reserved(path: &SourcePath) -> bool` · L198-L201
+`pub fn is_reserved(path: &SourcePath) -> bool` · L235-L238
 > `true` for corpus-level files (`_index.json`, ...).
 ```mermaid
 sequenceDiagram
@@ -134,7 +156,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_corpus::to_json`
-`fn to_json(value: &impl serde::Serialize, pretty: bool) -> String` · L203-L208
+`fn to_json(value: &impl serde::Serialize, pretty: bool) -> String` · L240-L245
 ```mermaid
 sequenceDiagram
   participant codemaid_corpus as codemaid_corpus mod

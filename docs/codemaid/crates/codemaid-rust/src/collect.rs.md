@@ -3,9 +3,9 @@ codemaid: 1
 source: crates/codemaid-rust/src/collect.rs
 module: codemaid_rust::collect
 language: rust
-source_hash: blake3:6fe2fe57ab23bc9f7f9687572467c88bb1f1574fae63cdd8a3da172e76d60b2f
-lines: 997
-fragments: 34
+source_hash: blake3:1718fe0c64d9c75af3f4c5ffeaf8d4d992c4657c05778cce724157572cefb1a9
+lines: 1029
+fragments: 36
 ---
 # `codemaid_rust::collect` · crates/codemaid-rust/src/collect.rs
 > Pass 1: parse one file with `syn` and collect unresolved raw data.
@@ -25,11 +25,13 @@ classDiagram
   class codemaid_rust__collect__FlowWalker["FlowWalker"] {
     <<struct>>
     -env: BTreeMap#lt;String, Recv#gt;
+    -depth: u32
     -arg(&mut self, a: &Expr, out: &mut Vec#lt;RawStep#gt;, deferred: &mut Vec#lt;Vec#lt;RawStep#gt;#gt;)
     -bind(&mut self, pat: &Pat, init: Option#lt;&Expr#gt;)
     -block(&mut self, b: &Block) Vec#lt;RawStep#gt;
     -cond(&mut self, cond: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -expr(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
+    -expr_inner(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -flush_deferred(&self, callee: &str, deferred: Vec#lt;Vec#lt;RawStep#gt;#gt;, out: &mut Vec#lt;RawStep#gt;)
     -mac(&mut self, m: &syn::Macro, out: &mut Vec#lt;RawStep#gt;)
     -new(env: BTreeMap#lt;String, Recv#gt;) Self
@@ -42,6 +44,7 @@ classDiagram
     <<module>>
     -const LABEL_MAX: usize
     -const LOOPING: &[&str]
+    ~const MAX_EXPR_DEPTH: u32
     -const SIG_MAX: usize
     -arg_sketch(e: &Expr) String
     -call(callee: Callee, name: &str, args: &Punctuated#lt;Expr, syn::Token![,]#gt;, kind: CallKind, span: PmSpan) RawStep
@@ -49,6 +52,7 @@ classDiagram
     -cond_label(cond: &Expr) String
     -constructed_type(e: &Expr) Option#lt;Segs#gt;
     -doc_of(attrs: &[Attribute]) Option#lt;String#gt;
+    ~failed_file(crate) RawFile
     -fields_of(fields: &Fields) Vec#lt;RawMember#gt;
     -first_path(ty: &Type) Option#lt;Segs#gt;
     -flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec#lt;RawUse#gt;)
@@ -199,7 +203,7 @@ classDiagram
 ```
 
 ## `codemaid_rust::collect::collect_file`
-`pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts: &RustOptions) -> RawFile` · L24-L55
+`pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts: &RustOptions) -> RawFile` · L29-L52
 > Parse `text` and collect everything pass 2 needs.
 ```mermaid
 sequenceDiagram
@@ -211,15 +215,27 @@ sequenceDiagram
   codemaid_rust__collect->>codemaid_model__hash__ContentHash: ContentHash::of_text(text)
   codemaid_rust__collect->>syn: syn::parse_file(text)
   opt Err(e)
-    codemaid_rust__collect->>codemaid_model__symbol__Span: Span::new(1, 1, max(), 1)
-    Note over codemaid_rust__collect: return raw
+    codemaid_rust__collect->>codemaid_rust__collect: failed_file(path, role, text, msg)
+    Note over codemaid_rust__collect: return failed_file(path, role, text, msg)
   end
   codemaid_rust__collect->>codemaid_model__symbol__Span: Span::new(1, 1, max(), 1)
   codemaid_rust__collect->>codemaid_rust__collect__Collector: module(clone(), &file.attrs, &file.items, span, Public)
 ```
 
+## `codemaid_rust::collect::failed_file`
+`pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error: String) -> RawFile` · L54-L76
+> The stand-in for a file that could not be collected (parse error or an internal panic): just its module symbol, tagged `parse_error`, so the 1:1 contract still…
+```mermaid
+sequenceDiagram
+  participant codemaid_rust__collect as collect mod
+  participant codemaid_model__hash__ContentHash as ContentHash
+  participant codemaid_model__symbol__Span as Span
+  codemaid_rust__collect->>codemaid_model__hash__ContentHash: ContentHash::of_text(text)
+  codemaid_rust__collect->>codemaid_model__symbol__Span: Span::new(1, 1, max(), 1)
+```
+
 ## `codemaid_rust::collect::Collector::module`
-`fn module(&mut self, path: Segs, attrs: &[Attribute], items: &[Item], span: Span, vis: Visibility)` · L63-L81
+`fn module(&mut self, path: Segs, attrs: &[Attribute], items: &[Item], span: Span, vis: Visibility)` · L84-L102
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__Collector as Collector
@@ -237,7 +253,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::Collector::skip`
-`fn skip(&self, attrs: &[Attribute]) -> bool` · L83-L85
+`fn skip(&self, attrs: &[Attribute]) -> bool` · L104-L106
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__Collector as Collector
@@ -246,7 +262,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::Collector::item`
-`fn item(&mut self, module: &Segs, item: &Item)` · L87-L301
+`fn item(&mut self, module: &Segs, item: &Item)` · L108-L322
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__Collector as Collector
@@ -395,7 +411,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::span_of`
-`fn span_of(s: PmSpan) -> Span` · L306-L309
+`fn span_of(s: PmSpan) -> Span` · L327-L330
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -407,7 +423,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::vis_of`
-`fn vis_of(v: &syn::Visibility) -> Visibility` · L311-L318
+`fn vis_of(v: &syn::Visibility) -> Visibility` · L332-L339
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -418,7 +434,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::vis_prefix`
-`fn vis_prefix(v: &syn::Visibility) -> String` · L320-L325
+`fn vis_prefix(v: &syn::Visibility) -> String` · L341-L346
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -429,7 +445,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::is_test_attr`
-`fn is_test_attr(a: &Attribute) -> bool` · L327-L333
+`fn is_test_attr(a: &Attribute) -> bool` · L348-L354
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -443,7 +459,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::doc_of`
-`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L335-L367
+`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L356-L388
 > First sentence of the doc comment, at most 160 chars.
 ```mermaid
 sequenceDiagram
@@ -456,7 +472,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::tags_of`
-`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L369-L382
+`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L390-L403
 > Attributes worth keeping as tags.
 ```mermaid
 sequenceDiagram
@@ -472,7 +488,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::fn_tags`
-`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L384-L396
+`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L405-L417
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -480,7 +496,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::generics_of`
-`fn generics_of(g: &Generics) -> Vec<String>` · L398-L407
+`fn generics_of(g: &Generics) -> Vec<String>` · L419-L428
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -500,7 +516,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::fields_of`
-`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L409-L426
+`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L430-L447
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -516,7 +532,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::type_refs`
-`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L432-L445
+`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L453-L466
 > Every path mentioned in a type, outermost first.
 ```mermaid
 sequenceDiagram
@@ -526,7 +542,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::sig_refs`
-`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L447-L456
+`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L468-L477
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -541,7 +557,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::first_path`
-`fn first_path(ty: &Type) -> Option<Segs>` · L458-L467
+`fn first_path(ty: &Type) -> Option<Segs>` · L479-L488
 > Outermost path of a type, looking through references and parens.
 ```mermaid
 sequenceDiagram
@@ -558,7 +574,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::params_of`
-`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L469-L486
+`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L490-L507
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -572,7 +588,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::flatten_use`
-`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L488-L521
+`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L509-L542
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -586,7 +602,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::block`
-`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L561-L565
+`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L584-L588
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -594,7 +610,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::stmts`
-`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L567-L587
+`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L590-L610
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -616,7 +632,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::bind`
-`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L589-L617
+`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L612-L640
 > Record the type of a `let` binding when it is evident.
 ```mermaid
 sequenceDiagram
@@ -634,7 +650,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::sub`
-`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L619-L623
+`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L642-L646
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -642,7 +658,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::sub_block`
-`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L625-L630
+`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L648-L653
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -650,7 +666,18 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::expr`
-`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L632-L835
+`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L655-L662
+```mermaid
+sequenceDiagram
+  participant codemaid_rust__collect__FlowWalker as FlowWalker
+  opt self.depth>= MAX_EXPR_DEPTH
+    Note over codemaid_rust__collect__FlowWalker: return
+  end
+  codemaid_rust__collect__FlowWalker->>codemaid_rust__collect__FlowWalker: expr_inner(e, out)
+```
+
+## `codemaid_rust::collect::FlowWalker::expr_inner`
+`fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L664-L867
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -812,7 +839,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::cond`
-`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L837-L843
+`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L869-L875
 > Condition of `if` / `while`: `let` scrutinee or boolean expression.
 ```mermaid
 sequenceDiagram
@@ -824,7 +851,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::arg`
-`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L845-L865
+`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L877-L897
 > Walk a call argument.
 ```mermaid
 sequenceDiagram
@@ -839,7 +866,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::mac`
-`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L880-L892
+`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L912-L924
 > Calls inside macro arguments (`vec![f()]`, `assert!(g())`, `format!("{}", h())`).
 ```mermaid
 sequenceDiagram
@@ -857,7 +884,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::FlowWalker::recv`
-`fn recv(&self, e: &Expr) -> Recv` · L894-L910
+`fn recv(&self, e: &Expr) -> Recv` · L926-L942
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect__FlowWalker as FlowWalker
@@ -871,7 +898,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::call`
-`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L913-L917
+`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L945-L949
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -884,7 +911,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::arg_sketch`
-`fn arg_sketch(e: &Expr) -> String` · L919-L939
+`fn arg_sketch(e: &Expr) -> String` · L951-L971
 > A compact stand-in for an argument: identifiers and short literals are kept, everything else becomes `_`.
 ```mermaid
 sequenceDiagram
@@ -905,7 +932,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::cond_label`
-`fn cond_label(cond: &Expr) -> String` · L941-L947
+`fn cond_label(cond: &Expr) -> String` · L973-L979
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -923,7 +950,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::is_call`
-`fn is_call(e: &Expr) -> bool` · L963-L971
+`fn is_call(e: &Expr) -> bool` · L995-L1003
 ```mermaid
 sequenceDiagram
   participant codemaid_rust__collect as collect mod
@@ -937,7 +964,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_rust::collect::constructed_type`
-`fn constructed_type(e: &Expr) -> Option<Segs>` · L979-L997
+`fn constructed_type(e: &Expr) -> Option<Segs>` · L1011-L1029
 > `Foo::new(..)`, `Foo { ..
 ```mermaid
 sequenceDiagram

@@ -229,3 +229,81 @@ fn extraction_is_deterministic_regardless_of_insertion_order() {
     let opts = RustOptions { name: "app".into(), ..Default::default() };
     assert_eq!(extract(&fwd, &opts).codebase, extract(&rev, &opts).codebase);
 }
+
+/// Generated code nests far deeper than hand-written code. Each shape below
+/// overflowed a 2 MiB rayon worker (debug build) before collection moved to
+/// big-stack threads and the flow walker got a depth guard.
+#[test]
+fn deep_nesting_does_not_overflow() {
+    let mut ty = String::from("B0");
+    for _ in 0..200 {
+        ty = format!("UInt<{ty}, B1>");
+    }
+    let shapes = [
+        format!("pub type U = {ty};\n"),
+        format!("pub fn f() {{ let x = {}1; }}\n", "g() + ".repeat(5000)),
+        format!("pub fn f() {{ x{}; }}\n", ".a()".repeat(5000)),
+        format!("pub fn f() {{ {}g(){} }}\n", "if c { ".repeat(300), " }".repeat(300)),
+        format!("pub fn f() {{ {}x{}; }}\n", "g(".repeat(300), ")".repeat(300)),
+    ];
+    // Two files, so rayon actually hands work to its workers.
+    for text in shapes {
+        let mut src = SourceSet::new();
+        src.insert("src/lib.rs", &text).unwrap();
+        src.insert("src/other.rs", "pub fn h() {}").unwrap();
+        let out = extract(&src, &RustOptions { name: "deep".into(), ..Default::default() });
+        assert!(out.codebase.symbol(&SymbolId::new("deep")).is_some());
+    }
+}
+
+/// `use a::*` cycles and many globs per module used to make path resolution
+/// exponential (sysctl 0.6: 908 M `walk` calls for one file, never finished).
+#[test]
+fn glob_cycles_resolve_quickly() {
+    let mut src = SourceSet::new();
+    let mut lib = String::new();
+    for i in 0..12 {
+        lib.push_str(&format!("mod m{i};\npub use m{i}::*;\n"));
+    }
+    src.insert("src/lib.rs", &lib).unwrap();
+    for i in 0..12 {
+        let mut m = String::new();
+        // Edition-2015 style crate-relative globs that do not resolve from
+        // the module, plus a real cycle back to the crate root.
+        for j in 0..12 {
+            m.push_str(&format!("use m{j}::*;\n"));
+        }
+        m.push_str("use crate::*;\n");
+        m.push_str(&format!("pub struct T{i};\npub fn f{i}() {{ missing(); T{i}::new(); }}\n"));
+        src.insert(format!("src/m{i}.rs").as_str(), &m).unwrap();
+    }
+    let t = std::time::Instant::now();
+    let out = extract(&src, &RustOptions { name: "g".into(), ..Default::default() });
+    assert!(t.elapsed() < std::time::Duration::from_secs(5), "took {:?}", t.elapsed());
+    assert!(out.codebase.symbol(&SymbolId::new("g::m3::T3")).is_some());
+}
+
+/// Known resolver fault, fixed in the id work (DESIGN §7, step 2): a method
+/// call on a receiver of unknown type (`dir`, bound from an `Option<&Path>`)
+/// is matched by name to the only in-crate method called `parent`, so
+/// `Path::parent()` is drawn, as inferred, on the `Id` lane (seen in
+/// `contract::remove_empty_parents`). The right answer is to drop the call (std) or
+/// keep it external, never to bind it to `Id::parent`.
+#[test]
+#[ignore = "resolver fix belongs to step 2 (sym: ids)"]
+fn std_receiver_method_is_not_bound_to_same_named_internal_method() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        use std::path::Path;
+        pub struct Id;
+        impl Id { pub fn parent(&self) -> Option<Id> { None } }
+        pub fn walk(file: &Path) {
+            let mut cur = file.parent();
+            while let Some(dir) = cur { cur = dir.parent(); }
+        }
+        "#,
+    )]);
+    let t = targets(&cb, "app::walk");
+    assert!(!t.iter().any(|t| t == "app::Id::parent"), "Path::parent bound to Id::parent: {t:?}");
+}

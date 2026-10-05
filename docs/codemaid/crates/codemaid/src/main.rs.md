@@ -3,8 +3,8 @@ codemaid: 1
 source: crates/codemaid/src/main.rs
 module: codemaid_main
 language: rust
-source_hash: blake3:36111ee157a75a218e151a6b0095bdc2df1daeb4d28754c549d799aeffe02ee8
-lines: 178
+source_hash: blake3:e4cedcfcdfeb916dc6f8c11e0fc395b3b109a17ce6b398ec10181325a2de03a5
+lines: 179
 fragments: 4
 ---
 # `codemaid_main` · crates/codemaid/src/main.rs
@@ -106,14 +106,14 @@ sequenceDiagram
 ```
 
 ## `codemaid_main::load`
-`fn load(c: &Common, opts: &Options) -> Result<(SourceSet, codemaid::rust::RustOptions), String>` · L150-L171
+`fn load(c: &Common, opts: &Options) -> Result<(SourceSet, codemaid::rust::RustOptions), String>` · L150-L172
 ```mermaid
 sequenceDiagram
   participant codemaid_main as codemaid_main mod
   participant codemaid_rust as codemaid_rust mod
   participant codemaid as codemaid mod
   opt c.repos.is_empty()
-    codemaid_main->>codemaid_rust: rust::extract_dir(&c.path, &ro)
+    codemaid_main->>codemaid_rust: rust::load_dir(&c.path)
     opt ro.name == #quot;codebase#quot;
       codemaid_main->>codemaid_main: dir_name(&c.path)
     end

@@ -3,9 +3,9 @@ codemaid: 1
 source: crates/codemaid-model/src/codebase.rs
 module: codemaid_model::codebase
 language: rust
-source_hash: blake3:dd531046b7ec742f4af476cccadec942a8bafaed41cde64efe2a5d960a9c4039
-lines: 154
-fragments: 3
+source_hash: blake3:fab2ce693d8f980de8eb6920c76cca477e11b1d04078c2ae7e011490d3b0f98f
+lines: 158
+fragments: 4
 ---
 # `codemaid_model::codebase` · crates/codemaid-model/src/codebase.rs
 
@@ -75,8 +75,20 @@ classDiagram
   codemaid_model__codebase__Codebase ..> codemaid_model__symbol__SymbolKind
 ```
 
+## `codemaid_model::codebase::Codebase::relations_from`
+`pub fn relations_from<'a>(&'a self, id: &'a SymbolId) -> impl Iterator<Item = &'a Relation>` · L95-L102
+> Relations whose source is `id`.
+```mermaid
+sequenceDiagram
+  participant codemaid_model__codebase__Codebase as Codebase
+  participant codemaid_model__symbol__SymbolId as SymbolId
+  participant codemaid_model__symbol__Relation as Relation
+  codemaid_model__codebase__Codebase->>codemaid_model__symbol__SymbolId: SymbolId::new(#quot;#quot;)
+  codemaid_model__codebase__Codebase->>codemaid_model__symbol__Relation: Relation::new(clone(), new(), Contains, Exact)
+```
+
 ## `codemaid_model::codebase::Codebase::owner_of`
-`pub fn owner_of(&self, id: &SymbolId) -> Option<SymbolId>` · L110-L121
+`pub fn owner_of(&self, id: &SymbolId) -> Option<SymbolId>` · L114-L125
 > The innermost *type* that owns `id` (the type for a method), or the module for free items.
 ```mermaid
 sequenceDiagram
@@ -88,7 +100,7 @@ sequenceDiagram
 ```
 
 ## `codemaid_model::codebase::Codebase::stats`
-`pub fn stats(&self) -> CodebaseStats` · L123-L138
+`pub fn stats(&self) -> CodebaseStats` · L127-L142
 > Summary counts.
 ```mermaid
 sequenceDiagram

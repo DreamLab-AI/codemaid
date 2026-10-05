@@ -50,6 +50,11 @@ pub struct LoadOptions {
     pub max_file_bytes: u64,
     /// Skip hidden files and directories (names starting with `.`).
     pub skip_hidden: bool,
+    /// Honour `.gitignore` and `.ignore` files found under the root (not
+    /// above it, and never the user's global excludes, so the result still
+    /// depends only on the bytes under the root). On by default: ignored
+    /// trees are typically vendored registries, build output or caches.
+    pub respect_ignore_files: bool,
 }
 
 impl Default for LoadOptions {
@@ -59,6 +64,7 @@ impl Default for LoadOptions {
             skip_dirs: ["target", "node_modules", "vendor", "dist", "build", "out"].map(String::from).to_vec(),
             max_file_bytes: 2 * 1024 * 1024,
             skip_hidden: true,
+            respect_ignore_files: true,
         }
     }
 }
@@ -144,36 +150,38 @@ impl SourceSet {
     /// skipped, so the result depends only on the bytes under `root`.
     pub fn load_dir(root: &Path, options: &LoadOptions) -> io::Result<Self> {
         let mut set = Self::new();
-        walk(root, root, options, &mut set)?;
-        Ok(set)
-    }
-}
-
-fn walk(root: &Path, dir: &Path, options: &LoadOptions, set: &mut SourceSet) -> io::Result<()> {
-    let mut entries: Vec<_> = fs::read_dir(dir)?.collect::<Result<_, _>>()?;
-    entries.sort_by_key(|e| e.file_name());
-    for entry in entries {
-        let name = entry.file_name();
-        let name = name.to_string_lossy();
-        if options.skip_hidden && name.starts_with('.') {
-            continue;
-        }
-        let ty = entry.file_type()?;
-        let path = entry.path();
-        if ty.is_dir() {
-            if !options.skip_dirs.iter().any(|d| d == name.as_ref()) {
-                walk(root, &path, options, set)?;
-            }
-        } else if ty.is_file() {
-            let ext_ok =
-                path.extension().and_then(|e| e.to_str()).is_some_and(|e| options.extensions.iter().any(|x| x == e));
-            if !ext_ok || entry.metadata()?.len() > options.max_file_bytes {
+        let skip_dirs = options.skip_dirs.clone();
+        let walker = ignore::WalkBuilder::new(root)
+            .hidden(options.skip_hidden)
+            .parents(false)
+            .ignore(options.respect_ignore_files)
+            .git_ignore(options.respect_ignore_files)
+            .git_global(false)
+            .git_exclude(false)
+            .require_git(false)
+            .follow_links(false)
+            .filter_entry(move |e| {
+                !(e.file_type().is_some_and(|t| t.is_dir())
+                    && e.depth() > 0
+                    && skip_dirs.iter().any(|d| e.file_name() == d.as_str()))
+            })
+            .build();
+        for entry in walker {
+            let entry = entry.map_err(|e| io::Error::other(e.to_string()))?;
+            if !entry.file_type().is_some_and(|t| t.is_file()) {
                 continue;
             }
-            let Ok(text) = fs::read_to_string(&path) else { continue };
-            let Ok(rel) = SourcePath::relative_to(&path, root) else { continue };
+            let path = entry.path();
+            let ext_ok =
+                path.extension().and_then(|e| e.to_str()).is_some_and(|e| options.extensions.iter().any(|x| x == e));
+            if !ext_ok || entry.metadata().map_err(|e| io::Error::other(e.to_string()))?.len() > options.max_file_bytes
+            {
+                continue;
+            }
+            let Ok(text) = fs::read_to_string(path) else { continue };
+            let Ok(rel) = SourcePath::relative_to(path, root) else { continue };
             set.files.insert(rel, normalise_newlines(&text).into_owned());
         }
+        Ok(set)
     }
-    Ok(())
 }

@@ -363,6 +363,10 @@ struct Resolver {
     impls: BTreeMap<SymbolId, BTreeSet<SymbolId>>,
     /// trait id → method names (required and provided).
     trait_methods: BTreeMap<SymbolId, BTreeSet<String>>,
+    /// module id → internal modules it glob-imports (`use a::b::*`), in
+    /// source order. Resolved once, without consulting globs, so a name
+    /// lookup never re-enters glob resolution.
+    globs: BTreeMap<String, Vec<String>>,
 }
 
 impl Resolver {
@@ -377,6 +381,7 @@ impl Resolver {
             by_name: BTreeMap::new(),
             impls: BTreeMap::new(),
             trait_methods: BTreeMap::new(),
+            globs: BTreeMap::new(),
         };
         for f in files {
             for m in &f.modules {
@@ -415,6 +420,25 @@ impl Resolver {
                 }
             }
         }
+        // Glob targets are resolved up front into a table, so a name lookup
+        // is a bounded graph search (`glob`) instead of a re-entrant `walk`,
+        // which was exponential in the number of globs per module. Round 0
+        // resolves targets without globs; round 1 lets a glob target itself
+        // be found through round-0 globs (`use super::*; use inner::*;`).
+        for round in 0..2 {
+            let mut globs: BTreeMap<String, Vec<String>> = BTreeMap::new();
+            for (module, uses) in &r.uses {
+                for u in uses.iter().filter(|u| u.alias == "*") {
+                    if let Some(t) = r.walk(module, &u.target, None, 0, round > 0) {
+                        let t = t.as_str().to_owned();
+                        if r.items.contains_key(&t) && !globs.get(module).is_some_and(|v| v.contains(&t)) {
+                            globs.entry(module.clone()).or_default().push(t);
+                        }
+                    }
+                }
+            }
+            r.globs = globs;
+        }
         // Impl methods need item tables to resolve self types; do inherent
         // impls before trait impls so inherent methods win name lookups.
         for pass_trait in [false, true] {
@@ -450,7 +474,7 @@ impl Resolver {
     /// sure we are. Unresolvable paths come back as their literal text with
     /// [`Confidence::External`].
     fn resolve(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> (SymbolId, Confidence) {
-        match self.walk(module, segs, self_ty, 0) {
+        match self.walk(module, segs, self_ty, 0, true) {
             Some(id) if self.internal.contains(&id) => (id, Confidence::Exact),
             Some(id) => {
                 let root = id.as_str().split("::").next().unwrap_or("");
@@ -461,10 +485,18 @@ impl Resolver {
     }
 
     fn resolve_internal(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
-        self.walk(module, segs, self_ty, 0).filter(|id| self.internal.contains(id))
+        self.walk(module, segs, self_ty, 0, true).filter(|id| self.internal.contains(id))
     }
 
-    fn walk(&self, module: &str, segs: &[String], self_ty: Option<&SymbolId>, depth: u8) -> Option<SymbolId> {
+    /// `use_globs` is false only while the glob table itself is being built.
+    fn walk(
+        &self,
+        module: &str,
+        segs: &[String],
+        self_ty: Option<&SymbolId>,
+        depth: u8,
+        use_globs: bool,
+    ) -> Option<SymbolId> {
         if depth > 8 || segs.is_empty() {
             return None;
         }
@@ -485,14 +517,20 @@ impl Resolver {
             name => {
                 if let Some(id) = self.items.get(module).and_then(|m| m.get(name)) {
                     id.clone()
-                } else if let Some(u) = self.uses.get(module).and_then(|us| us.iter().find(|u| u.alias == name)) {
+                } else if let Some(u) = self
+                    .uses
+                    .get(module)
+                    .and_then(|us| us.iter().find(|u| u.alias == name && u.target.as_slice() != [name]))
+                {
                     // Re-resolve the import target, then append the rest.
+                    // (`use foo;` — target == alias — would only re-enter
+                    // itself; it falls through to the crate check below.)
                     let mut full = u.target.clone();
                     full.extend(rest.iter().cloned());
                     return self
-                        .walk(module, &full, self_ty, depth + 1)
+                        .walk(module, &full, self_ty, depth + 1, use_globs)
                         .or_else(|| Some(SymbolId::new(full.join("::"))));
-                } else if let Some(id) = self.glob(module, name, depth) {
+                } else if let Some(id) = use_globs.then(|| self.glob(module, name)).flatten() {
                     id
                 } else if self.crates.contains(name) {
                     SymbolId::new(name)
@@ -510,7 +548,7 @@ impl Resolver {
                 cur = id.clone();
             } else if self.uses.get(&key).is_some_and(|us| us.iter().any(|u| &u.alias == seg)) {
                 // `pub use` re-export inside an internal module.
-                return self.walk(&key, &rest[i..], self_ty, depth + 1);
+                return self.walk(&key, &rest[i..], self_ty, depth + 1, use_globs);
             } else {
                 cur = cur.child(seg);
             }
@@ -518,11 +556,22 @@ impl Resolver {
         Some(cur)
     }
 
-    fn glob(&self, module: &str, name: &str, depth: u8) -> Option<SymbolId> {
-        for u in self.uses.get(module)?.iter().filter(|u| u.alias == "*") {
-            let target = self.walk(module, &u.target, None, depth + 1)?;
-            if let Some(id) = self.items.get(target.as_str()).and_then(|m| m.get(name)) {
+    /// Find `name` through `module`'s glob imports, following glob chains
+    /// (`pub use inner::*` re-exports) breadth-first. Each module is visited
+    /// at most once, so cyclic globs (`a: use b::*`, `b: use a::*`) are
+    /// harmless and the cost is linear in the glob graph.
+    fn glob(&self, module: &str, name: &str) -> Option<SymbolId> {
+        let mut queue: std::collections::VecDeque<&str> = self.globs.get(module)?.iter().map(String::as_str).collect();
+        let mut seen: BTreeSet<&str> = BTreeSet::from([module]);
+        while let Some(m) = queue.pop_front() {
+            if !seen.insert(m) {
+                continue;
+            }
+            if let Some(id) = self.items.get(m).and_then(|items| items.get(name)) {
                 return Some(id.clone());
+            }
+            if let Some(next) = self.globs.get(m) {
+                queue.extend(next.iter().map(String::as_str));
             }
         }
         None

@@ -89,7 +89,7 @@ mod structure;
 
 use std::collections::BTreeMap;
 
-use codemaid_model::{Codebase, SourcePath};
+use codemaid_model::{Codebase, SourcePath, Symbol, SymbolId};
 
 pub use contract::{Drift, DriftEntry, Report, corpus_hash, read_dir_corpus, verify, verify_against, write};
 pub use index::{CallRef, DocumentEntry, FragmentEntry, FragmentKind, Index};
@@ -173,9 +173,11 @@ impl Corpus {
 /// give byte-identical output.
 pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus {
     let mut files = BTreeMap::new();
+    naming::assert_unique_idents(codebase);
     let mut index = Index::new(codebase);
+    let lookup = Lookup::new(codebase);
     for file in codebase.files.values() {
-        let (path, text, entry) = document::render(codebase, file, options);
+        let (path, text, entry) = document::render(codebase, &lookup, file, options);
         index.documents.push(entry);
         files.insert(path, text);
     }
@@ -188,6 +190,41 @@ pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus {
     }
     files.insert(reserved("_index.json"), to_json(&index, options.pretty_json));
     Corpus { files, index }
+}
+
+/// Per-file and per-parent symbol lists, built once per [`generate`] call.
+///
+/// `Codebase::symbols_in_file` and `Codebase::children` scan every symbol;
+/// calling them per document made projection O(files × symbols).
+pub(crate) struct Lookup<'a> {
+    by_file: BTreeMap<&'a SourcePath, Vec<&'a Symbol>>,
+    children: BTreeMap<&'a SymbolId, Vec<&'a Symbol>>,
+}
+
+impl<'a> Lookup<'a> {
+    fn new(cb: &'a Codebase) -> Self {
+        let mut by_file: BTreeMap<&SourcePath, Vec<&Symbol>> = BTreeMap::new();
+        let mut children: BTreeMap<&SymbolId, Vec<&Symbol>> = BTreeMap::new();
+        // `symbols` iterates in id order, so each list keeps the order the
+        // linear scans produced.
+        for s in cb.symbols.values() {
+            by_file.entry(&s.file).or_default().push(s);
+            if let Some(p) = &s.parent {
+                children.entry(p).or_default().push(s);
+            }
+        }
+        Self { by_file, children }
+    }
+
+    /// Same items and order as `Codebase::symbols_in_file`.
+    pub(crate) fn in_file(&self, path: &SourcePath) -> impl Iterator<Item = &'a Symbol> + '_ {
+        self.by_file.get(path).into_iter().flatten().copied()
+    }
+
+    /// Same items and order as `Codebase::children`.
+    pub(crate) fn children(&self, id: &SymbolId) -> impl Iterator<Item = &'a Symbol> + '_ {
+        self.children.get(id).into_iter().flatten().copied()
+    }
 }
 
 /// Map a source path to its document path (`src/a.rs` → `src/a.rs.md`).

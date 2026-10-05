@@ -20,6 +20,11 @@ use crate::tidy::{clip, squeeze, tokens};
 const LABEL_MAX: usize = 56;
 /// Max characters for a stored signature.
 const SIG_MAX: usize = 200;
+/// Expression nesting beyond which flow extraction stops descending. Real
+/// code stays far below it; generated code (long `a + b + ...` or builder
+/// chains, which syn nests one level per operator) can exceed any fixed
+/// stack. Calls deeper than this are omitted from the flow.
+pub(crate) const MAX_EXPR_DEPTH: u32 = 1024;
 
 /// Parse `text` and collect everything pass 2 needs.
 pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts: &RustOptions) -> RawFile {
@@ -36,22 +41,38 @@ pub(crate) fn collect_file(path: &SourcePath, role: &FileRole, text: &str, opts:
     let file = match syn::parse_file(text) {
         Ok(f) => f,
         Err(e) => {
-            raw.error = Some(format!("{}:{}: {e}", e.span().start().line, e.span().start().column + 1));
-            raw.modules.push(RawModule {
-                path: role.module.clone(),
-                span: Span::new(1, 1, raw.text_lines.max(1), 1),
-                doc: None,
-                vis: Visibility::Public,
-                uses: Vec::new(),
-                tags: vec!["parse_error".into()],
-            });
-            return raw;
+            let msg = format!("{}:{}: {e}", e.span().start().line, e.span().start().column + 1);
+            return failed_file(path, role, text, msg);
         }
     };
     let mut c = Collector { opts, raw: &mut raw };
     let span = Span::new(1, 1, c.raw.text_lines.max(1), 1);
     c.module(role.module.clone(), &file.attrs, &file.items, span, Visibility::Public);
     raw
+}
+
+/// The stand-in for a file that could not be collected (parse error or an
+/// internal panic): just its module symbol, tagged `parse_error`, so the 1:1
+/// contract still holds and the problem surfaces as a diagnostic.
+pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error: String) -> RawFile {
+    let text_lines = text.lines().count() as u32;
+    RawFile {
+        path: path.clone(),
+        role: role.clone(),
+        text_lines,
+        hash: codemaid_model::ContentHash::of_text(text),
+        modules: vec![RawModule {
+            path: role.module.clone(),
+            span: Span::new(1, 1, text_lines.max(1), 1),
+            doc: None,
+            vis: Visibility::Public,
+            uses: Vec::new(),
+            tags: vec!["parse_error".into()],
+        }],
+        items: Vec::new(),
+        impls: Vec::new(),
+        error: Some(error),
+    }
 }
 
 struct Collector<'a> {
@@ -551,11 +572,13 @@ const LOOPING: &[&str] = &[
 
 struct FlowWalker {
     env: BTreeMap<String, Recv>,
+    /// Current `expr` recursion depth, see [`MAX_EXPR_DEPTH`].
+    depth: u32,
 }
 
 impl FlowWalker {
     fn new(env: BTreeMap<String, Recv>) -> Self {
-        Self { env }
+        Self { env, depth: 0 }
     }
 
     fn block(&mut self, b: &Block) -> Vec<RawStep> {
@@ -630,6 +653,15 @@ impl FlowWalker {
     }
 
     fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>) {
+        if self.depth >= MAX_EXPR_DEPTH {
+            return;
+        }
+        self.depth += 1;
+        self.expr_inner(e, out);
+        self.depth -= 1;
+    }
+
+    fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>) {
         match e {
             Expr::Call(c) => {
                 let mut deferred = Vec::new();

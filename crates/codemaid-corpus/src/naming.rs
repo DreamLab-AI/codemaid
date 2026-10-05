@@ -10,6 +10,25 @@ pub(crate) fn ident(id: &SymbolId) -> Ident {
     Ident::from_path(id.as_str())
 }
 
+/// Every symbol and relation endpoint must get its own diagram id: a shared
+/// id would silently merge two nodes in every diagram both appear in, and
+/// break merge-by-id across documents. `Ident::from_path` is injective by
+/// construction (short of a 64-bit hash collision); this checks it on the
+/// actual codebase.
+///
+/// # Panics
+///
+/// If two distinct ids map to the same diagram id.
+pub(crate) fn assert_unique_idents(cb: &Codebase) {
+    let mut seen: std::collections::BTreeMap<Ident, &SymbolId> = std::collections::BTreeMap::new();
+    let ids = cb.symbols.keys().chain(cb.relations.iter().flat_map(|r| [&r.from, &r.to]));
+    for id in ids {
+        if let Some(prev) = seen.insert(ident(id), id) {
+            assert!(prev == id, "diagram id collision: `{prev}` and `{id}` both map to `{}`", ident(id));
+        }
+    }
+}
+
 /// The lane (participant) a call target belongs to, its alias, and the
 /// prefix to show on the message when the lane is coarser than the owner.
 pub(crate) struct Lane {

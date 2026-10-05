@@ -4,7 +4,7 @@ kind: overview
 codebase: codemaid
 ---
 # codemaid overview
-30 files · 393 symbols · 1093 relations · 144 flows · 707 calls
+30 files · 406 symbols · 1133 relations · 150 flows · 720 calls
 
 ## crates
 ```mermaid
@@ -17,8 +17,10 @@ flowchart LR
   codemaid_rust(["codemaid_rust"])
   blake3{{"blake3"}}
   clap{{"clap"}}
+  ignore{{"ignore"}}
   proc_macro2{{"proc_macro2"}}
   quote{{"quote"}}
+  rayon{{"rayon"}}
   serde{{"serde"}}
   serde_json{{"serde_json"}}
   syn{{"syn"}}
@@ -27,7 +29,7 @@ flowchart LR
   codemaid -->|"8"| codemaid_model
   codemaid -->|"4"| codemaid_rust
   codemaid_corpus -->|"69"| codemaid_mermaid
-  codemaid_corpus -->|"136"| codemaid_model
+  codemaid_corpus -->|"144"| codemaid_model
   codemaid_corpus -->|"4"| serde
   codemaid_corpus -->|"2"| serde_json
   codemaid_main -->|"3"| clap
@@ -37,11 +39,13 @@ flowchart LR
   codemaid_main -->|"4"| codemaid_rust
   codemaid_main -->|"1"| serde_json
   codemaid_model -->|"1"| blake3
+  codemaid_model -->|"1"| ignore
   codemaid_model -->|"12"| serde
-  codemaid_rust -->|"117"| codemaid_model
+  codemaid_rust -->|"122"| codemaid_model
   codemaid_rust -->|"6"| proc_macro2
   codemaid_rust -->|"3"| quote
-  codemaid_rust -->|"61"| syn
+  codemaid_rust -->|"1"| rayon
+  codemaid_rust -->|"62"| syn
 ```
 
 ## modules: codemaid_corpus
@@ -58,10 +62,11 @@ flowchart LR
   codemaid_corpus -->|"8"| codemaid_corpus__contract
   codemaid_corpus -->|"1"| codemaid_corpus__document
   codemaid_corpus -->|"8"| codemaid_corpus__index
+  codemaid_corpus -->|"1"| codemaid_corpus__naming
   codemaid_corpus -->|"1"| codemaid_corpus__overview
   codemaid_corpus__contract -->|"7"| codemaid_corpus
   codemaid_corpus__contract -->|"4"| codemaid_corpus__document
-  codemaid_corpus__document -->|"4"| codemaid_corpus
+  codemaid_corpus__document -->|"7"| codemaid_corpus
   codemaid_corpus__document -->|"5"| codemaid_corpus__index
   codemaid_corpus__document -->|"2"| codemaid_corpus__sequence
   codemaid_corpus__document -->|"2"| codemaid_corpus__structure
@@ -70,7 +75,7 @@ flowchart LR
   codemaid_corpus__overview -->|"4"| codemaid_corpus__naming
   codemaid_corpus__sequence -->|"3"| codemaid_corpus
   codemaid_corpus__sequence -->|"9"| codemaid_corpus__naming
-  codemaid_corpus__structure -->|"2"| codemaid_corpus
+  codemaid_corpus__structure -->|"6"| codemaid_corpus
   codemaid_corpus__structure -->|"2"| codemaid_corpus__naming
 ```
 
@@ -120,7 +125,7 @@ flowchart LR
   codemaid_model__codebase -->|"1"| codemaid_model__flow
   codemaid_model__codebase -->|"4"| codemaid_model__path
   codemaid_model__codebase -->|"4"| codemaid_model__source
-  codemaid_model__codebase -->|"26"| codemaid_model__symbol
+  codemaid_model__codebase -->|"28"| codemaid_model__symbol
   codemaid_model__flow -->|"6"| codemaid_model__symbol
   codemaid_model__source -->|"6"| codemaid_model__hash
   codemaid_model__source -->|"12"| codemaid_model__path
@@ -138,12 +143,13 @@ flowchart LR
   codemaid_rust__raw["raw"]
   codemaid_rust__resolve["resolve"]
   codemaid_rust__tidy["tidy"]
-  codemaid_rust -->|"1"| codemaid_rust__collect
-  codemaid_rust -->|"1"| codemaid_rust__layout
+  codemaid_rust -->|"2"| codemaid_rust__collect
+  codemaid_rust -->|"2"| codemaid_rust__layout
+  codemaid_rust -->|"1"| codemaid_rust__raw
   codemaid_rust -->|"1"| codemaid_rust__resolve
   codemaid_rust__collect -->|"3"| codemaid_rust
-  codemaid_rust__collect -->|"2"| codemaid_rust__layout
-  codemaid_rust__collect -->|"30"| codemaid_rust__raw
+  codemaid_rust__collect -->|"3"| codemaid_rust__layout
+  codemaid_rust__collect -->|"32"| codemaid_rust__raw
   codemaid_rust__collect -->|"25"| codemaid_rust__tidy
   codemaid_rust__raw -->|"2"| codemaid_rust__layout
   codemaid_rust__resolve -->|"10"| codemaid_rust
@@ -505,6 +511,7 @@ erDiagram
   }
   codemaid_rust__collect__FlowWalker["FlowWalker"] {
     BTreeMap[String_Recv] env "BTreeMap<String, Recv>"
+    u32 depth
   }
   codemaid_rust__layout__FileRole["FileRole"] {
     String crate_name
@@ -596,6 +603,7 @@ erDiagram
     BTreeMap[String_BTreeSet[SymbolId]] by_name "BTreeMap<String, BTreeSet<SymbolId>>"
     BTreeMap[SymbolId_BTreeSet[SymbolId]] impls "BTreeMap<SymbolId, BTreeSet<SymbolId>>"
     BTreeMap[SymbolId_BTreeSet[String]] trait_methods "BTreeMap<SymbolId, BTreeSet<String>>"
+    BTreeMap[String_Vec[String]] globs "BTreeMap<String, Vec<String>>"
   }
   codemaid_rust__Extraction ||--o{ codemaid_rust__Diagnostic : "diagnostics"
   codemaid_rust__RustOptions ||--|| codemaid_rust__ExternalCalls : "external_calls"

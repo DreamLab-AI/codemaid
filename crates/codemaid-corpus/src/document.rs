@@ -5,13 +5,18 @@ use std::fmt::Write as _;
 use codemaid_model::{Codebase, ContentHash, SourceFile, SourcePath, Span, Symbol, SymbolKind};
 
 use crate::index::{CallRef, DocumentEntry, FragmentEntry, FragmentKind};
-use crate::{CorpusOptions, document_path, sequence, structure};
+use crate::{CorpusOptions, Lookup, document_path, sequence, structure};
 
 /// Header line every generated document starts with; `write` only deletes
 /// files that carry it.
 pub(crate) const MARKER: &str = "codemaid: ";
 
-pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> (SourcePath, String, DocumentEntry) {
+pub(crate) fn render(
+    cb: &Codebase,
+    lookup: &Lookup<'_>,
+    file: &SourceFile,
+    opts: &CorpusOptions,
+) -> (SourcePath, String, DocumentEntry) {
     let doc_path = document_path(&file.path);
     let mut fragments = Vec::new();
     let mut body = String::new();
@@ -25,9 +30,9 @@ pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> 
         let _ = writeln!(body, "> ⚠ file did not parse; only its module is listed");
     }
 
-    if let Some((text, _)) = structure::render(cb, file, opts) {
-        let participants = cb
-            .symbols_in_file(&file.path)
+    if let Some((text, _)) = structure::render(cb, lookup, file, opts) {
+        let participants = lookup
+            .in_file(&file.path)
             .filter(|s| s.kind.is_type() || s.kind == SymbolKind::Module)
             .map(|s| s.id.clone())
             .collect();
@@ -46,7 +51,7 @@ pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> 
     }
 
     let mut callables: Vec<&Symbol> =
-        cb.symbols_in_file(&file.path).filter(|s| s.kind.is_callable() && s.flow.is_some()).collect();
+        lookup.in_file(&file.path).filter(|s| s.kind.is_callable() && s.flow.is_some()).collect();
     // Source order reads better than id order inside one file.
     callables.sort_by_key(|s| (s.span.start_line, s.span.start_col, s.id.clone()));
     for sym in callables {

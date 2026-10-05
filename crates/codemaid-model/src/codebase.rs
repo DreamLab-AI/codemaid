@@ -93,8 +93,12 @@ impl Codebase {
     }
 
     /// Relations whose source is `id`.
+    ///
+    /// `Relation` orders by `from` first, so this is a range scan
+    /// (O(log n + k)), not a pass over every relation.
     pub fn relations_from<'a>(&'a self, id: &'a SymbolId) -> impl Iterator<Item = &'a Relation> {
-        self.relations.iter().filter(move |r| &r.from == id)
+        let lower = Relation::new(id.clone(), SymbolId::new(""), RelationKind::Contains, crate::Confidence::Exact);
+        self.relations.range(lower..).take_while(move |r| &r.from == id)
     }
 
     /// Relations whose target is `id`.

@@ -6,14 +6,19 @@ use std::collections::BTreeSet;
 use codemaid_mermaid::{Class, ClassDiagram, ClassRelationKind, Direction};
 use codemaid_model::{Codebase, MemberKind, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind, Visibility};
 
-use crate::CorpusOptions;
 use crate::naming::ident;
+use crate::{CorpusOptions, Lookup};
 
 /// Render the structure diagram for `file`. Returns `None` when the file
 /// defines nothing worth drawing.
-pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> Option<(String, usize)> {
+pub(crate) fn render(
+    cb: &Codebase,
+    lookup: &Lookup<'_>,
+    file: &SourceFile,
+    opts: &CorpusOptions,
+) -> Option<(String, usize)> {
     let visible = |s: &Symbol| opts.include_private || s.visibility != Visibility::Private;
-    let here: Vec<&Symbol> = cb.symbols_in_file(&file.path).filter(|s| visible(s)).collect();
+    let here: Vec<&Symbol> = lookup.in_file(&file.path).filter(|s| visible(s)).collect();
 
     let mut d = ClassDiagram::new(Direction::LR);
     let mut drawn: BTreeSet<SymbolId> = BTreeSet::new();
@@ -86,7 +91,7 @@ pub(crate) fn render(cb: &Codebase, file: &SourceFile, opts: &CorpusOptions) -> 
         let mut class = Class::new(ident(&module.id), &module.id.to_string());
         class.annotation("module");
         let mut any = false;
-        for s in cb.children(&module.id).filter(|s| visible(s)) {
+        for s in lookup.children(&module.id).filter(|s| visible(s)) {
             match s.kind {
                 SymbolKind::Module => {
                     class.field(s.visibility.uml_marker(), &format!("mod {}", s.name), "");
