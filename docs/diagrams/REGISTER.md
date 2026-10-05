@@ -3,7 +3,7 @@
 
 Collected from every topic file's labelled paragraphs (`**Tension:**`, `**Debt:**`, `**Drift:**`, `**Open:**`, `**Invariant:**`) and from `TENSION:` / `DEBT:` / `DRIFT:` / `OPEN:` / `INVARIANT:` prefixes inside diagram notes. Each row links back to the topic and diagram it was found in. This is the catalogue of the state of play; it proposes nothing. Remediation and roadmap work starts from here.
 
-Tension: 4 · Debt: 41 · Drift: 1 · Open: 12 · Invariant: 50
+Tension: 4 · Debt: 40 · Drift: 1 · Open: 12 · Invariant: 50
 
 ## Tensions
 
@@ -57,8 +57,7 @@ Tension: 4 · Debt: 41 · Drift: 1 · Open: 12 · Invariant: 50
 | DB-37 | [DEL-01.1](delivery/01-ci-msrv-and-determinism.md#del-011-the-four-ci-jobs) | the MSRV job runs only `build` and `test` with default features (`.github/workflows/ci.yml:46`-`47`); clippy, docs and the `--no-default-features` configuration are checked on stable only. |
 | DB-38 | [DEL-01.2](delivery/01-ci-msrv-and-determinism.md#del-012-the-ignore-0430-problem) | 0.4.30 uses let-chains, needs Rust 1.88, Cargo.toml:32 |
 | DB-39 | [DEL-02.1](delivery/02-design-versus-code.md#del-021-the-designs-layers-against-the-tree) _(designed, not built)_ | `--review`, a pack of diagrams only, is in the layer table (`docs/DESIGN.md:42`) but not in the binary (`docs/DESIGN.md:181`, `crates/sealmap/src/main.rs:45`-`65`). |
-| DB-40 | [DEL-02.5](delivery/02-design-versus-code.md#del-025-crates-planned-against-crates-present) | the workspace is still at version `0.1.0` (`Cargo.toml:6`), and the lock records its writer as `sealmap` plus that version (`crates/sealmap-corpus/src/seal/lock.rs:21`), so a lock signed by this tree names a released version that has no seal module until the 0.2 bump. |
-| DB-41 | [DEL-02.6](delivery/02-design-versus-code.md#del-026-dogfooding-the-gate-on-this-repository) | step 6 needs MER-02's example id moved into a fenced block or reworded before `verify` can run in CI on this repository (`crates/sealmap-corpus/src/seal/check.rs:390`, `docs/DESIGN.md:308`-`309`). |
+| DB-40 | [DEL-02.6](delivery/02-design-versus-code.md#del-026-dogfooding-the-gate-on-this-repository) | step 6 needs MER-02's example id moved into a fenced block or reworded before `verify` can run in CI on this repository (`crates/sealmap-corpus/src/seal/check.rs:390`, `docs/DESIGN.md:308`-`309`). |
 
 ## Drifts
 

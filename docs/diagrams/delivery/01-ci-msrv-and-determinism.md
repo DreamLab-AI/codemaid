@@ -20,7 +20,7 @@ sources:
   - crates/sealmap/src/main.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: 6cefaf431511f380d989b93790241b903077d673
 ---
 ## For developers
 
@@ -195,7 +195,7 @@ the older tree under the current tree's name.
 
 ```mermaid
 flowchart TB
-    WS["workspace: version 0.1.0, edition 2024,<br/>rust-version 1.85, MIT OR Apache-2.0<br/>Cargo.toml:5-9"]
+    WS["workspace: version 0.2.0, edition 2024,<br/>rust-version 1.85, MIT OR Apache-2.0<br/>Cargo.toml:5-9"]
     LN["lints: unsafe forbidden, missing docs<br/>warned, clippy all<br/>Cargo.toml:39-44"]
     MO["sealmap-model"]
     MM["sealmap-mermaid, model optional"]

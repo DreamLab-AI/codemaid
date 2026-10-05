@@ -15,7 +15,7 @@ sources:
   - crates/sealmap-corpus/src/seal/lock.rs
   - crates/sealmap-corpus/src/seal/check.rs
   - crates/sealmap-corpus/src/pack.rs
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: 6cefaf431511f380d989b93790241b903077d673
 ---
 ## For developers
 
@@ -24,8 +24,8 @@ verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 and step 3 followed in the tree: the lock, `resolve`, `stale`, `seal-check`,
 `verify`, `seal sign`, the retirement of the committed generated corpus,
 `sealmap-dense` with its `sealmap dense` subcommand, and `pack`
-(`docs/DESIGN.md:298`-`303`, `README.md:364`-`367`). What remains of step 3
-is the first 0.2 publish. This topic is the catalogue of the gap once `pack`
+(`docs/DESIGN.md:298`-`303`, `README.md:364`-`367`). Step 3 closed with
+the 0.2.0 publish (`docs/DESIGN.md:302`-`303`). This topic is the catalogue of the gap once `pack`
 landed: what the design still describes that the code does not do, and the
 questions the design leaves open.
 
@@ -102,7 +102,7 @@ the layer table (`docs/DESIGN.md:42`) but not in the binary
 flowchart TB
     S1["1 repository: rename, dual licence,<br/>hardening, sealmap-extract<br/>DONE, docs/DESIGN.md:291"]
     S2["2 ids and hashes: sym grammar, sig and body,<br/>injective ids, schema v2<br/>DONE, docs/DESIGN.md:296"]
-    S3["3 seal surface, retirement, sealmap-dense<br/>and pack DONE in the tree;<br/>the first 0.2 publish remains<br/>docs/DESIGN.md:298"]
+    S3["3 seal surface, retirement, sealmap-dense<br/>and pack DONE;<br/>published as 0.2.0<br/>docs/DESIGN.md:298"]
     S4["4 E0-R on VisionClaw and agentbox<br/>docs/DESIGN.md:304"]
     S5["5 sealmap skill, routing ADR<br/>docs/DESIGN.md:305"]
     S6["6 dogfood: seal this corpus<br/>docs/DESIGN.md:308"]
@@ -229,10 +229,9 @@ corpus crate has gained `pack`; one crate is deferred.
 built only if E0-R on the Rust repositories shows the precise-staleness gain
 is real (`docs/DESIGN.md:310`-`311`, `README.md:258`).
 
-**Debt:** the workspace is still at version `0.1.0` (`Cargo.toml:6`), and the
-lock records its writer as `sealmap` plus that version
-(`crates/sealmap-corpus/src/seal/lock.rs:21`), so a lock signed by this tree
-names a released version that has no seal module until the 0.2 bump.
+Closed in the 0.2.0 release: the workspace is at `0.2.0` (`Cargo.toml:6`),
+so a lock signed by this tree names `sealmap` 0.2.0, the first release that
+has the seal module (`crates/sealmap-corpus/src/seal/lock.rs:21`).
 
 **Open:** `sealmap-ts` is deferred (`docs/DESIGN.md:133`), yet the crate
 surface still plans it behind a *default* facade feature because oxc needs
