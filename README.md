@@ -6,7 +6,7 @@
 
 [![Licence](https://img.shields.io/badge/Licence-MIT%20OR%20Apache--2.0-blue?style=flat-square)](#licence)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange?style=flat-square)](Cargo.toml)
-[![Status](https://img.shields.io/badge/status-0.1%20%E2%86%92%200.2%20in%20progress-yellow?style=flat-square)](docs/DESIGN.md)
+[![Status](https://img.shields.io/badge/status-0.2%20seal%20surface%20in%20tree-yellow?style=flat-square)](docs/DESIGN.md)
 
 *The seal and the distillation do the work, not a bigger model.*
 
@@ -26,17 +26,17 @@ agents. It has one structural cost: **keeping the diagrams true**.
 
 **What sealmap does.** It reads source without compiling it and builds a
 language-neutral model: symbols, relations, and the ordered call flow of every
-function. From that model it provides five things. The first two exist
-today; the other three are the 0.2 seal surface, in progress:
+function. From that model it provides five things. The first four exist
+in this tree; review packs are next:
 
 - **Stable symbol ids** (exist), with no file path or line number in them,
   so moving code never breaks a citation.
 - **Two content hashes per symbol** (exist), one for the signature and one
   for the body, both insensitive to whitespace, comments and formatting.
-- **Seals** (planned, 0.2). A lockfile records that a hand-consolidated diagram topic was
+- **Seals** (exist). A lockfile records that a hand-consolidated diagram topic was
   reviewed against *these exact versions* of the functions it describes.
   `sealmap verify` enforces that in CI, with no LLM involved.
-- **Precise staleness** (planned, 0.2). When code changes, only the topics whose sealed
+- **Precise staleness** (exists). When code changes, only the topics whose sealed
   symbols actually changed are flagged for another look. Topics that merely
   share a file with the change are left alone.
 - **On-demand review packs** (planned, 0.2). A bounded, byte-identical blob is built from the
@@ -87,19 +87,76 @@ flowchart LR
 | **Sealed** | `seals.lock`, plus a static `sealed:` pointer per topic | yes | the skill's seal step (a reviewed decision) |
 | **Generated** | model, index, dense projection, optional 1:1 Mermaid | **never** | `sealmap generate`, rebuilt in seconds |
 
-### What a seal check reports (planned, 0.2)
+### What a seal check reports
 
-| Sealed symbol | Class | CI |
+| Condition | Class | CI |
 |---|---|---|
-| id resolves, both hashes match (code moves included) | holds | pass |
-| signature same, body changed | behaviour | fail → cheap re-review |
-| signature changed | contract | fail → re-consolidate, ADR addendum |
-| id gone; another id has the same body | absent (rename suspected) | fail → confirm rename |
-| file no longer parses | unparsable | fail (fail closed) |
-| topic prose edited since sealing | prose changed | fail |
+| id resolves, both hashes match (code moves included) | `holds` | pass |
+| signature same, body changed | `behaviour` | fail → cheap re-review |
+| signature changed | `contract` | fail → re-consolidate, ADR addendum |
+| id gone; candidates of the same kind with the sealed body are listed | `absent` (rename suspected) | fail → confirm rename |
+| a file that may hold the id no longer parses | `unparsable` | fail (fail closed) |
+| a `sym:` id cited but not sealed, or not a canonical id | `unsealed-citation` | fail |
+| a lock entry whose topic file is gone, or a sealed symbol no longer cited | `orphan` | fail |
+| topic prose edited since sealing | `prose-edited` | fail |
+| `sealed:` pointer and lock disagree, or the lock is not canonical | `lock-fault` | fail |
 
 Code, topic and lock land in **one commit**. No second "re-stamp" commit is
 needed.
+
+### A seal, end to end
+
+A topic cites symbols as inline code spans (ids contain spaces, so the code
+span is the delimiter):
+
+```markdown
+---
+id: LED-01
+title: Accounts
+area: ledger
+---
+Money goes in through `sym:cargo ledger . accounts/LedgerAccount#deposit().`.
+```
+
+Sealing it derives the entry from the current code and adds one pointer
+line to the front matter:
+
+```console
+$ sealmap seal sign LED-01 --reviewer zai:glm-5.3 --model claude:sonnet
+sealmap: sealed LED-01 (ledger/01-accounts.md) with 1 symbol(s) into ./docs/diagrams/seals.lock
+$ cat docs/diagrams/seals.lock
+version = 1
+algorithm = "sm1"
+generator = "sealmap 0.1.0"
+
+[[topic]]
+id = "LED-01"
+file = "ledger/01-accounts.md"
+topic_hash = "blake3-16:…"
+reviewer = "zai:glm-5.3"
+model = "claude:sonnet"
+date = "2026-10-05"
+symbols = [
+  { id = "sym:cargo ledger . accounts/LedgerAccount#deposit().", sig = "blake3-16:…", body = "blake3-16:…" },
+]
+$ sealmap verify && echo green
+green
+```
+
+Edit `deposit`'s body and the gate goes red, naming the topic, the symbol
+and the class:
+
+```console
+$ sealmap verify
+behaviour         LED-01   sym:cargo ledger . accounts/LedgerAccount#deposit(). body blake3-16:… -> blake3-16:… (src/accounts.rs:4-6)
+$ echo $?
+1
+```
+
+`topic_hash` is BLAKE3 over the topic text with line endings normalised and
+the `sealed:` line removed, truncated to 16 bytes; the lock is TOML in one
+canonical form that `sealmap` writes and `verify` byte-checks. Reviewer and
+model are opaque strings: reviewer policy belongs to the calling skill.
 
 ## Ids and hashes (exist today)
 
@@ -181,7 +238,7 @@ cheap and checkable.
 
 ## Crates
 
-**Today (in this tree: 0.1 plus step 2, ids and hashes; renamed from `codemaid-*`):**
+**Today (in this tree: 0.1 plus steps 2 and 3a: ids, hashes and the seal surface; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
@@ -190,7 +247,7 @@ cheap and checkable.
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
 | [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
-| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
+| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign` | serde_json, toml, blake3 |
 
 **Planned for 0.2:**
 
@@ -198,7 +255,7 @@ cheap and checkable.
 |---|---|
 | `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
 | `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
-| `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
+| `sealmap-corpus` gains | `pack`: bounded review packs |
 
 Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full
 rustdoc. Depend on the facade for the common path. A project that only needs
@@ -209,20 +266,29 @@ safe Mermaid output can depend on `sealmap-mermaid` alone.
 ```sh
 cargo install --path crates/sealmap
 
-sealmap generate .                   # write the 1:1 corpus, model and index to .sealmap/
-sealmap verify   .                   # local consistency check against .sealmap/
+sealmap generate .                   # write the 1:1 corpus, model and index to .sealmap/ (gitignored)
+sealmap generate . --check           # exit 1 if .sealmap/ differs from a fresh generation
 sealmap model    .  > model.json     # just the model
 
 # Several repositories as one codebase (cross-repo calls resolve):
 sealmap generate --repo api=../api --repo core=../core -o .sealmap
+
+# Seals over docs/diagrams/ (lock: docs/diagrams/seals.lock; -C ROOT, --diagrams DIR, --json)
+sealmap resolve 'sym:cargo my_crate . net/Client#connect().'   # span + hashes, or absent + rename candidates
+sealmap seal sign CP-03 --reviewer zai:glm-5.3 --model claude:sonnet   # seal a topic from the current code
+sealmap verify                                               # the CI gate: exit 1 unless everything holds
+sealmap seal-check CP-03 CP-07                               # classify chosen lock entries
+sealmap stale --since main                                   # sealed symbols changed since a revision; exit 0
 ```
 
-**Planned 0.2 CLI** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
+Exit codes: 0 success; 1 a check failed, an id is not found, or a seal was
+refused; 2 usage or IO error. Seals depend on the extraction options that
+shape ids (`--name`, `--tests`, `--repo`): check with the options you
+signed with.
+
+**Planned** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
 
 ```sh
-sealmap resolve 'sym:cargo my_crate . net/Client#connect().' # current span + hashes
-sealmap stale --since main                                 # topics needing a look
-sealmap verify                                             # the CI gate
 sealmap pack CP-03 CP-07 --max-bytes 1048576               # review blob
 sealmap pack --review                                      # diagrams only, for an outside reviewer
 ```
@@ -230,7 +296,8 @@ sealmap pack --review                                      # diagrams only, for 
 ## Properties
 
 - **Deterministic.** The same sources give byte-identical output on every
-  machine, and `pack` is byte-identical for the same tree, lock and arguments.
+  machine, CI compares two fresh generations byte for byte, and the lock has
+  one canonical form, so signing topics in any order writes the same bytes.
 - **Honest.** Every call and relation is tagged `exact`, `inferred` or
   `external`. Nothing is guessed silently, and an unparsable file fails a seal
   rather than passing it.
@@ -238,8 +305,8 @@ sealmap pack --review                                      # diagrams only, for 
   diagrams generated from tokio, axum, ripgrep, oxdraw and this repository parse
   in Mermaid 12 ([`tools/validate-mermaid.mjs`](tools/validate-mermaid.mjs)),
   as do the 6,142 diagrams of a VisionClaw corpus with step-2 ids.
-- **Bounded.** `pack` refuses an over-budget request with a shard plan rather
-  than truncating it.
+- **Bounded** (planned with `pack`). `pack` will refuse an over-budget request
+  with a shard plan rather than truncating it.
 - **Fast:**
 
   | Codebase | Release build | Notes |
@@ -258,7 +325,7 @@ sealmap pack --review                                      # diagrams only, for 
 - **It never writes the diagrams people read.** Consolidation, narrative and
   judgement are the LLM skill's job.
 - **It runs no model, makes no network calls, and spawns no processes** in the
-  libraries. The CLI only shells out to `git` for `--since`.
+  libraries. The CLI only shells out to `git` (and `tar`) for `stale --since`.
 - **It knows nothing about reviewers.** The lock holds opaque strings, and
   reviewer policy (cross-family review, evidence) lives in the skill layer.
 
@@ -266,7 +333,8 @@ sealmap pack --review                                      # diagrams only, for 
 
 **v0.1** is working. It is dogfooded on its own source, and the Rust language
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
-and 2 of the 0.2 plan are done in this tree and not yet released.
+and 2 of the 0.2 plan and the seal half of step 3 are done in this tree and
+not yet released.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
@@ -275,8 +343,10 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 2. **Done.** `sym:` id grammar (SCIP-descriptor style), signature and body
    hashes, schema v2, injective Mermaid ids, the `Path::parent` resolver fix,
    and CI on the MSRV.
-3. Seal surface (`resolve` / `stale` / `seal-check` / `verify` / `pack`) and
-   `sealmap-dense`; first crates.io release.
+3. **In progress.** Seal surface: the lock, `resolve`, `stale`, `seal-check`,
+   `verify` and `seal sign` are done and the committed generated corpus is
+   retired; `pack` and `sealmap-dense` remain, then the first 0.2 crates.io
+   release.
 4. **E0:** replay 100 real commits and count topics flagged per commit, file
    level against sealed, with no LLM involved. This is the first headline
    number.
@@ -290,8 +360,10 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 - [`docs/DESIGN.md`](docs/DESIGN.md): the governing design. It covers the
   layers, seal format, crate surface, skills, model-per-step tiering, evidence
   plan and owner decisions.
-- [`docs/sealmap/`](docs/sealmap): the v0.1 self-corpus. It is retired at
-  0.2, when generated output moves to the gitignored `.sealmap/`.
+- [`docs/diagrams/`](docs/diagrams): the hand-authored, citation-verified
+  diagram corpus of this repository. The v0.1 generated self-corpus
+  (`docs/sealmap/`) is retired: `sealmap generate` rebuilds it into the
+  gitignored `.sealmap/`.
 
 ## Licence
 
