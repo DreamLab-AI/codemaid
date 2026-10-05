@@ -24,6 +24,8 @@ design) and the root [`README.md`](../../README.md). There are no ADRs.
   [REGISTER.md](REGISTER.md).
 - **Changing the resolver or the walker?** EXT-03, EXT-04, EXT-05, and the
   Debt rows from them in the register.
+- **Feeding a codebase to an agent, or building `pack`?** DEN-01: the dense
+  format, its marks, and the slice that refuses rather than truncates.
 - **Planning 0.2 work?** DEL-02 is the gap between `docs/DESIGN.md` and the
   code; [DECISIONS-TIMELINE.md](DECISIONS-TIMELINE.md) is how it got here.
 
@@ -36,6 +38,7 @@ design) and the root [`README.md`](../../README.md). There are no ADRs.
 | mermaid | MER | `sealmap-mermaid`: typed writers, escaping, injective diagram ids |
 | corpus | COR | `sealmap-corpus` plus the facade and CLI: generate, the index, projections, verify and write |
 | delivery | DEL | CI, the MSRV job, determinism, publication, and design versus code |
+| dense | DEN | `sealmap-dense`: the agent projection, short names, call trees, budgeted slices; and what reading it revealed about the adapter |
 
 ## Checking and regenerating
 
@@ -52,7 +55,7 @@ new commit, correct the lines that moved, and bump that topic's
 `verified_commit`; leave topics whose sources did not change on their stamp.
 
 <!-- BEGIN GENERATED DIAGRAM INDEX -->
-_16 topic files, 86 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
+_17 topic files, 92 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
 
 ### model
 
@@ -94,4 +97,10 @@ _16 topic files, 86 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram
 |----|-------|----------|-------|-----------|------|
 | DEL-01 | [CI, the MSRV job and the determinism guarantees](delivery/01-ci-msrv-and-determinism.md) | 5 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 | DEL-02 | [Design versus code, what 0.2 plans and the tree does not yet do](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+
+### dense
+
+| ID | Topic | Diagrams | Kinds | Governing | ADRs |
+|----|-------|----------|-------|-----------|------|
+| DEN-01 | [The dense agent projection](dense/01-the-dense-agent-projection.md) | 6 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 <!-- END GENERATED DIAGRAM INDEX -->
