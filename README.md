@@ -4,7 +4,7 @@
 
 ### Deterministic code maps and sealed diagram contracts for LLM development harnesses
 
-[![Licence](https://img.shields.io/badge/Licence-MIT-blue?style=flat-square)](LICENSE)
+[![Licence](https://img.shields.io/badge/Licence-MIT%20OR%20Apache--2.0-blue?style=flat-square)](#licence)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange?style=flat-square)](Cargo.toml)
 [![Status](https://img.shields.io/badge/status-0.1%20%E2%86%92%200.2%20in%20progress-yellow?style=flat-square)](docs/DESIGN.md)
 
@@ -227,4 +227,13 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
 ## Licence
 
-MIT ([`LICENSE`](LICENSE)). The 0.2 release moves to `MIT OR Apache-2.0`.
+Licensed under either of
+
+- Apache License, Version 2.0 ([`LICENSE-APACHE`](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT licence ([`LICENSE-MIT`](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+
+at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 licence, shall be
+dual licensed as above, without any additional terms or conditions.
