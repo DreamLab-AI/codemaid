@@ -222,3 +222,66 @@ fn external_path_calls_are_not_double_qualified() {
     assert!(doc.contains(": Hasher::new_derive_key("), "{doc}");
     assert!(!doc.contains("Hasher::Hasher::"), "{doc}");
 }
+
+/// Review finding `critical:F-06` claimed that a call dispatched through a
+/// trait never links to an expanding fragment. Calls on a concrete type
+/// resolve to the impl method (`Type#[Trait]m().`) and calls to a trait's
+/// default method resolve to its own symbol; both have bodies and so both
+/// expand. Only a call through `dyn Trait` to a *required* method names the
+/// trait's declaration, which has no body to expand.
+#[test]
+fn trait_calls_link_to_impl_and_default_bodies() {
+    let c = corpus(&[
+        ("Cargo.toml", "[package]\nname = \"shop\""),
+        (
+            "src/lib.rs",
+            "pub trait Job { fn run(&self); fn dflt(&self) { helper(); } }\n\
+             pub struct Worker;\n\
+             impl Job for Worker { fn run(&self) { helper(); } }\n\
+             fn helper() {}\n\
+             pub fn concrete(w: Worker) { w.run(); w.dflt(); }\n\
+             pub fn dynamic(j: &dyn Job) { j.run(); }",
+        ),
+    ]);
+    let expands = |frag: &str| -> BTreeMap<String, Option<String>> {
+        c.index
+            .fragment(frag)
+            .unwrap_or_else(|| panic!("no fragment {frag}"))
+            .calls
+            .iter()
+            .map(|c| (c.target.to_string(), c.expands.clone()))
+            .collect()
+    };
+    let concrete = expands("sym:cargo shop . concrete().");
+    let imp = "sym:cargo shop . Worker#[Job]run().";
+    let dflt = "sym:cargo shop . Job#dflt().";
+    assert_eq!(concrete.get(imp), Some(&Some(imp.to_owned())));
+    assert_eq!(concrete.get(dflt), Some(&Some(dflt.to_owned())));
+    // Dynamic dispatch has no single callee: the declaration is the target and does not expand.
+    let dynamic = expands("sym:cargo shop . dynamic().");
+    assert_eq!(dynamic.get("sym:cargo shop . Job#run()."), Some(&None));
+}
+
+/// Review finding `premortem:F-01` claimed `write` purges any Markdown file
+/// that begins `sealmap: `. Only a file whose *front matter* opens with that
+/// key is generated; authored files that mention it are left alone.
+#[test]
+fn write_leaves_authored_markdown_that_mentions_the_marker() {
+    let dir = std::env::temp_dir().join(format!("sealmap-authored-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let c = corpus(SHOP);
+    write(&dir, &c).unwrap();
+    let authored = [
+        ("plain.md", "sealmap: my notes\n"),
+        ("other-fm.md", "---\ntitle: x\nsealmap: y\n---\nbody\n"),
+        ("late.md", "# Heading\n---\nsealmap: z\n"),
+    ];
+    for (name, text) in authored {
+        fs::write(dir.join(name), text).unwrap();
+    }
+    write(&dir, &c).unwrap();
+    for (name, text) in authored {
+        assert_eq!(fs::read_to_string(dir.join(name)).unwrap(), text, "{name} was touched");
+    }
+    fs::remove_dir_all(&dir).unwrap();
+}
