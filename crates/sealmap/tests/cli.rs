@@ -24,8 +24,17 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
+/// Stops git searching above the scratch root. Without it, a target directory
+/// inside a checkout (as on CI) makes every fixture part of that checkout.
+const GIT_CEILING: &str = env!("CARGO_TARGET_TMPDIR");
+
 fn sealmap(dir: &Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_sealmap")).current_dir(dir).args(args).output().unwrap()
+    Command::new(env!("CARGO_BIN_EXE_sealmap"))
+        .current_dir(dir)
+        .env("GIT_CEILING_DIRECTORIES", GIT_CEILING)
+        .args(args)
+        .output()
+        .unwrap()
 }
 
 fn code(o: &Output) -> i32 {
@@ -164,6 +173,7 @@ fn generate_check_compares_with_a_fresh_generation() {
 fn git(dir: &Path, args: &[&str]) {
     let o = Command::new("git")
         .current_dir(dir)
+        .env("GIT_CEILING_DIRECTORIES", GIT_CEILING)
         .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
         .args(args)
         .output()
