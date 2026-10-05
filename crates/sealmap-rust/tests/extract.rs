@@ -506,3 +506,18 @@ fn single_letter_generic_parameters_stay_unresolved() {
     assert!(calls(&cb, "sym:cargo app . each().").is_empty());
     assert!(!cb.relations.iter().any(|r| r.from == id("sym:cargo app . each().")));
 }
+
+#[test]
+fn variant_labels_leave_out_field_attributes() {
+    let mut src = SourceSet::new();
+    src.insert(
+        "src/lib.rs",
+        "pub enum Resolution {\n    /// Found it.\n    Found {\n        /// Where.\n        #[serde(skip)]\n        file: String,\n        line: u32,\n    },\n    Gone(#[doc = \"why\"] String),\n    None,\n}\n",
+    )
+    .unwrap();
+    let cb = extract(&src, &RustOptions { name: "r".into(), ..Default::default() }).codebase;
+    let e = cb.symbol(&SymbolId::parse("sym:cargo r . Resolution#").unwrap()).unwrap();
+    let labels: Vec<_> = e.members.iter().map(|m| (m.name.as_str(), m.ty.as_deref())).collect();
+    // Punctuation stays as written (the trailing comma); only attributes go.
+    assert_eq!(labels, [("Found", Some("{ file: String, line: u32, }")), ("Gone", Some("(String)")), ("None", None)]);
+}

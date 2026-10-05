@@ -256,8 +256,8 @@ impl Collector<'_> {
                     }
                     let ty = match &v.fields {
                         Fields::Unit => None,
-                        Fields::Unnamed(u) => Some(squeeze(&tokens(u))),
-                        Fields::Named(n) => Some(clip(&squeeze(&tokens(n)), LABEL_MAX)),
+                        Fields::Unnamed(_) => Some(squeeze(&tokens(&unattributed(&v.fields)))),
+                        Fields::Named(_) => Some(clip(&squeeze(&tokens(&unattributed(&v.fields))), LABEL_MAX)),
                     };
                     it.members.push(RawMember {
                         name: v.ident.to_string(),
@@ -1504,4 +1504,15 @@ fn constructed_type(e: &Expr) -> Option<Segs> {
         Expr::Reference(r) => constructed_type(&r.expr),
         _ => None,
     }
+}
+
+/// A variant's fields with their attributes removed, for its label: doc
+/// comments print as `#[doc = "..."]` and `#[serde(..)]`-style attributes
+/// are no part of the shape a diagram shows.
+fn unattributed(fields: &Fields) -> Fields {
+    let mut fields = fields.clone();
+    for f in &mut fields {
+        f.attrs.clear();
+    }
+    fields
 }
