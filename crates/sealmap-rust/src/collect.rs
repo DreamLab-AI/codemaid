@@ -198,6 +198,7 @@ impl Collector<'_> {
             signature: None,
             doc: doc_of(attrs),
             generics: Vec::new(),
+            type_params: Vec::new(),
             tags: tags_of(attrs),
             members: Vec::new(),
             sig_refs: Vec::new(),
@@ -228,6 +229,7 @@ impl Collector<'_> {
                 }
                 let mut it = base(s.ident.to_string(), SymbolKind::Struct, &s.vis, &s.attrs, s.span());
                 it.generics = generics_of(&s.generics);
+                it.type_params = param_names(&s.generics);
                 it.members = fields_of(&s.fields);
                 (it.sig_hash, it.body_hash) = data_type(item, &s.generics, Shape::Fields(&s.fields));
                 self.push_item(it, fold);
@@ -235,6 +237,7 @@ impl Collector<'_> {
             Item::Union(u) => {
                 let mut it = base(u.ident.to_string(), SymbolKind::Union, &u.vis, &u.attrs, u.span());
                 it.generics = generics_of(&u.generics);
+                it.type_params = param_names(&u.generics);
                 it.members = fields_of(&Fields::Named(u.fields.clone()));
                 (it.sig_hash, it.body_hash) = data_type(item, &u.generics, Shape::Named(&u.fields));
                 self.push_item(it, fold);
@@ -245,6 +248,7 @@ impl Collector<'_> {
                 }
                 let mut it = base(e.ident.to_string(), SymbolKind::Enum, &e.vis, &e.attrs, e.span());
                 it.generics = generics_of(&e.generics);
+                it.type_params = param_names(&e.generics);
                 for v in &e.variants {
                     let mut refs = Vec::new();
                     for f in v.fields.iter() {
@@ -262,6 +266,7 @@ impl Collector<'_> {
                         vis: Visibility::Public,
                         span: span_of(v.span()),
                         refs,
+                        type_params: Vec::new(),
                     });
                 }
                 (it.sig_hash, it.body_hash) = data_type(item, &e.generics, Shape::Variants(&e.variants));
@@ -273,6 +278,7 @@ impl Collector<'_> {
                 }
                 let mut it = base(t.ident.to_string(), SymbolKind::Trait, &t.vis, &t.attrs, t.span());
                 it.generics = generics_of(&t.generics);
+                it.type_params = param_names(&t.generics);
                 for b in &t.supertraits {
                     if let TypeParamBound::Trait(tb) = b {
                         it.supertraits.push(path_segs(&tb.path));
@@ -306,6 +312,7 @@ impl Collector<'_> {
                                         signature: sig,
                                         doc: doc_of(&f.attrs),
                                         generics: generics_of(&f.sig.generics),
+                                        type_params: param_names(&f.sig.generics),
                                         tags: fn_tags(&f.sig, &f.attrs),
                                         sig_refs: refs,
                                         flow: FlowWalker::new(params).block(block),
@@ -318,6 +325,7 @@ impl Collector<'_> {
                                     vis: Visibility::Public,
                                     span: span_of(f.span()),
                                     refs,
+                                    type_params: param_names(&f.sig.generics),
                                 }),
                             }
                         }
@@ -328,6 +336,7 @@ impl Collector<'_> {
                             vis: Visibility::Public,
                             span: span_of(ty.span()),
                             refs: Vec::new(),
+                            type_params: Vec::new(),
                         }),
                         TraitItem::Const(k) => {
                             let mut refs = Vec::new();
@@ -339,6 +348,7 @@ impl Collector<'_> {
                                 vis: Visibility::Public,
                                 span: span_of(k.span()),
                                 refs,
+                                type_params: Vec::new(),
                             });
                         }
                         _ => {}
@@ -350,6 +360,7 @@ impl Collector<'_> {
             Item::Type(t) => {
                 let mut it = base(t.ident.to_string(), SymbolKind::TypeAlias, &t.vis, &t.attrs, t.span());
                 it.generics = generics_of(&t.generics);
+                it.type_params = param_names(&t.generics);
                 it.signature = Some(clip(&format!("type {} = {}", t.ident, tokens(&t.ty)), SIG_MAX));
                 type_refs(&t.ty, &mut it.sig_refs);
                 let mut sig = Fingerprinter::sig();
@@ -369,6 +380,7 @@ impl Collector<'_> {
                 }
                 let mut it = base(f.sig.ident.to_string(), SymbolKind::Function, &f.vis, &f.attrs, f.span());
                 it.generics = generics_of(&f.sig.generics);
+                it.type_params = param_names(&f.sig.generics);
                 it.signature = Some(clip(&format!("{}{}", vis_prefix(&f.vis), tokens(&f.sig)), SIG_MAX));
                 it.tags.extend(fn_tags(&f.sig, &[]));
                 sig_refs(&f.sig, &mut it.sig_refs);
@@ -450,6 +462,7 @@ impl Collector<'_> {
                         signature: clip(&format!("{}{}", vis_prefix(&f.vis), tokens(&f.sig)), SIG_MAX),
                         doc: doc_of(&f.attrs),
                         generics: generics_of(&f.sig.generics),
+                        type_params: param_names(&f.sig.generics),
                         tags: fn_tags(&f.sig, &f.attrs),
                         sig_refs: refs,
                         flow: FlowWalker::new(params_of(&f.sig)).block(&f.block),
@@ -458,7 +471,13 @@ impl Collector<'_> {
                         body_hash,
                     });
                 }
-                self.raw.impls.push(RawImpl { module: module.clone(), self_ty, trait_, methods });
+                self.raw.impls.push(RawImpl {
+                    module: module.clone(),
+                    self_ty,
+                    trait_,
+                    type_params: param_names(&i.generics),
+                    methods,
+                });
             }
             // `use`, `extern crate`, foreign blocks, ...: part of the module.
             other => fingerprint::feed(fold, other),
@@ -762,6 +781,21 @@ fn generics_of(g: &Generics) -> Vec<String> {
         .collect()
 }
 
+/// The names a generic list puts in scope as types or values: its type and
+/// const parameters (lifetimes never appear in a resolved path). Bounds in a
+/// `where` clause constrain these names but declare none, and an `impl
+/// Trait` argument has no name: its paths are the trait's own.
+fn param_names(g: &Generics) -> Vec<String> {
+    g.params
+        .iter()
+        .filter_map(|p| match p {
+            GenericParam::Type(t) => Some(t.ident.to_string()),
+            GenericParam::Const(c) => Some(c.ident.to_string()),
+            GenericParam::Lifetime(_) => None,
+        })
+        .collect()
+}
+
 fn fields_of(fields: &Fields) -> Vec<RawMember> {
     fields
         .iter()
@@ -776,6 +810,7 @@ fn fields_of(fields: &Fields) -> Vec<RawMember> {
                 vis: vis_of(&f.vis),
                 span: span_of(f.span()),
                 refs,
+                type_params: Vec::new(),
             }
         })
         .collect()

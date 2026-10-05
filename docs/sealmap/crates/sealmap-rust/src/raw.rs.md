@@ -3,8 +3,8 @@ sealmap: 2
 source: crates/sealmap-rust/src/raw.rs
 module: "sym:cargo sealmap_rust . raw/"
 language: rust
-source_hash: blake3:975a367bf6e5e5b92c4465a5b2665faec0ecaf264d0b987ed282104c09e96506
-lines: 103
+source_hash: blake3:43f9883da8e7ee5fccddc041f490a25b7dc090d273153d99b4f9ad0334c6ac0b
+lines: 113
 fragments: 1
 ---
 # `sym:cargo sealmap_rust . raw/` · crates/sealmap-rust/src/raw.rs
@@ -33,6 +33,7 @@ classDiagram
     +signature: String
     +doc: Option#lt;String#gt;
     +generics: Vec#lt;String#gt;
+    +type_params: Vec#lt;String#gt;
     +tags: Vec#lt;String#gt;
     +sig_refs: Vec#lt;Segs#gt;
     +flow: Vec#lt;RawStep#gt;
@@ -44,6 +45,7 @@ classDiagram
     +module: Segs
     +self_ty: Option#lt;Segs#gt;
     +trait_: Option#lt;#40;Segs, String#41;#gt;
+    +type_params: Vec#lt;String#gt;
     +methods: Vec#lt;RawFn#gt;
   }
   class sealmap_rust__raw___tRawItem["RawItem"] {
@@ -56,6 +58,7 @@ classDiagram
     +signature: Option#lt;String#gt;
     +doc: Option#lt;String#gt;
     +generics: Vec#lt;String#gt;
+    +type_params: Vec#lt;String#gt;
     +tags: Vec#lt;String#gt;
     +members: Vec#lt;RawMember#gt;
     +sig_refs: Vec#lt;Segs#gt;
@@ -73,6 +76,7 @@ classDiagram
     +vis: Visibility
     +span: Span
     +refs: Vec#lt;Segs#gt;
+    +type_params: Vec#lt;String#gt;
   }
   class sealmap_rust__raw___tRawModule["RawModule"] {
     <<struct>>

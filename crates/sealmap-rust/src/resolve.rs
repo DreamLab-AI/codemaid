@@ -265,7 +265,9 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             s.doc = it.doc.clone();
             s.generics = it.generics.clone();
             s.tags = it.tags.clone();
-            s.members = it.members.iter().map(|m| r.member(&module, m, Some(&id))).collect();
+            let scope = InScope::of(&it.type_params);
+            s.members =
+                it.members.iter().map(|m| r.member(&module, m, Some(&id), scope.with(&m.type_params))).collect();
             for m in &s.members {
                 for t in &m.refs {
                     let c = if r.internal.contains(t) { Confidence::Exact } else { Confidence::External };
@@ -278,8 +280,9 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
                     cb.add_relation(Relation::new(id.clone(), t, RelationKind::Extends, c));
                 }
             }
-            r.add_uses(&mut cb, &id, &module, &it.sig_refs, Some(&id));
-            let ctx = FlowCtx { module: &module, self_ty: (it.kind == SymbolKind::Trait).then_some(&id) };
+            r.add_uses(&mut cb, &id, &module, &it.sig_refs, Some(&id), scope);
+            let ctx =
+                FlowCtx { module: &module, self_ty: (it.kind == SymbolKind::Trait).then_some(&id), params: scope };
             if !it.flow.is_empty() {
                 s.flow = r.flow(&ctx, &it.flow, opts);
             }
@@ -300,7 +303,7 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
                     cb.add_relation(Relation::new(ty.clone(), t, RelationKind::Implements, c));
                 }
             }
-            let ctx = FlowCtx { module: &module, self_ty: Some(&ty) };
+            let ctx = FlowCtx { module: &module, self_ty: Some(&ty), params: InScope::of(&imp.type_params) };
             for m in &imp.methods {
                 let mid = impl_method(&module, &ty, imp, &m.name);
                 let mut ms = r.method_symbol(&mid, &ty, m, f, &ctx, opts, &mut cb);
@@ -387,6 +390,60 @@ impl Slots {
 struct FlowCtx<'a> {
     module: &'a SymbolId,
     self_ty: Option<&'a SymbolId>,
+    /// Generic parameters in scope: the item's own, or the impl's or
+    /// trait's (a method's own are added by [`Resolver::method_symbol`]).
+    params: InScope<'a>,
+}
+
+/// The generic type and const parameters in scope at one point, as declared:
+/// an item's own, or an impl's or trait's plus one method's. A path whose
+/// first segment is one of them names a parameter, never a same-named item,
+/// whatever its spelling (`T`, `V2`, `Store`).
+///
+/// Scope is always known: every path the resolver sees comes from an item,
+/// impl or trait whose generics the collector recorded, and items nested in
+/// function bodies are not collected, so there is no name-shape fallback.
+#[derive(Debug, Clone, Copy, Default)]
+struct InScope<'a> {
+    enclosing: &'a [String],
+    own: &'a [String],
+}
+
+impl<'a> InScope<'a> {
+    /// The parameters of a top-level item, impl or trait.
+    fn of(own: &'a [String]) -> Self {
+        InScope { enclosing: &[], own }
+    }
+
+    /// This scope plus a member's own parameters (a method in an impl or
+    /// trait). Generics nest one level deep: members never nest further.
+    fn with(self, own: &'a [String]) -> Self {
+        debug_assert!(self.enclosing.is_empty(), "generic scopes nest one level");
+        InScope { enclosing: self.own, own }
+    }
+
+    fn contains(&self, name: &str) -> bool {
+        self.own.iter().chain(self.enclosing).any(|p| p == name)
+    }
+
+    /// Does `segs` start at a generic parameter (`T`, `T::Output`)?
+    fn heads(&self, segs: &[String]) -> bool {
+        segs.first().is_some_and(|s| self.contains(s))
+    }
+}
+
+/// A data type's fields as [`Resolver::fields`] keeps them.
+struct Fields {
+    module: SymbolId,
+    params: Vec<String>,
+    refs: BTreeMap<String, Vec<Segs>>,
+}
+
+impl Fields {
+    /// The module, generic scope and raw refs of field `name`.
+    fn field(&self, name: &str) -> Option<(&SymbolId, InScope<'_>, &[Segs])> {
+        Some((&self.module, InScope::of(&self.params), self.refs.get(name)?))
+    }
 }
 
 /// Lookup tables built from all raw files before any resolution.
@@ -398,8 +455,9 @@ struct Resolver {
     uses: BTreeMap<SymbolId, Vec<RawUse>>,
     /// Every internal symbol id that will exist (types, fns, modules, methods).
     internal: BTreeSet<SymbolId>,
-    /// type id → field name → raw refs with defining module.
-    fields: BTreeMap<SymbolId, (SymbolId, BTreeMap<String, Vec<Segs>>)>,
+    /// type id → its defining module, its generic parameters and, per field
+    /// name, the field's raw refs.
+    fields: BTreeMap<SymbolId, Fields>,
     /// type id → method name → method id (inherent first).
     methods: BTreeMap<SymbolId, BTreeMap<String, SymbolId>>,
     /// method name → ids, for unknown receivers.
@@ -449,8 +507,9 @@ impl Resolver {
                     .or_default()
                     .insert(it.kind, id.clone());
                 if matches!(it.kind, SymbolKind::Struct | SymbolKind::Union | SymbolKind::Enum) {
-                    let f = it.members.iter().map(|m| (m.name.clone(), m.refs.clone())).collect();
-                    r.fields.insert(id.clone(), (module.clone(), f));
+                    let refs = it.members.iter().map(|m| (m.name.clone(), m.refs.clone())).collect();
+                    r.fields
+                        .insert(id.clone(), Fields { module: module.clone(), params: it.type_params.clone(), refs });
                 }
                 if it.kind == SymbolKind::Trait {
                     let names = r.trait_methods.entry(id.clone()).or_default();
@@ -531,6 +590,24 @@ impl Resolver {
             }
             None => (ids::path_id(segs).unwrap_or_else(|| ids::unresolved_method_id("")), Confidence::External),
         }
+    }
+
+    /// [`Self::resolve`] for a path written where the generic parameters
+    /// `params` are in scope. A path through a parameter (`T::new`,
+    /// `Store::Key`) is a bare external path, never walked into an item that
+    /// happens to share the parameter's name.
+    fn resolve_in(
+        &self,
+        module: &SymbolId,
+        segs: &[String],
+        self_ty: Option<&SymbolId>,
+        ns: Ns,
+        params: InScope<'_>,
+    ) -> (SymbolId, Confidence) {
+        if params.heads(segs) {
+            return (ids::path_id(segs).unwrap_or_else(|| ids::unresolved_method_id("")), Confidence::External);
+        }
+        self.resolve(module, segs, self_ty, ns)
     }
 
     fn resolve_internal(&self, module: &SymbolId, segs: &[String], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
@@ -647,17 +724,15 @@ impl Resolver {
     }
 
     /// Resolve a list of raw type refs to kept relation targets.
-    fn refs(&self, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>) -> Vec<SymbolId> {
+    fn refs(&self, module: &SymbolId, raw: &[Segs], self_ty: Option<&SymbolId>, params: InScope<'_>) -> Vec<SymbolId> {
         let mut out = Vec::new();
         for segs in raw {
-            // Associated types (`Self::Error`, `T::Output`) are not symbols.
-            if segs.len() > 1 && (segs[0] == "Self" || is_generic_param(&segs[0])) {
+            // Generic parameters and their associated types (`T`,
+            // `T::Output`, `Self::Error`) are not symbols.
+            if params.heads(segs) || (segs.len() > 1 && segs[0] == "Self") {
                 continue;
             }
-            if segs.len() == 1
-                && (PRELUDE.contains(&segs[0].as_str()) || is_generic_param(&segs[0]))
-                && !self.local(module, &segs[0])
-            {
+            if segs.len() == 1 && PRELUDE.contains(&segs[0].as_str()) && !self.local(module, &segs[0]) {
                 continue;
             }
             let (id, _) = self.resolve(module, segs, self_ty, Ns::Type);
@@ -674,14 +749,14 @@ impl Resolver {
             || self.uses.get(module).is_some_and(|us| us.iter().any(|u| u.alias == name))
     }
 
-    fn member(&self, module: &SymbolId, m: &RawMember, owner: Option<&SymbolId>) -> Member {
+    fn member(&self, module: &SymbolId, m: &RawMember, owner: Option<&SymbolId>, params: InScope<'_>) -> Member {
         Member {
             name: m.name.clone(),
             kind: m.kind,
             ty: m.ty.clone(),
             visibility: m.vis.clone(),
             span: m.span,
-            refs: self.refs(module, &m.refs, owner),
+            refs: self.refs(module, &m.refs, owner, params),
         }
     }
 
@@ -692,8 +767,9 @@ impl Resolver {
         module: &SymbolId,
         raw: &[Segs],
         self_ty: Option<&SymbolId>,
+        params: InScope<'_>,
     ) {
-        for t in self.refs(module, raw, self_ty) {
+        for t in self.refs(module, raw, self_ty, params) {
             let c = if self.internal.contains(&t) { Confidence::Exact } else { Confidence::External };
             cb.add_relation(Relation::new(from.clone(), t, RelationKind::Uses, c));
         }
@@ -720,9 +796,10 @@ impl Resolver {
         s.doc = m.doc.clone();
         s.generics = m.generics.clone();
         s.tags = m.tags.clone();
-        self.add_uses(cb, id, ctx.module, &m.sig_refs, ctx.self_ty);
+        let ctx = FlowCtx { params: ctx.params.with(&m.type_params), ..*ctx };
+        self.add_uses(cb, id, ctx.module, &m.sig_refs, ctx.self_ty, ctx.params);
         if !m.flow.is_empty() {
-            s.flow = self.flow(ctx, &m.flow, opts);
+            s.flow = self.flow(&ctx, &m.flow, opts);
         }
         s
     }
@@ -738,7 +815,7 @@ impl Resolver {
                 if PRELUDE.contains(&segs[0].as_str()) && !self.local(ctx.module, &segs[0]) {
                     return None;
                 }
-                let (id, c) = self.resolve(ctx.module, segs, ctx.self_ty, Ns::Value);
+                let (id, c) = self.resolve_in(ctx.module, segs, ctx.self_ty, Ns::Value, ctx.params);
                 // A bare name that is neither defined, imported nor a crate is
                 // a local closure or function pointer: not a symbol.
                 if segs.len() == 1 && c == Confidence::External && !self.local(ctx.module, &segs[0]) {
@@ -763,14 +840,11 @@ impl Resolver {
     fn method(&self, ctx: &FlowCtx<'_>, recv: &Recv, name: &str) -> Option<(SymbolId, Confidence)> {
         let ty = match recv {
             Recv::SelfValue => ctx.self_ty.cloned(),
-            Recv::SelfField(field) => {
-                let found = ctx.self_ty.and_then(|ty| self.fields.get(ty)).and_then(|(m, f)| Some((m, f.get(field)?)));
-                match found {
-                    Some((module, refs)) => self.receiver_type(module, refs, None),
-                    None => return Some(self.by_name_only(name)),
-                }
-            }
-            Recv::Typed(refs) => self.receiver_type(ctx.module, refs, ctx.self_ty),
+            Recv::SelfField(field) => match ctx.self_ty.and_then(|ty| self.fields.get(ty)?.field(field)) {
+                Some((module, params, refs)) => self.receiver_type(module, refs, None, params),
+                None => return Some(self.by_name_only(name)),
+            },
+            Recv::Typed(refs) => self.receiver_type(ctx.module, refs, ctx.self_ty, ctx.params),
             Recv::Untyped => return Some(self.by_name_only(name)),
             Recv::Derived(origin) => {
                 return Some(if self.internal_origin(ctx, origin) {
@@ -804,19 +878,19 @@ impl Resolver {
     /// unevident type do; a value of `std` or third-party type, a third-party
     /// function's result and anything unknown do not.
     fn internal_origin(&self, ctx: &FlowCtx<'_>, origin: &Recv) -> bool {
-        let any_internal = |module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>| {
-            refs.iter().any(|segs| self.internal.contains(&self.resolve(module, segs, self_ty, Ns::Type).0))
+        let any_internal = |module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>, params: InScope<'_>| {
+            refs.iter().any(|segs| self.internal.contains(&self.resolve_in(module, segs, self_ty, Ns::Type, params).0))
         };
         match origin {
             Recv::SelfValue | Recv::Untyped => true,
-            Recv::SelfField(field) => {
-                match ctx.self_ty.and_then(|ty| self.fields.get(ty)).and_then(|(m, f)| Some((m, f.get(field)?))) {
-                    Some((module, refs)) => any_internal(module, refs, None),
-                    None => true,
-                }
+            Recv::SelfField(field) => match ctx.self_ty.and_then(|ty| self.fields.get(ty)?.field(field)) {
+                Some((module, params, refs)) => any_internal(module, refs, None, params),
+                None => true,
+            },
+            Recv::Typed(refs) => any_internal(ctx.module, refs, ctx.self_ty, ctx.params),
+            Recv::Returned(segs) => {
+                self.internal.contains(&self.resolve_in(ctx.module, segs, ctx.self_ty, Ns::Value, ctx.params).0)
             }
-            Recv::Typed(refs) => any_internal(ctx.module, refs, ctx.self_ty),
-            Recv::Returned(segs) => self.internal.contains(&self.resolve(ctx.module, segs, ctx.self_ty, Ns::Value).0),
             Recv::Derived(inner) | Recv::Computed(inner) => self.internal_origin(ctx, inner),
             Recv::Unknown => false,
         }
@@ -824,16 +898,23 @@ impl Resolver {
 
     /// The type a method is called on, from the declared type's paths
     /// (outermost first). Smart pointers are looked through; any other
-    /// wrapper (`Vec`, `Option`, `Mutex`, ...) *is* the receiver.
-    fn receiver_type(&self, module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>) -> Option<SymbolId> {
+    /// wrapper (`Vec`, `Option`, `Mutex`, ...) *is* the receiver. A generic
+    /// parameter has no concrete type.
+    fn receiver_type(
+        &self,
+        module: &SymbolId,
+        refs: &[Segs],
+        self_ty: Option<&SymbolId>,
+        params: InScope<'_>,
+    ) -> Option<SymbolId> {
         const DEREF: &[&str] =
             &["Box", "Arc", "Rc", "Cow", "Pin", "Ref", "RefMut", "MutexGuard", "RwLockReadGuard", "RwLockWriteGuard"];
         for segs in refs {
             let last = segs.last()?.as_str();
-            if segs.len() == 1 && is_generic_param(last) {
+            if segs.len() == 1 && params.contains(last) {
                 return None;
             }
-            let (id, _) = self.resolve(module, segs, self_ty, Ns::Type);
+            let (id, _) = self.resolve_in(module, segs, self_ty, Ns::Type, params);
             if DEREF.contains(&last) && !self.internal.contains(&id) {
                 continue;
             }
@@ -855,11 +936,4 @@ impl Resolver {
         }
         (ids::unresolved_method_id(name), Confidence::External)
     }
-}
-
-/// Single upper-case letters (and `T1`-style names) are almost always generic
-/// parameters.
-fn is_generic_param(s: &str) -> bool {
-    let mut cs = s.chars();
-    matches!(cs.next(), Some(c) if c.is_ascii_uppercase()) && cs.all(|c| c.is_ascii_digit())
 }

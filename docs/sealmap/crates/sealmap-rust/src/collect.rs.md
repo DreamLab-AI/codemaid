@@ -3,8 +3,8 @@ sealmap: 2
 source: crates/sealmap-rust/src/collect.rs
 module: "sym:cargo sealmap_rust . collect/"
 language: rust
-source_hash: blake3:0ef8975ba4871bb384a59efb2f0c83e0fd33e07d89ad02fa15cbd23795b030cf
-lines: 1472
+source_hash: blake3:ba977e14189af583c707daa7f3e78b6b9806cdab97985b24511665796d3edd89
+lines: 1507
 fragments: 50
 ---
 # `sym:cargo sealmap_rust . collect/` · crates/sealmap-rust/src/collect.rs
@@ -73,6 +73,7 @@ classDiagram
     -is_call(e: &Expr) bool
     -is_test_attr(a: &Attribute) bool
     -item_attrs(item: &Item) &[Attribute]
+    -param_names(g: &Generics) Vec#lt;String#gt;
     -params_of(sig: &syn::Signature) BTreeMap#lt;String, Recv#gt;
     ~path_segs(crate) Segs
     -pattern_names(pat: &Pat, out: &mut Vec#lt;String#gt;)
@@ -390,7 +391,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/Collector#item().`
-`fn item(&mut self, module: &Segs, item: &Item, fold: &mut Fingerprinter)` · L188-L466
+`fn item(&mut self, module: &Segs, item: &Item, fold: &mut Fingerprinter)` · L188-L485
 > Collect one item of `module`, folding what it contributes into the module's body fingerprint `fold`.
 ```mermaid
 sequenceDiagram
@@ -427,11 +428,13 @@ sequenceDiagram
       Note over sealmap_rust__collect___tCollector: return
     end
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&s.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&s.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: fields_of(&s.fields)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: data_type(item, &s.generics, Fields())
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Union(u)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&u.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&u.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: fields_of(&Named())
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: data_type(item, &u.generics, Named())
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
@@ -441,6 +444,7 @@ sequenceDiagram
       Note over sealmap_rust__collect___tCollector: return
     end
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&e.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&e.generics)
     loop for v in &e.variants
       loop for f in v.fields.iter()
         sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&f.ty, &refs)
@@ -463,6 +467,7 @@ sequenceDiagram
       Note over sealmap_rust__collect___tCollector: return
     end
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&t.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&t.generics)
     loop for b in &t.supertraits
       opt let TypeParamBound::Trait(tb) = b
         sealmap_rust__collect___tCollector->>sealmap_rust__collect: path_segs(&tb.path)
@@ -485,10 +490,12 @@ sequenceDiagram
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: doc_of(&f.attrs)
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&f.sig.generics)
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&f.sig.generics)
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: fn_tags(&f.sig, &f.attrs)
           sealmap_rust__collect___tCollector->>sealmap_rust__collect___tFlowWalker: FlowWalker::new(params)
         else None
           sealmap_rust__collect___tCollector->>sealmap_rust__collect: span_of(span())
+          sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&f.sig.generics)
         end
       else TraitItem::Type(ty)
         opt via then
@@ -506,6 +513,7 @@ sequenceDiagram
     sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Type(t)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&t.generics)
+    sealmap_rust__collect___tCollector->>sealmap_rust__collect: param_names(&t.generics)
     sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&t.ty)
     sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect___tCollector->>sealmap_rust__collect: type_refs(&t.ty, &it.sig_refs)
@@ -519,27 +527,20 @@ sequenceDiagram
     sealmap_rust__collect___tCollector->>sealmap_rust__fingerprint: fingerprint::feed(&body, &t.ty)
     sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
     sealmap_rust__collect___tCollector->>sealmap_extract__fingerprint___tFingerprinter: finish()
-    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: push_item(it, fold)
   else Item::Fn(f)
-    sealmap_rust__collect___tCollector->>sealmap_rust__collect___tCollector: skip(&f.attrs)
     opt self.skip(&f.attrs)
       Note over sealmap_rust__collect___tCollector: return
     end
-    sealmap_rust__collect___tCollector->>sealmap_rust__collect: generics_of(&f.sig.generics)
-    sealmap_rust__collect___tCollector->>sealmap_rust__collect: vis_prefix(&f.vis)
-    sealmap_rust__collect___tCollector->>sealmap_rust__tidy: tokens(&f.sig)
-    sealmap_rust__collect___tCollector->>sealmap_extract__labels: clip(&_, SIG_MAX)
-    sealmap_rust__collect___tCollector->>sealmap_rust__collect: fn_tags(&f.sig, &_)
   else Item::Impl(i)
     opt self.skip(&i.attrs)
       Note over sealmap_rust__collect___tCollector: return
     end
   end
-  Note over sealmap_rust__collect___tCollector: +55 more calls in _index.json
+  Note over sealmap_rust__collect___tCollector: +65 more calls in _index.json
 ```
 
 ## `sym:cargo sealmap_rust . collect/trait_text().`
-`fn trait_text(p: &syn::Path) -> String` · L469-L482
+`fn trait_text(p: &syn::Path) -> String` · L488-L501
 > The trait of an impl as written, which becomes part of its methods' ids (`Db#[`From<String>`]from().`).
 ```mermaid
 sequenceDiagram
@@ -549,7 +550,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/fold_member().`
-`fn fold_member(fold: &mut Fingerprinter, keyword: &str, name: &str, sig: Fingerprint, body: Fingerprint)` · L496-L502
+`fn fold_member(fold: &mut Fingerprinter, keyword: &str, name: &str, sig: Fingerprint, body: Fingerprint)` · L515-L521
 > Fold a member's identity and fingerprints into its container's body.
 ```mermaid
 sequenceDiagram
@@ -562,7 +563,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/callable().`
-`fn callable(mut sig: Fingerprinter, attrs: &[Attribute], vis: Option<&syn::Visibility>, signature: &syn::Signature, block: &Block,) -> (Fingerprint, Fingerprint)` · L504-L525
+`fn callable(mut sig: Fingerprinter, attrs: &[Attribute], vis: Option<&syn::Visibility>, signature: &syn::Signature, block: &Block,) -> (Fingerprint, Fingerprint)` · L523-L544
 > A function or method: `sig` already holds its context (the impl or trait header, if any); the attributes, visibility and signature are added.
 ```mermaid
 sequenceDiagram
@@ -584,7 +585,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/impl_header().`
-`fn impl_header(fp: &mut Fingerprinter, i: &syn::ItemImpl)` · L527-L543
+`fn impl_header(fp: &mut Fingerprinter, i: &syn::ItemImpl)` · L546-L562
 > The header of an impl block (attributes, `unsafe`, generics, trait, self type, `where`), part of each of its methods' contract.
 ```mermaid
 sequenceDiagram
@@ -607,7 +608,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/data_type().`
-`fn data_type(item: &Item, generics: &Generics, shape: Shape<'_>) -> (Fingerprint, Fingerprint)` · L552-L593
+`fn data_type(item: &Item, generics: &Generics, shape: Shape<'_>) -> (Fingerprint, Fingerprint)` · L571-L612
 > A struct, enum or union: the whole declaration is the contract; the shape (generics and fields or variants, without the name) is the body.
 ```mermaid
 sequenceDiagram
@@ -649,7 +650,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/trait_hashes().`
-`fn trait_hashes(t: &syn::ItemTrait) -> (Fingerprint, Fingerprint)` · L595-L632
+`fn trait_hashes(t: &syn::ItemTrait) -> (Fingerprint, Fingerprint)` · L614-L651
 > A trait: the header plus every member's signature is the contract; every member in full (default bodies included) is the body.
 ```mermaid
 sequenceDiagram
@@ -692,7 +693,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/value().`
-`fn value(keyword: &str, attrs: &[Attribute], vis: &syn::Visibility, mutability: Option<&syn::StaticMutability>, ident: &syn::Ident, ty: &Type, expr: &Expr,) -> (Fingerprint, Fingerprint)` · L634-L658
+`fn value(keyword: &str, attrs: &[Attribute], vis: &syn::Visibility, mutability: Option<&syn::StaticMutability>, ident: &syn::Ident, ty: &Type, expr: &Expr,) -> (Fingerprint, Fingerprint)` · L653-L677
 > A constant or static: everything but the value is the contract; the value is the body.
 ```mermaid
 sequenceDiagram
@@ -718,7 +719,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/span_of().`
-`fn span_of(s: PmSpan) -> Span` · L662-L665
+`fn span_of(s: PmSpan) -> Span` · L681-L684
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -730,7 +731,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/vis_of().`
-`fn vis_of(v: &syn::Visibility) -> Visibility` · L667-L674
+`fn vis_of(v: &syn::Visibility) -> Visibility` · L686-L693
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -741,7 +742,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/vis_prefix().`
-`fn vis_prefix(v: &syn::Visibility) -> String` · L676-L681
+`fn vis_prefix(v: &syn::Visibility) -> String` · L695-L700
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -752,7 +753,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/is_test_attr().`
-`fn is_test_attr(a: &Attribute) -> bool` · L683-L689
+`fn is_test_attr(a: &Attribute) -> bool` · L702-L708
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -766,7 +767,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/doc_of().`
-`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L691-L723
+`fn doc_of(attrs: &[Attribute]) -> Option<String>` · L710-L742
 > First sentence of the doc comment, at most 160 chars.
 ```mermaid
 sequenceDiagram
@@ -779,7 +780,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/tags_of().`
-`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L725-L738
+`fn tags_of(attrs: &[Attribute]) -> Vec<String>` · L744-L757
 > Attributes worth keeping as tags.
 ```mermaid
 sequenceDiagram
@@ -796,7 +797,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/fn_tags().`
-`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L740-L752
+`fn fn_tags(sig: &syn::Signature, attrs: &[Attribute]) -> Vec<String>` · L759-L771
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -804,7 +805,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/generics_of().`
-`fn generics_of(g: &Generics) -> Vec<String>` · L754-L763
+`fn generics_of(g: &Generics) -> Vec<String>` · L773-L782
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -825,7 +826,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/fields_of().`
-`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L765-L782
+`fn fields_of(fields: &Fields) -> Vec<RawMember>` · L799-L817
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -841,7 +842,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/type_refs().`
-`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L788-L801
+`fn type_refs(ty: &Type, out: &mut Vec<Segs>)` · L823-L836
 > Every path mentioned in a type, outermost first.
 ```mermaid
 sequenceDiagram
@@ -851,7 +852,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/sig_refs().`
-`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L803-L812
+`fn sig_refs(sig: &syn::Signature, out: &mut Vec<Segs>)` · L838-L847
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -866,7 +867,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/first_path().`
-`fn first_path(ty: &Type) -> Option<Segs>` · L814-L823
+`fn first_path(ty: &Type) -> Option<Segs>` · L849-L858
 > Outermost path of a type, looking through references and parens.
 ```mermaid
 sequenceDiagram
@@ -883,7 +884,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/params_of().`
-`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L825-L842
+`fn params_of(sig: &syn::Signature) -> BTreeMap<String, Recv>` · L860-L877
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -897,7 +898,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/flatten_use().`
-`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L844-L877
+`fn flatten_use(tree: &UseTree, prefix: &mut Segs, out: &mut Vec<RawUse>)` · L879-L912
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -911,7 +912,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#block().`
-`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L919-L923
+`fn block(&mut self, b: &Block) -> Vec<RawStep>` · L954-L958
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -919,7 +920,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#stmts().`
-`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L925-L945
+`fn stmts(&mut self, stmts: &[Stmt], out: &mut Vec<RawStep>)` · L960-L980
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -941,7 +942,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#bind().`
-`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L947-L984
+`fn bind(&mut self, pat: &Pat, init: Option<&Expr>)` · L982-L1019
 > Record the type of a `let` binding when it is evident.
 ```mermaid
 sequenceDiagram
@@ -969,7 +970,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#bind_destructured().`
-`fn bind_destructured(&mut self, pat: &Pat, scrutinee: &Expr, iterated: bool)` · L986-L1010
+`fn bind_destructured(&mut self, pat: &Pat, scrutinee: &Expr, iterated: bool)` · L1021-L1045
 > Bind the names a destructuring pattern (`Some(x)`, `(a, b)`, `Foo { bar, ..
 ```mermaid
 sequenceDiagram
@@ -983,7 +984,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#origin().`
-`fn origin(&self, e: &Expr) -> Recv` · L1012-L1052
+`fn origin(&self, e: &Expr) -> Recv` · L1047-L1087
 > Where the value of `e` comes from, for [`Recv::Derived`]: the receiver at the root of its method chain, field accesses, `?`, `.await` and borrows, or the path …
 ```mermaid
 sequenceDiagram
@@ -1030,7 +1031,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#forget().`
-`fn forget(&mut self, pat: &Pat)` · L1054-L1062
+`fn forget(&mut self, pat: &Pat)` · L1089-L1097
 > Drop what is known about the names `pat` binds (a shadowing binding without a value).
 ```mermaid
 sequenceDiagram
@@ -1040,7 +1041,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#sub().`
-`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L1064-L1068
+`fn sub(&mut self, e: &Expr) -> Vec<RawStep>` · L1099-L1103
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -1048,7 +1049,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#sub_block().`
-`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L1070-L1075
+`fn sub_block(&mut self, b: &Block) -> Vec<RawStep>` · L1105-L1110
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -1056,7 +1057,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#expr().`
-`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1077-L1084
+`fn expr(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1112-L1119
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -1067,7 +1068,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#expr_inner().`
-`fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1086-L1293
+`fn expr_inner(&mut self, e: &Expr, out: &mut Vec<RawStep>)` · L1121-L1328
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -1233,7 +1234,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#cond().`
-`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L1295-L1301
+`fn cond(&mut self, cond: &Expr, out: &mut Vec<RawStep>)` · L1330-L1336
 > Condition of `if` / `while`: `let` scrutinee or boolean expression.
 ```mermaid
 sequenceDiagram
@@ -1245,7 +1246,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#arg().`
-`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L1303-L1323
+`fn arg(&mut self, a: &Expr, out: &mut Vec<RawStep>, deferred: &mut Vec<Vec<RawStep>>)` · L1338-L1358
 > Walk a call argument.
 ```mermaid
 sequenceDiagram
@@ -1260,7 +1261,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#mac().`
-`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L1325-L1337
+`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L1360-L1372
 > Calls inside macro arguments (`vec![f()]`, `assert!(g())`, `format!("{}", h())`).
 ```mermaid
 sequenceDiagram
@@ -1278,7 +1279,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/FlowWalker#recv().`
-`fn recv(&self, e: &Expr) -> Recv` · L1339-L1355
+`fn recv(&self, e: &Expr) -> Recv` · L1374-L1390
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect___tFlowWalker as FlowWalker
@@ -1292,7 +1293,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/turbofish_refs().`
-`fn turbofish_refs(args: &Punctuated<syn::GenericArgument, syn::Token![,]>) -> Option<Vec<Segs>>` · L1382-L1393
+`fn turbofish_refs(args: &Punctuated<syn::GenericArgument, syn::Token![,]>) -> Option<Vec<Segs>>` · L1417-L1428
 > The type paths of a turbofish with exactly one type argument (`::<Config>`, `::<Vec<Job>>`).
 ```mermaid
 sequenceDiagram
@@ -1306,7 +1307,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/pattern_names().`
-`fn pattern_names(pat: &Pat, out: &mut Vec<String>)` · L1395-L1407
+`fn pattern_names(pat: &Pat, out: &mut Vec<String>)` · L1430-L1442
 > The names a pattern binds, in source order.
 ```mermaid
 sequenceDiagram
@@ -1316,7 +1317,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/call().`
-`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L1409-L1412
+`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L1444-L1447
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -1329,7 +1330,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/arg_sketch().`
-`fn arg_sketch(e: &Expr) -> String` · L1414-L1434
+`fn arg_sketch(e: &Expr) -> String` · L1449-L1469
 > A compact stand-in for an argument: identifiers and short literals are kept, everything else becomes `_`.
 ```mermaid
 sequenceDiagram
@@ -1351,7 +1352,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/cond_label().`
-`fn cond_label(cond: &Expr) -> String` · L1436-L1442
+`fn cond_label(cond: &Expr) -> String` · L1471-L1477
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -1370,7 +1371,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/is_call().`
-`fn is_call(e: &Expr) -> bool` · L1444-L1452
+`fn is_call(e: &Expr) -> bool` · L1479-L1487
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -1384,7 +1385,7 @@ sequenceDiagram
 ```
 
 ## `sym:cargo sealmap_rust . collect/constructed_type().`
-`fn constructed_type(e: &Expr) -> Option<Segs>` · L1454-L1472
+`fn constructed_type(e: &Expr) -> Option<Segs>` · L1489-L1507
 > `Foo::new(..)`, `Foo { ..
 ```mermaid
 sequenceDiagram

@@ -52,6 +52,9 @@ pub(crate) struct RawMember {
     pub vis: Visibility,
     pub span: Span,
     pub refs: Vec<Segs>,
+    /// Generic type and const parameters the member declares itself (a
+    /// required trait method's own); its item's are in scope too.
+    pub type_params: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -62,6 +65,9 @@ pub(crate) struct RawFn {
     pub signature: String,
     pub doc: Option<String>,
     pub generics: Vec<String>,
+    /// Names of the generic type and const parameters the function declares
+    /// itself; the enclosing impl's or trait's are in scope too.
+    pub type_params: Vec<String>,
     pub tags: Vec<String>,
     pub sig_refs: Vec<Segs>,
     pub flow: Vec<RawStep>,
@@ -79,6 +85,8 @@ pub(crate) struct RawItem {
     pub signature: Option<String>,
     pub doc: Option<String>,
     pub generics: Vec<String>,
+    /// Names of the generic type and const parameters the item declares.
+    pub type_params: Vec<String>,
     pub tags: Vec<String>,
     pub members: Vec<RawMember>,
     /// Types mentioned in signatures / aliases.
@@ -99,5 +107,7 @@ pub(crate) struct RawImpl {
     pub self_ty: Option<Segs>,
     /// Trait path and its display form (`From<String>`).
     pub trait_: Option<(Segs, String)>,
+    /// Names of the impl block's generic type and const parameters.
+    pub type_params: Vec<String>,
     pub methods: Vec<RawFn>,
 }

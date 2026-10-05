@@ -4,7 +4,7 @@ kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-41 files · 619 symbols · 1695 relations · 256 flows · 1180 calls
+41 files · 627 symbols · 1720 relations · 259 flows · 1199 calls
 
 ## crates
 ```mermaid
@@ -59,12 +59,12 @@ flowchart LR
   sealmap_rust -->|"1"| RawCall
   sealmap_rust -->|"11"| RawStep
   sealmap_rust -->|"7"| Recv
-  sealmap_rust -->|"15"| Segs
+  sealmap_rust -->|"16"| Segs
   sealmap_rust -->|"23"| proc_macro2
   sealmap_rust -->|"6"| quote
-  sealmap_rust -->|"132"| sealmap_extract
-  sealmap_rust -->|"132"| sealmap_model
-  sealmap_rust -->|"123"| syn
+  sealmap_rust -->|"134"| sealmap_extract
+  sealmap_rust -->|"136"| sealmap_model
+  sealmap_rust -->|"124"| syn
   sealmap_rust -->|"1"| toml
 ```
 
@@ -644,6 +644,7 @@ erDiagram
     String signature
     Option[String] doc
     Vec[String] generics
+    Vec[String] type_params
     Vec[String] tags
     Vec[Segs] sig_refs
     Vec[RawStep] flow
@@ -654,6 +655,7 @@ erDiagram
     Segs module
     Option[Segs] self_ty
     Option[(Segs_String)] trait_ "Option<(Segs, String)>"
+    Vec[String] type_params
     Vec[RawFn] methods
   }
   sealmap_rust__raw___tRawItem["RawItem"] {
@@ -665,6 +667,7 @@ erDiagram
     Option[String] signature
     Option[String] doc
     Vec[String] generics
+    Vec[String] type_params
     Vec[String] tags
     Vec[RawMember] members
     Vec[Segs] sig_refs
@@ -681,6 +684,7 @@ erDiagram
     Visibility vis
     Span span
     Vec[Segs] refs
+    Vec[String] type_params
   }
   sealmap_rust__raw___tRawModule["RawModule"] {
     Segs path
@@ -696,12 +700,26 @@ erDiagram
     String alias
     Segs target
   }
+  sealmap_rust__resolve___tFields["Fields"] {
+    SymbolId module
+    Vec[String] params
+    BTreeMap[String_Vec[Segs]] refs "BTreeMap<String, Vec<Segs>>"
+  }
+  sealmap_rust__resolve___tFlowCtx["FlowCtx"] {
+    __aSymbolId module "&'a SymbolId"
+    Option[__aSymbolId] self_ty "Option<&'a SymbolId>"
+    InScope[_a] params "InScope<'a>"
+  }
+  sealmap_rust__resolve___tInScope["InScope"] {
+    __a[String] enclosing "&'a [String]"
+    __a[String] own "&'a [String]"
+  }
   sealmap_rust__resolve___tResolver["Resolver"] {
     BTreeSet[String] crates
     BTreeMap[SymbolId_BTreeMap[String_Slots]] items "BTreeMap<SymbolId, BTreeMap<String, Slots>>"
     BTreeMap[SymbolId_Vec[RawUse]] uses "BTreeMap<SymbolId, Vec<RawUse>>"
     BTreeSet[SymbolId] internal
-    BTreeMap[SymbolId_(SymbolId_BTreeMap[String_Vec[Segs]])] fields "BTreeMap<SymbolId, (SymbolId, BTreeMap<String, Vec<Segs>>)>"
+    BTreeMap[SymbolId_Fields] fields "BTreeMap<SymbolId, Fields>"
     BTreeMap[SymbolId_BTreeMap[String_SymbolId]] methods "BTreeMap<SymbolId, BTreeMap<String, SymbolId>>"
     BTreeMap[String_BTreeSet[SymbolId]] by_name "BTreeMap<String, BTreeSet<SymbolId>>"
     BTreeMap[SymbolId_BTreeSet[SymbolId]] impls "BTreeMap<SymbolId, BTreeSet<SymbolId>>"
@@ -723,6 +741,8 @@ erDiagram
   sealmap_rust__raw___tRawItem ||--o{ sealmap_rust__raw___tRawMember : "members"
   sealmap_rust__raw___tRawItem ||--o{ sealmap_rust__raw___tRawFn : "methods"
   sealmap_rust__raw___tRawModule ||--o{ sealmap_rust__raw___tRawUse : "uses"
+  sealmap_rust__resolve___tFlowCtx ||--|| sealmap_rust__resolve___tInScope : "params"
   sealmap_rust__resolve___tResolver ||--o{ sealmap_rust__resolve___tSlots : "items"
   sealmap_rust__resolve___tResolver ||--o{ sealmap_rust__raw___tRawUse : "uses"
+  sealmap_rust__resolve___tResolver ||--o{ sealmap_rust__resolve___tFields : "fields"
 ```
