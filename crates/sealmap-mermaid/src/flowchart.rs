@@ -81,7 +81,7 @@ enum Stmt {
 /// ```
 /// use sealmap_mermaid::{EdgeStyle, Flowchart, Direction, Ident, NodeShape};
 ///
-/// let (a, b) = (Ident::from_path("app::net"), Ident::from_path("app::db"));
+/// let (a, b) = (Ident::new("app__net"), Ident::new("app__db"));
 /// let mut f = Flowchart::new(Direction::LR);
 /// f.subgraph(Ident::new("app"), "app", None, |g| {
 ///     g.node(a.clone(), "net", NodeShape::Rect);

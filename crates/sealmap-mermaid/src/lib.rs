@@ -5,9 +5,12 @@
 //! [`ErDiagram`] (data) and [`Flowchart`] (dependencies and topology, from
 //! module level up to multi-repository maps).
 //!
-//! The crate has **no dependencies** and knows nothing about code models; it
-//! is a safe Mermaid emitter you can use on its own. `sealmap-corpus` uses it
-//! to project a `sealmap_model::Codebase` into diagrams.
+//! The writers know nothing about code models; they are a safe Mermaid
+//! emitter you can use on their own, and with `default-features = false` the
+//! crate has **no dependencies**. The default `model` feature adds
+//! `Ident::from_symbol`, the injective map from a `sealmap_model::SymbolId`
+//! to a diagram id that `sealmap-corpus` uses to project a
+//! `sealmap_model::Codebase` into diagrams.
 //!
 //! ## Why typed builders instead of `format!`
 //!
@@ -37,8 +40,8 @@
 //! ```
 //! use sealmap_mermaid::{Arrow, Ident, SequenceDiagram};
 //!
-//! let api = Ident::from_path("app::Api");
-//! let db = Ident::from_path("app::Db");
+//! let api = Ident::new("app__Api");
+//! let db = Ident::new("app__Db");
 //!
 //! let mut seq = SequenceDiagram::new();
 //! seq.participant(api.clone(), "Api");
@@ -68,6 +71,8 @@ mod er;
 mod escape;
 mod flowchart;
 mod sequence;
+#[cfg(feature = "model")]
+mod symbol;
 mod writer;
 
 pub use class::{Class, ClassDiagram, ClassRelation, ClassRelationKind, Direction};

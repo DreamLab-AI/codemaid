@@ -510,7 +510,7 @@ impl SymbolId {
     /// ```
     pub fn name(&self) -> Cow<'_, str> {
         match self.shape() {
-            Shape::Global { name, descriptors } => {
+            Shape::Global { name, descriptors, .. } => {
                 scan_descriptors(descriptors).last().map_or_else(|| unfield(name), |d| unquote(d.name))
             }
             Shape::Path(body) => scan_path(body).last().map_or(Cow::Borrowed(""), |s| unquote(s)),
@@ -588,7 +588,7 @@ impl SymbolId {
     /// the segments of a path id, the name of an unresolved id.
     pub fn names(&self) -> Vec<Cow<'_, str>> {
         match self.shape() {
-            Shape::Global { name, descriptors } => std::iter::once(unfield(name))
+            Shape::Global { name, descriptors, .. } => std::iter::once(unfield(name))
                 .chain(scan_descriptors(descriptors).into_iter().map(|d| unquote(d.name)))
                 .collect(),
             Shape::Path(body) => scan_path(body).into_iter().map(unquote).collect(),
@@ -610,6 +610,54 @@ impl SymbolId {
         let mut s: Vec<String> = self.names().into_iter().map(Cow::into_owned).collect();
         s.push(segment.to_owned());
         Self::from_repr(&Repr::Path(s))
+    }
+
+    /// A borrowed view of the id's parts. Unlike [`package`](Self::package)
+    /// and [`descriptors`](Self::descriptors) it allocates nothing but the
+    /// descriptor list (and a name only when it needs unescaping), so it
+    /// suits hot paths such as deriving a diagram id per call site.
+    ///
+    /// ```
+    /// use sealmap_model::{DescriptorKind, IdView, SymbolId};
+    ///
+    /// let id = SymbolId::parse("sym:cargo shop . db/Db#[Store]put().").unwrap();
+    /// let IdView::Global(g) = id.view() else { unreachable!() };
+    /// assert_eq!((g.manager, &*g.package, g.version.is_none()), ("cargo", "shop", true));
+    /// let kinds: Vec<_> = g.descriptors.iter().map(|d| (d.kind, &*d.name)).collect();
+    /// assert_eq!(kinds, [
+    ///     (DescriptorKind::Namespace, "db"),
+    ///     (DescriptorKind::Type, "Db"),
+    ///     (DescriptorKind::TypeParameter, "Store"),
+    ///     (DescriptorKind::Method, "put"),
+    /// ]);
+    /// ```
+    pub fn view(&self) -> IdView<'_> {
+        match self.shape() {
+            Shape::Global { manager, name, version, descriptors } => IdView::Global(GlobalView {
+                manager,
+                package: unfield(name),
+                version: (version != ".").then(|| unfield(version)),
+                descriptors: scan_descriptors(descriptors)
+                    .into_iter()
+                    .map(|d| DescriptorView {
+                        name: unquote(d.name),
+                        kind: match d.kind {
+                            b'/' => DescriptorKind::Namespace,
+                            b'#' => DescriptorKind::Type,
+                            b'(' => DescriptorKind::Method,
+                            b'[' => DescriptorKind::TypeParameter,
+                            b')' => DescriptorKind::Parameter,
+                            b':' => DescriptorKind::Meta,
+                            b'!' => DescriptorKind::Macro,
+                            _ => DescriptorKind::Term,
+                        },
+                        disambiguator: (!d.disambiguator.is_empty()).then_some(d.disambiguator),
+                    })
+                    .collect(),
+            }),
+            Shape::Path(body) => IdView::Path(scan_path(body).into_iter().map(unquote).collect()),
+            Shape::Unresolved(raw) => IdView::Unresolved(unquote(raw)),
+        }
     }
 
     /// The names joined by `::`, for human-facing labels. Not injective:
@@ -689,6 +737,62 @@ fn print(repr: &Repr) -> String {
     out
 }
 
+/// A borrowed view of a [`SymbolId`], from [`SymbolId::view`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IdView<'a> {
+    /// A global id.
+    Global(GlobalView<'a>),
+    /// A path id's segments.
+    Path(Vec<Cow<'a, str>>),
+    /// An unresolved method's name.
+    Unresolved(Cow<'a, str>),
+}
+
+/// The parts of a global id.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GlobalView<'a> {
+    /// The package manager.
+    pub manager: &'a str,
+    /// The package name.
+    pub package: Cow<'a, str>,
+    /// The release version, `None` for [`Version::Current`].
+    pub version: Option<Cow<'a, str>>,
+    /// The descriptors in order.
+    pub descriptors: Vec<DescriptorView<'a>>,
+}
+
+/// One descriptor of a [`GlobalView`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DescriptorView<'a> {
+    /// The name, unescaped.
+    pub name: Cow<'a, str>,
+    /// The kind.
+    pub kind: DescriptorKind,
+    /// A method's disambiguator.
+    pub disambiguator: Option<&'a str>,
+}
+
+/// The kind of a descriptor, as in [`Suffix`] without the payload.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum DescriptorKind {
+    /// `name/`.
+    Namespace,
+    /// `name#`.
+    Type,
+    /// `name.`.
+    Term,
+    /// `name(…).`.
+    Method,
+    /// `[name]`.
+    TypeParameter,
+    /// `(name)`.
+    Parameter,
+    /// `name:`.
+    Meta,
+    /// `name!`.
+    Macro,
+}
+
 // ------------------------------------------------------------------ scanner
 //
 // Borrowed views of text already known to be canonical. They never allocate
@@ -696,9 +800,10 @@ fn print(repr: &Repr) -> String {
 // branch below is the one the printer took.
 
 enum Shape<'a> {
-    /// `name` is the raw package-name field; `descriptors` the raw text after
-    /// the version's separating space (empty for a package root).
-    Global { name: &'a str, descriptors: &'a str },
+    /// Raw manager, package-name and version fields; `descriptors` is the
+    /// raw text after the version's separating space (empty for a package
+    /// root).
+    Global { manager: &'a str, name: &'a str, version: &'a str, descriptors: &'a str },
     /// The raw text after `extern `.
     Path(&'a str),
     /// The raw name after `? `.
@@ -730,12 +835,15 @@ impl<'a> Shape<'a> {
                 i += 1;
             }
         }
-        let name = match (seps.first(), seps.get(1)) {
-            (Some(&a), Some(&b)) => &body[a + 1..b],
-            _ => "",
+        let (a, b) = match (seps.first(), seps.get(1)) {
+            (Some(&a), Some(&b)) => (a, b),
+            _ => (0, 0),
         };
+        let manager = &body[..a];
+        let name = body.get(a + 1..b).unwrap_or("");
+        let version = seps.get(2).map_or(body.get(b + 1..).unwrap_or(""), |&c| &body[b + 1..c]);
         let descriptors = seps.get(2).map_or("", |&c| &body[c + 1..]);
-        Shape::Global { name, descriptors }
+        Shape::Global { manager, name, version, descriptors }
     }
 }
 
@@ -744,7 +852,11 @@ impl<'a> Shape<'a> {
 struct DescSpan<'a> {
     end: usize,
     name: &'a str,
+    /// The suffix byte (`/ # . ( : !`), `[` for a type parameter, `)` for a
+    /// parameter.
     kind: u8,
+    /// A method's raw disambiguator (empty when there is none).
+    disambiguator: &'a str,
 }
 
 /// The length of the raw name at the start of `s` (quoted or simple).
@@ -772,25 +884,25 @@ fn scan_descriptors(s: &str) -> Vec<DescSpan<'_>> {
     let mut pos = 0;
     while pos < s.len() {
         let rest = &s[pos..];
-        let (kind, name, len) = match rest.as_bytes()[0] {
+        let (kind, name, len, disambiguator) = match rest.as_bytes()[0] {
             open @ (b'[' | b'(') => {
                 let n = raw_name_len(&rest[1..]);
-                (open, &rest[1..1 + n], n + 2)
+                (if open == b'(' { b')' } else { b'[' }, &rest[1..1 + n], n + 2, "")
             }
             _ => {
                 let n = raw_name_len(rest);
                 let kind = rest.as_bytes().get(n).copied().unwrap_or(b'.');
-                let len = if kind == b'(' {
+                if kind == b'(' {
                     // `name(disambiguator).`
-                    n + rest[n..].find(").").map_or(rest.len() - n, |i| i + 2)
+                    let close = rest[n..].find(").").unwrap_or(rest.len() - n);
+                    (kind, &rest[..n], n + close + 2, rest.get(n + 1..n + close).unwrap_or(""))
                 } else {
-                    n + 1
-                };
-                (kind, &rest[..n], len)
+                    (kind, &rest[..n], n + 1, "")
+                }
             }
         };
         pos += len.max(1);
-        out.push(DescSpan { end: pos.min(s.len()), name, kind });
+        out.push(DescSpan { end: pos.min(s.len()), name, kind, disambiguator });
     }
     out
 }

@@ -1,6 +1,6 @@
 [package]
 name = "sealmap-mermaid"
-description = "Typed, deterministic Mermaid writers (sequence, class, ER, flowchart) with safe escaping and injective ids; no dependencies"
+description = "Typed, deterministic Mermaid writers (sequence, class, ER, flowchart) with safe escaping and injective ids derived from sym: symbol ids"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
@@ -13,7 +13,17 @@ authors.workspace = true
 keywords = ["mermaid", "diagram", "sequence-diagram", "class-diagram", "markdown"]
 categories.workspace = true
 
+[features]
+default = ["model"]
+## `Ident::from_symbol`: injective diagram ids from `sealmap_model::SymbolId`.
+## Without it the writers have no dependencies at all.
+model = ["dep:sealmap-model"]
+
 [dependencies]
+sealmap-model = { workspace = true, optional = true }
+
+[dev-dependencies]
+proptest.workspace = true
 
 [lints]
 workspace = true

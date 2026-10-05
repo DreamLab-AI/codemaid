@@ -13,7 +13,7 @@ use sealmap_rust::{RustOptions, extract};
 /// The diagram id of a canonical `sym:` id.
 fn mid(sym: &str) -> String {
     let id = SymbolId::parse(sym).unwrap_or_else(|e| panic!("{sym}: {e}"));
-    Ident::from_path(&id.to_string()).as_str().to_owned()
+    Ident::from_symbol(&id).as_str().to_owned()
 }
 
 fn corpus(files: &[(&str, &str)]) -> Corpus {

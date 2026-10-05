@@ -499,6 +499,10 @@ dependencies = [
 [[package]]
 name = "sealmap-mermaid"
 version = "0.1.0"
+dependencies = [
+ "proptest",
+ "sealmap-model",
+]
 
 [[package]]
 name = "sealmap-model"

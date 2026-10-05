@@ -54,10 +54,14 @@
 //!
 //! ## Stable ids
 //!
-//! Every node, class, entity and participant id is the symbol's canonical
-//! path with `::` replaced by `__` (see [`sealmap_mermaid::Ident`]). The same
-//! symbol has the same id in every diagram of every document, so diagrams can
-//! be concatenated, merged or diffed by id.
+//! Every symbol is cited by its `sym:` id (`sym:cargo shop . db/Db#insert().`,
+//! see [`sealmap_model::sym`]) in headings, front matter and the JSON files.
+//! Every node, class, entity and participant id is derived from that id by
+//! an injective encoding (`shop__db___tDb___finsert`, see
+//! `sealmap_mermaid::Ident::from_symbol`), so the same symbol has the same
+//! id in every diagram of every document, no two symbols share one, and
+//! diagrams can be concatenated, merged or diffed by id. [`generate`] asserts
+//! that uniqueness over the whole codebase.
 //!
 //! ## Example
 //!
@@ -73,7 +77,7 @@
 //! let corpus = generate(&model, &CorpusOptions::default());
 //! let doc = corpus.document("src/lib.rs.md").unwrap();
 //! assert!(doc.contains("sequenceDiagram"));
-//! assert!(doc.contains(": helper()"));
+//! assert!(doc.contains("demo___tA->>demo: helper()"));
 //! assert!(corpus.document("_index.json").is_some());
 //! ```
 

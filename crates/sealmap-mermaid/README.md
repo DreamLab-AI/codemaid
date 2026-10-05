@@ -4,13 +4,16 @@
 [![docs.rs](https://img.shields.io/docsrs/sealmap-mermaid)](https://docs.rs/sealmap-mermaid)
 
 Typed, deterministic [Mermaid](https://mermaid.js.org) writers with safe
-escaping: sequence, class, ER and flowchart diagrams. **No dependencies.**
+escaping: sequence, class, ER and flowchart diagrams. With
+`default-features = false`, **no dependencies**.
 
 - Every label and identifier goes through one escaping layer, so generated
   diagrams parse, whatever the source text contained.
-- `Ident::from_path` turns any path into a valid Mermaid id. Plain paths stay
-  readable (`app::Db` → `app__Db`); anything that could collide gets a hash
-  suffix, so the mapping is injective.
+- `Ident::from_symbol` (default feature `model`) turns a `sym:` symbol id into
+  a Mermaid id by an injective encoding, readable where names are plain
+  (`sym:cargo app . db/Db#get().` → `app__db___tDb___fget`). Two symbols never
+  share a diagram id, by construction rather than by a collision check.
+- `Ident::new` sanitises any other text into a valid id.
 - Output is a pure function of the calls made, byte for byte.
 
 Part of [sealmap](https://github.com/DreamLab-AI/sealmap), and usable on its
@@ -19,8 +22,8 @@ own by anything that emits Mermaid.
 ```rust
 use sealmap_mermaid::{Arrow, Ident, SequenceDiagram};
 
-let api = Ident::from_path("app::Api");
-let db = Ident::from_path("app::Db");
+let api = Ident::new("app__Api");
+let db = Ident::new("app__Db");
 
 let mut seq = SequenceDiagram::new();
 seq.participant(api.clone(), "Api");

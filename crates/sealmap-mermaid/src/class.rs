@@ -31,7 +31,7 @@ impl Direction {
 /// ```
 /// use sealmap_mermaid::{Class, Ident};
 ///
-/// let mut c = Class::new(Ident::from_path("app::Cache"), "Cache<K, V>");
+/// let mut c = Class::new(Ident::new("app__Cache"), "Cache<K, V>");
 /// c.annotation("struct")
 ///     .field('-', "map", "HashMap<K, V>")
 ///     .method('+', "get", "&self, k: &K", "Option<&V>");

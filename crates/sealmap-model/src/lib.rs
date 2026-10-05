@@ -90,7 +90,9 @@ pub use flow::{Arm, Call, CallKind, Exit, Flow, Step};
 pub use hash::{ContentHash, Fingerprint};
 pub use path::{PathError, SourcePath};
 pub use source::{LoadOptions, SourceFile, SourceSet};
-pub use sym::{Descriptor, IdError, Package, Suffix, SymbolId, Version};
+pub use sym::{
+    Descriptor, DescriptorKind, DescriptorView, GlobalView, IdError, IdView, Package, Suffix, SymbolId, Version,
+};
 pub use symbol::{Confidence, Member, MemberKind, Relation, RelationKind, Span, Symbol, SymbolKind, Visibility};
 
 /// Version of the serialised model schema (the JSON shape of [`Codebase`]).

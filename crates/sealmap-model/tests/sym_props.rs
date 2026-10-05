@@ -178,3 +178,49 @@ proptest! {
         }
     }
 }
+
+proptest! {
+    #![proptest_config(ProptestConfig { cases: 4096, ..ProptestConfig::default() })]
+
+    /// The borrowed view agrees with the structured parse.
+    #[test]
+    fn view_agrees_with_structure(id in symbol_id()) {
+        use sealmap_model::{DescriptorKind, IdView};
+        match id.view() {
+            IdView::Global(g) => {
+                let p = id.package().unwrap();
+                prop_assert_eq!(g.manager, p.manager());
+                prop_assert_eq!(&*g.package, p.name());
+                match p.version() {
+                    Version::Current => prop_assert!(g.version.is_none()),
+                    Version::Release(v) => prop_assert_eq!(g.version.as_deref(), Some(v.as_str())),
+                }
+                let ds = id.descriptors();
+                prop_assert_eq!(g.descriptors.len(), ds.len());
+                for (v, d) in g.descriptors.iter().zip(&ds) {
+                    prop_assert_eq!(&*v.name, d.name());
+                    let (kind, dis) = match d.suffix() {
+                        Suffix::Namespace => (DescriptorKind::Namespace, None),
+                        Suffix::Type => (DescriptorKind::Type, None),
+                        Suffix::Term => (DescriptorKind::Term, None),
+                        Suffix::Method { disambiguator } => (DescriptorKind::Method, disambiguator.as_deref()),
+                        Suffix::TypeParameter => (DescriptorKind::TypeParameter, None),
+                        Suffix::Parameter => (DescriptorKind::Parameter, None),
+                        Suffix::Meta => (DescriptorKind::Meta, None),
+                        Suffix::Macro => (DescriptorKind::Macro, None),
+                    };
+                    prop_assert_eq!(v.kind, kind);
+                    prop_assert_eq!(v.disambiguator, dis);
+                }
+            }
+            IdView::Path(segs) => {
+                let want = id.segments().unwrap();
+                prop_assert_eq!(segs.iter().map(|s| s.to_string()).collect::<Vec<_>>(), want);
+            }
+            IdView::Unresolved(n) => {
+                prop_assert!(id.is_unresolved());
+                prop_assert_eq!(n, id.name());
+            }
+        }
+    }
+}

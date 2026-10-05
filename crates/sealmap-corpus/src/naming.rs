@@ -5,16 +5,17 @@ use sealmap_model::{Codebase, SymbolId, SymbolKind};
 
 use crate::{CorpusOptions, ExternalLanes};
 
-/// Diagram id for a symbol (stable across all documents).
+/// Diagram id for a symbol (stable across all documents), derived from the
+/// id's structure by [`Ident::from_symbol`].
 pub(crate) fn ident(id: &SymbolId) -> Ident {
-    Ident::from_path(&id.to_string())
+    Ident::from_symbol(id)
 }
 
 /// Every symbol and relation endpoint must get its own diagram id: a shared
 /// id would silently merge two nodes in every diagram both appear in, and
-/// break merge-by-id across documents. `Ident::from_path` is injective by
-/// construction (short of a 64-bit hash collision); this checks it on the
-/// actual codebase.
+/// break merge-by-id across documents. `Ident::from_symbol` is injective by
+/// construction; this guard checks it on the actual codebase anyway, so a
+/// future change to either grammar cannot silently merge nodes.
 ///
 /// # Panics
 ///
