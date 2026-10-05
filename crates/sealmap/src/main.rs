@@ -9,6 +9,8 @@
 //! sealmap seal-check CP-03 CP-07                    # classify chosen lock entries
 //! sealmap stale [--since main]                      # sealed symbols that changed; exit 0
 //! sealmap seal sign CP-03 --reviewer R --model M    # write a seal
+//! sealmap pack CP-03 CP-07 --budget 200000          # a review pack on stdout
+//! sealmap pack --diff main --budget 200000 --shard -o packs/   # changed topics, sharded
 //! ```
 //!
 //! Exit codes: 0 success; 1 a check failed, a symbol is not found, or a seal
@@ -24,6 +26,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode, Stdio};
 
 use clap::{Args, Parser, Subcommand};
+use sealmap::corpus::pack::{self, PackError, PackInput, PackOptions};
 use sealmap::corpus::seal::{self, Lock, Resolution, SealReport, Signature};
 use sealmap::corpus::{self, Drift, ExternalLanes};
 use sealmap::dense::{self, DenseOptions};
@@ -57,6 +60,8 @@ enum Cmd {
     /// Write seals.
     #[command(subcommand)]
     Seal(SealCmd),
+    /// A deterministic review pack: topics, dense slices of the code they cite, source windows.
+    Pack(PackArgs),
 }
 
 #[derive(Subcommand)]
@@ -146,9 +151,9 @@ struct DenseArgs {
     stats: bool,
 }
 
-/// The authored corpus and the code it cites.
+/// Where the authored corpus and the code it cites live.
 #[derive(Args)]
-struct Corpus {
+struct Site {
     /// Source root; also the base of a relative --diagrams.
     #[arg(long, short = 'C', default_value = ".")]
     root: PathBuf,
@@ -157,6 +162,13 @@ struct Corpus {
     diagrams: PathBuf,
     #[command(flatten)]
     source: Source,
+}
+
+/// The authored corpus and the code it cites, with report flags.
+#[derive(Args)]
+struct Corpus {
+    #[command(flatten)]
+    site: Site,
     /// Print JSON instead of text.
     #[arg(long)]
     json: bool,
@@ -188,6 +200,35 @@ struct Stale {
     since: Option<String>,
     #[command(flatten)]
     corpus: Corpus,
+}
+
+#[derive(Args)]
+struct PackArgs {
+    /// Topic ids (`COR-04`) or topic files.
+    topics: Vec<String>,
+    /// Also pack every topic whose sealed or cited symbols changed since this git revision.
+    #[arg(long, value_name = "REV")]
+    diff: Option<String>,
+    /// Refuse a pack longer than this many bytes (with --shard: per file).
+    #[arg(long, value_name = "BYTES")]
+    budget: Option<usize>,
+    /// Call levels in each topic's dense slice.
+    #[arg(long, default_value_t = PackOptions::default().depth)]
+    depth: usize,
+    /// Most source lines shown per cited symbol (0: none).
+    #[arg(long, value_name = "LINES", default_value_t = PackOptions::default().source_window)]
+    source_window: usize,
+    /// Write the pack to this file instead of stdout (with --shard: a directory).
+    #[arg(short, long)]
+    out: Option<PathBuf>,
+    /// Split into numbered files of whole topics, each within --budget, instead of refusing.
+    #[arg(long, requires_all = ["budget", "out"])]
+    shard: bool,
+    #[command(flatten)]
+    site: Site,
+    /// Print a refusal as JSON on stdout.
+    #[arg(long)]
+    json: bool,
 }
 
 #[derive(Args)]
@@ -229,7 +270,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         Cmd::Resolve(r) => resolve(&r),
         Cmd::SealCheck(s) => {
             let only: BTreeSet<String> = s.topics.iter().cloned().collect();
-            let ctx = Ctx::load(&s.corpus)?;
+            let ctx = Ctx::load(&s.corpus.site)?;
             let lock = match &ctx.lock_text {
                 Some(text) => Lock::parse(text).map_err(|e| format!("{}: {e}", ctx.lock_path.display()))?,
                 None => return Err(format!("{} does not exist", ctx.lock_path.display())),
@@ -244,12 +285,13 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             print_report(&report, &s.corpus)
         }
         Cmd::Verify(c) => {
-            let ctx = Ctx::load(&c)?;
+            let ctx = Ctx::load(&c.site)?;
             let report = seal::verify(ctx.lock_text.as_deref(), seal::LOCK_FILE, &ctx.topics, &ctx.codebase);
             print_report(&report, &c)
         }
         Cmd::Stale(s) => stale(&s),
         Cmd::Seal(SealCmd::Sign(s)) => sign(&s),
+        Cmd::Pack(p) => pack(&p),
     }
 }
 
@@ -384,6 +426,7 @@ fn dir_name(p: &Path) -> String {
 /// Everything the seal commands read.
 struct Ctx {
     codebase: Codebase,
+    sources: SourceSet,
     name: String,
     diagrams: PathBuf,
     lock_path: PathBuf,
@@ -392,8 +435,8 @@ struct Ctx {
 }
 
 impl Ctx {
-    fn load(c: &Corpus) -> Result<Self, String> {
-        let (codebase, name) = extract(&c.root, &c.source, ExternalCalls::NonStd)?;
+    fn load(c: &Site) -> Result<Self, String> {
+        let (codebase, name, sources) = extract_sources(&c.root, &c.source, ExternalCalls::NonStd)?;
         let diagrams = if c.diagrams.is_absolute() { c.diagrams.clone() } else { c.root.join(&c.diagrams) };
         let lock_path = diagrams.join(seal::LOCK_FILE);
         let lock_text = match fs::read_to_string(&lock_path) {
@@ -402,7 +445,25 @@ impl Ctx {
             Err(e) => return Err(format!("{}: {e}", lock_path.display())),
         };
         let topics = read_topics(&diagrams).map_err(|e| format!("{}: {e}", diagrams.display()))?;
-        Ok(Self { codebase, name, diagrams, lock_path, lock_text, topics })
+        Ok(Self { codebase, sources, name, diagrams, lock_path, lock_text, topics })
+    }
+    /// The lock, if there is one.
+    fn lock(&self) -> Result<Option<Lock>, String> {
+        self.lock_text
+            .as_deref()
+            .map(|text| Lock::parse(text).map_err(|e| format!("{}: {e}", self.lock_path.display())))
+            .transpose()
+    }
+
+    /// The model of the code at git revision `rev`, read under the same name
+    /// and options as the current one. `flag` names the option for errors.
+    fn model_at(&self, site: &Site, rev: &str, flag: &str) -> Result<Codebase, String> {
+        if !site.source.repos.is_empty() {
+            return Err(format!("{flag} reads one git repository; it cannot be combined with --repo"));
+        }
+        let tree = GitTree::export(&site.root, rev)?;
+        let source = Source { name: Some(self.name.clone()), ..site.source.clone() };
+        Ok(extract(tree.path(), &source, ExternalCalls::NonStd)?.0)
     }
 }
 
@@ -444,7 +505,7 @@ fn read_topics_rec(root: &Path, dir: &Path, out: &mut seal::Topics) -> io::Resul
 
 fn resolve(r: &Resolve) -> Result<ExitCode, String> {
     let id = SymbolId::parse(&r.id).map_err(|e| format!("`{}` is not a sym: id: {e}", r.id))?;
-    let ctx = Ctx::load(&r.corpus)?;
+    let ctx = Ctx::load(&r.corpus.site)?;
     // The sealed body, from any entry that seals the id, gives rename candidates.
     let sealed_body = match &ctx.lock_text {
         Some(text) => Lock::parse(text)
@@ -511,21 +572,11 @@ fn print_report(report: &SealReport, c: &Corpus) -> Result<ExitCode, String> {
 // ------------------------------------------------------------------ stale
 
 fn stale(s: &Stale) -> Result<ExitCode, String> {
-    let ctx = Ctx::load(&s.corpus)?;
-    let lock = match &ctx.lock_text {
-        Some(text) => Lock::parse(text).map_err(|e| format!("{}: {e}", ctx.lock_path.display()))?,
-        None => Lock::new(),
-    };
+    let ctx = Ctx::load(&s.corpus.site)?;
+    let lock = ctx.lock()?.unwrap_or_default();
     let before = match &s.since {
         None => None,
-        Some(rev) => {
-            if !s.corpus.source.repos.is_empty() {
-                return Err("--since reads one git repository; it cannot be combined with --repo".into());
-            }
-            let tree = GitTree::export(&s.corpus.root, rev)?;
-            let source = Source { name: Some(ctx.name.clone()), ..s.corpus.source.clone() };
-            Some(extract(tree.path(), &source, ExternalCalls::NonStd)?.0)
-        }
+        Some(rev) => Some(ctx.model_at(&s.corpus.site, rev, "--since")?),
     };
     let changed = seal::stale(&lock, before.as_ref(), &ctx.codebase);
     if s.corpus.json {
@@ -607,12 +658,9 @@ fn git(root: &Path, args: &[&str]) -> Result<String, String> {
 // ------------------------------------------------------------------ sign
 
 fn sign(s: &Sign) -> Result<ExitCode, String> {
-    let ctx = Ctx::load(&s.corpus)?;
-    let mut lock = match &ctx.lock_text {
-        // A parsable but non-canonical lock is rewritten canonically.
-        Some(text) => Lock::parse(text).map_err(|e| format!("{}: {e}", ctx.lock_path.display()))?,
-        None => Lock::new(),
-    };
+    let ctx = Ctx::load(&s.corpus.site)?;
+    // A parsable but non-canonical lock is rewritten canonically.
+    let mut lock = ctx.lock()?.unwrap_or_default();
     let file = topic_file(&ctx, &s.topic)?;
     let text = &ctx.topics[&file];
     let who = Signature {
@@ -641,6 +689,85 @@ fn sign(s: &Sign) -> Result<ExitCode, String> {
         ctx.lock_path.display()
     );
     Ok(ExitCode::SUCCESS)
+}
+
+// ------------------------------------------------------------------ pack
+
+fn pack(p: &PackArgs) -> Result<ExitCode, String> {
+    let ctx = Ctx::load(&p.site)?;
+    let mut ids = BTreeSet::new();
+    for arg in &p.topics {
+        let file = topic_file(&ctx, arg)?;
+        let id = seal::topic_id(&ctx.topics[&file]).ok_or_else(|| format!("{file} has no front-matter id"))?;
+        ids.insert(id);
+    }
+    if let Some(rev) = &p.diff {
+        let before = ctx.model_at(&p.site, rev, "--diff")?;
+        let changed = pack::changed_topics(ctx.lock()?.as_ref(), &ctx.topics, &before, &ctx.codebase);
+        eprintln!("sealmap: {} topic(s) changed since {rev}", changed.len());
+        ids.extend(changed);
+    } else if ids.is_empty() {
+        return Err("name the topics to pack, or select them with --diff REV".into());
+    }
+    if ids.is_empty() {
+        return Ok(ExitCode::SUCCESS);
+    }
+    let ids: Vec<String> = ids.into_iter().collect();
+    let revision = revision(&p.site.root);
+    let mut input = PackInput::new(&ctx.codebase, &ctx.sources, &ctx.topics, &revision);
+    if let Some(rev) = &p.diff {
+        input = input.diff(rev);
+    }
+    let mut options = PackOptions::default().depth(p.depth).source_window(p.source_window);
+    if let Some(b) = p.budget {
+        options = options.budget(b);
+    }
+    let result = if p.shard {
+        pack::shard(&input, &ids, &options)
+    } else {
+        pack::pack(&input, &ids, &options).map(|one| vec![one])
+    };
+    let packs = match result {
+        Ok(packs) => packs,
+        Err(e) => {
+            if p.json {
+                println!("{}", serde_json::to_string_pretty(&e).map_err(|e| e.to_string())?);
+            }
+            eprintln!("sealmap: not packed: {e}");
+            if let PackError::OverBudget { header, topics, .. } = &e {
+                eprintln!("{:<10} {header:>10}", "header");
+                for t in topics {
+                    eprintln!("{:<10} {:>10}", t.id, t.bytes);
+                }
+            }
+            return Ok(ExitCode::from(1));
+        }
+    };
+    match (&p.out, p.shard) {
+        (None, _) => print!("{}", packs[0].text),
+        (Some(file), false) => fs::write(file, &packs[0].text).map_err(|e| format!("{}: {e}", file.display()))?,
+        (Some(dir), true) => {
+            fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+            let width = packs.len().to_string().len().max(2);
+            for (i, one) in packs.iter().enumerate() {
+                let file = dir.join(format!("pack-{:0width$}.txt", i + 1));
+                fs::write(&file, &one.text).map_err(|e| format!("{}: {e}", file.display()))?;
+            }
+        }
+    }
+    let bytes: usize = packs.iter().map(|one| one.text.len()).sum();
+    eprintln!("sealmap: packed {} topic(s) into {} pack(s), {bytes} bytes", ids.len(), packs.len());
+    Ok(ExitCode::SUCCESS)
+}
+
+/// The checkout's revision for a pack header: `HEAD`'s commit, with
+/// `+dirty` when tracked files differ from it, or `unknown` outside git.
+/// Untracked files are not consulted, so writing a pack into the checkout
+/// does not change the next pack's header.
+fn revision(root: &Path) -> String {
+    let Ok(head) = git(root, &["rev-parse", "HEAD"]) else { return "unknown".into() };
+    let dirty = git(root, &["status", "--porcelain", "--untracked-files=no"]).is_ok_and(|s| !s.trim().is_empty());
+    format!("{}{}", head.trim(), if dirty { "+dirty" } else { "" })
 }
 
 /// A topic named by id, or by a path relative to the current directory or

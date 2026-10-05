@@ -39,7 +39,7 @@ Everything else lives in the skills.
 | **Authored** | `docs/diagrams/<area>/NN-*.md`: consolidated topics, narratives, register; citations are `sym:` ids | yes | LLM skill, tiered (§6) | `sealmap verify` (ids resolve) + `diagram-index-gen.cjs --check --render` |
 | **Sealed** | `docs/diagrams/seals.lock` (and `docs/adr/seals.lock`); each topic and ADR carries a static `sealed: seals.lock` line | yes | the skill's seal step | `sealmap verify`: **the CI gate** |
 | **Generated** | model, index, dense projection, optional 1:1 Mermaid, under `.sealmap/` | **never** (gitignored) | `sealmap generate`, `sealmap dense` | rebuilt in memory; never trusted from disk |
-| **Review pack** | `sealmap pack`: pegged topics + dense slices + bounded source windows; `--review` = diagrams only | never | crate | Gemini external review, seal review, debugging |
+| **Review pack** | `sealmap pack`: pegged topics + dense slices + bounded source windows (built); `--review` = diagrams only (not built) | never | crate | Gemini external review, seal review, debugging |
 
 **Retired from v0.1 (done in step 3):** the committed generated corpus
 (`docs/codemaid/`, later `docs/sealmap/`) and its CI drift gate. The 1:1
@@ -133,7 +133,7 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | `sealmap-ts` | oxc language adapter (§8); **deferred** until E0-R shows the gain |
 | `sealmap-mermaid` | typed writers, short participant aliases (−26.5 % tokens), **injective** ids with a uniqueness assertion |
 | `sealmap-dense` | **exists.** Agent projection: skeletons with `L<start>-<end>` and short names, indented call trees (each callable expanded once; `^` reference, `↺` cycle, `…` depth cut), `_index.txt`, and the budgeted `slice` that `pack` embeds. Measured `dense.txt` 0.17–0.29× source and 13–18 tokens per call edge against 34–53 for Mermaid (sealmap, tokio, VisionClaw; bytes / 4) |
-| `sealmap-corpus` | generate, the `seal` module (lock parse and canonical write), `resolve`, `seal-check`, `stale`, `verify`, `sign`; `pack` next |
+| `sealmap-corpus` | generate, the `seal` module (lock parse and canonical write), `resolve`, `seal-check`, `stale`, `verify`, `sign`; the `pack` module (review packs, sharding, change selection) |
 | `sealmap` | facade and CLI; `sealmap-ts` behind a default feature, because oxc needs MSRV 1.97 |
 
 **`sealmap-dense` as built (differs from the research estimate).** The
@@ -158,15 +158,37 @@ default is 3.
 | `seal-check [topic…]` | classify the given lock entries (default: all) |
 | `verify` | `seal-check` across the corpus, plus coverage and lock faults |
 | `seal sign <topic> --reviewer --model [--date]` | write one topic's seal from the current code |
-| `pack <topics\|--diff old new> [--review] [--max-bytes]` | (next) deterministic blob. Refuses with a shard plan when over budget; never silently truncates; never includes the lock |
+| `pack [topic…] [--diff REV] [--budget BYTES] [--depth N] [--source-window LINES] [--shard -o DIR]` | deterministic blob. Refuses when over budget, naming each topic's size; `--shard` splits by topic instead; never silently truncates; never includes the lock |
 | `generate [--check]` | writes `.sealmap/`; `--check` compares an existing directory with a fresh generation, writes nothing, exits 1 on drift |
 | `dense [PATH] [-o DIR] [--depth N] [--stats]` | writes `dense.txt` and `_index.txt` (default `.sealmap/dense`) |
 | `export --scip` (later) | interop |
 
-Git stays out of the libraries. `--diff` takes two trees, and `--since` is CLI
-sugar that shells out to `git archive` (piped to `tar`) and reads the revision
-as a second model. Seal commands take `-C ROOT`, `--diagrams DIR` (default
-`docs/diagrams`) and `--json`.
+Git stays out of the libraries. `pack::changed_topics` takes two models, and
+`--since` and `--diff` are CLI sugar that shell out to `git archive` (piped to
+`tar`) and read the revision as a second model. Seal commands take `-C ROOT`,
+`--diagrams DIR` (default `docs/diagrams`) and `--json`.
+
+**`pack` as built (differs from the plan above).**
+
+- `--diff REV` compares one revision with the working tree, as `--since`
+  does, rather than two named trees. It selects the topics `stale` reports
+  for the lock against REV, plus every topic citing a symbol added, removed,
+  made unparsable or rehashed since REV. Moves do not count. Topics named on
+  the command line join the selection.
+- The budget flag is `--budget`, not `--max-bytes`. The refusal names the
+  header's size and each topic's. `--shard` fills numbered packs with whole
+  topics, in id order, and refuses only a topic too large to fit alone.
+- `--review` (diagrams only) is not built.
+- The format is versioned text (`# sealmap-pack 1`). The header records the
+  generator, codebase, revision (`HEAD`, plus `+dirty` when tracked files
+  differ), any `diff:` base, the topics, the budget, the depth and the source
+  window. Every block line gives its payload's length in bytes, so a reader
+  can skip a block even when a topic contains a line that looks like one.
+- Unresolved citations (`absent`, `unparsable`, `invalid`) are listed, never
+  dropped. Source windows show at most N lines of each cited symbol, and a
+  clipped window says so (`L40-79 of L40-112`).
+- A topic that still cites `path:line` rather than `sym:` ids packs as its
+  text alone.
 
 Licence `MIT OR Apache-2.0`. Every crate is published to crates.io with full
 rustdoc, a README, and a clean `cargo doc --no-deps`. Skills pin the published
@@ -181,8 +203,9 @@ version, never a path dependency.
 | `diagrams-as-code` | small amendment | `diagram-index-gen.cjs` accepts `sym:` and `sealed:`; `--cite-check` kept for legacy `path:line` topics; the researcher role becomes `resolve` (zero tokens) |
 | `build-with-quality` | small amendment | step 5a **Re-seal**: `stale` → behaviour (cheap cross-family review, sign) / contract (ADR addendum, re-consolidate, review, sign) / absent (confirm rename). Code, topic and lock land in **one commit**, ending today's two-commit routine |
 
-When `sealmap pack --review` exists, `sealmap-review` swaps its own packer for
-it. Until then the skill reads the corpus directly.
+`sealmap pack` exists, so `sealmap-review` can swap its own packer for it in
+inline mode, where code is wanted. Its external mode is diagrams only, which
+waits for `--review`. Until the skill changes, it reads the corpus directly.
 
 ## 6. Model per step
 
@@ -274,9 +297,10 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
    Mermaid ids, schema v2.
 3. **Seal surface.** `seal` module plus `resolve` / `stale` / `seal-check` /
    `verify` / `pack`, and `sealmap-dense`. Retire the committed corpus.
-   **First crates.io publish (0.2).** *Status: the seal module, `resolve`,
-   `stale`, `seal-check`, `verify`, `seal sign`, the retirement,
-   `sealmap-dense` and `sealmap dense` are done; `pack` remains.*
+   **First crates.io publish (0.2).** *Status: done in the tree (the seal
+   module, `resolve`, `stale`, `seal-check`, `verify`, `seal sign`, the
+   retirement, `sealmap-dense`, `sealmap dense` and `pack`); the publish
+   remains.*
 4. **E0-R** on VisionClaw and agentbox. This is the first headline number.
 5. **`sealmap` skill** (skill-builder): seal workflow, tiers, edge-check,
    bench. Amend diagrams-as-code and build-with-quality. Write the routing ADR.

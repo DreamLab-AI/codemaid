@@ -160,3 +160,116 @@ fn generate_check_compares_with_a_fresh_generation() {
     assert_eq!(code(&o), 1);
     assert!(stdout(&o).contains("stale     src/accounts.rs.md"), "{}", stdout(&o));
 }
+
+fn git(dir: &Path, args: &[&str]) {
+    let o = Command::new("git")
+        .current_dir(dir)
+        .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
+        .args(args)
+        .output()
+        .unwrap();
+    assert!(o.status.success(), "git {args:?}: {}", String::from_utf8_lossy(&o.stderr));
+}
+
+fn has_git() -> bool {
+    Command::new("git").arg("--version").output().is_ok()
+}
+
+/// A second topic citing a symbol of its own, so packs and `--diff` have a
+/// choice to make.
+const TOPIC2: &str = "---\nid: LED-02\ntitle: Withdrawals\narea: ledger\n---\nOverdrafts are possible: `sym:cargo ledger . accounts/LedgerAccount#withdraw().`.\n";
+
+fn scratch2(name: &str) -> PathBuf {
+    let dir = scratch(name);
+    fs::write(dir.join("docs/diagrams/ledger/02-withdrawals.md"), TOPIC2).unwrap();
+    dir
+}
+
+#[test]
+fn pack_is_byte_identical_across_runs_and_argument_order() {
+    let dir = scratch2("pack-determinism");
+    let a = sealmap(&dir, &["pack", "LED-01", "LED-02"]);
+    assert_eq!(code(&a), 0, "{}", String::from_utf8_lossy(&a.stderr));
+    let b = sealmap(&dir, &["pack", "ledger/02-withdrawals.md", "LED-01", "LED-02"]);
+    assert_eq!(a.stdout, b.stdout);
+    let text = stdout(&a);
+    assert!(text.starts_with("# sealmap-pack 1\n"), "{text}");
+    assert!(
+        text.contains("\nrevision: unknown\ntopics: LED-01 LED-02\nbudget: none\ndepth: 1\nsource-window: 40 lines\n")
+    );
+    assert!(text.contains(&format!("==== source LED-01 src/accounts.rs:L4-6 83 bytes {DEPOSIT}\n")), "{text}");
+    // To a file: the same bytes.
+    assert_eq!(code(&sealmap(&dir, &["pack", "LED-02", "LED-01", "-o", "pack.txt"])), 0);
+    assert_eq!(fs::read(dir.join("pack.txt")).unwrap(), a.stdout);
+    // Nothing to pack is a usage error.
+    assert_eq!(code(&sealmap(&dir, &["pack"])), 2);
+    assert_eq!(code(&sealmap(&dir, &["pack", "LED-09"])), 2);
+}
+
+#[test]
+fn pack_over_budget_refuses_with_sizes_and_shards_on_request() {
+    let dir = scratch2("pack-budget");
+    let full = stdout(&sealmap(&dir, &["pack", "LED-01", "LED-02", "--budget", "9999"]));
+    // The budget is part of the header: keep its width (four digits) the same.
+    assert!((1001..=9999).contains(&full.len()), "{}", full.len());
+    let budget = (full.len() - 1).to_string();
+    let o = sealmap(&dir, &["pack", "LED-01", "LED-02", "--budget", &budget]);
+    assert_eq!(code(&o), 1);
+    assert!(o.stdout.is_empty(), "nothing is written when refusing");
+    let err = String::from_utf8_lossy(&o.stderr);
+    assert!(err.contains("1 over the") && err.contains("refusing rather than truncating"), "{err}");
+    assert!(err.contains("\nLED-01 ") && err.contains("\nLED-02 ") && err.contains("\nheader "), "{err}");
+    let o = sealmap(&dir, &["pack", "LED-01", "LED-02", "--budget", &budget, "--json"]);
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
+    assert_eq!(v["error"], "over_budget");
+    assert_eq!(v["topics"].as_array().unwrap().len(), 2);
+
+    // --shard splits by topic into numbered files, each within the budget.
+    let o = sealmap(&dir, &["pack", "LED-01", "LED-02", "--budget", &budget, "--shard", "-o", "packs"]);
+    assert_eq!(code(&o), 0, "{}", String::from_utf8_lossy(&o.stderr));
+    let one = fs::read_to_string(dir.join("packs/pack-01.txt")).unwrap();
+    let two = fs::read_to_string(dir.join("packs/pack-02.txt")).unwrap();
+    assert!(one.contains("\ntopics: LED-01\n") && one.contains("\nshard: 1\n"), "{one}");
+    assert!(two.contains("\ntopics: LED-02\n") && two.contains("\nshard: 2\n"), "{two}");
+    assert!(one.len() < full.len() && two.len() < full.len());
+    // --shard needs a budget and a directory.
+    assert_eq!(code(&sealmap(&dir, &["pack", "LED-01", "--shard"])), 2);
+}
+
+#[test]
+fn pack_diff_selects_topics_whose_cited_symbols_changed_since_a_revision() {
+    if !has_git() {
+        eprintln!("git not available; skipping");
+        return;
+    }
+    let dir = scratch2("pack-diff");
+    git(&dir, &["init", "-q"]);
+    git(&dir, &["add", "-A"]);
+    git(&dir, &["commit", "-q", "-m", "base"]);
+    let head =
+        String::from_utf8(Command::new("git").current_dir(&dir).args(["rev-parse", "HEAD"]).output().unwrap().stdout)
+            .unwrap();
+
+    // Nothing changed: nothing to pack, and that is not an error.
+    let o = sealmap(&dir, &["pack", "--diff", "HEAD"]);
+    assert_eq!(code(&o), 0);
+    assert!(o.stdout.is_empty());
+
+    // Change deposit only: LED-01 cites it, LED-02 does not.
+    edit(&dir, "src/accounts.rs", "self.balance += amount;", "self.balance += amount * 2;");
+    let o = sealmap(&dir, &["pack", "--diff", "HEAD"]);
+    assert_eq!(code(&o), 0, "{}", String::from_utf8_lossy(&o.stderr));
+    let text = stdout(&o);
+    assert!(text.contains(&format!("\nrevision: {}+dirty\ndiff: HEAD\ntopics: LED-01\n", head.trim())), "{text}");
+    assert!(text.contains("self.balance += amount * 2;"), "the window shows the current code: {text}");
+    // Explicit topics join the changed ones.
+    let both = stdout(&sealmap(&dir, &["pack", "LED-02", "--diff", "HEAD"]));
+    assert!(both.contains("\ntopics: LED-01 LED-02\n"), "{both}");
+
+    // Committed, the change is behind HEAD but not behind HEAD~0's parent.
+    git(&dir, &["commit", "-q", "-am", "double deposits"]);
+    assert!(stdout(&sealmap(&dir, &["pack", "--diff", "HEAD"])).is_empty());
+    let since_base = stdout(&sealmap(&dir, &["pack", "--diff", head.trim()]));
+    assert!(since_base.contains("\ntopics: LED-01\n") && !since_base.contains("+dirty"), "{since_base}");
+    assert_eq!(code(&sealmap(&dir, &["pack", "--diff", "no-such-rev"])), 2);
+}

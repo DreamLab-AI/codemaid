@@ -1,0 +1,92 @@
+# sealmap-pack 1
+generator: sealmap 0.1.0
+codebase: ledger
+revision: 4f1a9de0c0ffee
+topics: LED-01 LED-02
+budget: none
+depth: 1
+source-window: 6 lines
+==== topic LED-01 389 bytes ledger/01-accounts.md
+---
+id: LED-01
+title: Accounts
+area: ledger
+---
+Money goes in through `sym:cargo ledger . accounts/LedgerAccount#deposit().` and
+out through `sym:cargo ledger . accounts/LedgerAccount#withdraw().`, which
+refuses an overdraft. Deposits are recorded again by
+`sym:cargo ledger . accounts/LedgerAccount#deposit().`.
+
+Interest was paid by `sym:cargo ledger . accounts/LedgerAccount#credit().`.
+==== dense LED-01 depth 1 963 bytes
+# sealmap-dense 1 slice depth 1 ledger: L<a>-<b> source lines; @name short names (see _index.txt); calls ~inferred ?external, ^ expanded above, ↺ cycle, … cut; tree roots: bare = entry point, … = continued, ↺ = cycle-only
+# symbols
+## src/accounts.rs
+pub fn deposit(&mut self, amount: i64) L9-12 @LedgerAccount.deposit
+pub fn withdraw(&mut self, amount: i64) -> bool L14-22 @LedgerAccount.withdraw
+## src/audit.rs
+pub fn record(&mut self, what: &str, amount: i64) L6-8 @Trail.record
+# calls
+LedgerAccount.deposit
+ Trail.record("deposit", amount)
+LedgerAccount.withdraw
+ opt amount> self.balance
+  Trail.record("refused", amount)
+  return false
+ Trail.record("withdraw", amount)
+# index
+LedgerAccount.deposit sym:cargo ledger . accounts/LedgerAccount#deposit(). src/accounts.rs:L9-12
+LedgerAccount.withdraw sym:cargo ledger . accounts/LedgerAccount#withdraw(). src/accounts.rs:L14-22
+Trail.record sym:cargo ledger . audit/Trail#record(). src/audit.rs:L6-8
+==== unresolved LED-01 59 bytes
+absent sym:cargo ledger . accounts/LedgerAccount#credit().
+==== source LED-01 src/accounts.rs:L9-12 129 bytes sym:cargo ledger . accounts/LedgerAccount#deposit().
+    pub fn deposit(&mut self, amount: i64) {
+        self.balance += amount;
+        self.trail.record("deposit", amount);
+    }
+==== source LED-01 src/accounts.rs:L14-19 of L14-22 207 bytes sym:cargo ledger . accounts/LedgerAccount#withdraw().
+    pub fn withdraw(&mut self, amount: i64) -> bool {
+        if amount > self.balance {
+            self.trail.record("refused", amount);
+            return false;
+        }
+        self.balance -= amount;
+==== end LED-01
+==== topic LED-02 231 bytes ledger/02-audit.md
+---
+id: LED-02
+title: The audit trail
+area: ledger
+---
+Every movement lands in `sym:cargo ledger . audit/Trail#record().`, owned by
+`sym:cargo ledger . audit/Trail#`. A typo stays visible: `sym:cargo ledger . audit/Trail#record(`.
+==== dense LED-02 depth 1 955 bytes
+# sealmap-dense 1 slice depth 1 ledger: L<a>-<b> source lines; @name short names (see _index.txt); calls ~inferred ?external, ^ expanded above, ↺ cycle, … cut; tree roots: bare = entry point, … = continued, ↺ = cycle-only
+# symbols
+## src/accounts.rs
+pub fn deposit(&mut self, amount: i64) L9-12 @LedgerAccount.deposit
+pub fn withdraw(&mut self, amount: i64) -> bool L14-22 @LedgerAccount.withdraw
+## src/audit.rs
+pub struct Trail { entries: Vec<(String, i64)> } L1-3 @Trail
+pub fn record(&mut self, what: &str, amount: i64) L6-8 @Trail.record
+# callers
+Trail.record
+ LedgerAccount.deposit
+ LedgerAccount.withdraw
+# index
+LedgerAccount.deposit sym:cargo ledger . accounts/LedgerAccount#deposit(). src/accounts.rs:L9-12
+LedgerAccount.withdraw sym:cargo ledger . accounts/LedgerAccount#withdraw(). src/accounts.rs:L14-22
+Trail sym:cargo ledger . audit/Trail# src/audit.rs:L1-3
+Trail.record sym:cargo ledger . audit/Trail#record(). src/audit.rs:L6-8
+==== unresolved LED-02 94 bytes
+invalid sym:cargo ledger . audit/Trail#record(: malformed symbol id at byte 38: expected `).`
+==== source LED-02 src/audit.rs:L1-3 54 bytes sym:cargo ledger . audit/Trail#
+pub struct Trail {
+    entries: Vec<(String, i64)>,
+}
+==== source LED-02 src/audit.rs:L6-8 116 bytes sym:cargo ledger . audit/Trail#record().
+    pub fn record(&mut self, what: &str, amount: i64) {
+        self.entries.push((what.to_owned(), amount));
+    }
+==== end LED-02

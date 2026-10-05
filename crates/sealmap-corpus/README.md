@@ -18,8 +18,13 @@ citation, orphan, prose edited or lock fault; `seal::stale` compares two
 models; `seal::sign` writes a seal. All of it is pure: no file system, no
 git.
 
-Part of [sealmap](https://github.com/DreamLab-AI/sealmap). Review packs
-(`pack`) are planned.
+Its `pack` module builds review packs: one deterministic text holding
+chosen topics verbatim, the `sealmap-dense` slice of the code each cites and
+a bounded window of that code's source, refused (never truncated) when over
+a byte budget, or split into shards of whole topics. `pack::changed_topics`
+picks the topics whose sealed or cited symbols changed between two models.
+
+Part of [sealmap](https://github.com/DreamLab-AI/sealmap).
 
 ```rust
 use sealmap_corpus::{CorpusOptions, generate};
@@ -34,6 +39,33 @@ let corpus = generate(&model, &CorpusOptions::default());
 let doc = corpus.document("src/lib.rs.md").unwrap();
 assert!(doc.contains("demo___tA->>demo: helper()"));
 assert!(corpus.document("_index.json").is_some());
+```
+
+A review pack of one topic, refused when over budget:
+
+```rust
+use sealmap_corpus::pack::{PackError, PackInput, PackOptions, pack};
+use sealmap_corpus::seal::Topics;
+use sealmap_model::{SourcePath, SourceSet};
+use sealmap_rust::{RustOptions, extract};
+
+let mut src = SourceSet::new();
+src.insert("src/lib.rs", "pub struct Ledger;\nimpl Ledger {\n    pub fn post(&self) {}\n}\n").unwrap();
+let model = extract(&src, &RustOptions { name: "shop".into(), ..Default::default() }).codebase;
+let mut topics = Topics::new();
+topics.insert(
+    SourcePath::new("ledger/01-posting.md").unwrap(),
+    "---\nid: LED-01\n---\nPosting goes through `sym:cargo shop . Ledger#post().`.\n".into(),
+);
+
+let input = PackInput::new(&model, &src, &topics, "4f1a9de");
+let ids = ["LED-01".to_string()];
+let out = pack(&input, &ids, &PackOptions::default()).unwrap();
+assert!(out.text.contains("==== dense LED-01 depth 1 "));
+assert!(matches!(
+    pack(&input, &ids, &PackOptions::default().budget(100)),
+    Err(PackError::OverBudget { budget: 100, .. })
+));
 ```
 
 ## Licence

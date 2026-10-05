@@ -72,7 +72,7 @@
 //!
 //! ## Slices
 //!
-//! [`Dense::slice`] is what a review pack embeds: the dense text for a set of
+//! [`Dense::slice`] is what a review pack (`sealmap_corpus::pack`) embeds: the dense text for a set of
 //! symbols plus their callers and callees to a depth, with its own index
 //! section, byte-identical for identical inputs. With a byte budget it
 //! **refuses** an oversized slice with [`SliceError::OverBudget`], naming the

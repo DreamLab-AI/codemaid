@@ -26,8 +26,8 @@ agents. It has one structural cost: **keeping the diagrams true**.
 
 **What sealmap does.** It reads source without compiling it and builds a
 language-neutral model: symbols, relations, and the ordered call flow of every
-function. From that model it provides five things. The first four exist
-in this tree; review packs are next:
+function. From that model it provides five things, all of which exist in
+this tree:
 
 - **Stable symbol ids** (exist), with no file path or line number in them,
   so moving code never breaks a citation.
@@ -39,9 +39,10 @@ in this tree; review packs are next:
 - **Precise staleness** (exists). When code changes, only the topics whose sealed
   symbols actually changed are flagged for another look. Topics that merely
   share a file with the change are left alone.
-- **On-demand review packs** (planned, 0.2). A bounded, byte-identical blob is built from the
-  sealed topics, dense slices of the code they cite, and source windows. It
-  feeds an external reviewer, a seal review or a debugging session.
+- **On-demand review packs** (exist). `sealmap pack` builds a bounded,
+  byte-identical blob from chosen topics (or the topics whose code changed
+  since a revision), dense slices of the code they cite, and source windows.
+  It feeds an external reviewer, a seal review or a debugging session.
 
 **What stays with the LLM skill:** the narratives, the register of tensions
 and debt, the choice of what to merge, and the review that produces a seal.
@@ -230,7 +231,7 @@ cheap and checkable.
 | Sibling | Relationship |
 |:--------|:-------------|
 | [agentbox](https://github.com/DreamLab-AI/agentbox) `diagrams-as-code` skill | Writes the authored corpus. With sealmap, its line-resolution role costs zero tokens and its citations become `sym:` ids |
-| agentbox `sealmap-review` skill (shipped) | Diagrams-only external review (Gemini 3.8 Flash, critical and pre-mortem lenses) and an inline check against the cited code. It will consume `sealmap pack --review` |
+| agentbox `sealmap-review` skill (shipped) | Diagrams-only external review (Gemini 3.8 Flash, critical and pre-mortem lenses) and an inline check against the cited code. It can swap its own packer for `sealmap pack` |
 | agentbox `build-with-quality` skill | Takes review findings as hypotheses to test. Gains a **re-seal** step driven by `sealmap stale` |
 | agentbox `sealmap` skill (planned) | The seal workflow, model tiering per step, and the A/B bench |
 | [diagram-ir](https://github.com/DreamLab-AI/diagram-ir) | The inverse direction: reads hand-written Mermaid back into an IR. The skill pairs it with `sealmap resolve` to catch invented edges |
@@ -238,7 +239,7 @@ cheap and checkable.
 
 ## Crates
 
-**Today (in this tree: 0.1 plus step 2, ids and hashes, and most of step 3: the seal surface and `sealmap-dense`; renamed from `codemaid-*`):**
+**Today (in this tree: 0.1 plus step 2, ids and hashes, and step 3: the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
@@ -247,7 +248,7 @@ cheap and checkable.
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
 | [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
-| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign` | serde_json, toml, blake3 |
+| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign`; the `pack` module: review packs and change selection | sealmap-dense, serde_json, toml, blake3 |
 | [`sealmap-dense`](crates/sealmap-dense) | the agent projection: Rust-like skeletons with `L<start>-<end>` spans, indented call trees (each callable expanded once; `^` / `↺` / `…` marks; `~` inferred, `?` external), a short-name `_index.txt`, and byte-budgeted slices that refuse rather than truncate | sealmap-model |
 
 **Planned for 0.2:**
@@ -255,7 +256,6 @@ cheap and checkable.
 | Crate | Role |
 |---|---|
 | `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
-| `sealmap-corpus` gains | `pack`: bounded review packs |
 
 Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full
 rustdoc. Depend on the facade for the common path. A project that only needs
@@ -282,6 +282,10 @@ sealmap stale --since main                                   # sealed symbols ch
 
 # The dense agent projection: dense.txt + _index.txt into .sealmap/dense
 sealmap dense . --stats
+
+# Review packs: topics + dense slices of the code they cite + source windows
+sealmap pack CP-03 CP-07 --budget 200000 > pack.txt          # refused (exit 1, sizes named) if over budget
+sealmap pack --diff main --budget 200000 --shard -o packs/   # topics whose cited code changed, split by topic
 ```
 
 Exit codes: 0 success; 1 a check failed, an id is not found, or a seal was
@@ -289,12 +293,22 @@ refused; 2 usage or IO error. Seals depend on the extraction options that
 shape ids (`--name`, `--tests`, `--repo`): check with the options you
 signed with.
 
-**Planned** (see [`docs/DESIGN.md`](docs/DESIGN.md) §4):
+A pack is plain text: a header recording what shaped it (generator,
+revision, topics, budget, depth, source window), then per topic its text
+verbatim, the dense slice of its cited symbols, the citations that do not
+resolve, and a window of each cited symbol's source labelled
+`path:Lstart-end`. Every block line gives its payload's length in bytes:
 
-```sh
-sealmap pack CP-03 CP-07 --max-bytes 1048576               # review blob
-sealmap pack --review                                      # diagrams only, for an outside reviewer
+```text
+==== topic CP-03 4120 bytes control-plane/03-the-scr-executor.md
+==== dense CP-03 depth 1 2210 bytes
+==== source CP-03 src/scr/executor.rs:L40-79 of L40-112 1630 bytes sym:cargo cp . scr/executor/execute().
+==== end CP-03
 ```
+
+Topics still citing `path:line` rather than `sym:` ids pack as text only.
+A diagrams-only `--review` mode is designed but not built
+([`docs/DESIGN.md`](docs/DESIGN.md) §4).
 
 ## Properties
 
@@ -308,8 +322,9 @@ sealmap pack --review                                      # diagrams only, for 
   diagrams generated from tokio, axum, ripgrep, oxdraw and this repository parse
   in Mermaid 12 ([`tools/validate-mermaid.mjs`](tools/validate-mermaid.mjs)),
   as do the 6,142 diagrams of a VisionClaw corpus with step-2 ids.
-- **Bounded** (planned with `pack`). `pack` will refuse an over-budget request
-  with a shard plan rather than truncating it.
+- **Bounded.** `pack` refuses an over-budget request, naming the size of
+  each topic, rather than truncating it; `--shard` splits it into numbered
+  packs of whole topics instead.
 - **Fast:**
 
   | Codebase | Release build | Notes |
@@ -328,7 +343,8 @@ sealmap pack --review                                      # diagrams only, for 
 - **It never writes the diagrams people read.** Consolidation, narrative and
   judgement are the LLM skill's job.
 - **It runs no model, makes no network calls, and spawns no processes** in the
-  libraries. The CLI only shells out to `git` (and `tar`) for `stale --since`.
+  libraries. The CLI only shells out to `git` (and `tar`) for `stale --since`
+  and `pack --diff`, and to `git` for a pack's revision line.
 - **It knows nothing about reviewers.** The lock holds opaque strings, and
   reviewer policy (cross-family review, evidence) lives in the skill layer.
 
@@ -336,8 +352,7 @@ sealmap pack --review                                      # diagrams only, for 
 
 **v0.1** is working. It is dogfooded on its own source, and the Rust language
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
-and 2 of the 0.2 plan and all of step 3 except `pack` are done in this tree
-and not yet released.
+to 3 of the 0.2 plan are done in this tree and not yet released.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
@@ -346,10 +361,10 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 2. **Done.** `sym:` id grammar (SCIP-descriptor style), signature and body
    hashes, schema v2, injective Mermaid ids, the `Path::parent` resolver fix,
    and CI on the MSRV.
-3. **In progress.** Seal surface: the lock, `resolve`, `stale`, `seal-check`,
-   `verify` and `seal sign` are done and the committed generated corpus is
-   retired; `sealmap-dense` and `sealmap dense` are done; `pack` remains, then
-   the first 0.2 crates.io release.
+3. **Done, unreleased.** Seal surface: the lock, `resolve`, `stale`,
+   `seal-check`, `verify`, `seal sign` and `pack`; `sealmap-dense` and
+   `sealmap dense`; the committed generated corpus is retired. The first 0.2
+   crates.io release follows.
 4. **E0:** replay 100 real commits and count topics flagged per commit, file
    level against sealed, with no LLM involved. This is the first headline
    number.

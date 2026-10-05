@@ -17,7 +17,9 @@ Hand-written diagram topics cite those ids, and a lockfile, `seals.lock`,
 records the hashes each cited symbol had when the topic was reviewed.
 `sealmap verify` checks every seal against the code in CI, with no LLM
 involved, and `sealmap stale` lists only the topics whose sealed symbols
-changed (see the
+changed. `sealmap dense` writes a compact agent projection of the code, and
+`sealmap pack` a bounded review pack of chosen topics with the code they
+cite (see the
 [design](https://github.com/DreamLab-AI/sealmap/blob/main/docs/DESIGN.md)).
 
 | Crate | Role |
@@ -26,7 +28,7 @@ changed (see the
 | [`sealmap-mermaid`](https://crates.io/crates/sealmap-mermaid) | typed Mermaid writers and injective diagram ids (no dependencies without the default `model` feature) |
 | [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0) |
 | [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust language adapter (syn) |
-| [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index and write; the seal lock, `verify`, `seal_check`, `stale`, `resolve`, `sign` |
+| [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index and write; the seal lock, `verify`, `seal_check`, `stale`, `resolve`, `sign`; review packs (`pack`) |
 | [`sealmap-dense`](https://crates.io/crates/sealmap-dense) | compact agent projection: skeletons, call trees, short-name index, budgeted slices (`sealmap::dense`) |
 
 ## Command line
@@ -46,6 +48,10 @@ sealmap seal sign CP-03 --reviewer zai:glm-5.3 --model claude:sonnet   # seal on
 sealmap verify                      # the CI gate: exit 1 unless every seal holds
 sealmap seal-check CP-03            # classify chosen lock entries
 sealmap stale --since main          # sealed symbols changed since a revision; exit 0
+
+# Review packs: topics, dense slices of the code they cite, source windows
+sealmap pack CP-03 CP-07 --budget 200000             # stdout; exit 1 naming each topic's size if over
+sealmap pack --diff main --budget 200000 --shard -o packs/   # changed topics, split by topic
 ```
 
 Exit codes: 0 success; 1 a check failed, an id is not found, or a seal was

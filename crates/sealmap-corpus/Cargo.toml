@@ -1,6 +1,6 @@
 [package]
 name = "sealmap-corpus"
-description = "Dense Mermaid projections of a sealmap Codebase, and the seal lockfile and checks that keep hand-written diagram topics true to the code"
+description = "Dense Mermaid projections of a sealmap Codebase, the seal lockfile and checks that keep hand-written diagram topics true to the code, and bounded review packs"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
@@ -16,6 +16,7 @@ categories.workspace = true
 [dependencies]
 sealmap-model.workspace = true
 sealmap-mermaid.workspace = true
+sealmap-dense.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

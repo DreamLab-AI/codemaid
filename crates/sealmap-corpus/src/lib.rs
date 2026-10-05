@@ -1,8 +1,9 @@
 //! # sealmap-corpus
 //!
-//! Two jobs: the generated 1:1 Mermaid corpus (below), and [`seal`], the
+//! Three jobs: the generated 1:1 Mermaid corpus (below); [`seal`], the
 //! lockfile and checks that keep hand-written diagram topics true to the
-//! code they cite (`sealmap verify`).
+//! code they cite (`sealmap verify`); and [`pack`], bounded review packs of
+//! topics with the code they cite (`sealmap pack`).
 //!
 //! Projects a [`Codebase`] into a **contract-enforced, 1:1 corpus** of dense
 //! Mermaid diagrams plus machine-readable metadata, designed to be read by
@@ -93,6 +94,7 @@ mod document;
 mod index;
 mod naming;
 mod overview;
+pub mod pack;
 pub mod seal;
 mod sequence;
 mod structure;

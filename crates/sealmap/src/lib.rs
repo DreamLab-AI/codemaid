@@ -29,7 +29,7 @@
 //! | [`mermaid`] (`sealmap-mermaid`) | typed Mermaid writers and injective diagram ids |
 //! | [`extract`] (`sealmap-extract`) | language-neutral extraction core shared by the language adapters: flow IR and lowering, confidence, labels, `sym:` ids, fingerprints |
 //! | [`rust`] (`sealmap-rust`) | Rust language adapter (syn) |
-//! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract; the seal lock and its checks |
+//! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract; the seal lock and its checks; review packs |
 //! | [`dense`] (`sealmap-dense`) | compact agent projection: skeletons, call trees, short-name index, budgeted slices |
 //!
 //! Depend on the facade for the common path, or on the individual crates to
