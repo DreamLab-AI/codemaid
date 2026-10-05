@@ -1217,7 +1217,13 @@ impl FlowWalker {
                         }
                         let saved = self.env.clone();
                         self.bind_destructured(&a.pat, &m.expr, false);
-                        let steps = self.sub(&a.body);
+                        // The guard runs once the pattern matches and sees
+                        // its bindings, so its calls open the arm.
+                        let mut steps = Vec::new();
+                        if let Some((_, g)) = &a.guard {
+                            self.expr(g, &mut steps);
+                        }
+                        self.expr(&a.body, &mut steps);
                         self.env = saved;
                         (clip(&label, LABEL_MAX), steps)
                     })
@@ -1382,6 +1388,8 @@ impl FlowWalker {
                 (Expr::Path(_) | Expr::Field(_), syn::Member::Named(_)) => Recv::Untyped,
                 _ => Recv::Unknown,
             },
+            // A struct literal names its own type: `Parser { .. }.id()`.
+            Expr::Struct(s) => Recv::Typed(vec![path_segs(&s.path)]),
             Expr::Paren(p) => self.recv(&p.expr),
             Expr::Reference(r) => self.recv(&r.expr),
             Expr::Unary(u) => self.recv(&u.expr),

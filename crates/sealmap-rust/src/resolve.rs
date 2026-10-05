@@ -811,9 +811,17 @@ impl Resolver {
     fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call> {
         let (target, confidence) = match &c.callee {
             Callee::Path(segs) => {
-                // `drop(x)`, `Vec::new()`, `String::from(..)`: prelude, not code.
-                if PRELUDE.contains(&segs[0].as_str()) && !self.local(ctx.module, &segs[0]) {
-                    return None;
+                match segs[0].as_str() {
+                    // `Self` and `self` are on the prelude list for type
+                    // references, but in a call path they are not the
+                    // prelude. `Self::f(..)` names the enclosing impl's self
+                    // type (the trait, in a provided method); outside both it
+                    // names nothing. `self::f(..)` is the current module.
+                    "Self" if ctx.self_ty.is_none() => return None,
+                    "Self" | "self" => {}
+                    // `drop(x)`, `Vec::new()`, `String::from(..)`: prelude, not code.
+                    first if PRELUDE.contains(&first) && !self.local(ctx.module, first) => return None,
+                    _ => {}
                 }
                 let (id, c) = self.resolve_in(ctx.module, segs, ctx.self_ty, Ns::Value, ctx.params);
                 // A bare name that is neither defined, imported nor a crate is

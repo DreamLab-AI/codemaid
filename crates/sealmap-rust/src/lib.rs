@@ -24,7 +24,9 @@
 //!    local items, `use` imports (including renames, globs and `pub use`
 //!    re-exports), `crate`/`self`/`super`/`Self`, and sibling workspace crates.
 //!    Method calls are resolved from the receiver's declared or constructed
-//!    type (`self`, `self.field`, typed params, `let x = Foo::new()`).
+//!    type (`self`, `self.field`, typed params, `let x = Foo::new()`, a
+//!    struct literal), and `Self::f(..)` from the enclosing impl's self type.
+//!    Calls in `match` guards are part of their arm.
 //!
 //! ## Ids
 //!
