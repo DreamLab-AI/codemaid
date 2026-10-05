@@ -1,6 +1,6 @@
 [package]
 name = "sealmap"
-description = "Deterministic, dense codebase-to-Mermaid generation for LLM agents: sequence, class, ER and dependency diagrams in a contract-enforced 1:1 corpus"
+description = "Deterministic code maps and sealed diagram contracts for LLM development harnesses: stable symbol ids, signature and body hashes, a seal lockfile checked in CI, and dense Mermaid views"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
@@ -35,3 +35,7 @@ required-features = ["cli"]
 
 [lints]
 workspace = true
+
+[[test]]
+name = "cli"
+required-features = ["cli"]

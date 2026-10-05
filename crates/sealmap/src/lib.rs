@@ -29,7 +29,7 @@
 //! | [`mermaid`] (`sealmap-mermaid`) | typed Mermaid writers and injective diagram ids |
 //! | [`extract`] (`sealmap-extract`) | language-neutral extraction core shared by the language adapters: flow IR and lowering, confidence, labels, `sym:` ids, fingerprints |
 //! | [`rust`] (`sealmap-rust`) | Rust language adapter (syn) |
-//! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract |
+//! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract; the seal lock and its checks |
 //!
 //! Depend on the facade for the common path, or on the individual crates to
 //! keep dependencies minimal (for example, `sealmap-mermaid` with
@@ -40,9 +40,9 @@
 //! ```no_run
 //! use std::path::Path;
 //!
-//! // Generate the corpus for a checkout and write it into `docs/sealmap`.
+//! // Generate the corpus for a checkout and write it into `.sealmap/`.
 //! let corpus = sealmap::generate_dir(Path::new("."), &sealmap::Options::default())?;
-//! let changed = sealmap::corpus::write(Path::new("docs/sealmap"), &corpus)?;
+//! let changed = sealmap::corpus::write(Path::new(".sealmap"), &corpus)?;
 //! println!("{} files updated", changed.entries.len());
 //! # Ok::<(), std::io::Error>(())
 //! ```
@@ -64,8 +64,17 @@
 //! The same sources and options always produce byte-identical output on any
 //! machine: ordered collections everywhere, normalised paths and newlines,
 //! BLAKE3 hashes, no timestamps, and parallel work collected in input order.
-//! That is what makes the corpus diffable, cacheable and enforceable in CI
-//! (`sealmap verify`).
+//! That is what makes generated output safe to rebuild on demand instead of
+//! committing it, and what lets a seal pin exact symbol versions.
+//!
+//! ## Seals
+//!
+//! Hand-written diagram topics cite symbols by `sym:` id, and a lockfile
+//! (`seals.lock`) records the `sig_hash` and `body_hash` each cited symbol
+//! had when the topic was reviewed. [`corpus::seal`] holds the lock format
+//! and the checks: `verify` (the CI gate), `seal_check`, `stale`, `resolve`
+//! and `sign`. The `sealmap` binary wraps them, reading topics from
+//! `docs/diagrams/` by default.
 
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]

@@ -11,8 +11,13 @@ sealmap reads source without compiling it, builds a language-neutral model
 into Mermaid diagrams with one document per source file. The same sources
 always give byte-identical output. Every symbol has a stable `sym:` id (no
 file path) and two fingerprints: `sig_hash` for its contract, `body_hash` for
-its implementation, both blind to formatting, comments and moves. Sealed
-diagram contracts checked in CI are planned for 0.2 (see the
+its implementation, both blind to formatting, comments and moves.
+
+Hand-written diagram topics cite those ids, and a lockfile, `seals.lock`,
+records the hashes each cited symbol had when the topic was reviewed.
+`sealmap verify` checks every seal against the code in CI, with no LLM
+involved, and `sealmap stale` lists only the topics whose sealed symbols
+changed (see the
 [design](https://github.com/DreamLab-AI/sealmap/blob/main/docs/DESIGN.md)).
 
 | Crate | Role |
@@ -21,18 +26,28 @@ diagram contracts checked in CI are planned for 0.2 (see the
 | [`sealmap-mermaid`](https://crates.io/crates/sealmap-mermaid) | typed Mermaid writers and injective diagram ids (no dependencies without the default `model` feature) |
 | [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0) |
 | [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust language adapter (syn) |
-| [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index, write and verify |
+| [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index and write; the seal lock, `verify`, `seal_check`, `stale`, `resolve`, `sign` |
 
 ## Command line
 
 ```sh
 cargo install sealmap
 
-sealmap generate .                  # write the corpus, model and index to .sealmap/
-sealmap verify   .                  # exit 1 if .sealmap/ no longer matches the sources
+sealmap generate .                  # write the corpus, model and index to .sealmap/ (gitignore it)
+sealmap generate . --check          # exit 1 if .sealmap/ no longer matches a fresh generation
 sealmap model    .  > model.json    # just the model
 sealmap generate --repo api=../api --repo core=../core -o .sealmap   # several repositories as one
+
+# Seals over the authored topics in docs/diagrams/ (lock: docs/diagrams/seals.lock)
+sealmap resolve 'sym:cargo shop . db/Db#insert().'      # span and hashes, or absent + rename candidates
+sealmap seal sign CP-03 --reviewer zai:glm-5.3 --model claude:sonnet   # seal one topic
+sealmap verify                      # the CI gate: exit 1 unless every seal holds
+sealmap seal-check CP-03            # classify chosen lock entries
+sealmap stale --since main          # sealed symbols changed since a revision; exit 0
 ```
+
+Exit codes: 0 success; 1 a check failed, an id is not found, or a seal was
+refused; 2 usage or IO error.
 
 ## Library
 
@@ -65,6 +80,33 @@ again.insert("src/lib.rs", "pub struct Db;\n\n// note\nimpl Db {\n    pub fn get
 let model2 = rust::extract(&again, &rust::RustOptions { name: "shop".into(), ..Default::default() }).codebase;
 let get2 = model2.symbol(&id).unwrap();
 assert_eq!((get.sig_hash, get.body_hash), (get2.sig_hash, get2.body_hash));
+```
+
+Sealing in memory, and catching a behaviour change:
+
+```rust
+use sealmap::corpus::seal::{self, Class, Lock, Signature};
+use sealmap::model::SourcePath;
+use sealmap::{SourceSet, rust};
+
+let opts = rust::RustOptions { name: "shop".into(), ..Default::default() };
+let model = |body: &str| {
+    let mut src = SourceSet::new();
+    src.insert("src/lib.rs", format!("pub struct Db;\nimpl Db {{ pub fn get(&self) -> u8 {{ {body} }} }}")).unwrap();
+    rust::extract(&src, &opts).codebase
+};
+let file = SourcePath::new("store/01-db.md").unwrap();
+let topic = "---\nid: ST-01\n---\nReads go through `sym:cargo shop . Db#get().`.\n";
+let who = Signature { reviewer: "r".into(), model: "m".into(), date: "2026-10-05".into() };
+
+let mut lock = Lock::new();
+let sealed = seal::sign(&mut lock, &file, topic, &model("1"), seal::LOCK_FILE, &who).unwrap();
+let topics = [(file, sealed)].into_iter().collect();
+let lock_text = lock.to_toml();
+
+assert!(seal::verify(Some(&lock_text), seal::LOCK_FILE, &topics, &model("1")).passes());
+let report = seal::verify(Some(&lock_text), seal::LOCK_FILE, &topics, &model("2"));
+assert_eq!(report.failures().next().unwrap().class, Class::Behaviour);
 ```
 
 ## Licence
