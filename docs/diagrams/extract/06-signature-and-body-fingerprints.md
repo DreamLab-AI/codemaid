@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/tests/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -40,7 +40,7 @@ fingerprint as it was, so no reviewed diagram is flagged. Changing what a
 function does changes its body fingerprint; changing how it is called changes
 its signature fingerprint. The README records the experiment behind the
 claim: reflowing tokio, VisionClaw and sealmap at a 50-column width changed no
-id and no hash (`README.md:197`-`198`).
+id and no hash (`README.md:198`-`199`).
 
 The one gap an adopter should know about is macros: when a macro's arguments
 are not ordinary expressions, its body is only normalised token by token, so

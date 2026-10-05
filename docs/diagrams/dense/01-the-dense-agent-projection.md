@@ -13,11 +13,14 @@ sources:
   - crates/sealmap/src/main.rs
   - crates/sealmap-rust/src/resolve.rs
   - crates/sealmap-rust/src/collect.rs
+  - crates/sealmap-rust/src/layout.rs
+  - crates/sealmap-rust/tests/resolver_den01.rs
+  - crates/sealmap-corpus/src/pack.rs
   - crates/sealmap-model/src/sym.rs
   - crates/sealmap-corpus/src/structure.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -28,7 +31,7 @@ built once, assigning short names and reading the call graph from the flows
 then share it. A render is two texts: `dense.txt` holds skeletons and call
 trees, and `_index.txt` maps each short name to its `sym:` id and location
 (`crates/sealmap-dense/src/lib.rs:144`-`147`). A slice is the bounded excerpt
-that the planned `pack` command will embed (`crates/sealmap-dense/src/lib.rs:347`).
+that `pack` embeds, one per topic (`crates/sealmap-dense/src/lib.rs:347`, COR-06).
 
 Three rules carry the design:
 
@@ -52,7 +55,7 @@ measures 0.17–0.29× (`docs/DESIGN.md:135`, `docs/DESIGN.md:139`).
 
 On the command line, `sealmap dense [PATH] [-o DIR] [--depth N] [--stats]`
 writes both files, by default into `.sealmap/dense`
-(`crates/sealmap/src/main.rs:48`, `crates/sealmap/src/main.rs:299`-`306`).
+(`crates/sealmap/src/main.rs:51`, `crates/sealmap/src/main.rs:341`-`348`).
 It reads the code with the same `--repo`, `--name` and `--tests` options as
 the seal commands, so its `_index.txt` names the ids a seal would. Until the
 seal surface merged, the hook was an example binary; the subcommand replaced
@@ -67,7 +70,7 @@ An agent that loads the source of a codebase to learn its shape pays for
 every comment, every formatting choice and every repeated name. The one-file
 Mermaid corpus is no cheaper: it costs 0.48–0.88× the source. The dense
 projection carries the same symbols, signatures, line spans and resolved
-calls at 0.17–0.29× (`README.md:59`). A fixed context budget therefore holds
+calls at 0.17–0.29× (`README.md:60`). A fixed context budget therefore holds
 roughly three times more of the call graph.
 
 Every call is marked exact, inferred or external, so an agent can tell a
@@ -87,7 +90,7 @@ flowchart TB
     IX["index: one line per symbol<br/>lib.rs:307"]
     SL["slice: seeds plus callers and callees<br/>lib.rs:347"]
     OUT["dense.txt and _index.txt<br/>lib.rs:144-147"]
-    PK["pack, planned: embeds slices"]
+    PK["pack: one slice per topic<br/>pack.rs:480"]
     CB --> NEW
     NEW --> SN
     NEW --> GR
@@ -104,9 +107,10 @@ flowchart TB
 **What it shows.** The two expensive steps, naming and the call graph, run
 once. Rendering and slicing only read their results.
 
-**Why it is this way.** `pack` will take many slices of one codebase per
-request. A `Dense` built once lets it do so without recomputing the names,
-and the one-call `slice` function says so (`crates/sealmap-dense/src/lib.rs:473`-`474`).
+**Why it is this way.** `pack` takes many slices of one codebase per
+request. It builds one `Dense` and slices it once per topic
+(`crates/sealmap-corpus/src/pack.rs:438`), and the one-call `slice` function
+says to do so (`crates/sealmap-dense/src/lib.rs:473`-`474`).
 
 **Invariant:** the call graph counts a call only when its target is a symbol
 of the codebase, and a callable's own recursion is not counted as a caller,
@@ -273,54 +277,75 @@ byte under the budget, it is refused, with the overflow named
 ```mermaid
 flowchart TB
     R["dense.txt of sealmap<br/>read as an agent would"]
-    S["SymbolId.global and .unresolved<br/>show no calls at all"]
-    S1["path calls whose first segment is<br/>in PRELUDE are dropped<br/>resolve.rs:815"]
-    S2["Self is in PRELUDE<br/>resolve.rs:59"]
-    G["a guard call never appears<br/>is_shared, structure.rs:194"]
-    G1["a match guard goes into the<br/>arm label, never walked<br/>collect.rs:1215-1216"]
-    N["Resolver lost its inferred<br/>call to SymbolId.root"]
-    N1["by-name guess needs a unique<br/>method name, resolve.rs:930"]
-    N2["sealmap-dense adds two root<br/>methods, tree.rs:92, tree.rs:244"]
-    R --> S
-    S --> S1
-    S1 --> S2
-    R --> G --> G1
-    R --> N --> N1
-    N1 --> N2
+    S["Self::f calls dropped:<br/>SymbolId.global showed no calls"]
+    SF["call paths starting Self or self<br/>resolve before the prelude check<br/>resolve.rs:830-833"]
+    G["guard calls never walked:<br/>is_shared had no caller"]
+    GF["the guard is walked after the<br/>arm's bindings, collect.rs:1223-1224"]
+    L["struct-literal receivers lost:<br/>Parser.id under SymbolId.parse"]
+    LF["a struct literal names its type<br/>collect.rs:1392"]
+    N["a guessed edge vanished when<br/>another crate added root methods"]
+    NF["guesses count only crates the caller<br/>can reach, resolve.rs:954-967<br/>layout.rs:59"]
+    P["pack's own calls bound to<br/>the CLI's fn pack"]
+    PF["a path prefix is a module or type<br/>resolve.rs:392, resolve.rs:649"]
+    R --> S --> SF
+    R --> G --> GF
+    R --> L --> LF
+    R --> N --> NF
+    R --> P --> PF
 ```
 
-**What it shows.** Three adapter behaviours that the Mermaid corpus hid and
-the dense trees exposed in a single read. Each is an edge the model loses.
+**What it shows.** Five resolver and walker defects that the Mermaid corpus
+hid and the dense trees exposed, each now fixed with a test written first
+(`crates/sealmap-rust/tests/resolver_den01.rs:41`). The first four came from
+one read of sealmap's own projection. The fifth came from reading the
+projection of the `pack` code added afterwards.
 
 **Why it is this way.** In the dense format a missing edge is visible. A
-function whose body plainly calls something shows no calls, or a private
-helper appears as an entry point. The Mermaid corpus spreads the same facts
-over one diagram per function.
+function whose body plainly calls something shows no calls, a private helper
+appears as an entry point, or a call is marked `~` where the import makes it
+certain. The Mermaid corpus spreads the same facts over one diagram per
+function.
 
-**Debt:** every `Self::f(..)` call is dropped from flows. The prelude filter
-returns before resolution (`crates/sealmap-rust/src/resolve.rs:815`-`816`),
-and `"Self"` is on the prelude list (`crates/sealmap-rust/src/resolve.rs:59`),
-so the resolver's `Self` arm (`crates/sealmap-rust/src/resolve.rs:651`) is
-never reached for calls. Example: `Self::from_repr` in `SymbolId::global`
-(`crates/sealmap-model/src/sym.rs:406`). `Type::f(..)` on the same function
-resolves.
+**Closed (`d227dd8`):** every `Self::f(..)` call was dropped. `"Self"` is on
+the prelude list for type references (`crates/sealmap-rust/src/resolve.rs:60`),
+and the call filter checked that list before resolving. A call path starting
+`Self` now resolves to the enclosing impl's self type through the resolver's
+`Self` arm (`crates/sealmap-rust/src/resolve.rs:661`), exactly as `Type::f(..)`
+does. Outside any impl it names nothing and is dropped
+(`crates/sealmap-rust/src/resolve.rs:830`-`833`). `self::f(..)` was dropped by
+the same check and resolves too. `Self::from_repr` in `SymbolId::global`
+(`crates/sealmap-model/src/sym.rs:406`) is now an exact edge. On VisionClaw
+this alone adds 477 exact and 20 inferred edges.
 
-**Debt:** calls in a match guard are not walked. The guard is only formatted
-into the arm label (`crates/sealmap-rust/src/collect.rs:1215`-`1216`), so
-`is_shared` (`crates/sealmap-corpus/src/structure.rs:194`) has no caller in
-the model.
+**Closed (`d227dd8`):** calls in a match guard were only formatted into the
+arm label. The guard is now walked once the arm's bindings are in scope, and
+its calls open the arm (`crates/sealmap-rust/src/collect.rs:1223`-`1224`). The
+guard calling `is_shared` (`crates/sealmap-corpus/src/structure.rs:194`) gives
+it its caller.
 
-**Tension (inferred edges vs locality):** the by-name guess accepts a method
-name only if it is unique in the workspace
-(`crates/sealmap-rust/src/resolve.rs:930`). Adding `TreeWriter::root` and
-`CallerWriter::root` (`crates/sealmap-dense/src/tree.rs:92`,
-`crates/sealmap-dense/src/tree.rs:244`) therefore removed a correct inferred
-edge from `Resolver` to `SymbolId::root`
-(`crates/sealmap-rust/src/resolve.rs:588`) in another crate, and changed that
-crate's generated diagrams. Inferred edges depend on every name in the
-workspace, not only on the code that makes the call.
-
-**Open:** a method called on a struct-literal receiver, such as
+**Closed (`d227dd8`):** a method called on a struct literal, such as
 `Parser { .. }.id()` in `SymbolId::parse`
-(`crates/sealmap-model/src/sym.rs:437`), is missing from the flow. Its cause
-in the walker has not been traced.
+(`crates/sealmap-model/src/sym.rs:437`), was lost. The cause, traced:
+`recv()` classed a struct literal as an unknown receiver, so the call resolved
+to `sym:? id`, which the default external policy drops. A struct literal now
+names its own type (`crates/sealmap-rust/src/collect.rs:1392`).
+
+**Closed (`613b9ba`):** the by-name guess for an unknown receiver accepted a
+method name only if it was unique in the whole workspace, so `TreeWriter::root`
+and `CallerWriter::root` in sealmap-dense (`crates/sealmap-dense/src/tree.rs:92`,
+`crates/sealmap-dense/src/tree.rs:244`) removed a correct guessed edge from
+`Resolver` to `SymbolId::root` in sealmap-rust, a crate that cannot name
+sealmap-dense. Candidates now come only from crates the caller can reach:
+itself, its package's library, and the workspace packages its manifest lists
+(`crates/sealmap-rust/src/layout.rs:59`, `crates/sealmap-rust/src/layout.rs:135`).
+Two or more reachable candidates are a genuine ambiguity, and no edge is
+guessed; the call stays `sym:? name` (`crates/sealmap-rust/src/resolve.rs:954`-`968`).
+On VisionClaw this drops 62 guesses into crates the caller does not depend on,
+such as std's `as_secs()` bound to another crate's `Timestamp::as_secs`.
+
+**Closed (`926144c`):** the CLI's `pack::shard(..)` was drawn as an inferred
+call to `sealmap_main::pack::shard`. The local `fn pack` captured the
+imported module `pack`, because a leading path segment fell back from the
+type namespace to values. A segment with more after it now consults the type
+namespace alone (`crates/sealmap-rust/src/resolve.rs:392`,
+`crates/sealmap-rust/src/resolve.rs:649`).

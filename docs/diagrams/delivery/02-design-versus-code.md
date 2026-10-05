@@ -14,26 +14,27 @@ sources:
   - crates/sealmap/src/main.rs
   - crates/sealmap-corpus/src/seal/lock.rs
   - crates/sealmap-corpus/src/seal/check.rs
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+  - crates/sealmap-corpus/src/pack.rs
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
 `docs/DESIGN.md` was accepted on 2026-10-05 with every recommendation taken
 (`docs/DESIGN.md:3`). Steps 1 and 2 of its order of work landed the same day,
-and most of step 3 followed: the lock, `resolve`, `stale`, `seal-check`,
-`verify`, `seal sign`, the retirement of the committed generated corpus, and
-`sealmap-dense` with its `sealmap dense` subcommand
-(`docs/DESIGN.md:275`-`279`, `README.md:349`-`352`). What remains of step 3
-is `pack`. This topic is the catalogue of the gap at the merge of
-`sealmap-dense`: what the design still describes that the code does not do,
-and the questions the design leaves open.
+and step 3 followed in the tree: the lock, `resolve`, `stale`, `seal-check`,
+`verify`, `seal sign`, the retirement of the committed generated corpus,
+`sealmap-dense` with its `sealmap dense` subcommand, and `pack`
+(`docs/DESIGN.md:298`-`303`, `README.md:364`-`367`). What remains of step 3
+is the first 0.2 publish. This topic is the catalogue of the gap once `pack`
+landed: what the design still describes that the code does not do, and the
+questions the design leaves open.
 
 It is a catalogue, not a plan. The design's order of work
-(`docs/DESIGN.md:266`-`291`) is the plan. Where the build settled something
+(`docs/DESIGN.md:289`-`315`) is the plan. Where the build settled something
 the design left loose, DESIGN now records it as built (`docs/DESIGN.md:72`-`74`,
-`docs/DESIGN.md:80`-`94`, `docs/DESIGN.md:113`-`121`), and the subsystem topics carry the detail: the
+`docs/DESIGN.md:80`-`94`, `docs/DESIGN.md:113`-`121`, `docs/DESIGN.md:171`-`191`), and the subsystem topics carry the detail: the
 seal module in COR-04, the seal commands in COR-05, `generate --check` in
-COR-03.
+COR-03, `pack` in COR-06.
 
 ## For the business
 
@@ -43,10 +44,11 @@ checked them against, and one command in CI says whether every seal still
 holds, with no model involved. After a commit, a second command lists only
 the topics whose sealed functions changed.
 
-The dense agent projection now exists: an agent can read the shape of the
-code at about a quarter of the source's size. One thing is still to come
-before the first 0.2 release: bounded review packs for an outside reviewer.
-The headline
+The dense agent projection exists: an agent can read the shape of the code
+at about a quarter of the source's size. So do review packs: one bounded,
+reproducible file holding the topics to review and the code they cite. The
+designed variant that holds diagrams alone, for an outside reviewer who
+should not see code, is still to come. The headline
 cost saving is not measured yet; that is step 4. And this repository has not
 sealed its own diagrams yet, so its CI does not run the seal gate (step 6).
 
@@ -64,11 +66,11 @@ flowchart TB
     end
     subgraph GEN["Generated layer, docs/DESIGN.md:41"]
         G1["model, index, dense projection,<br/>optional 1:1 Mermaid, gitignored"]
-        G1S["model, index, 1:1 Mermaid and the dense<br/>projection under a gitignored .sealmap<br/>.gitignore:3, main.rs:48"]
+        G1S["model, index, 1:1 Mermaid and the dense<br/>projection under a gitignored .sealmap<br/>.gitignore:3, main.rs:51"]
     end
     subgraph PACK["Review pack, docs/DESIGN.md:42"]
         P1["pegged topics, dense slices,<br/>source windows"]
-        P1S["NOT BUILT"]
+        P1S["built: topics, dense slices, source windows,<br/>pack.rs:274; diagrams-only --review NOT BUILT"]
     end
     A1 --> A1S
     S1 --> S1S
@@ -77,8 +79,8 @@ flowchart TB
     AUTH --> SEAL --> GEN --> PACK
 ```
 
-**What it shows.** The authored, sealed and generated layers exist, the
-generated one no longer committed; the review pack does not exist.
+**What it shows.** All four layers exist, the generated one no longer
+committed; of the review pack, only the diagrams-only mode is missing.
 
 **Why it is this way.** Step 3 split in two: the seal surface first, then
 `pack` and `sealmap-dense` (`docs/DESIGN.md:277`-`279`); `sealmap-dense` was
@@ -86,40 +88,41 @@ built on a branch and merged after the seal surface. The generated corpus
 is rebuilt on demand and never trusted from disk (`docs/DESIGN.md:44`-`48`).
 
 `sealmap-dense` came in under its estimate. The README now reports the
-measured 0.17–0.29× source (`README.md:59`) where it quoted the research's
+measured 0.17–0.29× source (`README.md:60`) where it quoted the research's
 0.45×, and DESIGN records why the built projection is smaller: each callable
 is expanded once and each signature printed once (`docs/DESIGN.md:139`-`144`).
 
-**Debt (designed, not built):** the review pack is designed
-(`docs/DESIGN.md:42`) and planned in the README (`README.md:42`-`44`) but
-absent from the binary (`crates/sealmap/src/main.rs:42`-`60`).
+**Debt (designed, not built):** `--review`, a pack of diagrams only, is in
+the layer table (`docs/DESIGN.md:42`) but not in the binary
+(`docs/DESIGN.md:181`, `crates/sealmap/src/main.rs:45`-`65`).
 
 ## DEL-02.2 The order of work and where the tree stands
 
 ```mermaid
 flowchart TB
-    S1["1 repository: rename, dual licence,<br/>hardening, sealmap-extract<br/>DONE, docs/DESIGN.md:268"]
-    S2["2 ids and hashes: sym grammar, sig and body,<br/>injective ids, schema v2<br/>DONE, docs/DESIGN.md:273"]
-    S3["3 seal surface DONE, retirement DONE,<br/>sealmap-dense DONE; pack remains,<br/>then the first 0.2 publish<br/>docs/DESIGN.md:275"]
-    S4["4 E0-R on VisionClaw and agentbox<br/>docs/DESIGN.md:280"]
-    S5["5 sealmap skill, routing ADR<br/>docs/DESIGN.md:281"]
-    S6["6 dogfood: seal this corpus<br/>docs/DESIGN.md:284"]
-    S7["7 sealmap-ts, deferred<br/>docs/DESIGN.md:286"]
-    S8["8 review A/B<br/>docs/DESIGN.md:288"]
-    S9["9 migrate VisionFlow<br/>docs/DESIGN.md:290"]
+    S1["1 repository: rename, dual licence,<br/>hardening, sealmap-extract<br/>DONE, docs/DESIGN.md:291"]
+    S2["2 ids and hashes: sym grammar, sig and body,<br/>injective ids, schema v2<br/>DONE, docs/DESIGN.md:296"]
+    S3["3 seal surface, retirement, sealmap-dense<br/>and pack DONE in the tree;<br/>the first 0.2 publish remains<br/>docs/DESIGN.md:298"]
+    S4["4 E0-R on VisionClaw and agentbox<br/>docs/DESIGN.md:304"]
+    S5["5 sealmap skill, routing ADR<br/>docs/DESIGN.md:305"]
+    S6["6 dogfood: seal this corpus<br/>docs/DESIGN.md:308"]
+    S7["7 sealmap-ts, deferred<br/>docs/DESIGN.md:310"]
+    S8["8 review A/B<br/>docs/DESIGN.md:312"]
+    S9["9 migrate VisionFlow<br/>docs/DESIGN.md:314"]
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
 ```
 
-**What it shows.** Two steps done and all of the third but `pack`. The first
+**What it shows.** Three steps done in the tree, the third short of its
+publish. The first
 number the design is built to produce, topics flagged per commit file-level
 against sealed, comes at step 4; `stale --since` is the tool it needs, and it
 exists.
 
 **Why it is this way.** The evidence endpoints are a fixed sequence, each
-tested only if the previous one holds (`docs/DESIGN.md:239`-`240`).
+tested only if the previous one holds (`docs/DESIGN.md:262`-`263`).
 
 **Open:** the endpoints are to be pre-registered in `PREREG.md` before any run
-(`docs/DESIGN.md:240`), and the design cites its evidence as `research/01`
+(`docs/DESIGN.md:263`), and the design cites its evidence as `research/01`
 to `05` in a design-session scratchpad (`docs/DESIGN.md:4`-`5`); neither is in
 the repository, so where do the pre-registration and the evidence live?
 
@@ -138,8 +141,8 @@ flowchart TB
         PK["pack"]
         EX["export --scip, later"]
     end
-    subgraph NOW["present CLI, sealmap/src/main.rs:42-60"]
-        C1["resolve, seal-check, verify,<br/>stale, seal sign"]
+    subgraph NOW["present CLI, sealmap/src/main.rs:45-65"]
+        C1["resolve, seal-check, verify,<br/>stale, seal sign, pack"]
         C2["generate with --check, model, dense"]
     end
     RS --> C1
@@ -147,24 +150,23 @@ flowchart TB
     SC --> C1
     VF --> C1
     SG --> C1
+    PK --> C1
     GC --> C2
     DN --> C2
-    PK -.->|not built| NOW
     EX -.->|not built| NOW
 ```
 
-**What it shows.** Every designed command except `pack` and the later
-`export --scip` exists, and `verify` now means the seal gate only; the old
-drift check is `generate --check`.
+**What it shows.** Every designed command except the later `export --scip`
+exists, and `verify` now means the seal gate only; the old drift check is
+`generate --check`.
 
-**Why it is this way.** Git stays out of the libraries: `--since` exports the
-revision with `git archive` and reads it as a second model
-(`docs/DESIGN.md:166`-`169`, `crates/sealmap/src/main.rs:557`-`566`).
-
-**Debt (designed, not built):** `pack` is designed with a byte budget and a
-shard plan (`docs/DESIGN.md:161`) and listed as planned in the README
-(`README.md:292`-`297`), but the binary has no such command
-(`crates/sealmap/src/main.rs:42`-`60`).
+**Why it is this way.** Git stays out of the libraries: `--since` and
+`--diff` export the revision with `git archive` and read it as a second model
+(`docs/DESIGN.md:166`-`169`, `crates/sealmap/src/main.rs:608`-`617`). `pack`
+was built to its own flags rather than the planned ones: `--diff REV`
+against the working tree instead of two named trees, and `--budget` instead
+of `--max-bytes`. DESIGN records both (`docs/DESIGN.md:161`,
+`docs/DESIGN.md:171`-`180`).
 
 ## DEL-02.4 A sealed topic's life, as built
 
@@ -191,7 +193,7 @@ the review between a failing state and the next seal is the skill's step, not
 the crate's.
 
 **Why it is this way.** Code, topic and lock land in one commit, ending the
-two-commit "change then re-stamp" routine (`README.md:104`-`105`); `seal sign`
+two-commit "change then re-stamp" routine (`README.md:105`-`106`); `seal sign`
 re-derives the entry from the code, so the lock is never hand-edited
 (`docs/DESIGN.md:80`-`85`).
 
@@ -209,24 +211,23 @@ flowchart TB
         H2["sealmap-extract"]
         H3["sealmap-rust"]
         H4["sealmap-mermaid"]
-        H5["sealmap-corpus: generate, write,<br/>and the seal module"]
+        H5["sealmap-corpus: generate, write,<br/>the seal module and pack"]
         H7["sealmap-dense: skeletons, call trees,<br/>index, budgeted slices<br/>sealmap/Cargo.toml:29"]
         H6["sealmap facade: features cli, parallel<br/>sealmap/Cargo.toml:17"]
     end
     subgraph PLANNED["planned, docs/DESIGN.md:128-137"]
-        P2["sealmap-corpus gains pack"]
         P3["sealmap-ts on oxc, DEFERRED"]
         P4["facade: sealmap-ts behind a default<br/>feature, oxc needs MSRV 1.97"]
     end
     HAVE --> PLANNED
 ```
 
-**What it shows.** Seven crates exist, `sealmap-dense` the newest; one is
-deferred, and the corpus crate is planned to gain `pack`.
+**What it shows.** Seven crates exist, `sealmap-dense` the newest, and the
+corpus crate has gained `pack`; one crate is deferred.
 
 **Why it is this way.** The owner deferred `sealmap-ts` on 2026-10-05: it is
 built only if E0-R on the Rust repositories shows the precise-staleness gain
-is real (`docs/DESIGN.md:286`-`287`, `README.md:257`).
+is real (`docs/DESIGN.md:310`-`311`, `README.md:258`).
 
 **Debt:** the workspace is still at version `0.1.0` (`Cargo.toml:6`), and the
 lock records its writer as `sealmap` plus that version
@@ -246,7 +247,7 @@ flowchart TB
     V["sealmap verify<br/>check.rs:359"]
     C["topics with no seal and no citation:<br/>coverage only, never a failure<br/>check.rs:391-392"]
     M["MER-02 cites a fixture id in prose:<br/>an unsealed citation, exit 1<br/>check.rs:390"]
-    CI["no CI job runs verify yet<br/>ci.yml:9-80"]
+    CI["no CI job runs verify yet<br/>ci.yml:9-84"]
     T --> V
     V --> C
     V --> M
@@ -265,4 +266,4 @@ fails rather than vanishing (COR-04).
 
 **Debt:** step 6 needs MER-02's example id moved into a fenced block or
 reworded before `verify` can run in CI on this repository
-(`crates/sealmap-corpus/src/seal/check.rs:390`, `docs/DESIGN.md:284`-`285`).
+(`crates/sealmap-corpus/src/seal/check.rs:390`, `docs/DESIGN.md:308`-`309`).

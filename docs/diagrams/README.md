@@ -60,7 +60,7 @@ new commit, correct the lines that moved, and bump that topic's
 `verified_commit`; leave topics whose sources did not change on their stamp.
 
 <!-- BEGIN GENERATED DIAGRAM INDEX -->
-_19 topic files, 102 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
+_20 topic files, 106 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
 
 ### model
 
@@ -97,6 +97,7 @@ _19 topic files, 102 diagrams. Regenerate with_ `node docs/diagrams/tools/diagra
 | COR-03 | [Generate --check, write and the command line](corpus/03-generate-check-write-and-the-cli.md) | 5 | sequenceDiagram, flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 | COR-04 | [Seals, the lock and the checks](corpus/04-seals-the-lock-and-the-checks.md) | 6 | classDiagram, flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 | COR-05 | [The seal commands, resolve, verify, stale and sign](corpus/05-the-seal-commands.md) | 4 | sequenceDiagram, flowchart | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| COR-06 | [Review packs](corpus/06-review-packs.md) | 4 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 
 ### delivery
 

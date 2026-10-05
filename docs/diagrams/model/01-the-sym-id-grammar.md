@@ -10,7 +10,7 @@ sources:
   - crates/sealmap-extract/src/ids.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -26,8 +26,8 @@ operations are cheap.
 The id is the identity half of rustc's identity/freshness split
 (`crates/sealmap-model/src/sym.rs:3`-`9`): the content half lives in
 fingerprints (MOD-02). It was introduced in commit `5973a4e` as step 2 of the
-0.2 plan (`docs/DESIGN.md:273`), replacing the 0.1 `::` path ids whose
-`::` → `__` mangling was not injective (`docs/DESIGN.md:212`).
+0.2 plan (`docs/DESIGN.md:296`), replacing the 0.1 `::` path ids whose
+`::` → `__` mangling was not injective (`docs/DESIGN.md:235`).
 
 The builder that mints ids for real definitions is `sealmap-extract`'s
 `ids` module (EXT-02); this topic covers the grammar it targets. What this
@@ -271,7 +271,7 @@ strict prefix of the child's (`crates/sealmap-model/tests/sym_props.rs:92`).
 ```mermaid
 flowchart TB
     D1["DESIGN.md section 4<br/>sym grammar, kind-explicit, no file path<br/>docs/DESIGN.md:130"]
-    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:179"]
+    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:180"]
     C1["grammar in rustdoc<br/>crates/sealmap-model/src/sym.rs:17"]
     C2["property tests<br/>crates/sealmap-model/tests/sym_props.rs:75"]
     C3["id builder, one per adapter<br/>crates/sealmap-extract/src/ids.rs:3"]
@@ -286,6 +286,6 @@ grammar as the authority, and the property tests and the shared id builder
 are the two things that hold the code to it.
 
 **Why it is this way.** The README says the grammar "is documented in
-`sealmap_model::sym`" (`README.md:180`) rather than restating it, so there is
-one source; the README's example table (`README.md:168`-`174`) is
+`sealmap_model::sym`" (`README.md:181`) rather than restating it, so there is
+one source; the README's example table (`README.md:169`-`175`) is
 illustrative.

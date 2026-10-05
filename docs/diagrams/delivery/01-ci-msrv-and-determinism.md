@@ -20,7 +20,7 @@ sources:
   - crates/sealmap/src/main.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -36,8 +36,8 @@ READMEs, docs.rs metadata and `deny(missing_docs)` in `d308faf`; the dual
 licence in `0d1fe6b`; the committed generated corpus and its drift gate were
 retired in step 3, when CI started checking determinism instead. None of the
 0.2 crates in this tree is published yet; the README's roadmap puts the first
-0.2 crates.io release after `pack`, the last open item of step 3
-(`README.md:349`-`352`).
+0.2 crates.io release after step 3, which is now done in the tree
+(`README.md:364`-`367`).
 
 ## For the business
 
@@ -63,22 +63,23 @@ flowchart TB
         R3["tests, default and no-default features<br/>ci.yml:19-20"]
         R4["docs with warnings denied<br/>ci.yml:21-23"]
         R5["determinism: two fresh generations,<br/>name pinned, compared with diff<br/>ci.yml:26-30"]
-        R1 --> R2 --> R3 --> R4 --> R5
+        R6["a review pack of two topics, both orders,<br/>compared with cmp<br/>ci.yml:31-34"]
+        R1 --> R2 --> R3 --> R4 --> R5 --> R6
     end
-    subgraph MSRV["msrv job, Rust 1.85, ci.yml:35"]
-        M1["build, locked<br/>ci.yml:42"]
-        M2["test, locked<br/>ci.yml:43"]
+    subgraph MSRV["msrv job, Rust 1.85, ci.yml:39"]
+        M1["build, locked<br/>ci.yml:46"]
+        M2["test, locked<br/>ci.yml:47"]
         M1 --> M2
     end
-    subgraph MER["mermaid job, Node 22, ci.yml:45"]
-        X1["install mermaid 12 and puppeteer<br/>ci.yml:54"]
-        X2["generate a fresh corpus into .sealmap<br/>ci.yml:56"]
-        X3["render every block, MODE render<br/>ci.yml:59-61"]
+    subgraph MER["mermaid job, Node 22, ci.yml:49"]
+        X1["install mermaid 12 and puppeteer<br/>ci.yml:58"]
+        X2["generate a fresh corpus into .sealmap<br/>ci.yml:60"]
+        X3["render every block, MODE render<br/>ci.yml:63-65"]
         X1 --> X2 --> X3
     end
-    subgraph DIA["diagrams job, full history, ci.yml:66"]
-        D1["structure and every path:line citation<br/>at its topic's stamp, strict<br/>ci.yml:79"]
-        D2["mmdc render with the width ceiling<br/>ci.yml:80"]
+    subgraph DIA["diagrams job, full history, ci.yml:70"]
+        D1["structure and every path:line citation<br/>at its topic's stamp, strict<br/>ci.yml:83"]
+        D2["mmdc render with the width ceiling<br/>ci.yml:84"]
         D1 --> D2
     end
     RUST --> MSRV --> MER --> DIA
@@ -94,11 +95,11 @@ generator.
 is that two generations agree byte for byte (`.github/workflows/ci.yml:24`-`25`),
 not that a committed copy matches. Testing with `--no-default-features`
 exercises the sequential collection path, which must give the same output as
-the parallel one (`crates/sealmap-rust/src/lib.rs:67`-`70`). The Mermaid job
-is the proof that typed writers produce valid diagrams (`README.md:307`-`310`).
+the parallel one (`crates/sealmap-rust/src/lib.rs:72`-`75`). The Mermaid job
+is the proof that typed writers produce valid diagrams (`README.md:321`-`324`).
 
 **Debt:** the MSRV job runs only `build` and `test` with default features
-(`.github/workflows/ci.yml:42`-`43`); clippy, docs and the
+(`.github/workflows/ci.yml:46`-`47`); clippy, docs and the
 `--no-default-features` configuration are checked on stable only.
 
 **Open:** no job runs `sealmap verify` yet: this repository's topics are not
@@ -113,11 +114,11 @@ sequenceDiagram
     participant DV as a 1.85 toolchain
     participant MF as workspace manifest<br/>Cargo.toml:35
     participant LK as Cargo.lock<br/>Cargo.lock:263
-    participant CI as msrv job<br/>ci.yml:35
+    participant CI as msrv job<br/>ci.yml:39
     participant DS as downstream crate, no lock
     DV->>MF: requirement ignore 0.4.23 or later (Cargo.toml:35)
     Note over MF: rust-version 1.85 for every crate, Cargo.toml:8
-    DV->>LK: --locked build (ci.yml:42)
+    DV->>LK: --locked build (ci.yml:46)
     LK-->>DV: ignore 0.4.29, builds on 1.85 (Cargo.lock:264)
     CI-->>DV: green
     DS->>MF: resolves the newest compatible ignore
@@ -132,7 +133,7 @@ unify on newer releases, which is exactly what exposes them to 0.4.30.
 **Why it is this way.** The MSRV-aware resolver skips releases that declare a
 newer `rust-version`, but 0.4.30 declares none, so it is chosen and fails; the
 comment gives the manual remedy for a 1.85 user outside the workspace
-(`Cargo.toml:32`-`34`, `.github/workflows/ci.yml:32`-`34`). `ignore` is a
+(`Cargo.toml:32`-`34`, `.github/workflows/ci.yml:36`-`38`). `ignore` is a
 dependency because the model crate's loader honours ignore files
 (`crates/sealmap-model/Cargo.toml:21`).
 
@@ -149,13 +150,14 @@ flowchart TB
     P["normalised relative paths<br/>sealmap-model/src/lib.rs:27"]
     H["BLAKE3, never a seeded hasher<br/>sealmap-model/src/lib.rs:30"]
     A["no timestamps, absolute paths,<br/>user names or environment<br/>sealmap-model/src/lib.rs:33"]
-    PO["parallel results in input order<br/>sealmap-rust/src/lib.rs:67"]
-    BY["byte-identical model, corpus and index"]
+    PO["parallel results in input order<br/>sealmap-rust/src/lib.rs:72"]
+    BY["byte-identical model, corpus, index and pack"]
     T1["extraction deterministic regardless of<br/>insertion order, tests/extract.rs:231"]
     T2["generation byte-identical across runs<br/>and input order, tests/contract.rs:93"]
     T3["CI: two fresh generations compared<br/>ci.yml:29-30"]
     T4["lock writer: order-independent signing,<br/>byte-stable round trip, tests/seal.rs:554"]
-    NM["codebase name: --name, else the<br/>checkout directory's name<br/>main.rs:351, main.rs:377-382"]
+    T5["CI: a pack in two topic orders compared<br/>ci.yml:33-34"]
+    NM["codebase name: --name, else the<br/>checkout directory's name<br/>main.rs:393, main.rs:419-424"]
     O --> BY
     P --> BY
     H --> BY
@@ -165,6 +167,7 @@ flowchart TB
     BY --> T2
     BY --> T3
     BY --> T4
+    BY --> T5
     NM -.->|leaks into output| BY
 ```
 
@@ -182,7 +185,7 @@ downstream crates rely on (`crates/sealmap-model/src/lib.rs:18`-`34`). CI pins
 **Tension (determinism contract vs CLI):** "no ambient data"
 (`crates/sealmap-model/src/lib.rs:33`-`34`) holds for the model's types, but the
 CLI names the codebase after the canonicalised checkout directory when no
-name is given (`crates/sealmap/src/main.rs:351`, `crates/sealmap/src/main.rs:377`-`382`),
+name is given (`crates/sealmap/src/main.rs:393`, `crates/sealmap/src/main.rs:419`-`424`),
 and that name reaches the index and overview, so two clones in differently
 named directories produce different bytes. For seals the name matters only
 where no `Cargo.toml` names the package, which is why `stale --since` reads
@@ -235,10 +238,10 @@ crate is meant to start from.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant CI as mermaid job<br/>ci.yml:59
+    participant CI as mermaid job<br/>ci.yml:63
     participant VM as validate-mermaid.mjs<br/>validate-mermaid.mjs:7
     participant BR as headless Chromium with mermaid
-    CI->>VM: every md under the fresh .sealmap, MODE render (ci.yml:61)
+    CI->>VM: every md under the fresh .sealmap, MODE render (ci.yml:65)
     VM->>VM: collect fenced mermaid blocks (validate-mermaid.mjs:11)
     VM->>BR: launch, load mermaid.min.js, raise text and edge limits (validate-mermaid.mjs:14)
     loop chunks of 100 blocks
@@ -256,4 +259,4 @@ matches what a reader's renderer does; the edge and text limits are raised so
 large generated diagrams are judged on grammar and layout, not size
 (`tools/validate-mermaid.mjs:19`). The script defaults to `parse`
 (`tools/validate-mermaid.mjs:15`); CI asks for a full render because some
-faults only surface at layout (`.github/workflows/ci.yml:57`-`58`).
+faults only surface at layout (`.github/workflows/ci.yml:61`-`62`).

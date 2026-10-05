@@ -13,7 +13,7 @@ sources:
   - crates/sealmap-extract/src/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -33,7 +33,7 @@ means, how two `#[cfg]` twins that share an id end up with one fingerprint,
 and what the pair lets the seal check decide (built; drawn in COR-04).
 
 The fingerprints arrived in commit `0a304ba` (step 2 of the 0.2 plan,
-`docs/DESIGN.md:273`), after rustc's split between a definition's identity
+`docs/DESIGN.md:296`), after rustc's split between a definition's identity
 and its query fingerprints (`docs/DESIGN.md:130`).
 
 ## For the business
@@ -229,7 +229,7 @@ reported as holding or absent (`crates/sealmap-corpus/src/seal/check.rs:146`,
 **Why it is this way.** The name sits in `sig_hash` and never in `body_hash`,
 which is what makes a rename detectable by body
 (`crates/sealmap-extract/src/fingerprint.rs:26`-`27`); the README states the
-same table for users (`README.md:188`-`195`).
+same table for users (`README.md:189`-`196`).
 
 The crate-surface table records that an optional `flow_hash` was considered
 and not built (`docs/DESIGN.md:130`); the model has only the two

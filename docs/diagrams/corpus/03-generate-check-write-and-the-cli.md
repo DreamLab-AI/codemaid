@@ -14,7 +14,7 @@ sources:
   - .github/workflows/ci.yml
   - docs/DESIGN.md
   - README.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -24,11 +24,11 @@ corpus and a directory on disk. `verify_against` compares a freshly generated
 missing, orphaned, stale or modified; `write` brings the directory into
 compliance and only ever deletes files that carry the generator's header
 (`crates/sealmap-corpus/src/contract.rs:1`-`2`,
-`crates/sealmap-corpus/src/lib.rs:11`-`28`).
+`crates/sealmap-corpus/src/lib.rs:12`-`29`).
 
 Since step 3 the command line reaches that contract only through
 `sealmap generate`: plain `generate` writes, and `generate --check` compares
-and writes nothing (`crates/sealmap/src/main.rs:269`-`280`). The name `verify`
+and writes nothing (`crates/sealmap/src/main.rs:311`-`322`). The name `verify`
 now belongs to the seal gate (COR-04, COR-05), and nothing generated is
 committed; CI checks instead that two fresh generations agree (DEL-01). This
 topic draws the generate path, the drift classes and the shared flags.
@@ -52,26 +52,26 @@ a pipeline that ran `sealmap verify` against a committed corpus now wants
 sequenceDiagram
     autonumber
     participant US as developer or CI
-    participant GE as generate<br/>main.rs:258
-    participant EX as extract<br/>main.rs:339
+    participant GE as generate<br/>main.rs:300
+    participant EX as extract<br/>main.rs:381
     participant AD as sealmap-rust extract
     participant PR as sealmap generate
     participant CT as contract verify or write
     US->>GE: generate PATH -o DIR, maybe --check
-    GE->>GE: map flags onto the corpus options (main.rs:259)
-    GE->>EX: sources, single dir or several repos (main.rs:267)
-    EX->>EX: codebase name from --name, the dir or the repo names (main.rs:351)
-    EX->>AD: extract once (main.rs:360)
-    AD-->>EX: Extraction, diagnostics printed as warnings (main.rs:361)
-    EX-->>GE: model and the name used (main.rs:340)
-    GE->>PR: corpus in memory (main.rs:268)
+    GE->>GE: map flags onto the corpus options (main.rs:301)
+    GE->>EX: sources, single dir or several repos (main.rs:309)
+    EX->>EX: codebase name from --name, the dir or the repo names (main.rs:393)
+    EX->>AD: extract once (main.rs:402)
+    AD-->>EX: Extraction, diagnostics printed as warnings (main.rs:403)
+    EX-->>GE: model and the name used (main.rs:382)
+    GE->>PR: corpus in memory (main.rs:310)
     alt --check
-        GE->>CT: compare DIR with the fresh corpus (main.rs:270)
+        GE->>CT: compare DIR with the fresh corpus (main.rs:312)
         CT-->>GE: Report
-        GE-->>US: one padded line per drift, exit 1 if any (main.rs:272, main.rs:279)
+        GE-->>US: one padded line per drift, exit 1 if any (main.rs:314, main.rs:321)
     else write
-        GE->>CT: bring DIR into compliance (main.rs:281)
-        GE-->>US: counts written, removed, unchanged (main.rs:284)
+        GE->>CT: bring DIR into compliance (main.rs:323)
+        GE-->>US: counts written, removed, unchanged (main.rs:326)
     end
 ```
 
@@ -81,11 +81,11 @@ except the bytes being compared.
 
 **Why it is this way.** The extraction helper returns the codebase name it
 used, so `stale --since` can read a second tree under the same name
-(`crates/sealmap/src/main.rs:336`-`339`). Errors in arguments or IO exit 2,
-drift under `--check` exits 1 (`crates/sealmap/src/main.rs:215`,
-`crates/sealmap/src/main.rs:279`). A drift name is padded through
+(`crates/sealmap/src/main.rs:378`-`381`). Errors in arguments or IO exit 2,
+drift under `--check` exits 1 (`crates/sealmap/src/main.rs:256`,
+`crates/sealmap/src/main.rs:321`). A drift name is padded through
 `to_string`, because `Drift`'s `Display` writes with `write_str` and ignores a
-width (`crates/sealmap/src/main.rs:272`,
+width (`crates/sealmap/src/main.rs:314`,
 `crates/sealmap-corpus/src/contract.rs:32`).
 
 ## COR-03.2 Classifying a difference
@@ -120,7 +120,7 @@ changed" from "the document was touched"; anything in the directory that is
 not a generated document is ignored.
 
 **Why it is this way.** Recording the source hash in each document makes drift
-detectable without re-parsing the old state (`crates/sealmap-corpus/src/lib.rs:15`-`16`);
+detectable without re-parsing the old state (`crates/sealmap-corpus/src/lib.rs:16`-`17`);
 `verify_classifies_every_kind_of_drift` pins all four classes
 (`crates/sealmap-corpus/tests/contract.rs:106`).
 
@@ -188,18 +188,23 @@ can also be summarised as one hash for cheap cross-machine equality
 
 ```mermaid
 flowchart TB
-    CMD["generate, model, dense, resolve, seal-check,<br/>verify, stale, seal sign<br/>main.rs:42-66"]
-    SRC["shared source flags: --repo, --name, --tests<br/>main.rs:71-81"]
-    GEN["generate only: -o, --check, --external,<br/>--owner-lanes, --min-calls, --public-only,<br/>--no-model, --pretty<br/>main.rs:84-114"]
-    MOD["model: path, source flags, --external<br/>main.rs:117-126"]
-    DNS["dense: path, source flags, -o, --depth,<br/>--external, --stats<br/>main.rs:129-147"]
+    CMD["generate, model, dense, resolve, seal-check,<br/>verify, stale, seal sign, pack<br/>main.rs:45-71"]
+    SRC["shared source flags: --repo, --name, --tests<br/>main.rs:76-86"]
+    GEN["generate only: -o, --check, --external,<br/>--owner-lanes, --min-calls, --public-only,<br/>--no-model, --pretty<br/>main.rs:89-119"]
+    MOD["model: path, source flags, --external<br/>main.rs:122-131"]
+    DNS["dense: path, source flags, -o, --depth,<br/>--external, --stats<br/>main.rs:134-152"]
+    SITE["seal commands and pack: -C ROOT,<br/>--diagrams DIR, source flags<br/>main.rs:156-165"]
+    PCK["pack only: topics, --diff, --budget,<br/>--depth, --source-window, -o, --shard<br/>main.rs:206-232, COR-06"]
     OP["Options: rust and corpus halves<br/>sealmap/src/lib.rs:98"]
-    ONE["one directory: load_dir<br/>main.rs:352"]
+    ONE["one directory: load_dir<br/>main.rs:394"]
     MANY["several repos, each prefixed NAME/<br/>load_repos, sealmap/src/lib.rs:125"]
     CMD --> SRC
     CMD --> GEN
     CMD --> MOD
     CMD --> DNS
+    CMD --> SITE
+    SITE --> PCK
+    SITE --> SRC
     GEN --> OP
     SRC --> ONE
     SRC --> MANY
@@ -207,13 +212,15 @@ flowchart TB
 
 **What it shows.** Every command shares the flags that shape ids; only
 `generate` carries the projection flags, and `model` takes the external-call
-policy because it changes the flows it prints. Several repositories are
+policy because it changes the flows it prints. The seal commands and `pack`
+share one `Site` group (root, topic directory, source flags); the report
+flags `--json` and `--all` sit beside it only where a command reports. Several repositories are
 loaded into one `SourceSet` under name prefixes, so calls between them
 resolve and the overview groups crates by repository
 (`crates/sealmap/src/lib.rs:112`-`113`).
 
 **Why it is this way.** The source flags decide which symbols exist and what
 they are called, so a seal must be checked with the flags it was signed with
-(`crates/sealmap/src/main.rs:68`-`69`); the facade exists so the common path
+(`crates/sealmap/src/main.rs:73`-`74`); the facade exists so the common path
 is one dependency (`crates/sealmap/src/lib.rs:35`-`36`), and the CLI is behind
 the default `cli` feature, so a library user does not pull in clap.

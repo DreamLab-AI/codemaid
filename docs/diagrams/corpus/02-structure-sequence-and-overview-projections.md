@@ -15,7 +15,7 @@ sources:
   - crates/sealmap-corpus/tests/contract.rs
   - crates/sealmap-model/src/codebase.rs
   - docs/DESIGN.md
-verified_commit: b52b21f5dd005489d5f097577e2abbbb1009eef7
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
 ---
 ## For developers
 
@@ -89,7 +89,7 @@ already there (`crates/sealmap-corpus/src/sequence.rs:83`-`88`), the fix for
 (`crates/sealmap-corpus/tests/contract.rs:219`).
 
 **Debt:** a sequence over `max_messages` (default 80,
-`crates/sealmap-corpus/src/lib.rs:160`) drops every later call from the
+`crates/sealmap-corpus/src/lib.rs:162`) drops every later call from the
 diagram, wherever it sits in the flow, and says only how many
 (`crates/sealmap-corpus/src/sequence.rs:71`-`73`); the dropped calls are
 recoverable from `_index.json`, not from the diagram.
@@ -125,7 +125,7 @@ land on one lane per crate (the densest option) or one per external owner.
 
 **Why it is this way.** One lane per external crate keeps diagrams narrow; the
 owner is kept in the message text (`tokio::fs::read` on a `tokio` lane), so no
-information is lost (`crates/sealmap-corpus/src/lib.rs:118`-`126`).
+information is lost (`crates/sealmap-corpus/src/lib.rs:120`-`128`).
 
 **Debt:** every call on a receiver of unknown type shares one `?` lane
 (`crates/sealmap-corpus/src/naming.rs:47`-`49`), so unrelated unknown
@@ -210,7 +210,7 @@ flowchart TB
 by weight for the graphs, entities by degree for the data models.
 
 **Why it is this way.** Mermaid's default edge limit is 500, so the default
-cap is 300 (`crates/sealmap-corpus/src/lib.rs:139`-`141`); unresolved targets
+cap is 300 (`crates/sealmap-corpus/src/lib.rs:141`-`143`); unresolved targets
 have no crate root and are left out of the crate graph
 (`crates/sealmap-corpus/src/overview.rs:81`-`82`).
 

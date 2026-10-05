@@ -52,6 +52,13 @@ revision that row describes.
 | 22:23 | `d29bc8f` | **Generated corpus retired**: `docs/sealmap` deleted, `.sealmap/` gitignored; CI checks that two fresh generations are byte-identical and renders a fresh corpus. | — |
 | 22:25 | `6e0604c` | README and DESIGN state the seal surface as built; `flow_hash` and the hash-suffix row corrected. | — |
 | 22:26 | `ae478d9` | Reading the generated diagrams of the new code finds field doc comments leaking into enum-variant labels; fixed. **Every topic is re-stamped here**; COR-04 and COR-05 are new. | Generated diagrams still omit call-free match arms (COR-04.5). |
+| 22:26 | `11b3b56` | **`sealmap-dense`**, on the `dense` branch: each callable expanded once, short names derived from ids alone, slices refused rather than truncated over a byte budget. Measured `dense.txt` 0.17–0.29× source against the research's 0.45×. The CLI hook is an example binary, so the branch merges cleanly. | Merged at `b52b21f`; the example replaced by `sealmap dense`. |
+| 22:50 | `b52b21f` | **Merge of `dense`** (a merge commit). The generated corpus stays retired; `sealmap dense` joins the CLI. **Every topic is re-stamped** at the merge (`34b1296`). | — |
+| 22:59 | `d227dd8` | Reading the dense projection of sealmap: `Self::f(..)` calls, match-guard calls and calls on struct literals reach the flow (DEN-01.6). On VisionClaw: +477 exact edges from `Self::` alone, no exact edge lost. | — |
+| 22:59 | `613b9ba` | **Name guesses become local**: a guessed edge needs exactly one candidate among the crates the caller can reach, read from each manifest's dependency tables; two or more give no edge. On VisionClaw: 62 guesses into crates the caller does not depend on withdrawn. | — |
+| 23:08 | `dd88e1f` | **`sealmap pack`**: topics verbatim, dense slices, source windows; refused with per-topic sizes over budget, or `--shard`. Built as `--diff REV` against the working tree and `--budget`, not the designed `--diff old new` and `--max-bytes`; `--review` not built. | The diagrams-only `--review` stays designed only (COR-06.3). |
+| 23:12 | `926144c` | Reading the dense projection of `pack`: a path's leading segment never resolves to a function, so the CLI's `fn pack` no longer captures `pack::shard(..)`. | — |
+| 23:12 | `673d58c` | Shards planned from sizes; the dense projection had shown a quadratic copy. **Every topic is re-stamped** at `4ed7a51`; COR-06 is new. | — |
 
 ## Reversals at a glance
 
@@ -63,4 +70,6 @@ revision that row describes.
 | `sealmap verify` | the 1:1 drift check (`47d7dc2`) | — | the seal gate; the drift check is `generate --check` (`702530e`) |
 | TypeScript adapter | designed, 31–36 engineer-days (`docs/DESIGN.md:188`) | — | deferred (`faf08e4`) |
 | `flow_hash` | optional in the design (`docs/DESIGN.md:101`) | not added (`0a304ba`) | recorded in the design as not built (`6e0604c`) |
+| Name-only guesses | unique in the whole workspace (0.1) | — | unique among the crates the caller can reach (`613b9ba`) |
+| `pack` flags | `--diff old new`, `--max-bytes`, `--review` (design) | — | `--diff REV`, `--budget`, `--shard`; no `--review` (`dd88e1f`) |
 | Primary review arm | the owner's open prompt | — | critical plus pre-mortem lenses (`docs/DESIGN.md:211`-`212`) |
