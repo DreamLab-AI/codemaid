@@ -299,14 +299,14 @@ fn glob_cycles_resolve_quickly() {
     assert!(out.codebase.symbol(&id("sym:cargo g . m3/T3#")).is_some());
 }
 
-/// Known resolver fault, fixed in the id work (DESIGN §7, step 2): a method
-/// call on a receiver of unknown type (`dir`, bound from an `Option<&Path>`)
-/// is matched by name to the only in-crate method called `parent`, so
-/// `Path::parent()` is drawn, as inferred, on the `Id` lane (seen in
-/// `contract::remove_empty_parents`). The right answer is to drop the call (std) or
-/// keep it external, never to bind it to `Id::parent`.
+/// The `Path::parent` lane fault (DESIGN §7): `dir`, bound by `while let
+/// Some(dir) = cur` from a call result, used to count as an untyped plain
+/// variable, so `dir.parent()` was matched by name to the only in-crate
+/// method called `parent` and drawn, as inferred, on the `Id` lane (seen in
+/// `contract::remove_empty_parents`). Destructured names now inherit what is
+/// known about the scrutinee: unknown here, so the call stays unresolved
+/// and is dropped as non-code.
 #[test]
-#[ignore = "resolver fix belongs to step 2 (sym: ids)"]
 fn std_receiver_method_is_not_bound_to_same_named_internal_method() {
     let cb = model(&[(
         "src/lib.rs",
@@ -322,4 +322,73 @@ fn std_receiver_method_is_not_bound_to_same_named_internal_method() {
     )]);
     let t = targets(&cb, "sym:cargo app . walk().");
     assert!(!t.iter().any(|t| t == "sym:cargo app . Id#parent()."), "Path::parent bound to Id::parent: {t:?}");
+}
+
+/// Destructuring keeps what is known: a typed scrutinee loses one wrapper
+/// (`Option<Db>`, `Vec<Db>`, `Result<Db, _>`), so genuine internal calls
+/// still resolve exactly; any other part is matched by a distinctive name
+/// only when it comes from internal code.
+#[test]
+fn destructured_bindings_inherit_the_scrutinee() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        use std::sync::Mutex;
+        use std::time::Instant;
+        pub struct Db;
+        impl Db { pub fn query(&self) {} pub fn vacuum(&self) {} }
+        pub struct Svc { db: Mutex<Db>, started: Mutex<Instant> }
+        impl Svc {
+            pub fn locked(&self) { if let Ok(d) = self.db.lock() { d.vacuum(); } }
+            pub fn clock(&self) { if let Ok(t) = self.started.lock() { t.vacuum(); } }
+        }
+        pub fn one(opt: Option<Db>) { if let Some(d) = opt { d.query(); } }
+        pub fn each(all: Vec<Db>) { for d in all { d.query(); } }
+        pub fn arms(r: Result<Db, String>) { match r { Ok(d) => d.query(), Err(e) => { e.vacuum(); } } }
+        pub fn from_internal() { if let Some(d) = make() { d.vacuum(); } }
+        pub fn from_external() { if let Some(d) = std::env::var_os("X") { d.vacuum(); } }
+        fn make() -> Option<Db> { None }
+        pub fn loose(xs: &[u8]) { xs.iter().for_each(|conn| if let Some(d) = conn.inner { d.vacuum(); }); }
+        pub fn local_import(any: &dyn std::any::Any) {
+            use crate::Db as Local;
+            if let Some(d) = any.downcast_ref::<Local>() { d.vacuum(); }
+        }
+        pub fn local_dependency() {
+            use sha2::Sha256;
+            let h = Sha256::new();
+            h.vacuum();
+        }
+        pub fn named(v: serde_json::Value, any: &dyn std::any::Any) {
+            if let Ok(d) = serde_json::from_value::<Db>(v) { d.query(); }
+            if let Some(d) = any.downcast_ref::<Db>() { d.query(); }
+        }
+        "#,
+    )]);
+    let query = ("sym:cargo app . Db#query().".to_owned(), Confidence::Exact);
+    let vacuum = ("sym:cargo app . Db#vacuum().".to_owned(), Confidence::Inferred);
+    assert_eq!(calls(&cb, "sym:cargo app . one()."), std::slice::from_ref(&query));
+    assert_eq!(calls(&cb, "sym:cargo app . each()."), std::slice::from_ref(&query));
+    // `Err(e)` is the error type (`String`), not `Db`: the call is std.
+    assert_eq!(calls(&cb, "sym:cargo app . arms()."), [query]);
+    // Parts of an internal function's result or an internal field: guessed.
+    assert_eq!(targets(&cb, "sym:cargo app . from_internal()."), ["sym:cargo app . make().", &vacuum.0]);
+    assert_eq!(calls(&cb, "sym:cargo app . Svc#locked()."), std::slice::from_ref(&vacuum));
+    // Parts of a std value: never bound to an internal method.
+    assert!(calls(&cb, "sym:cargo app . from_external().").is_empty());
+    assert!(calls(&cb, "sym:cargo app . Svc#clock().").is_empty());
+    // A type imported inside the function body resolves like any import ...
+    assert_eq!(
+        calls(&cb, "sym:cargo app . local_import()."),
+        [("sym:cargo app . Db#vacuum().".to_owned(), Confidence::Exact)]
+    );
+    // ... and a dependency type imported there is never an internal type.
+    assert!(targets(&cb, "sym:cargo app . local_dependency().").iter().all(|t| t.starts_with("sym:extern sha2::")));
+    // A turbofish names the payload's type: resolved exactly.
+    assert_eq!(
+        targets(&cb, "sym:cargo app . named()."),
+        ["sym:extern serde_json::from_value", "sym:cargo app . Db#query().", "sym:cargo app . Db#query()."]
+    );
+    assert!(calls(&cb, "sym:cargo app . named().").iter().skip(1).all(|(_, c)| *c == Confidence::Exact));
+    // A closure parameter is untyped, as before.
+    assert_eq!(calls(&cb, "sym:cargo app . loose()."), [vacuum]);
 }

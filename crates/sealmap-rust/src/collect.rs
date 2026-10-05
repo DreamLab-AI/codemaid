@@ -152,6 +152,29 @@ impl Collector<'_> {
         hashes
     }
 
+    /// Add the `use` declarations inside a function body to `module`'s
+    /// imports. Their scope is really the block; widening it to the module
+    /// is the cheap approximation, and far better than not seeing them:
+    /// `use crate::events::Metrics;` inside a handler would otherwise leave
+    /// `Metrics` unresolved, and `use sha2::Sha256;` would leave `Sha256`
+    /// looking like nothing in particular rather than a dependency type.
+    fn local_uses(&mut self, module: &Segs, block: &Block) {
+        struct Uses(Vec<RawUse>);
+        impl<'ast> syn::visit::Visit<'ast> for Uses {
+            fn visit_item_use(&mut self, u: &'ast syn::ItemUse) {
+                flatten_use(&u.tree, &mut Vec::new(), &mut self.0);
+            }
+        }
+        let mut found = Uses(Vec::new());
+        syn::visit::Visit::visit_block(&mut found, block);
+        if found.0.is_empty() {
+            return;
+        }
+        if let Some(m) = self.raw.modules.iter_mut().rev().find(|m| m.path == *module) {
+            m.uses.extend(found.0);
+        }
+    }
+
     /// Record a collected item and fold it into its module's body.
     fn push_item(&mut self, it: RawItem, fold: &mut Fingerprinter) {
         fold_member(fold, it.kind.keyword(), &it.name, it.sig_hash, it.body_hash);
@@ -273,6 +296,7 @@ impl Collector<'_> {
                                     fingerprint::feed(&mut sig_fp, &t.generics);
                                     fingerprint::feed(&mut sig_fp, &t.generics.where_clause);
                                     let (sig_hash, body_hash) = callable(sig_fp, &f.attrs, None, &f.sig, block);
+                                    self.local_uses(module, block);
                                     it.methods.push(RawFn {
                                         sig_hash,
                                         body_hash,
@@ -352,6 +376,7 @@ impl Collector<'_> {
                 let mut sig = Fingerprinter::sig();
                 sig.section("fn");
                 (it.sig_hash, it.body_hash) = callable(sig, &f.attrs, Some(&f.vis), &f.sig, &f.block);
+                self.local_uses(module, &f.block);
                 self.push_item(it, fold);
             }
             Item::Const(k) => {
@@ -415,6 +440,7 @@ impl Collector<'_> {
                     sig_fp.section("fn");
                     let (sig_hash, body_hash) = callable(sig_fp, &f.attrs, Some(&f.vis), &f.sig, &f.block);
                     fold_member(fold, "fn", &f.sig.ident.to_string(), sig_hash, body_hash);
+                    self.local_uses(module, &f.block);
                     let mut refs = Vec::new();
                     sig_refs(&f.sig, &mut refs);
                     let vis = if is_trait_impl { Visibility::Public } else { vis_of(&f.vis) };
@@ -930,7 +956,14 @@ impl FlowWalker {
                 _ => return,
             },
             Pat::Ident(id) => (id.ident.to_string(), None),
-            _ => return,
+            // `let Some(x) = init else { .. }`, `let (a, b) = init`.
+            other => {
+                match init {
+                    Some(e) => self.bind_destructured(other, e, false),
+                    None => self.forget(other),
+                }
+                return;
+            }
         };
         let inferred = declared.or_else(|| init.and_then(constructed_type).map(|t| vec![t]));
         match inferred {
@@ -938,13 +971,93 @@ impl FlowWalker {
                 self.env.insert(name, Recv::Typed(refs));
             }
             // Bound to something we could not type (a call chain, a
-            // computation): calls on it are not guessed by name.
+            // computation): calls on it are not guessed by name, but where
+            // it came from is kept for the parts a pattern takes from it.
             None if init.is_some() => {
-                self.env.insert(name, Recv::Unknown);
+                let origin = init.map_or(Recv::Unknown, |e| self.origin(e));
+                self.env.insert(name, Recv::Computed(Box::new(origin)));
             }
             None => {
                 self.env.remove(&name);
             }
+        }
+    }
+
+    /// Bind the names a destructuring pattern (`Some(x)`, `(a, b)`,
+    /// `Foo { bar, .. }`) takes from `scrutinee`; `iterated` for the pattern
+    /// of a `for` loop, which takes elements rather than the value itself.
+    ///
+    /// * A typed scrutinee is looked into where the shape says which type
+    ///   the one bound name gets: `Some(x)` / `Ok(x)` take the first type
+    ///   argument (`opt: Option<Db>` makes `x` a `Db`), `Err(e)` the second,
+    ///   and `for x in` the element of a one-parameter collection
+    ///   (`Vec<Db>`, `HashSet<Db>`, `Option<Db>`).
+    /// * Anything else becomes [`Recv::Derived`] from the scrutinee's
+    ///   origin, so a later call on it is matched by name only when that
+    ///   origin is internal code.
+    fn bind_destructured(&mut self, pat: &Pat, scrutinee: &Expr, iterated: bool) {
+        let mut names = Vec::new();
+        pattern_names(pat, &mut names);
+        let origin = self.origin(scrutinee);
+        let class = match (&origin, names.len()) {
+            (Recv::Typed(refs), 1) => peel(pat, refs, iterated).map(Recv::Typed),
+            _ => None,
+        }
+        .unwrap_or_else(|| Recv::Derived(Box::new(origin)));
+        for name in names {
+            self.env.insert(name, class.clone());
+        }
+    }
+
+    /// Where the value of `e` comes from, for [`Recv::Derived`]: the
+    /// receiver at the root of its method chain, field accesses, `?`,
+    /// `.await` and borrows, or the path it calls.
+    fn origin(&self, e: &Expr) -> Recv {
+        match e {
+            Expr::Path(p) if p.path.segments.len() == 1 => {
+                self.env.get(&p.path.segments[0].ident.to_string()).cloned().unwrap_or(Recv::Untyped)
+            }
+            Expr::Field(f) => match (&*f.base, &f.member) {
+                (Expr::Path(p), syn::Member::Named(n)) if p.path.is_ident("self") => Recv::SelfField(n.to_string()),
+                _ => self.origin(&f.base),
+            },
+            // A turbofish names the result's type: `x.try_into::<Config>()`,
+            // `any.downcast_ref::<Metrics>()`, `iter.collect::<Vec<Job>>()`.
+            Expr::MethodCall(m) => match m.turbofish.as_ref().and_then(|t| turbofish_refs(&t.args)) {
+                Some(refs) => Recv::Typed(refs),
+                None => self.origin(&m.receiver),
+            },
+            Expr::Call(c) => match &*c.func {
+                Expr::Path(p) => match constructed_type(e) {
+                    Some(t) => Recv::Typed(vec![t]),
+                    None => {
+                        // `serde_json::from_str::<Store>(..)`.
+                        let named = p.path.segments.last().and_then(|seg| match &seg.arguments {
+                            syn::PathArguments::AngleBracketed(a) => turbofish_refs(&a.args),
+                            _ => None,
+                        });
+                        named.map_or_else(|| Recv::Returned(path_segs(&p.path)), Recv::Typed)
+                    }
+                },
+                _ => Recv::Unknown,
+            },
+            Expr::Try(t) => self.origin(&t.expr),
+            Expr::Await(a) => self.origin(&a.base),
+            Expr::Paren(p) => self.origin(&p.expr),
+            Expr::Reference(r) => self.origin(&r.expr),
+            Expr::Unary(u) => self.origin(&u.expr),
+            Expr::Index(i) => self.origin(&i.expr),
+            _ => Recv::Unknown,
+        }
+    }
+
+    /// Drop what is known about the names `pat` binds (a shadowing binding
+    /// without a value).
+    fn forget(&mut self, pat: &Pat) {
+        let mut names = Vec::new();
+        pattern_names(pat, &mut names);
+        for name in names {
+            self.env.remove(&name);
         }
     }
 
@@ -1068,6 +1181,7 @@ impl FlowWalker {
                             label = format!("{label} if {}", squeeze(&tokens(g)));
                         }
                         let saved = self.env.clone();
+                        self.bind_destructured(&a.pat, &m.expr, false);
                         let steps = self.sub(&a.body);
                         self.env = saved;
                         (clip(&label, LABEL_MAX), steps)
@@ -1081,7 +1195,10 @@ impl FlowWalker {
                 self.expr(&f.expr, out);
                 let label =
                     clip(&format!("for {} in {}", squeeze(&tokens(&f.pat)), squeeze(&tokens(&f.expr))), LABEL_MAX);
+                let saved = self.env.clone();
+                self.bind_destructured(&f.pat, &f.expr, true);
                 let body = self.sub_block(&f.body);
+                self.env = saved;
                 if !body.is_empty() {
                     out.push(RawStep::Loop(label, body));
                 }
@@ -1236,6 +1353,57 @@ impl FlowWalker {
             _ => Recv::Unknown,
         }
     }
+}
+
+/// The type the single name bound by `pat` gets from a scrutinee of
+/// declared type `refs` (outermost first), when the shape says so.
+fn peel(pat: &Pat, refs: &[Segs], iterated: bool) -> Option<Vec<Segs>> {
+    const ONE_PARAMETER: &[&str] =
+        &["Vec", "VecDeque", "HashSet", "BTreeSet", "IndexSet", "Option", "BinaryHeap", "LinkedList"];
+    let outer = refs.first()?.last()?.as_str();
+    let arg = |i: usize| refs.get(i).map(|r| vec![r.clone()]);
+    if iterated {
+        return if ONE_PARAMETER.contains(&outer) && refs.len() == 2 { arg(1) } else { None };
+    }
+    let Pat::TupleStruct(ts) = pat else { return None };
+    match ts.path.segments.last()?.ident.to_string().as_str() {
+        "Some" if outer == "Option" => arg(1),
+        "Ok" if outer == "Result" => arg(1),
+        "Err" if outer == "Result" => arg(2),
+        // A value known only by its own type, as a constructor or turbofish
+        // gives it (`Ok(store) = RoleStore::new(..).await`,
+        // `Some(m) = any.downcast_ref::<Metrics>()`): the wrapper is implied,
+        // the payload is that type.
+        "Some" | "Ok" if refs.len() == 1 && !["Option", "Result"].contains(&outer) => arg(0),
+        _ => None,
+    }
+}
+
+/// The type paths of a turbofish with exactly one type argument
+/// (`::<Config>`, `::<Vec<Job>>`).
+fn turbofish_refs(args: &Punctuated<syn::GenericArgument, syn::Token![,]>) -> Option<Vec<Segs>> {
+    let mut types = args.iter().filter_map(|a| match a {
+        syn::GenericArgument::Type(t) => Some(t),
+        _ => None,
+    });
+    let (Some(ty), None) = (types.next(), types.next()) else { return None };
+    let mut refs = Vec::new();
+    type_refs(ty, &mut refs);
+    (!refs.is_empty()).then_some(refs)
+}
+
+/// The names a pattern binds, in source order.
+fn pattern_names(pat: &Pat, out: &mut Vec<String>) {
+    struct Names<'a>(&'a mut Vec<String>);
+    impl<'ast> syn::visit::Visit<'ast> for Names<'_> {
+        fn visit_pat_ident(&mut self, p: &'ast syn::PatIdent) {
+            self.0.push(p.ident.to_string());
+            syn::visit::visit_pat_ident(self, p);
+        }
+        // Paths inside patterns (`Foo::Bar`, consts) bind nothing.
+        fn visit_expr(&mut self, _: &'ast Expr) {}
+    }
+    syn::visit::Visit::visit_pat(&mut Names(out), pat);
 }
 
 fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep {

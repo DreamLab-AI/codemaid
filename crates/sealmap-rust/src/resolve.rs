@@ -758,7 +758,14 @@ impl Resolver {
             }
             Recv::Typed(refs) => self.receiver_type(ctx.module, refs, ctx.self_ty),
             Recv::Untyped => return Some(self.by_name_only(name)),
-            Recv::Unknown => None,
+            Recv::Derived(origin) => {
+                return Some(if self.internal_origin(ctx, origin) {
+                    self.by_name_only(name)
+                } else {
+                    (ids::unresolved_method_id(name), Confidence::External)
+                });
+            }
+            Recv::Returned(_) | Recv::Computed(_) | Recv::Unknown => None,
         };
         let Some(ty) = ty else { return Some((ids::unresolved_method_id(name), Confidence::External)) };
         if let Some(id) = self.methods.get(&ty).and_then(|m| m.get(name)) {
@@ -775,6 +782,30 @@ impl Resolver {
         // Known type, method not defined in the codebase: a derived or std
         // trait method on an internal type, or a dependency's method.
         Some((undefined_member(&ty, name), Confidence::External))
+    }
+
+    /// Does a [`Recv::Derived`] value come from code in the analysed
+    /// codebase? `self`, a field or typed value whose type mentions an
+    /// internal type, an internal function's result, or a plain variable of
+    /// unevident type do; a value of `std` or third-party type, a third-party
+    /// function's result and anything unknown do not.
+    fn internal_origin(&self, ctx: &FlowCtx<'_>, origin: &Recv) -> bool {
+        let any_internal = |module: &SymbolId, refs: &[Segs], self_ty: Option<&SymbolId>| {
+            refs.iter().any(|segs| self.internal.contains(&self.resolve(module, segs, self_ty, Ns::Type).0))
+        };
+        match origin {
+            Recv::SelfValue | Recv::Untyped => true,
+            Recv::SelfField(field) => {
+                match ctx.self_ty.and_then(|ty| self.fields.get(ty)).and_then(|(m, f)| Some((m, f.get(field)?))) {
+                    Some((module, refs)) => any_internal(module, refs, None),
+                    None => true,
+                }
+            }
+            Recv::Typed(refs) => any_internal(ctx.module, refs, ctx.self_ty),
+            Recv::Returned(segs) => self.internal.contains(&self.resolve(ctx.module, segs, ctx.self_ty, Ns::Value).0),
+            Recv::Derived(inner) | Recv::Computed(inner) => self.internal_origin(ctx, inner),
+            Recv::Unknown => false,
+        }
     }
 
     /// The type a method is called on, from the declared type's paths

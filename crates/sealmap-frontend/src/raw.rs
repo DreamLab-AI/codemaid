@@ -109,6 +109,23 @@ pub enum Recv {
     /// A plain variable or field whose type is not evident. Calls on it may
     /// be matched to a distinctive internal method name (`inferred`).
     Untyped,
+    /// The value returned by calling this path (`get_logger()`). Only used
+    /// as the origin of a [`Recv::Derived`] value.
+    Returned(Segs),
+    /// A value of unknown type obtained from another receiver: a part of it
+    /// taken apart by a pattern (`if let Some(x) = origin`, `for x in
+    /// origin`, a `match` arm), possibly through method calls and `?` on
+    /// the way (`origin.lock()`). Calls on it may be matched to a distinctive
+    /// internal method name only when the origin is internal code (`self`,
+    /// an internal type or function); a value derived from a `std` or
+    /// third-party one never is, so `Path::parent()` on a part of an
+    /// `Option<&Path>` is not drawn as a call to an internal `parent`.
+    Derived(Box<Recv>),
+    /// A value computed from this origin and bound by name (`let x =
+    /// origin.call()`). Its type is not evident, so calls on it are not
+    /// resolved or guessed, exactly as for [`Recv::Unknown`]; parts a
+    /// pattern takes from it ([`Recv::Derived`]) keep the origin.
+    Computed(Box<Recv>),
     /// Anything else (call chains, indexing, literals). Not resolved.
     Unknown,
 }
