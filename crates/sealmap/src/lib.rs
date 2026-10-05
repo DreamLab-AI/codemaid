@@ -15,18 +15,25 @@
 //! * a JSON **index** linking every call to the fragment that expands it,
 //!   so an orchestrating agent can merge and inline diagrams by stable id.
 //!
+//! Every symbol is named by a `sym:` id (`sym:cargo shop . db/Db#insert().`,
+//! no file path, see [`model::sym`]) and carries two fingerprints:
+//! `sig_hash` for its contract and `body_hash` for its implementation, both
+//! blind to formatting, comments and moves. Diagram ids are derived from the
+//! `sym:` ids injectively. The model and index JSON are schema v2.
+//!
 //! This crate is a facade over the workspace:
 //!
 //! | Crate | Role |
 //! |---|---|
 //! | [`model`] (`sealmap-model`) | language-neutral code model and in-memory sources |
-//! | [`mermaid`] (`sealmap-mermaid`) | zero-dependency typed Mermaid writers |
+//! | [`mermaid`] (`sealmap-mermaid`) | typed Mermaid writers and injective diagram ids |
 //! | [`extract`] (`sealmap-extract`) | language-neutral extraction core shared by the language adapters: flow IR and lowering, confidence, labels, `sym:` ids, fingerprints |
 //! | [`rust`] (`sealmap-rust`) | Rust language adapter (syn) |
 //! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract |
 //!
 //! Depend on the facade for the common path, or on the individual crates to
-//! keep dependencies minimal (for example, `sealmap-mermaid` alone has none).
+//! keep dependencies minimal (for example, `sealmap-mermaid` with
+//! `default-features = false` has none).
 //!
 //! ## Quick start
 //!

@@ -26,7 +26,7 @@ use sealmap_model::{Codebase, Confidence, Relation, RelationKind, SymbolId};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ExternalCalls {
     /// Keep every external call, including `std` and unresolved method calls
-    /// (`?::name`). Verbose; useful for debugging the language adapter.
+    /// (`sym:? name`). Verbose; useful for debugging the language adapter.
     All,
     /// Keep calls into non-std dependencies (`tokio::spawn`,
     /// `serde_json::to_string`); drop `std`/`core`/`alloc` and unresolved
