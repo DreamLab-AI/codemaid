@@ -28,6 +28,9 @@ proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1"
 toml = "0.8"
 rayon = "1"
+# Cargo.lock pins 0.4.29: 0.4.30 needs Rust 1.88 but declares no
+# rust-version; 0.4.31+ declare 1.88. On a 1.85 toolchain outside this
+# workspace, `cargo update -p ignore --precise 0.4.29` does the same.
 ignore = "0.4.23"
 clap = { version = "4", features = ["derive"] }
 proptest = { version = "1", default-features = false, features = ["std"] }

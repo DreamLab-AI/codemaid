@@ -24,6 +24,19 @@ jobs:
       # The 1:1 contract, dogfooded: docs/sealmap must match the sources.
       - run: cargo run --release -p sealmap -- verify . --name sealmap -o docs/sealmap
 
+  # The declared MSRV (workspace `rust-version`). `--locked` keeps the
+  # lockfile's `ignore 0.4.29`: 0.4.30 uses let-chains (Rust 1.88) without
+  # declaring a rust-version, so the MSRV-aware resolver cannot avoid it.
+  msrv:
+    name: rust 1.85 (MSRV)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.85
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --workspace --locked
+      - run: cargo test --workspace --locked
+
   mermaid:
     runs-on: ubuntu-latest
     steps:
