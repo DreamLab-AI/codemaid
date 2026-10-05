@@ -352,13 +352,18 @@ fn keep_ref(id: &SymbolId) -> bool {
     !STD_ROOTS.contains(&first) && !PRELUDE.contains(&first)
 }
 
-/// Which namespace a path's final segment is looked up in first. Rust keeps
-/// types (and modules) apart from values (functions, constants), so a module
-/// `config` and a function `config` in one module are both reachable.
+/// Which namespace a path segment is looked up in. Rust keeps types (and
+/// modules) apart from values (functions, constants), so a module `config`
+/// and a function `config` in one module are both reachable. The final
+/// segment tries its own namespace first; a leading one is a [`Ns::Prefix`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Ns {
     Type,
     Value,
+    /// A segment with more after it (`audit` in `audit::record`): only a
+    /// module or type has members, so a same-named function or constant
+    /// never captures the path.
+    Prefix,
 }
 
 /// The definitions one name has in one module, per namespace.
@@ -384,6 +389,7 @@ impl Slots {
         match ns {
             Ns::Type => self.ty.as_ref().or(self.value.as_ref()),
             Ns::Value => self.value.as_ref().or(self.ty.as_ref()),
+            Ns::Prefix => self.ty.as_ref(),
         }
     }
 }
@@ -640,7 +646,7 @@ impl<'p> Resolver<'p> {
         let mut rest = &segs[1..];
         // Intermediate segments name modules and types; only the last one is
         // looked up in `ns` first.
-        let ns_at = |i: usize| if i + 1 == segs.len() { ns } else { Ns::Type };
+        let ns_at = |i: usize| if i + 1 == segs.len() { ns } else { Ns::Prefix };
         let base: SymbolId = match first {
             "crate" => module_sym(&[module.root().unwrap_or_default().into_owned()]),
             "self" => module.clone(),
@@ -697,7 +703,7 @@ impl<'p> Resolver<'p> {
                 // a kind-free path that would cut it loose from the type.
                 cur = match ns {
                     Ns::Value => ids::method_id(&cur, None, seg),
-                    Ns::Type => ids::item_id(&cur, SymbolKind::TypeAlias, seg),
+                    Ns::Type | Ns::Prefix => ids::item_id(&cur, SymbolKind::TypeAlias, seg),
                 };
             } else {
                 cur = cur.extend_path(seg);

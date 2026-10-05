@@ -232,3 +232,23 @@ fn binaries_and_target_dependencies_reach_their_libraries() {
     );
     assert!(main.contains(&exact("sym:cargo ledger_cli . version().")), "{main:?}");
 }
+
+/// Found by reading the dense projection of `sealmap pack` (DEN-01.6): a
+/// path's leading segment is a module or type, never a function, so a local
+/// `fn audit` must not capture `audit::record()` when the module `audit` is
+/// imported. Functions and modules live in different namespaces.
+#[test]
+fn a_path_prefix_never_resolves_to_a_function() {
+    let cb = model(&[
+        ("src/lib.rs", "pub mod audit;\npub mod cli;"),
+        ("src/audit.rs", "pub mod trail { pub fn flush() {} }\npub fn record() {}"),
+        (
+            "src/cli.rs",
+            "use crate::audit;\nuse crate::audit::trail;\npub fn audit() { audit::record(); trail::flush(); }\npub fn trail() {}",
+        ),
+    ]);
+    assert_eq!(
+        calls(&cb, "sym:cargo ledger . cli/audit()."),
+        [exact("sym:cargo ledger . audit/record()."), exact("sym:cargo ledger . audit/trail/flush().")]
+    );
+}
