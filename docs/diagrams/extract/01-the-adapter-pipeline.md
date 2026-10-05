@@ -14,7 +14,7 @@ sources:
   - crates/sealmap-extract/src/isolate.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: fec7affdba38c57717d55676d297f418a8060a10
 ---
 ## For developers
 
@@ -80,7 +80,7 @@ and the sequential halves meet only in a `Vec<RawFile>`.
 
 **Why it is this way.** Collecting to plain strings and vectors lets files be
 parsed in parallel and resolved afterwards in one deterministic pass
-(`crates/sealmap-rust/src/raw.rs:3`-`6`, drawn as the IR in EXT-03).
+(`crates/sealmap-rust/src/raw.rs:3`-`6`, drawn as the IR in EXT-3).
 
 **Invariant:** parallel collection returns results in input order, so the
 model is identical with or without the `parallel` feature
@@ -212,10 +212,10 @@ flowchart TB
         FI["SourceFile entry<br/>resolve.rs:225"]
         MO["module symbols and their imports<br/>resolve.rs:232"]
         IT["items, members, field and uses<br/>relations, trait methods<br/>resolve.rs:256"]
-        IM["impl blocks: implements relation,<br/>method symbols<br/>resolve.rs:293"]
+        IM["impl blocks: implements relation,<br/>method symbols<br/>resolve.rs:296"]
         FI --> MO --> IT --> IM
     end
-    AG["one calls relation per caller and target<br/>aggregate_calls, resolve.rs:315"]
+    AG["one calls relation per caller and target<br/>aggregate_calls, resolve.rs:318"]
     T --> D --> PERFILE --> AG
 ```
 
@@ -226,4 +226,4 @@ call edges are aggregated from the finished flows last.
 **Why it is this way.** Modules and items go first so field types are known
 before any flow is resolved (`crates/sealmap-rust/src/resolve.rs:223`); call
 relations come from flows rather than being recorded during the walk, so the
-edge confidence is the strongest of the calls behind it (EXT-04).
+edge confidence is the strongest of the calls behind it (EXT-4).

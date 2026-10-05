@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/src/lib.rs
   - crates/sealmap-model/src/symbol.rs
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: fec7affdba38c57717d55676d297f418a8060a10
 ---
 ## For developers
 
@@ -79,17 +79,17 @@ hold is repaired to `_`, and an invalid manager falls back to `unknown _ .`
 ```mermaid
 flowchart TB
     IT["an item in a module<br/>Collector.item, collect.rs:191"]
-    MOD["inline mod: a module of its own<br/>collect.rs:211"]
-    DATA["struct, enum, union<br/>collect.rs:225"]
-    TR["trait, with provided methods<br/>collect.rs:270"]
-    AL["type alias<br/>collect.rs:350"]
-    FN["free function with a flow<br/>collect.rs:366"]
-    VAL["const, static<br/>collect.rs:382"]
-    MAC{"macro_rules with a name?<br/>collect.rs:398"}
-    MDEF["macro symbol, public if macro_export<br/>collect.rs:399"]
-    MINV["item-level invocation: folded into<br/>the module body hash only<br/>collect.rs:416"]
-    IMPL["impl block: methods kept as RawImpl<br/>collect.rs:419"]
-    REST["use, extern crate, foreign blocks:<br/>module body only<br/>collect.rs:464"]
+    MOD["inline mod: a module of its own<br/>collect.rs:212"]
+    DATA["struct, enum, union<br/>collect.rs:226"]
+    TR["trait, with provided methods<br/>collect.rs:275"]
+    AL["type alias<br/>collect.rs:360"]
+    FN["free function with a flow<br/>collect.rs:377"]
+    VAL["const, static<br/>collect.rs:394"]
+    MAC{"macro_rules with a name?<br/>collect.rs:410"}
+    MDEF["macro symbol, public if macro_export<br/>collect.rs:411"]
+    MINV["item-level invocation: folded into<br/>the module body hash only<br/>collect.rs:428"]
+    IMPL["impl block: methods kept as RawImpl<br/>collect.rs:431"]
+    REST["use, extern crate, foreign blocks:<br/>module body only<br/>collect.rs:483"]
     IT --> MOD
     IT --> DATA
     IT --> TR
@@ -110,13 +110,13 @@ module's body fingerprint.
 
 **Why it is this way.** An item-level macro invocation such as
 `thread_local!` has no name to cite, so the only honest thing to record is
-that the module changed when it changes (`crates/sealmap-rust/src/collect.rs:415`-`416`).
+that the module changed when it changes (`crates/sealmap-rust/src/collect.rs:427`-`428`).
 
 **Debt:** the test filter (`self.skip`) is applied to modules, structs,
 enums, traits, functions and impls, but not to unions, type aliases,
-constants, statics or macros (`crates/sealmap-rust/src/collect.rs:235`,
-`crates/sealmap-rust/src/collect.rs:350`,
-`crates/sealmap-rust/src/collect.rs:382`); a top-level `#[cfg(test)]` const
+constants, statics or macros (`crates/sealmap-rust/src/collect.rs:237`,
+`crates/sealmap-rust/src/collect.rs:360`,
+`crates/sealmap-rust/src/collect.rs:394`); a top-level `#[cfg(test)]` const
 is modelled even when tests are excluded.
 
 ## EXT-02.3 A method's owner is resolved, then the id is built
@@ -125,22 +125,22 @@ is modelled even when tests are excluded.
 sequenceDiagram
     autonumber
     participant BU as build<br/>resolve.rs:212
-    participant RS as Resolver.resolve<br/>resolve.rs:519
-    participant IM as impl_method<br/>resolve.rs:332
+    participant RS as Resolver.resolve<br/>resolve.rs:578
+    participant IM as impl_method<br/>resolve.rs:335
     participant ID as impl_method_id<br/>ids.rs:95
-    participant MS as method_symbol<br/>resolve.rs:703
-    BU->>RS: self type of the impl as written (resolve.rs:296)
+    participant MS as method_symbol<br/>resolve.rs:779
+    BU->>RS: self type of the impl as written (resolve.rs:299)
     RS-->>BU: owner id, global if internal
-    BU->>IM: module, owner, impl, method name (resolve.rs:305)
-    IM->>ID: self type text, trait display text (resolve.rs:335)
+    BU->>IM: module, owner, impl, method name (resolve.rs:308)
+    IM->>ID: self type text, trait display text (resolve.rs:338)
     alt owner is a global id
         ID-->>IM: method under the owner type (ids.rs:103)
     else owner outside the code
         ID-->>IM: module/impl anchor (ids.rs:110)
     end
-    BU->>MS: id, parent is the owner (resolve.rs:306)
-    MS-->>BU: Symbol with parent set to the owner (resolve.rs:714)
-    BU->>BU: trait impls tag the method impl Trait (resolve.rs:308)
+    BU->>MS: id, parent is the owner (resolve.rs:309)
+    MS-->>BU: Symbol with parent set to the owner (resolve.rs:790)
+    BU->>BU: trait impls tag the method impl Trait (resolve.rs:311)
 ```
 
 **What it shows.** The impl's self type is resolved through imports and
@@ -149,21 +149,21 @@ of one type, in any files, produce methods under one owner.
 
 **Why it is this way.** Inherent impls are registered before trait impls so
 that an inherent method wins a name lookup over a trait method of the same
-name (`crates/sealmap-rust/src/resolve.rs:488`-`490`).
+name (`crates/sealmap-rust/src/resolve.rs:547`-`549`).
 
 **Invariant:** a trait-impl method is recorded as public whatever its
 written visibility, because trait methods are as visible as the trait
-(`crates/sealmap-rust/src/collect.rs:446`).
+(`crates/sealmap-rust/src/collect.rs:458`).
 
 ## EXT-02.4 Formatting never reaches an id
 
 ```mermaid
 flowchart TB
     W["impl Handler of Msg with a trailing comma<br/>as rustfmt writes a broken list"]
-    TT["trait_text<br/>collect.rs:474"]
-    TK["tokens printed and squeezed<br/>collect.rs:475"]
-    TC["trailing comma before a closing<br/>angle or square bracket dropped<br/>collect.rs:476"]
-    KEEP["comma before a closing paren kept:<br/>a one-tuple is a different type<br/>collect.rs:473"]
+    TT["trait_text<br/>collect.rs:493"]
+    TK["tokens printed and squeezed<br/>collect.rs:494"]
+    TC["trailing comma before a closing<br/>angle or square bracket dropped<br/>collect.rs:495"]
+    KEEP["comma before a closing paren kept:<br/>a one-tuple is a different type<br/>collect.rs:492"]
     ID["the same Trait descriptor text<br/>either way"]
     W --> TT --> TK --> TC --> ID
     TC -.-> KEEP
@@ -175,22 +175,22 @@ the trailing commas rustfmt adds to a broken generic list removed.
 **Why it is this way.** Ids must not change when rustfmt reflows a line; the
 README's claim that reflowing tokio, VisionClaw and sealmap at
 `max_width = 50` changes no id (`README.md:140`-`141`) depends on this rule
-(`crates/sealmap-rust/src/collect.rs:469`-`473`).
+(`crates/sealmap-rust/src/collect.rs:488`-`492`).
 
 **Invariant:** `(T,)` and `(T)` stay distinct in a trait's text, because only
-commas before `>` and `]` are dropped (`crates/sealmap-rust/src/collect.rs:476`).
+commas before `>` and `]` are dropped (`crates/sealmap-rust/src/collect.rs:495`).
 
 ## EXT-02.5 A member the code does not define stays with its type
 
 ```mermaid
 flowchart TB
     P["path Fp::default as written"]
-    WK["walk the path segment by segment<br/>Resolver.walk, resolve.rs:546"]
-    KN{"segment defined on the<br/>current type or module?<br/>resolve.rs:601"}
-    LAST{"last segment, current is an<br/>internal type?<br/>resolve.rs:608"}
-    VAL["value position: Type method id<br/>resolve.rs:618"]
-    TY["type position: Type member id<br/>resolve.rs:619"]
-    EP["otherwise: extend as a path id<br/>resolve.rs:622"]
+    WK["walk the path segment by segment<br/>Resolver.walk, resolve.rs:623"]
+    KN{"segment defined on the<br/>current type or module?<br/>resolve.rs:678"}
+    LAST{"last segment, current is an<br/>internal type?<br/>resolve.rs:685"}
+    VAL["value position: Type method id<br/>resolve.rs:695"]
+    TY["type position: Type member id<br/>resolve.rs:696"]
+    EP["otherwise: extend as a path id<br/>resolve.rs:699"]
     NEXT["continue from the definition"]
     P --> WK --> KN
     KN -->|yes| NEXT
@@ -206,9 +206,9 @@ in the code, but it still belongs to `Fingerprint`, so it becomes
 
 **Why it is this way.** Before `6c8a9b0` such calls were cut loose from their
 type and drawn on an external lane in the self-corpus; the fix keeps them on
-the type's lane (`crates/sealmap-rust/src/resolve.rs:612`-`616`).
+the type's lane (`crates/sealmap-rust/src/resolve.rs:689`-`693`).
 
 **Debt:** such an id names a symbol the model does not contain, so it is not
 internal and resolves with `Inferred` confidence inside the workspace or
-`External` outside it (`crates/sealmap-rust/src/resolve.rs:528`-`530`); a seal
+`External` outside it (`crates/sealmap-rust/src/resolve.rs:587`-`589`); a seal
 could cite an id that `Codebase::symbol` never returns.

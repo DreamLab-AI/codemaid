@@ -17,7 +17,7 @@ sources:
   - crates/sealmap-rust/src/tidy.rs
   - crates/sealmap-rust/src/lib.rs
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: fec7affdba38c57717d55676d297f418a8060a10
 ---
 ## For developers
 
@@ -57,10 +57,10 @@ calls; the policy can be widened to everything for debugging.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant RS as Resolver.flow<br/>resolve.rs:730
+    participant RS as Resolver.flow<br/>resolve.rs:807
     participant LF as lower_flow<br/>lower.rs:36
     participant LS as lower_steps<br/>lower.rs:53
-    participant CB as resolver closure<br/>resolve.rs:731
+    participant CB as resolver closure<br/>resolve.rs:808
     RS->>LF: raw steps and a call resolver
     LF->>LS: lower the top level (lower.rs:40)
     loop each raw step
@@ -168,22 +168,22 @@ the strongest confidence of the call sites behind it
 sequenceDiagram
     autonumber
     participant LS as lower_steps<br/>lower.rs:53
-    participant CA as Resolver.call<br/>resolve.rs:734
-    participant ME as Resolver.method<br/>resolve.rs:763
+    participant CA as Resolver.call<br/>resolve.rs:811
+    participant ME as Resolver.method<br/>resolve.rs:840
     participant EC as ExternalCalls.keeps<br/>confidence.rs:46
     LS->>CA: raw call
     alt path call
-        CA->>CA: prelude name not shadowed, drop (resolve.rs:738)
-        CA->>CA: resolve the path in the value namespace (resolve.rs:741)
-        CA->>CA: bare unknown local name, drop as a closure (resolve.rs:744)
+        CA->>CA: prelude name not shadowed, drop (resolve.rs:815)
+        CA->>CA: resolve the path in the value namespace (resolve.rs:818)
+        CA->>CA: bare unknown local name, drop as a closure (resolve.rs:821)
     else method call
-        CA->>ME: receiver and name (resolve.rs:749)
+        CA->>ME: receiver and name (resolve.rs:826)
         ME-->>CA: target and confidence, or None to drop
     end
-    CA->>EC: confidence, plus a dependency test (resolve.rs:751)
+    CA->>EC: confidence, plus a dependency test (resolve.rs:828)
     EC-->>CA: keep or not
-    Note over CA: a dependency is a lower-case external root<br/>that is not a workspace crate, resolve.rs:756
-    CA-->>LS: Call with target, label, kind, flags, line (resolve.rs:758)
+    Note over CA: a dependency is a lower-case external root<br/>that is not a workspace crate, resolve.rs:833
+    CA-->>LS: Call with target, label, kind, flags, line (resolve.rs:835)
 ```
 
 **What it shows.** Path calls to prelude names (`Some`, `Vec::new`, `drop`)
@@ -195,7 +195,7 @@ plainly: std, prelude constructors and calls on receivers of unknown type are
 dropped so diagrams stay dense (`crates/sealmap-rust/src/lib.rs:59`-`63`).
 
 **Debt:** "looks like a dependency" is a lower-case first letter on the
-target's root (`crates/sealmap-rust/src/resolve.rs:756`), so an unresolved
+target's root (`crates/sealmap-rust/src/resolve.rs:833`), so an unresolved
 lower-case path that is a local module alias or a misspelling is kept and drawn
 as a dependency lane.
 
@@ -206,7 +206,7 @@ flowchart TB
     T["a syn node"]
     TS["token stream printed with a space<br/>between every token<br/>tidy.rs:8"]
     SQ["squeeze: fixed-point spacing rules,<br/>then call parens and arrows restored<br/>labels.rs:57"]
-    AS["argument sketch: names and short<br/>literals kept, anything else underscore<br/>collect.rs:1416"]
+    AS["argument sketch: names and short<br/>literals kept, anything else underscore<br/>collect.rs:1451"]
     CL["call_label: name of sketches<br/>clipped to 56 chars<br/>labels.rs:116"]
     CO["condition_label: clipped as if<br/>prefixed with if<br/>labels.rs:122"]
     CP["clip on a char boundary with an ellipsis<br/>labels.rs:104"]

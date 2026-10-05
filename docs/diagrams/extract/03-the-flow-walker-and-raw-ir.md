@@ -12,7 +12,7 @@ sources:
   - crates/sealmap-extract/src/labels.rs
   - crates/sealmap-model/src/flow.rs
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: fec7affdba38c57717d55676d297f418a8060a10
 ---
 ## For developers
 
@@ -109,19 +109,19 @@ still name the arm that survives resolution
 ```mermaid
 sequenceDiagram
     autonumber
-    participant EI as expr_inner<br/>collect.rs:1086
-    participant AR as arg<br/>collect.rs:1305
-    participant RV as recv<br/>collect.rs:1339
+    participant EI as expr_inner<br/>collect.rs:1121
+    participant AR as arg<br/>collect.rs:1340
+    participant RV as recv<br/>collect.rs:1374
     participant PD as place_deferred<br/>sealmap-extract/src/raw.rs:160
     Note over EI: items.iter().for_each(closure calling a)
-    EI->>EI: walk the receiver first (collect.rs:1115)
-    EI->>AR: each argument (collect.rs:1118)
-    AR->>AR: closure body walked with env saved and restored (collect.rs:1308)
-    AR-->>EI: body steps held back as deferred (collect.rs:1312)
-    EI->>RV: what is the receiver (collect.rs:1120)
+    EI->>EI: walk the receiver first (collect.rs:1150)
+    EI->>AR: each argument (collect.rs:1153)
+    AR->>AR: closure body walked with env saved and restored (collect.rs:1343)
+    AR-->>EI: body steps held back as deferred (collect.rs:1347)
+    EI->>RV: what is the receiver (collect.rs:1155)
     RV-->>EI: Typed, Untyped, SelfField or Unknown
-    EI->>EI: push the method call itself (collect.rs:1122)
-    EI->>PD: callee name, deferred bodies, LOOPING list (collect.rs:1129)
+    EI->>EI: push the method call itself (collect.rs:1157)
+    EI->>PD: callee name, deferred bodies, LOOPING list (collect.rs:1164)
     PD-->>EI: loop each via for_each, after the call
 ```
 
@@ -130,14 +130,14 @@ call, so nested calls appear as earlier steps; closure and async-block
 arguments are held back and placed after the call they are passed to.
 
 **Why it is this way.** A closure passed to a call runs during it, not before
-(`crates/sealmap-rust/src/collect.rs:1303`-`1304`); drawing its calls ahead of
+(`crates/sealmap-rust/src/collect.rs:1338`-`1339`); drawing its calls ahead of
 the call would invert the order a reader sees. `?` and `.await` mark the call
 they apply to through `last_call_mut`, which skips any deferred fragment
 pushed after it (`crates/sealmap-extract/src/raw.rs:149`-`153`).
 
 **Invariant:** walking stops below 1,024 levels of expression nesting, so
 generated code cannot overflow the collector's stack; deeper calls are
-omitted (`crates/sealmap-rust/src/collect.rs:1078`).
+omitted (`crates/sealmap-rust/src/collect.rs:1113`).
 
 ## EXT-03.3 Where a deferred closure body goes
 
@@ -145,7 +145,7 @@ omitted (`crates/sealmap-rust/src/collect.rs:1078`).
 flowchart TB
     D["closure or async body passed to a call"]
     SP{"callee name contains spawn?<br/>deferred_shape, labels.rs:140"}
-    LP{"callee in the per-element list?<br/>LOOPING, collect.rs:882"}
+    LP{"callee in the per-element list?<br/>LOOPING, collect.rs:917"}
     PAR["Parallel arm: spawned task<br/>labels.rs:153"]
     LOOP["Loop: each via callee<br/>labels.rs:154"]
     OPT["Optional: via callee<br/>labels.rs:156"]
@@ -165,7 +165,7 @@ element becomes a loop; anything else may run, so it is optional.
 **Why it is this way.** The shape and the label are shared rules in
 `sealmap-extract::labels`, so every adapter draws deferred bodies the same way
 (`crates/sealmap-extract/src/raw.rs:155`-`159`). The per-element list is the
-Rust adapter's own (`crates/sealmap-rust/src/collect.rs:881`-`906`).
+Rust adapter's own (`crates/sealmap-rust/src/collect.rs:916`-`941`).
 
 **Debt:** the parallel rule is a substring test on the callee's name
 (`crates/sealmap-extract/src/labels.rs:140`), so a closure passed to any
@@ -176,12 +176,12 @@ method whose name merely contains `spawn` is drawn as a concurrent task.
 ```mermaid
 flowchart TB
     SRC["let g = closure calling helper<br/>later: g of 1"]
-    LOC["Stmt.Local: walk the initialiser<br/>collect.rs:930"]
-    CL["Expr.Closure outside an argument:<br/>body walked in place<br/>collect.rs:1226"]
-    OPT["Optional fragment labelled closure,<br/>at the definition<br/>collect.rs:1229"]
-    BIND["g bound as Computed, type unknown<br/>collect.rs:978"]
-    CALL["g of 1: a bare name that is neither<br/>defined, imported nor a crate<br/>resolve.rs:744"]
-    DROP["call dropped as a local closure<br/>resolve.rs:745"]
+    LOC["Stmt.Local: walk the initialiser<br/>collect.rs:965"]
+    CL["Expr.Closure outside an argument:<br/>body walked in place<br/>collect.rs:1261"]
+    OPT["Optional fragment labelled closure,<br/>at the definition<br/>collect.rs:1264"]
+    BIND["g bound as Computed, type unknown<br/>collect.rs:1013"]
+    CALL["g of 1: a bare name that is neither<br/>defined, imported nor a crate<br/>resolve.rs:821"]
+    DROP["call dropped as a local closure<br/>resolve.rs:822"]
     SRC --> LOC --> CL --> OPT
     LOC --> BIND
     SRC --> CALL --> DROP
@@ -193,12 +193,12 @@ through the variable is recognised as a local closure and dropped.
 
 **Why it is this way.** The walker has no data-flow analysis, and dropping
 bare calls to unknown local names keeps closures and function pointers from
-appearing as calls to nothing (`crates/sealmap-rust/src/resolve.rs:742`-`743`).
+appearing as calls to nothing (`crates/sealmap-rust/src/resolve.rs:819`-`820`).
 The test that pins the default drops `g(1)` explicitly
 (`crates/sealmap-rust/tests/extract.rs:108`-`116`).
 
 **Debt:** a closure stored with `let` is drawn where it is defined, not where
-it is called (`crates/sealmap-rust/src/collect.rs:1226`-`1231`): its calls
+it is called (`crates/sealmap-rust/src/collect.rs:1261`-`1266`): its calls
 appear once, at the definition, inside an `opt` labelled `closure`, even when
 it is called many times later or never.
 
@@ -206,10 +206,10 @@ it is called many times later or never.
 
 ```mermaid
 flowchart TB
-    IF["if cond, else if cond2, else<br/>Expr.If, collect.rs:1147"]
-    C1["first condition's calls go before<br/>the whole branch<br/>collect.rs:1157"]
-    C2["later conditions' calls go inside<br/>their own arm, labelled if cond2<br/>collect.rs:1160"]
-    EL["else arm with an empty label<br/>collect.rs:1166"]
+    IF["if cond, else if cond2, else<br/>Expr.If, collect.rs:1182"]
+    C1["first condition's calls go before<br/>the whole branch<br/>collect.rs:1192"]
+    C2["later conditions' calls go inside<br/>their own arm, labelled if cond2<br/>collect.rs:1195"]
+    EL["else arm with an empty label<br/>collect.rs:1201"]
     PA{"push_arms<br/>sealmap-extract/src/raw.rs:137"}
     NONE["all arms empty: nothing<br/>sealmap-extract/src/raw.rs:138"]
     ONE["one arm: Optional<br/>sealmap-extract/src/raw.rs:143"]
@@ -232,18 +232,18 @@ ones failed, so its calls sit inside that arm.
 **Why it is this way.** This keeps the evaluation order exact without a
 control-flow graph; `match` follows the same idea with the scrutinee walked
 first and one arm per pattern, guard included in the label
-(`crates/sealmap-rust/src/collect.rs:1174`-`1181`). The shape is pinned by
+(`crates/sealmap-rust/src/collect.rs:1209`-`1216`). The shape is pinned by
 `flow_shapes_follow_control_flow` (`crates/sealmap-rust/tests/extract.rs:143`).
 
 ## EXT-03.6 Macros in a body
 
 ```mermaid
 flowchart TB
-    M["a macro invocation in a body<br/>mac, collect.rs:1328"]
-    E{"body parses as comma-separated<br/>expressions?<br/>collect.rs:1330"}
-    B{"body parses as statements?<br/>collect.rs:1334"}
-    WA["walk each argument<br/>collect.rs:1332"]
-    WS["walk the statements<br/>collect.rs:1335"]
+    M["a macro invocation in a body<br/>mac, collect.rs:1363"]
+    E{"body parses as comma-separated<br/>expressions?<br/>collect.rs:1365"}
+    B{"body parses as statements?<br/>collect.rs:1369"}
+    WA["walk each argument<br/>collect.rs:1367"]
+    WS["walk the statements<br/>collect.rs:1370"]
     SK["skipped: no calls seen"]
     NO["no Call for the macro itself<br/>CallKind.Macro, flow.rs:160"]
     M --> E
@@ -260,12 +260,12 @@ list nor a statement block contributes nothing; the macro invocation itself
 is never a call step.
 
 **Why it is this way.** Without expansion, the only thing that can be walked
-is a body that happens to parse as Rust (`crates/sealmap-rust/src/collect.rs:1325`-`1327`).
+is a body that happens to parse as Rust (`crates/sealmap-rust/src/collect.rs:1360`-`1362`).
 
 **Debt:** the model defines `CallKind::Macro` for "macro invocations the
 adapter chose to keep" (`crates/sealmap-model/src/flow.rs:158`-`160`), but the
 Rust walker never emits one: every call it pushes is a function or a method
-(`crates/sealmap-rust/src/collect.rs:1105`, `crates/sealmap-rust/src/collect.rs:1126`).
+(`crates/sealmap-rust/src/collect.rs:1140`, `crates/sealmap-rust/src/collect.rs:1161`).
 
 ## EXT-03.7 What the walker remembers about local names
 
@@ -294,7 +294,7 @@ name gets; every block, arm and loop body restores the environment on exit.
 `Path::parent` fix: a part taken from a std value must never be matched to an
 internal method of the same name (`crates/sealmap-extract/src/raw.rs:115`-`122`,
 and EXT-05). Peeling rules are listed in the walker
-(`crates/sealmap-rust/src/collect.rs:990`-`997`).
+(`crates/sealmap-rust/src/collect.rs:1025`-`1032`).
 
 **Debt:** a `use` inside a function body is widened to the whole module's
 imports (`crates/sealmap-rust/src/collect.rs:155`-`160`), so a local import in

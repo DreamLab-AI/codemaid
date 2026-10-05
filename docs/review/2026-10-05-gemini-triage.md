@@ -44,5 +44,11 @@ Totals: known 31, rejected 2, confirmed 0.
 
 - Every `known` row is a defect the authors had already registered; the reviewer restated the register as findings. Several carried `marked_by_authors: yes`, which the register confirms.
 - Both rejections come from reading the diagrams without the code. The two regression tests live in `crates/sealmap-corpus/tests/contract.rs` and pass; they were written to fail if the claim were true.
-- No defect was confirmed, so no code changed and no citation moved.
-- Probe caution: a single-letter type name (`A`) is treated as a generic parameter (`resolve.rs:is_generic_param`), so a first reproduction of F-06 with `struct A` dropped every call. Use multi-letter names in fixtures.
+- No reviewer finding was confirmed. The one code change (and the citation restamp of the six `extract/` topics to `fec7aff`) comes from the defect found while probing, recorded below.
+- Probe caution (now fixed, see below): a single-letter type name (`A`) was treated as a generic parameter (`resolve.rs:is_generic_param`), so a first reproduction of F-06 with `struct A` dropped every call.
+
+## Defects found during triage
+
+| Defect | Verdict | Evidence | Test / commit |
+|---|---|---|---|
+| triage:G-1 resolver took any one-capital name (`A`, `V2`) for a generic parameter and no multi-letter one (`Store`) | confirmed, fixed | `is_generic_param` checked spelling, not declared scope; now `InScope` (resolve.rs:407, collect.rs:788). VisionClaw model byte-identical before and after | `single_capital_type_names_are_concrete_types_not_generics`, `declared_multi_letter_generics_shadow_concrete_types`, `single_letter_generic_parameters_stay_unresolved`; tests `1667cc4`, fix `fec7aff` |

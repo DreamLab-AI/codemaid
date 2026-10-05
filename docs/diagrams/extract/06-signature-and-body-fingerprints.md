@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/tests/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: fec7affdba38c57717d55676d297f418a8060a10
 ---
 ## For developers
 
@@ -97,19 +97,19 @@ checkouts fingerprint like their plain equivalents
 ```mermaid
 sequenceDiagram
     autonumber
-    participant IT as Collector.item<br/>sealmap-rust/src/collect.rs:419
-    participant IH as impl_header<br/>sealmap-rust/src/collect.rs:529
-    participant CA as callable<br/>sealmap-rust/src/collect.rs:507
+    participant IT as Collector.item<br/>sealmap-rust/src/collect.rs:431
+    participant IH as impl_header<br/>sealmap-rust/src/collect.rs:548
+    participant CA as callable<br/>sealmap-rust/src/collect.rs:526
     participant FD as feed_canonical<br/>sealmap-rust/src/fingerprint.rs:50
-    participant FM as fold_member<br/>sealmap-rust/src/collect.rs:497
-    IT->>IH: new sig hasher gets the impl header (sealmap-rust/src/collect.rs:439)
+    participant FM as fold_member<br/>sealmap-rust/src/collect.rs:516
+    IT->>IH: new sig hasher gets the impl header (sealmap-rust/src/collect.rs:451)
     IH-->>IT: attrs, unsafety, generics, trait, self type, where
-    IT->>CA: header so far, method attrs, vis, signature, block (sealmap-rust/src/collect.rs:441)
-    CA->>CA: attrs, vis, sig sections into the sig hasher (sealmap-rust/src/collect.rs:514)
-    CA->>FD: the block alone into a body hasher (sealmap-rust/src/collect.rs:523)
+    IT->>CA: header so far, method attrs, vis, signature, block (sealmap-rust/src/collect.rs:453)
+    CA->>CA: attrs, vis, sig sections into the sig hasher (sealmap-rust/src/collect.rs:533)
+    CA->>FD: the block alone into a body hasher (sealmap-rust/src/collect.rs:542)
     FD-->>CA: canonical copy fed
     CA-->>IT: sig_hash, body_hash
-    IT->>FM: fold name and both values into the module body (sealmap-rust/src/collect.rs:442)
+    IT->>FM: fold name and both values into the module body (sealmap-rust/src/collect.rs:454)
 ```
 
 **What it shows.** A method's contract includes the header of the impl it
@@ -118,12 +118,12 @@ module's body.
 
 **Why it is this way.** The body never sees the name, so a renamed function
 keeps its `body_hash` and a rename detector can match it
-(`crates/sealmap-rust/src/collect.rs:504`-`506`); the test
+(`crates/sealmap-rust/src/collect.rs:523`-`525`); the test
 `renaming_changes_the_id_and_keeps_the_body_hash` pins it
 (`crates/sealmap-rust/tests/fingerprint.rs:228`).
 
 **Open:** because the impl header is part of every method's contract
-(`crates/sealmap-rust/src/collect.rs:438`-`440`), adding a bound to an
+(`crates/sealmap-rust/src/collect.rs:450`-`452`), adding a bound to an
 impl's `where` clause changes the `sig_hash` of every method in it; the design's
 contract class (`docs/DESIGN.md:85`) does not say whether that is meant to
 read as a contract change for each of them.
@@ -132,19 +132,19 @@ read as a contract change for each of them.
 
 ```mermaid
 flowchart TB
-    subgraph CALL["callables, sealmap-rust/src/collect.rs:507"]
+    subgraph CALL["callables, sealmap-rust/src/collect.rs:526"]
         CS["sig: attrs, vis, signature,<br/>plus impl or trait header"]
         CB["body: the block"]
     end
-    subgraph DATA["struct, enum, union, sealmap-rust/src/collect.rs:556"]
+    subgraph DATA["struct, enum, union, sealmap-rust/src/collect.rs:575"]
         DS["sig: the whole declaration"]
         DB["body: generics and fields or<br/>variants, no name"]
     end
-    subgraph TRAIT["traits, sealmap-rust/src/collect.rs:597"]
+    subgraph TRAIT["traits, sealmap-rust/src/collect.rs:616"]
         TS["sig: header and every member signature"]
         TB["body: every member, defaults included"]
     end
-    subgraph VALUE["const, static, sealmap-rust/src/collect.rs:636"]
+    subgraph VALUE["const, static, sealmap-rust/src/collect.rs:655"]
         VS["sig: everything but the value"]
         VB["body: the value"]
     end
@@ -161,7 +161,7 @@ implements it.
 
 **Why it is this way.** Data-type fields are fed one by one, each with its own
 separator, so the trailing comma of a field list never enters the stream
-(`crates/sealmap-rust/src/collect.rs:552`-`555`).
+(`crates/sealmap-rust/src/collect.rs:571`-`574`).
 
 **Open:** a module's `body_hash` folds the values of every member
 (`crates/sealmap-rust/src/collect.rs:179`-`181`), so it changes on any edit
@@ -202,7 +202,7 @@ macro body is hashed token by token
 (`crates/sealmap-rust/src/fingerprint.rs:27`-`30`), so a formatter rewrite
 inside, for example, a `macro_rules!` arm or a DSL macro changes the
 fingerprint, and a `macro_rules!` definition's body is fed raw
-(`crates/sealmap-rust/src/collect.rs:411`).
+(`crates/sealmap-rust/src/collect.rs:423`).
 
 ## EXT-06.5 Is this comma layout?
 
