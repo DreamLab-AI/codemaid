@@ -296,28 +296,40 @@ pub fn shard(input: &PackInput<'_>, ids: &[String], options: &PackOptions) -> Re
     let builder = Builder::new(input, ids, options)?;
     let sections = builder.sections();
     let Some(budget) = options.budget else { return Ok(vec![builder.assemble(&sections, None)]) };
-    let mut packs = Vec::new();
-    let mut current: Vec<Section> = Vec::new();
-    for section in sections {
-        let mut grown = current.clone();
-        grown.push(section.clone());
-        if builder.assemble(&grown, Some(packs.len() + 1)).text.len() <= budget {
-            current = grown;
+    // Sizes are planned from the header and the section lengths; each pack
+    // is assembled once.
+    let mut plan: Vec<Vec<usize>> = Vec::new();
+    let mut current: Vec<usize> = Vec::new();
+    for (i, section) in sections.iter().enumerate() {
+        let size = |members: &[usize], shard: usize| {
+            let ids: Vec<&str> = members.iter().map(|&m| sections[m].id.as_str()).collect();
+            builder.header(&ids, Some(shard)).len() + members.iter().map(|&m| sections[m].text.len()).sum::<usize>()
+        };
+        current.push(i);
+        if size(&current, plan.len() + 1) <= budget {
             continue;
         }
+        current.pop();
         if !current.is_empty() {
-            packs.push(builder.assemble(&current, Some(packs.len() + 1)));
+            plan.push(std::mem::take(&mut current));
         }
-        let alone = builder.assemble(std::slice::from_ref(&section), Some(packs.len() + 1));
-        if alone.text.len() > budget {
-            return Err(PackError::TopicOverBudget { id: section.id, bytes: alone.text.len(), budget });
+        let alone = size(&[i], plan.len() + 1);
+        if alone > budget {
+            return Err(PackError::TopicOverBudget { id: section.id.clone(), bytes: alone, budget });
         }
-        current = vec![section];
+        current.push(i);
     }
     if !current.is_empty() {
-        packs.push(builder.assemble(&current, Some(packs.len() + 1)));
+        plan.push(current);
     }
-    Ok(packs)
+    Ok(plan
+        .iter()
+        .enumerate()
+        .map(|(n, members)| {
+            let chosen: Vec<Section> = members.iter().map(|&m| sections[m].clone()).collect();
+            builder.assemble(&chosen, Some(n + 1))
+        })
+        .collect())
 }
 
 /// The topics whose sealed or cited symbols changed between `before` and
@@ -507,6 +519,19 @@ impl<'a, 'i> Builder<'a, 'i> {
 
     /// The header plus `sections`, as one pack (shard `shard` when given).
     fn assemble(&self, sections: &[Section], shard: Option<usize>) -> Pack {
+        let ids: Vec<&str> = sections.iter().map(|s| s.id.as_str()).collect();
+        let mut text = self.header(&ids, shard);
+        let header = text.len();
+        let mut topics = Vec::with_capacity(sections.len());
+        for s in sections {
+            text.push_str(&s.text);
+            topics.push(TopicSize { id: s.id.clone(), bytes: s.text.len() });
+        }
+        Pack { text, header, topics }
+    }
+
+    /// The header of a pack of the topics `ids` (shard `shard` when given).
+    fn header(&self, ids: &[&str], shard: Option<usize>) -> String {
         let input = self.input;
         let mut text = format!("# sealmap-pack {PACK_FORMAT_VERSION}\ngenerator: {GENERATOR}\n");
         let _ = writeln!(text, "codebase: {}", one_line(&input.codebase.name));
@@ -514,7 +539,6 @@ impl<'a, 'i> Builder<'a, 'i> {
         if let Some(base) = input.diff {
             let _ = writeln!(text, "diff: {}", one_line(base));
         }
-        let ids: Vec<&str> = sections.iter().map(|s| s.id.as_str()).collect();
         let _ = writeln!(text, "topics: {}", ids.join(" "));
         match self.options.budget {
             Some(b) => {
@@ -527,13 +551,7 @@ impl<'a, 'i> Builder<'a, 'i> {
         if let Some(n) = shard {
             let _ = writeln!(text, "shard: {n}");
         }
-        let header = text.len();
-        let mut topics = Vec::with_capacity(sections.len());
-        for s in sections {
-            text.push_str(&s.text);
-            topics.push(TopicSize { id: s.id.clone(), bytes: s.text.len() });
-        }
-        Pack { text, header, topics }
+        text
     }
 }
 
