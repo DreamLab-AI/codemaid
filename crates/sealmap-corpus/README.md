@@ -6,12 +6,20 @@
 Projects a `sealmap_model::Codebase` into a corpus of dense Mermaid diagrams
 with exactly one document per source file, plus an overview, a JSON index that
 links every call to the fragment that expands it, and the model itself. It
-also writes the corpus to disk and checks a directory against it (`verify`),
-touching only files it generated.
+also writes the corpus to disk and checks a directory against it, touching
+only files it generated.
 
-Part of [sealmap](https://github.com/DreamLab-AI/sealmap). The 0.2 line adds
-the seal lockfile, `resolve`, `stale`, `seal-check`, `pack` and a
-corpus-wide `verify` here (planned).
+Its `seal` module keeps hand-written diagram topics true to the code. A
+topic cites symbols by `sym:` id; `seals.lock` records the `sig_hash` and
+`body_hash` each had when the topic was reviewed, plus a hash of the topic's
+prose. `seal::verify` classifies every seal as holds, behaviour, contract,
+absent (with rename candidates), unparsable (fail closed), unsealed
+citation, orphan, prose edited or lock fault; `seal::stale` compares two
+models; `seal::sign` writes a seal. All of it is pure: no file system, no
+git.
+
+Part of [sealmap](https://github.com/DreamLab-AI/sealmap). Review packs
+(`pack`) are planned.
 
 ```rust
 use sealmap_corpus::{CorpusOptions, generate};

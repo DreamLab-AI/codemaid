@@ -1,6 +1,6 @@
 [package]
 name = "sealmap-corpus"
-description = "Projects a sealmap Codebase into a contract-enforced 1:1 corpus of dense Mermaid diagrams with LLM-ready metadata"
+description = "Dense Mermaid projections of a sealmap Codebase, and the seal lockfile and checks that keep hand-written diagram topics true to the code"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
@@ -19,9 +19,12 @@ sealmap-mermaid.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+toml.workspace = true
+blake3.workspace = true
 
 [dev-dependencies]
 sealmap-rust.workspace = true
+proptest.workspace = true
 
 [lints]
 workspace = true

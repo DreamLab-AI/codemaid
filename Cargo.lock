@@ -479,12 +479,15 @@ dependencies = [
 name = "sealmap-corpus"
 version = "0.1.0"
 dependencies = [
+ "blake3",
+ "proptest",
  "sealmap-mermaid",
  "sealmap-model",
  "sealmap-rust",
  "serde",
  "serde_json",
  "thiserror",
+ "toml",
 ]
 
 [[package]]

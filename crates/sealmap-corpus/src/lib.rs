@@ -1,5 +1,9 @@
 //! # sealmap-corpus
 //!
+//! Two jobs: the generated 1:1 Mermaid corpus (below), and [`seal`], the
+//! lockfile and checks that keep hand-written diagram topics true to the
+//! code they cite (`sealmap verify`).
+//!
 //! Projects a [`Codebase`] into a **contract-enforced, 1:1 corpus** of dense
 //! Mermaid diagrams plus machine-readable metadata, designed to be read by
 //! LLM agents and merged by an orchestrating agent.
@@ -20,8 +24,8 @@
 //! | [`Drift::Modified`] | source unchanged but document differs (hand edit, or generator/options changed) |
 //!
 //! [`write()`] brings a directory into compliance (and only ever deletes files
-//! that carry the sealmap header), so `sealmap verify` in CI plus
-//! `sealmap generate` locally keeps the corpus honest.
+//! that carry the sealmap header); `sealmap generate --check` runs [`verify`]
+//! and writes nothing. The corpus is a regenerable view, not a gate.
 //!
 //! ## What a document contains
 //!
@@ -89,6 +93,7 @@ mod document;
 mod index;
 mod naming;
 mod overview;
+pub mod seal;
 mod sequence;
 mod structure;
 
