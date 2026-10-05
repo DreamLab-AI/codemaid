@@ -93,7 +93,9 @@ pub use source::{LoadOptions, SourceFile, SourceSet};
 pub use sym::{
     Descriptor, DescriptorKind, DescriptorView, GlobalView, IdError, IdView, Package, Suffix, SymbolId, Version,
 };
-pub use symbol::{Confidence, Member, MemberKind, Relation, RelationKind, Span, Symbol, SymbolKind, Visibility};
+pub use symbol::{
+    Confidence, Member, MemberKind, PARSE_ERROR_TAG, Relation, RelationKind, Span, Symbol, SymbolKind, Visibility,
+};
 
 /// Version of the serialised model schema (the JSON shape of [`Codebase`]).
 ///

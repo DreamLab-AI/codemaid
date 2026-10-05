@@ -71,7 +71,7 @@ pub(crate) fn failed_file(path: &SourcePath, role: &FileRole, text: &str, error:
             doc: None,
             vis: Visibility::Public,
             uses: Vec::new(),
-            tags: vec!["parse_error".into()],
+            tags: vec![sealmap_model::PARSE_ERROR_TAG.into()],
             sig_hash,
             body_hash,
         }],

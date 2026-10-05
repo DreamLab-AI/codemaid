@@ -339,3 +339,30 @@ impl Relation {
         Self { from, to, kind, confidence }
     }
 }
+
+/// The tag a language adapter puts on the module symbol of a file it could
+/// not parse. Such a file contributes that one symbol and nothing else, so
+/// any definition it held is missing from the model.
+///
+/// Consumers that must **fail closed** on unparsable code (the seal check in
+/// `sealmap-corpus`) look for this tag rather than for adapter diagnostics,
+/// so they need nothing but the [`Codebase`](crate::Codebase).
+///
+/// ```
+/// use sealmap_model::{PARSE_ERROR_TAG, SourcePath, Symbol, SymbolId, SymbolKind};
+///
+/// let id = SymbolId::parse("sym:cargo shop . db/").unwrap();
+/// let mut module = Symbol::new(id, "db", SymbolKind::Module, SourcePath::new("src/db.rs").unwrap());
+/// assert!(!module.is_unparsable());
+/// module.tags.push(PARSE_ERROR_TAG.into());
+/// assert!(module.is_unparsable());
+/// ```
+pub const PARSE_ERROR_TAG: &str = "parse_error";
+
+impl Symbol {
+    /// `true` when this is the module symbol of a file that failed to parse
+    /// (it carries [`PARSE_ERROR_TAG`]).
+    pub fn is_unparsable(&self) -> bool {
+        self.tags.iter().any(|t| t == PARSE_ERROR_TAG)
+    }
+}

@@ -26,7 +26,7 @@ pub(crate) fn render(
     if let Some(doc) = module.and_then(|m| m.doc.as_deref()) {
         let _ = writeln!(body, "> {}", inline(doc));
     }
-    if module.is_some_and(|m| m.tags.iter().any(|t| t == "parse_error")) {
+    if module.is_some_and(sealmap_model::Symbol::is_unparsable) {
         let _ = writeln!(body, "> ⚠ file did not parse; only its module is listed");
     }
 
