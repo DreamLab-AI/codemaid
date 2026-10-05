@@ -3,6 +3,7 @@
 //! ```text
 //! sealmap generate [PATH] [-o .sealmap] [--check]   # write (or compare) the generated corpus
 //! sealmap model    [PATH]                           # print the model as JSON
+//! sealmap dense    [PATH] [-o .sealmap/dense]       # the dense agent projection
 //! sealmap resolve  'sym:cargo shop . db/Db#insert().'   # current span and hashes
 //! sealmap verify                                    # the seal gate over docs/diagrams (CI)
 //! sealmap seal-check CP-03 CP-07                    # classify chosen lock entries
@@ -25,6 +26,7 @@ use std::process::{Command, ExitCode, Stdio};
 use clap::{Args, Parser, Subcommand};
 use sealmap::corpus::seal::{self, Lock, Resolution, SealReport, Signature};
 use sealmap::corpus::{self, Drift, ExternalLanes};
+use sealmap::dense::{self, DenseOptions};
 use sealmap::model::{Codebase, SourcePath, SymbolId};
 use sealmap::rust::{ExternalCalls, RustOptions};
 use sealmap::{Options, SourceSet};
@@ -42,6 +44,8 @@ enum Cmd {
     Generate(Generate),
     /// Print the extracted model as JSON to stdout.
     Model(ModelArgs),
+    /// Write the dense agent projection: dense.txt and _index.txt.
+    Dense(DenseArgs),
     /// Where a symbol is now (span and hashes), or `absent` with rename candidates.
     Resolve(Resolve),
     /// Classify lock entries: holds, behaviour, contract, absent, ... Exits 1 unless all hold.
@@ -119,6 +123,27 @@ struct ModelArgs {
     /// External calls to keep in flows: all, non-std, none.
     #[arg(long, default_value = "non-std")]
     external: String,
+}
+
+#[derive(Args)]
+struct DenseArgs {
+    /// Source root (ignored when --repo is given).
+    #[arg(default_value = ".")]
+    path: PathBuf,
+    #[command(flatten)]
+    source: Source,
+    /// Output directory.
+    #[arg(short, long, default_value = ".sealmap/dense")]
+    out: PathBuf,
+    /// Call levels expanded under a tree's root before a callee is cut.
+    #[arg(long, default_value_t = DenseOptions::default().max_depth)]
+    depth: usize,
+    /// External calls to keep in flows: all, non-std, none.
+    #[arg(long, default_value = "non-std")]
+    external: String,
+    /// Print sizes and call-edge counts to stderr.
+    #[arg(long)]
+    stats: bool,
 }
 
 /// The authored corpus and the code it cites.
@@ -200,6 +225,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             println!("{}", serde_json::to_string_pretty(&codebase).map_err(|e| e.to_string())?);
             Ok(ExitCode::SUCCESS)
         }
+        Cmd::Dense(d) => dense(&d),
         Cmd::Resolve(r) => resolve(&r),
         Cmd::SealCheck(s) => {
             let only: BTreeSet<String> = s.topics.iter().cloned().collect();
@@ -268,6 +294,34 @@ fn generate(g: &Generate) -> Result<ExitCode, String> {
     Ok(ExitCode::SUCCESS)
 }
 
+// ------------------------------------------------------------------ dense
+
+fn dense(d: &DenseArgs) -> Result<ExitCode, String> {
+    let (cb, _, sources) = extract_sources(&d.path, &d.source, external(&d.external)?)?;
+    let out = dense::render(&cb, &DenseOptions::with_max_depth(d.depth));
+    fs::create_dir_all(&d.out).map_err(|e| format!("{}: {e}", d.out.display()))?;
+    for (name, text) in out.files() {
+        let path = d.out.join(name);
+        fs::write(&path, text).map_err(|e| format!("{}: {e}", path.display()))?;
+    }
+    if d.stats {
+        let source: usize = cb.files.keys().filter_map(|p| sources.get(p)).map(str::len).sum();
+        let calls_at = out.text.find("\n# calls\n").map_or(out.text.len(), |i| i + 1);
+        let stats = cb.stats();
+        eprintln!(
+            "source={source} dense={} index={} skeleton={} calls={} call_edges={} symbols={} ratio={:.3}",
+            out.text.len(),
+            out.index.len(),
+            calls_at,
+            out.text.len() - calls_at,
+            stats.calls,
+            stats.symbols,
+            out.text.len() as f64 / source.max(1) as f64,
+        );
+    }
+    Ok(ExitCode::SUCCESS)
+}
+
 fn external(s: &str) -> Result<ExternalCalls, String> {
     match s {
         "all" => Ok(ExternalCalls::All),
@@ -283,6 +337,15 @@ fn external(s: &str) -> Result<ExternalCalls, String> {
 /// and the codebase name used, so a second tree can be read under the same
 /// name.
 fn extract(root: &Path, source: &Source, external_calls: ExternalCalls) -> Result<(Codebase, String), String> {
+    extract_sources(root, source, external_calls).map(|(cb, name, _)| (cb, name))
+}
+
+/// [`extract`], also returning the source texts that were read.
+fn extract_sources(
+    root: &Path,
+    source: &Source,
+    external_calls: ExternalCalls,
+) -> Result<(Codebase, String, SourceSet), String> {
     let mut ro = RustOptions { include_tests: source.tests, external_calls, ..RustOptions::default() };
     let sources: SourceSet = if source.repos.is_empty() {
         ro.name = source.name.clone().unwrap_or_else(|| dir_name(root));
@@ -298,7 +361,7 @@ fn extract(root: &Path, source: &Source, external_calls: ExternalCalls) -> Resul
     for d in &extraction.diagnostics {
         eprintln!("warning: {}: {}", d.file, d.message);
     }
-    Ok((extraction.codebase, ro.name))
+    Ok((extraction.codebase, ro.name, sources))
 }
 
 fn parse_repos(repos: &[String]) -> Result<Vec<(String, PathBuf)>, String> {

@@ -26,8 +26,8 @@ operations are cheap.
 The id is the identity half of rustc's identity/freshness split
 (`crates/sealmap-model/src/sym.rs:3`-`9`): the content half lives in
 fingerprints (MOD-02). It was introduced in commit `5973a4e` as step 2 of the
-0.2 plan (`docs/DESIGN.md:259`), replacing the 0.1 `::` path ids whose
-`::` → `__` mangling was not injective (`docs/DESIGN.md:198`).
+0.2 plan (`docs/DESIGN.md:273`), replacing the 0.1 `::` path ids whose
+`::` → `__` mangling was not injective (`docs/DESIGN.md:212`).
 
 The builder that mints ids for real definitions is `sealmap-extract`'s
 `ids` module (EXT-02); this topic covers the grammar it targets. What this
@@ -106,7 +106,7 @@ are plain string operations, and a parent sorts before its children because
 its text is a prefix of theirs (`crates/sealmap-model/src/sym.rs:101`-`104`).
 The owner chose SCIP's descriptor suffixes so a global id maps to a SCIP
 symbol by swapping the prefix (`crates/sealmap-model/src/sym.rs:11`-`13`),
-which is what keeps a later `export --scip` cheap (`docs/DESIGN.md:150`).
+which is what keeps a later `export --scip` cheap (`docs/DESIGN.md:164`).
 
 **Invariant:** two ids are equal exactly when their texts are, because only
 canonical text is ever stored; `parse` refuses anything that does not print

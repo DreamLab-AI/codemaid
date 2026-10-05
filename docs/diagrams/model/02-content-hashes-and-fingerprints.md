@@ -33,7 +33,7 @@ means, how two `#[cfg]` twins that share an id end up with one fingerprint,
 and what the pair lets the seal check decide (built; drawn in COR-04).
 
 The fingerprints arrived in commit `0a304ba` (step 2 of the 0.2 plan,
-`docs/DESIGN.md:259`), after rustc's split between a definition's identity
+`docs/DESIGN.md:273`), after rustc's split between a definition's identity
 and its query fingerprints (`docs/DESIGN.md:130`).
 
 ## For the business

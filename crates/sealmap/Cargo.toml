@@ -26,6 +26,7 @@ sealmap-extract.workspace = true
 sealmap-mermaid.workspace = true
 sealmap-rust.workspace = true
 sealmap-corpus.workspace = true
+sealmap-dense.workspace = true
 serde_json.workspace = true
 clap = { workspace = true, optional = true }
 

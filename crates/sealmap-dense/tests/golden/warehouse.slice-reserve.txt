@@ -1,0 +1,23 @@
+# sealmap-dense 1 slice depth 2 warehouse: L<a>-<b> source lines; @name short names (see _index.txt); calls ~inferred ?external, ^ expanded above, ↺ cycle, … cut; tree roots: bare = entry point, … = continued, ↺ = cycle-only
+# symbols
+## src/inventory.rs
+pub fn available(&self, sku: &str) -> u32 L5-7 @StockStore.available
+pub fn record(&mut self, line: String) L27-29 @InventoryLedger.record
+pub fn reserve(&mut self, sku: &str, qty: u32) -> Result<(), StockError> L33-40 @InventoryLedger.reserve
+## src/orders.rs
+pub async fn place(ledger: &mut InventoryLedger, order: PurchaseOrder) -> Result<usize, StockError> L24-33 @place
+# calls
+InventoryLedger.reserve
+ StockStore.available(sku)
+  warehouse::inventory::StockStore::lookup(sku)
+ opt have<qty
+  return Err(StockError::Short { sku: sku.into(), wanted:…
+ InventoryLedger.record(_)
+# callers
+InventoryLedger.reserve
+ place
+# index
+InventoryLedger.record sym:cargo warehouse . inventory/InventoryLedger#record(). src/inventory.rs:L27-29
+InventoryLedger.reserve sym:cargo warehouse . inventory/InventoryLedger#[StockStore]reserve(). src/inventory.rs:L33-40
+StockStore.available sym:cargo warehouse . inventory/StockStore#available(). src/inventory.rs:L5-7
+place sym:cargo warehouse . orders/place(). src/orders.rs:L24-33

@@ -27,6 +27,7 @@ changed (see the
 | [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0) |
 | [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust language adapter (syn) |
 | [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index and write; the seal lock, `verify`, `seal_check`, `stale`, `resolve`, `sign` |
+| [`sealmap-dense`](https://crates.io/crates/sealmap-dense) | compact agent projection: skeletons, call trees, short-name index, budgeted slices (`sealmap::dense`) |
 
 ## Command line
 
@@ -37,6 +38,7 @@ sealmap generate .                  # write the corpus, model and index to .seal
 sealmap generate . --check          # exit 1 if .sealmap/ no longer matches a fresh generation
 sealmap model    .  > model.json    # just the model
 sealmap generate --repo api=../api --repo core=../core -o .sealmap   # several repositories as one
+sealmap dense    . --stats          # the agent projection: dense.txt + _index.txt in .sealmap/dense
 
 # Seals over the authored topics in docs/diagrams/ (lock: docs/diagrams/seals.lock)
 sealmap resolve 'sym:cargo shop . db/Db#insert().'      # span and hashes, or absent + rename candidates

@@ -28,7 +28,7 @@ compliance and only ever deletes files that carry the generator's header
 
 Since step 3 the command line reaches that contract only through
 `sealmap generate`: plain `generate` writes, and `generate --check` compares
-and writes nothing (`crates/sealmap/src/main.rs:243`-`254`). The name `verify`
+and writes nothing (`crates/sealmap/src/main.rs:269`-`280`). The name `verify`
 now belongs to the seal gate (COR-04, COR-05), and nothing generated is
 committed; CI checks instead that two fresh generations agree (DEL-01). This
 topic draws the generate path, the drift classes and the shared flags.
@@ -52,26 +52,26 @@ a pipeline that ran `sealmap verify` against a committed corpus now wants
 sequenceDiagram
     autonumber
     participant US as developer or CI
-    participant GE as generate<br/>main.rs:232
-    participant EX as extract<br/>main.rs:285
+    participant GE as generate<br/>main.rs:258
+    participant EX as extract<br/>main.rs:339
     participant AD as sealmap-rust extract
     participant PR as sealmap generate
     participant CT as contract verify or write
     US->>GE: generate PATH -o DIR, maybe --check
-    GE->>GE: map flags onto the corpus options (main.rs:233)
-    GE->>EX: sources, single dir or several repos (main.rs:241)
-    EX->>EX: codebase name from --name, the dir or the repo names (main.rs:288)
-    EX->>AD: extract once (main.rs:297)
-    AD-->>EX: Extraction, diagnostics printed as warnings (main.rs:298)
-    EX-->>GE: model and the name used (main.rs:301)
-    GE->>PR: corpus in memory (main.rs:242)
+    GE->>GE: map flags onto the corpus options (main.rs:259)
+    GE->>EX: sources, single dir or several repos (main.rs:267)
+    EX->>EX: codebase name from --name, the dir or the repo names (main.rs:351)
+    EX->>AD: extract once (main.rs:360)
+    AD-->>EX: Extraction, diagnostics printed as warnings (main.rs:361)
+    EX-->>GE: model and the name used (main.rs:340)
+    GE->>PR: corpus in memory (main.rs:268)
     alt --check
-        GE->>CT: compare DIR with the fresh corpus (main.rs:244)
+        GE->>CT: compare DIR with the fresh corpus (main.rs:270)
         CT-->>GE: Report
-        GE-->>US: one padded line per drift, exit 1 if any (main.rs:246, main.rs:253)
+        GE-->>US: one padded line per drift, exit 1 if any (main.rs:272, main.rs:279)
     else write
-        GE->>CT: bring DIR into compliance (main.rs:255)
-        GE-->>US: counts written, removed, unchanged (main.rs:258)
+        GE->>CT: bring DIR into compliance (main.rs:281)
+        GE-->>US: counts written, removed, unchanged (main.rs:284)
     end
 ```
 
@@ -81,11 +81,11 @@ except the bytes being compared.
 
 **Why it is this way.** The extraction helper returns the codebase name it
 used, so `stale --since` can read a second tree under the same name
-(`crates/sealmap/src/main.rs:282`-`285`). Errors in arguments or IO exit 2,
-drift under `--check` exits 1 (`crates/sealmap/src/main.rs:190`,
-`crates/sealmap/src/main.rs:253`). A drift name is padded through
+(`crates/sealmap/src/main.rs:336`-`339`). Errors in arguments or IO exit 2,
+drift under `--check` exits 1 (`crates/sealmap/src/main.rs:215`,
+`crates/sealmap/src/main.rs:279`). A drift name is padded through
 `to_string`, because `Drift`'s `Display` writes with `write_str` and ignores a
-width (`crates/sealmap/src/main.rs:246`,
+width (`crates/sealmap/src/main.rs:272`,
 `crates/sealmap-corpus/src/contract.rs:32`).
 
 ## COR-03.2 Classifying a difference
@@ -188,16 +188,18 @@ can also be summarised as one hash for cheap cross-machine equality
 
 ```mermaid
 flowchart TB
-    CMD["generate, model, resolve, seal-check,<br/>verify, stale, seal sign<br/>main.rs:40-62"]
-    SRC["shared source flags: --repo, --name, --tests<br/>main.rs:67-77"]
-    GEN["generate only: -o, --check, --external,<br/>--owner-lanes, --min-calls, --public-only,<br/>--no-model, --pretty<br/>main.rs:80-110"]
-    MOD["model: path, source flags, --external<br/>main.rs:113-122"]
-    OP["Options: rust and corpus halves<br/>sealmap/src/lib.rs:96"]
-    ONE["one directory: load_dir<br/>main.rs:289"]
-    MANY["several repos, each prefixed NAME/<br/>load_repos, sealmap/src/lib.rs:123"]
+    CMD["generate, model, dense, resolve, seal-check,<br/>verify, stale, seal sign<br/>main.rs:42-66"]
+    SRC["shared source flags: --repo, --name, --tests<br/>main.rs:71-81"]
+    GEN["generate only: -o, --check, --external,<br/>--owner-lanes, --min-calls, --public-only,<br/>--no-model, --pretty<br/>main.rs:84-114"]
+    MOD["model: path, source flags, --external<br/>main.rs:117-126"]
+    DNS["dense: path, source flags, -o, --depth,<br/>--external, --stats<br/>main.rs:129-147"]
+    OP["Options: rust and corpus halves<br/>sealmap/src/lib.rs:98"]
+    ONE["one directory: load_dir<br/>main.rs:352"]
+    MANY["several repos, each prefixed NAME/<br/>load_repos, sealmap/src/lib.rs:125"]
     CMD --> SRC
     CMD --> GEN
     CMD --> MOD
+    CMD --> DNS
     GEN --> OP
     SRC --> ONE
     SRC --> MANY
@@ -208,10 +210,10 @@ flowchart TB
 policy because it changes the flows it prints. Several repositories are
 loaded into one `SourceSet` under name prefixes, so calls between them
 resolve and the overview groups crates by repository
-(`crates/sealmap/src/lib.rs:110`-`111`).
+(`crates/sealmap/src/lib.rs:112`-`113`).
 
 **Why it is this way.** The source flags decide which symbols exist and what
 they are called, so a seal must be checked with the flags it was signed with
-(`crates/sealmap/src/main.rs:64`-`65`); the facade exists so the common path
-is one dependency (`crates/sealmap/src/lib.rs:34`-`35`), and the CLI is behind
+(`crates/sealmap/src/main.rs:68`-`69`); the facade exists so the common path
+is one dependency (`crates/sealmap/src/lib.rs:35`-`36`), and the CLI is behind
 the default `cli` feature, so a library user does not pull in clap.

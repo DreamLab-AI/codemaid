@@ -47,7 +47,7 @@ timestamps, no machine paths, no user names.
 Two properties lower risk directly. The loader honours the repository's own
 ignore files, so vendored and generated trees do not inflate the model (the
 design measured 47,229 files walked instead of 934 before this,
-`docs/DESIGN.md:196`). And a model written by another version is refused
+`docs/DESIGN.md:210`). And a model written by another version is refused
 outright rather than half-read, so a stale artefact cannot be mistaken for a
 current one.
 
@@ -95,7 +95,7 @@ carry a flow; a relation always carries a confidence.
 **Why it is this way.** Ordered collections make serialisation deterministic
 and every query iterate in key order (`crates/sealmap-model/src/codebase.rs:12`-`14`).
 Confidence is on every relation because there is no type checker behind the
-model, and nothing is meant to be guessed silently (`README.md:301`-`303`).
+model, and nothing is meant to be guessed silently (`README.md:304`-`306`).
 
 **Invariant:** a relation from a symbol to itself is never stored
 (`crates/sealmap-model/src/codebase.rs:91`).
@@ -135,7 +135,7 @@ files by extension and size and stores their text with `\n` line endings.
 **Why it is this way.** Reading only what is under the root, and never the
 user's global excludes, keeps the result a function of the checkout's bytes
 (`crates/sealmap-model/src/source.rs:53`-`57`). The ignore support was the
-hardening fix for the 48-second VisionClaw walk (`docs/DESIGN.md:196`). It
+hardening fix for the 48-second VisionClaw walk (`docs/DESIGN.md:210`). It
 also makes `ignore` a dependency of the model crate
 (`crates/sealmap-model/Cargo.toml:21`), which DEL-01 follows to the MSRV.
 

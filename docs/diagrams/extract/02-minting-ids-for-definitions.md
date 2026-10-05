@@ -39,7 +39,7 @@ no reviewed diagram. A real rename, or moving a function to another module,
 does change the name, which is what a reviewer would expect to look at again.
 
 One limit for adopters to know: items that a macro generates are not seen,
-so they get no name and cannot be cited or sealed (`README.md:324`).
+so they get no name and cannot be cited or sealed (`README.md:327`).
 
 ## EXT-02.1 The id table
 

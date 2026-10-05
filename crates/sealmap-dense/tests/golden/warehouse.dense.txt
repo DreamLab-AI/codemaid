@@ -1,0 +1,67 @@
+# sealmap-dense 1 warehouse: L<a>-<b> source lines; @name short names (see _index.txt); calls ~inferred ?external, ^ expanded above, ↺ cycle, … cut; tree roots: bare = entry point, … = continued, ↺ = cycle-only
+# symbols
+## src/inventory.rs
+pub mod inventory L1-49 @inventory/
+pub trait StockStore { fn reserve(&mut self, sku: &str, qty: u32) -> Result<(), StockError>, fn lookup(&self, sku: &str) -> u32 } L3-9 @StockStore
+pub fn available(&self, sku: &str) -> u32 L5-7 @StockStore.available
+pub enum StockError { Missing(String), Short{ sku: String, wanted: u32 } } L11-15 @StockError
+pub struct InventoryLedger { levels: BTreeMap<String, u32>, journal: Vec<String> } : StockStore L17-20 @inventory/InventoryLedger
+pub fn new() -> Self L23-25 @inventory/InventoryLedger.new
+pub fn record(&mut self, line: String) L27-29 @InventoryLedger.record
+pub fn reserve(&mut self, sku: &str, qty: u32) -> Result<(), StockError> L33-40 @InventoryLedger.reserve
+pub fn lookup(&self, sku: &str) -> u32 L42-44 @InventoryLedger.lookup
+pub fn validate(sku: &str) -> bool L47-49 @inventory/validate
+## src/ledger.rs
+pub mod ledger L1-42 @ledger/
+pub struct InventoryLedger L1-1 @ledger/InventoryLedger
+pub fn new() -> Self L4-6 @ledger/InventoryLedger.new
+pub fn settle(depth: u32) -> u32 L9-14 @settle
+pub fn reconcile(depth: u32) -> u32 L16-18 @reconcile
+fn audit_trail(n: u32) -> u32 L20-22 @audit_trail
+pub fn chain_alpha() L24-26 @chain_alpha
+fn chain_beta() L28-30 @chain_beta
+fn chain_gamma() L32-34 @chain_gamma
+fn chain_delta() L36-38 @chain_delta
+fn chain_epsilon() L40-42 @chain_epsilon
+## src/lib.rs
+pub mod warehouse L1-4 @warehouse/
+## src/orders.rs
+pub mod orders L1-41 @orders/
+pub struct PurchaseOrder { lines: Vec<OrderLine> } L3-5 @PurchaseOrder
+pub struct OrderLine { sku: String, qty: u32 } L7-10 @OrderLine
+pub fn from(line: OrderLine) -> Self L13-15 @PurchaseOrder[From<OrderLine>].from
+pub fn from(lines: Vec<OrderLine>) -> Self L19-21 @PurchaseOrder[From<Vec<OrderLine>>].from
+pub async fn place(ledger: &mut InventoryLedger, order: PurchaseOrder) -> Result<usize, StockError> L24-33 @place
+async fn notify(count: usize) L35-37 @notify
+pub fn validate(order: &PurchaseOrder) -> bool L39-41 @orders/validate
+# calls
+chain_alpha
+ chain_beta()
+  chain_gamma()
+   chain_delta() …
+chain_delta …
+ chain_epsilon()
+  settle(1)
+   opt depth == 0
+    return 0
+   reconcile(_) …
+reconcile …
+ settle(depth) ^
+ audit_trail(depth)
+  opt n> 10
+   audit_trail(_) ↺
+place
+ orders/validate(&order)
+  loop each via all
+   inventory/validate(&line.sku)
+ opt !validate(&order)
+  return Ok(0)
+ loop for line in &order.lines
+  InventoryLedger.reserve(&line.sku, line.qty)?
+   StockStore.available(sku)
+    warehouse::inventory::StockStore::lookup(sku)
+   opt have<qty
+    return Err(StockError::Short { sku: sku.into(), wanted:…
+   InventoryLedger.record(_)
+ notify(len()).await
+  ?serde_json::to_string(&count)

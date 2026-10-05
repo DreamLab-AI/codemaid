@@ -60,7 +60,7 @@ new commit, correct the lines that moved, and bump that topic's
 `verified_commit`; leave topics whose sources did not change on their stamp.
 
 <!-- BEGIN GENERATED DIAGRAM INDEX -->
-_18 topic files, 96 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
+_19 topic files, 102 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
 
 ### model
 
@@ -104,4 +104,10 @@ _18 topic files, 96 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram
 |----|-------|----------|-------|-----------|------|
 | DEL-01 | [CI, the MSRV job and the determinism guarantees](delivery/01-ci-msrv-and-determinism.md) | 5 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 | DEL-02 | [Design versus code after the seal surface](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+
+### dense
+
+| ID | Topic | Diagrams | Kinds | Governing | ADRs |
+|----|-------|----------|-------|-----------|------|
+| DEN-01 | [The dense agent projection](dense/01-the-dense-agent-projection.md) | 6 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 <!-- END GENERATED DIAGRAM INDEX -->

@@ -34,7 +34,7 @@ with generics and `#` starts an entity code
 (`crates/sealmap-mermaid/src/lib.rs:17`-`21`). This topic draws the writer
 contract, the escaping rules and how each builder renders. It is the reason a
 whole generated corpus parses: the README counts 4,680 diagrams from five
-codebases and 6,142 from a VisionClaw corpus (`README.md:304`-`307`).
+codebases and 6,142 from a VisionClaw corpus (`README.md:307`-`310`).
 
 ## For the business
 

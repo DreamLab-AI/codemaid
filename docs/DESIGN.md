@@ -38,7 +38,7 @@ Everything else lives in the skills.
 |---|---|---|---|---|
 | **Authored** | `docs/diagrams/<area>/NN-*.md`: consolidated topics, narratives, register; citations are `sym:` ids | yes | LLM skill, tiered (§6) | `sealmap verify` (ids resolve) + `diagram-index-gen.cjs --check --render` |
 | **Sealed** | `docs/diagrams/seals.lock` (and `docs/adr/seals.lock`); each topic and ADR carries a static `sealed: seals.lock` line | yes | the skill's seal step | `sealmap verify`: **the CI gate** |
-| **Generated** | model, index, dense projection, optional 1:1 Mermaid, under `.sealmap/` | **never** (gitignored) | `sealmap generate` | rebuilt in memory; never trusted from disk |
+| **Generated** | model, index, dense projection, optional 1:1 Mermaid, under `.sealmap/` | **never** (gitignored) | `sealmap generate`, `sealmap dense` | rebuilt in memory; never trusted from disk |
 | **Review pack** | `sealmap pack`: pegged topics + dense slices + bounded source windows; `--review` = diagrams only | never | crate | Gemini external review, seal review, debugging |
 
 **Retired from v0.1 (done in step 3):** the committed generated corpus
@@ -132,9 +132,22 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | `sealmap-rust` | syn language adapter, hardened (§7) |
 | `sealmap-ts` | oxc language adapter (§8); **deferred** until E0-R shows the gain |
 | `sealmap-mermaid` | typed writers, short participant aliases (−26.5 % tokens), **injective** ids with a uniqueness assertion |
-| `sealmap-dense` | agent projection: indented call trees + skeletons with `L<start>-<end>` + `_index.txt`. 0.45× source, about 13 tokens per call edge against 42 |
+| `sealmap-dense` | **exists.** Agent projection: skeletons with `L<start>-<end>` and short names, indented call trees (each callable expanded once; `^` reference, `↺` cycle, `…` depth cut), `_index.txt`, and the budgeted `slice` that `pack` embeds. Measured `dense.txt` 0.17–0.29× source and 13–18 tokens per call edge against 34–53 for Mermaid (sealmap, tokio, VisionClaw; bytes / 4) |
 | `sealmap-corpus` | generate, the `seal` module (lock parse and canonical write), `resolve`, `seal-check`, `stale`, `verify`, `sign`; `pack` next |
 | `sealmap` | facade and CLI; `sealmap-ts` behind a default feature, because oxc needs MSRV 1.97 |
+
+**`sealmap-dense` as built (differs from the research estimate).** The
+research figure (0.45× source) projected every function's flow on its own. The
+crate instead draws trees from entry points and expands each callable once, so
+every call site appears exactly once; that, plus printing each signature once,
+brings `dense.txt` to 0.17–0.29× source. The `_index.txt` that resolves short
+names to `sym:` ids is nearly as large again (0.15–0.17× source, because the
+ids are long), so it is a separate file an agent loads only to resolve a name;
+`dense.txt` plus the index is still 0.32–0.46×. Slices carry their own index
+section. A tree header with no mark is an entry point (nothing internal calls
+it); `name …` continues a cut and `name ↺` is reachable only through a cycle.
+The depth limit barely moves the size (±3 % between 1 and 10 levels); the
+default is 3.
 
 ### CLI
 
@@ -147,6 +160,7 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | `seal sign <topic> --reviewer --model [--date]` | write one topic's seal from the current code |
 | `pack <topics\|--diff old new> [--review] [--max-bytes]` | (next) deterministic blob. Refuses with a shard plan when over budget; never silently truncates; never includes the lock |
 | `generate [--check]` | writes `.sealmap/`; `--check` compares an existing directory with a fresh generation, writes nothing, exits 1 on drift |
+| `dense [PATH] [-o DIR] [--depth N] [--stats]` | writes `dense.txt` and `_index.txt` (default `.sealmap/dense`) |
 | `export --scip` (later) | interop |
 
 Git stays out of the libraries. `--diff` takes two trees, and `--since` is CLI
@@ -261,8 +275,8 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
 3. **Seal surface.** `seal` module plus `resolve` / `stale` / `seal-check` /
    `verify` / `pack`, and `sealmap-dense`. Retire the committed corpus.
    **First crates.io publish (0.2).** *Status: the seal module, `resolve`,
-   `stale`, `seal-check`, `verify`, `seal sign` and the retirement are done;
-   `pack` and `sealmap-dense` remain.*
+   `stale`, `seal-check`, `verify`, `seal sign`, the retirement,
+   `sealmap-dense` and `sealmap dense` are done; `pack` remains.*
 4. **E0-R** on VisionClaw and agentbox. This is the first headline number.
 5. **`sealmap` skill** (skill-builder): seal workflow, tiers, edge-check,
    bench. Amend diagrams-as-code and build-with-quality. Write the routing ADR.

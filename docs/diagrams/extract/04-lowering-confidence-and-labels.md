@@ -44,7 +44,7 @@ This is where sealmap is honest about what it does not know. Every call in
 every diagram carries one of three tags: `exact` (resolved through explicit
 paths, imports or declared types), `inferred` (matched by a weaker rule) or
 `external` (outside the analysed code). Nothing is guessed silently
-(`README.md:301`-`303`), and the generated sequence diagrams mark inferred
+(`README.md:304`-`306`), and the generated sequence diagrams mark inferred
 calls with a `~` so a reviewer can see which arrows to doubt (COR-01).
 
 By default calls into the standard library and calls on values of unknown

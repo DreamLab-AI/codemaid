@@ -31,7 +31,7 @@ This is what lets diagrams drawn separately, in different documents, be
 concatenated, merged or diffed by id (`crates/sealmap-corpus/src/lib.rs:63`-`68`).
 The encoding replaced, in commit `337301a`, a readable-plus-FNV-1a-suffix
 scheme from the hardening commit `8af26b3`, which in turn replaced 0.1's
-non-injective `::` → `__` mangling (`docs/DESIGN.md:198`). The corpus still
+non-injective `::` → `__` mangling (`docs/DESIGN.md:212`). The corpus still
 asserts uniqueness over every generated codebase as a guard. This topic draws
 the encoding, why it cannot collide, the proof the tests give, and where ids
 are still minted the lossy way.
@@ -167,7 +167,7 @@ back to the symbol it came from.
 
 ```mermaid
 flowchart TB
-    V1["0.1: path ids with :: turned into __<br/>not injective<br/>docs/DESIGN.md:198"]
+    V1["0.1: path ids with :: turned into __<br/>not injective<br/>docs/DESIGN.md:212"]
     V2["hardening, 8af26b3: readable ids,<br/>FNV-1a suffix on collision,<br/>corpus-wide assertion"]
     V3["step 2, 337301a: encoding of the<br/>sym id structure, no suffix<br/>symbol.rs:58"]
     V1 --> V2 --> V3
@@ -182,5 +182,5 @@ The README describes the current scheme (`README.md:209`-`212`).
 
 The design's hardening table now records the fix as it was built: injective
 readable ids derived from `sym:` ids, with no hash suffix
-(`docs/DESIGN.md:198`), as the code has it
+(`docs/DESIGN.md:212`), as the code has it
 (`crates/sealmap-mermaid/src/symbol.rs:10`-`12`).
