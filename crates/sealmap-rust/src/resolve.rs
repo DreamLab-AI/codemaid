@@ -4,7 +4,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use sealmap_extract::{aggregate_calls, ids, lower};
 use sealmap_model::{
-    Call, Codebase, Confidence, Flow, Member, Package, Relation, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind,
+    Call, Codebase, Confidence, Flow, Member, Package, Relation, RelationKind, SourceFile, Suffix, Symbol, SymbolId,
+    SymbolKind,
 };
 
 use crate::raw::*;
@@ -604,6 +605,19 @@ impl Resolver {
             } else if self.uses.get(&cur).is_some_and(|us| us.iter().any(|u| &u.alias == seg)) {
                 // `pub use` re-export inside an internal module.
                 return self.walk(&cur, &rest[i..], self_ty, ns, depth + 1, use_globs);
+            } else if i + 1 == rest.len()
+                && self.internal.contains(&cur)
+                && cur.last().is_some_and(|d| *d.suffix() == Suffix::Type)
+            {
+                // A member of an internal type that the code does not define
+                // (`Fingerprint::default()` from a derive, an associated item
+                // from a trait): it still belongs to that type, so it is
+                // `Type#member().` (or `Type#Member#` in type position), never
+                // a kind-free path that would cut it loose from the type.
+                cur = match ns {
+                    Ns::Value => ids::method_id(&cur, None, seg),
+                    Ns::Type => ids::item_id(&cur, SymbolKind::TypeAlias, seg),
+                };
             } else {
                 cur = cur.extend_path(seg);
             }

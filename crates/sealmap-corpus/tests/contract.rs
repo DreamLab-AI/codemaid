@@ -211,3 +211,14 @@ fn schema_v2_json_carries_ids_spans_and_fingerprints() {
     let back = sealmap_model::Codebase::from_json(c.document("_model.json").unwrap()).unwrap();
     assert_eq!(serde_json::to_string(&back).unwrap() + "\n", c.document("_model.json").unwrap());
 }
+
+/// An external call through a qualified path is labelled once with its
+/// owner (`Hasher::new_derive_key`), not twice (`Hasher::Hasher::…`), which
+/// the self-corpus showed after the `sym:` ids landed.
+#[test]
+fn external_path_calls_are_not_double_qualified() {
+    let c = corpus(&[("src/lib.rs", "pub fn f() { blake3::Hasher::new_derive_key(\"c\"); }")]);
+    let doc = c.document("src/lib.rs.md").unwrap();
+    assert!(doc.contains(": Hasher::new_derive_key("), "{doc}");
+    assert!(!doc.contains("Hasher::Hasher::"), "{doc}");
+}

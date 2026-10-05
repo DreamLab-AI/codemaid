@@ -392,3 +392,23 @@ fn destructured_bindings_inherit_the_scrutinee() {
     // A closure parameter is untyped, as before.
     assert_eq!(calls(&cb, "sym:cargo app . loose()."), [vacuum]);
 }
+
+/// A member of an internal type that the code does not define (a derived
+/// `Default`) still belongs to the type: it sits on the type's lane, not on
+/// an external one (seen in the self-corpus as `Fingerprint::default()` on a
+/// `sealmap_model ext` lane).
+#[test]
+fn undefined_member_of_internal_type_stays_with_the_type() {
+    let cb = model(&[
+        ("Cargo.toml", "[workspace]\nmembers = ['core', 'app']"),
+        ("core/Cargo.toml", "[package]\nname = 'core_model'"),
+        ("core/src/lib.rs", "mod hash;\npub use hash::Fp;"),
+        ("core/src/hash.rs", "#[derive(Default)]\npub struct Fp;"),
+        ("app/Cargo.toml", "[package]\nname = 'app'"),
+        ("app/src/lib.rs", "use core_model::Fp;\npub fn make() -> Fp { Fp::default() }"),
+    ]);
+    assert_eq!(
+        calls(&cb, "sym:cargo app . make()."),
+        [("sym:cargo core_model . hash/Fp#default().".to_owned(), Confidence::Inferred)]
+    );
+}

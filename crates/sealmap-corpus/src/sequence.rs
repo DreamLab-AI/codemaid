@@ -80,7 +80,12 @@ impl Ctx<'_> {
                     if c.confidence == Confidence::Inferred {
                         text.push('~');
                     }
-                    text.push_str(&prefix);
+                    // A path call's label already names its owner
+                    // (`Hasher::new_derive_key`); only bare method labels
+                    // need the lane's qualifier.
+                    if !c.label.starts_with(&prefix) {
+                        text.push_str(&prefix);
+                    }
                     text.push_str(&c.label);
                     if c.awaited {
                         text.push_str(".await");
