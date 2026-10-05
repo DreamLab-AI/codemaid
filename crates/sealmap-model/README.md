@@ -6,7 +6,7 @@
 A language-neutral, deterministic model of a codebase: source files, the
 symbols they define, the typed relations between them, and the ordered call
 flow of every function. It is the shared vocabulary of
-[sealmap](https://github.com/DreamLab-AI/sealmap): frontends produce a
+[sealmap](https://github.com/DreamLab-AI/sealmap): language adapters produce a
 `Codebase`, projections consume one, and neither side depends on the other.
 
 - **`sym:` symbol ids**: kind-explicit, SCIP-style, no file path

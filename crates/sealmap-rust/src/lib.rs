@@ -1,6 +1,6 @@
 //! # sealmap-rust
 //!
-//! A pure-Rust frontend that turns Rust source into a
+//! A pure-Rust language adapter that turns Rust source into a
 //! [`sealmap_model::Codebase`]: modules, types, traits, functions and
 //! methods, the relations between them, and an ordered call [`Flow`] for every
 //! function body (the input for sequence diagrams).
@@ -29,7 +29,7 @@
 //! ## Ids
 //!
 //! Every definition gets a `sym:` id in the `cargo` package named after its
-//! crate (see `sealmap_frontend::ids` for the full table):
+//! crate (see `sealmap_extract::ids` for the full table):
 //! `sym:cargo shop . db/Db#insert().`. Binary, test, example and bench
 //! targets are packages of their own (`shop_main`, `test_it`, ...), so a
 //! binary and the library never share an id.
@@ -37,7 +37,7 @@
 //! ## Fingerprints
 //!
 //! Every symbol carries `sig_hash` (its contract) and `body_hash` (its
-//! implementation), computed with `sealmap_frontend::fingerprint` from syn's
+//! implementation), computed with `sealmap_extract::fingerprint` from syn's
 //! token streams. Comments, doc comments, whitespace, lint attributes and the
 //! rewrites rustfmt makes (trailing commas, braces around a closure or match
 //! arm body, `use` order) never change them; neither does moving an item
@@ -121,12 +121,12 @@ mod tidy;
 
 use std::path::Path;
 
-use sealmap_frontend::isolate::{COLLECT_STACK_BYTES, map_isolated};
+use sealmap_extract::isolate::{COLLECT_STACK_BYTES, map_isolated};
 use sealmap_model::{LoadOptions, SourcePath, SourceSet};
 
-pub use sealmap_frontend::{Diagnostic, ExternalCalls, Extraction};
+pub use sealmap_extract::{Diagnostic, ExternalCalls, Extraction};
 
-/// Frontend options.
+/// Language adapter options.
 #[derive(Debug, Clone)]
 pub struct RustOptions {
     /// Codebase name, also used as the crate name when no `Cargo.toml` is
@@ -165,7 +165,7 @@ pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction {
 type Job<'a> = (SourcePath, layout::FileRole, &'a str);
 
 /// Pass 1 over every file, isolated per file (big stacks, panic guard; see
-/// [`sealmap_frontend::isolate`]). A panic while collecting one file degrades
+/// [`sealmap_extract::isolate`]). A panic while collecting one file degrades
 /// that file to a diagnostic instead of aborting the run.
 fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile> {
     map_isolated(

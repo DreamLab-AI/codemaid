@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use sealmap_frontend::{aggregate_calls, ids, lower};
+use sealmap_extract::{aggregate_calls, ids, lower};
 use sealmap_model::{
     Call, Codebase, Confidence, Flow, Member, Package, Relation, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind,
 };

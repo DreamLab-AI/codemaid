@@ -239,9 +239,9 @@ fn renaming_changes_the_id_and_keeps_the_body_hash() {
     assert_eq!(of(&a, "sym:cargo app . Point#").1, of(&b, "sym:cargo app . Vec2#").1);
 }
 
-/// Pinned values for a fixed input: any change to what the Rust frontend
+/// Pinned values for a fixed input: any change to what the Rust language adapter
 /// feeds, or to the shared encoding, fails here. Bump the algorithm id
-/// (`sealmap_frontend::fingerprint::ALGORITHM`) when that is intended.
+/// (`sealmap_extract::fingerprint::ALGORITHM`) when that is intended.
 #[test]
 fn golden_values() {
     let cb = model(&[("src/lib.rs", "pub fn add(a: u8) -> u8 { a + 1 }\npub struct P { x: u8 }\n")]);

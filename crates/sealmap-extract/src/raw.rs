@@ -1,4 +1,4 @@
-//! The raw flow IR: what a frontend records while walking a function body,
+//! The raw flow IR: what a language adapter records while walking a function body,
 //! before any name is resolved.
 //!
 //! Everything here is owned `String`s and `Vec`s (no parser nodes), so files
@@ -7,7 +7,7 @@
 //! [`Flow`](sealmap_model::Flow).
 //!
 //! ```
-//! use sealmap_frontend::raw::{Callee, RawCall, RawStep, last_call_mut};
+//! use sealmap_extract::raw::{Callee, RawCall, RawStep, last_call_mut};
 //! use sealmap_model::CallKind;
 //!
 //! let mut out = vec![RawStep::Call(RawCall::new(Callee::Path(vec!["load".into()]), "load()".into(), CallKind::Function, 3))];

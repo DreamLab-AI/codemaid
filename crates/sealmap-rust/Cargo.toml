@@ -1,6 +1,6 @@
 [package]
 name = "sealmap-rust"
-description = "Pure-Rust (syn) frontend for sealmap: extracts symbols, relations and ordered call flows from Rust workspaces"
+description = "Pure-Rust (syn) language adapter for sealmap: extracts symbols, relations and ordered call flows from Rust workspaces"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
@@ -16,11 +16,11 @@ categories.workspace = true
 [features]
 default = ["parallel"]
 ## Parse files on all cores with rayon. Output is identical with or without it.
-parallel = ["sealmap-frontend/parallel"]
+parallel = ["sealmap-extract/parallel"]
 
 [dependencies]
 sealmap-model.workspace = true
-sealmap-frontend.workspace = true
+sealmap-extract.workspace = true
 syn.workspace = true
 proc-macro2.workspace = true
 quote.workspace = true

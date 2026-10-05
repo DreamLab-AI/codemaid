@@ -17,8 +17,8 @@ see the [design](https://github.com/DreamLab-AI/sealmap/blob/main/docs/DESIGN.md
 |---|---|
 | [`sealmap-model`](https://crates.io/crates/sealmap-model) | language-neutral code model |
 | [`sealmap-mermaid`](https://crates.io/crates/sealmap-mermaid) | typed Mermaid writers, no dependencies |
-| [`sealmap-frontend`](https://crates.io/crates/sealmap-frontend) | logic shared by every language frontend |
-| [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust frontend (syn) |
+| [`sealmap-extract`](https://crates.io/crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0) |
+| [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust language adapter (syn) |
 | [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index, write and verify |
 
 ## Command line

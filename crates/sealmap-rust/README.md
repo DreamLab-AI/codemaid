@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/sealmap-rust.svg)](https://crates.io/crates/sealmap-rust)
 [![docs.rs](https://img.shields.io/docsrs/sealmap-rust)](https://docs.rs/sealmap-rust)
 
-A pure-Rust frontend for [sealmap](https://github.com/DreamLab-AI/sealmap): it
+A pure-Rust language adapter for [sealmap](https://github.com/DreamLab-AI/sealmap): it
 turns Rust source into a `sealmap_model::Codebase` of modules, types, traits,
 functions and methods, the relations between them, and an ordered call flow
 for every function body.

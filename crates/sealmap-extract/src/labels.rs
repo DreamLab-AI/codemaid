@@ -7,7 +7,7 @@
 //! are purely textual, so the result depends only on the text.
 //!
 //! ```
-//! use sealmap_frontend::labels::{LABEL_MAX, call_label, clip, squeeze};
+//! use sealmap_extract::labels::{LABEL_MAX, call_label, clip, squeeze};
 //!
 //! assert_eq!(squeeze("fn foo (& self , a : u8) -> u8"), "fn foo(&self, a: u8) -> u8");
 //! assert_eq!(call_label("Db::open", &["path".into(), "_".into()]), "Db::open(path, _)");
@@ -111,7 +111,7 @@ pub fn clip(s: &str, max: usize) -> String {
 }
 
 /// The message for a call: `name(arg, arg)`, clipped to [`LABEL_MAX`].
-/// `args` are the frontend's argument sketches (identifiers and short
+/// `args` are the language adapter's argument sketches (identifiers and short
 /// literals kept, anything else `_`).
 pub fn call_label(name: &str, args: &[String]) -> String {
     clip(&format!("{name}({})", args.join(", ")), LABEL_MAX)

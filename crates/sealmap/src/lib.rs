@@ -21,8 +21,8 @@
 //! |---|---|
 //! | [`model`] (`sealmap-model`) | language-neutral code model and in-memory sources |
 //! | [`mermaid`] (`sealmap-mermaid`) | zero-dependency typed Mermaid writers |
-//! | [`frontend`] (`sealmap-frontend`) | language-neutral frontend core: flow IR and lowering, confidence, labels, ids |
-//! | [`rust`] (`sealmap-rust`) | Rust frontend (syn) |
+//! | [`extract`] (`sealmap-extract`) | language-neutral extraction core shared by the language adapters: flow IR and lowering, confidence, labels, `sym:` ids, fingerprints |
+//! | [`rust`] (`sealmap-rust`) | Rust language adapter (syn) |
 //! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract |
 //!
 //! Depend on the facade for the common path, or on the individual crates to
@@ -67,7 +67,7 @@ use std::io;
 use std::path::Path;
 
 pub use sealmap_corpus as corpus;
-pub use sealmap_frontend as frontend;
+pub use sealmap_extract as extract;
 pub use sealmap_mermaid as mermaid;
 pub use sealmap_model as model;
 pub use sealmap_rust as rust;
@@ -78,7 +78,7 @@ pub use sealmap_model::{Codebase, SourceSet};
 /// Options for the end-to-end helpers.
 #[derive(Debug, Clone, Default)]
 pub struct Options {
-    /// Frontend options.
+    /// Language adapter options.
     pub rust: rust::RustOptions,
     /// Projection options.
     pub corpus: CorpusOptions,

@@ -1,7 +1,7 @@
 //! Compact printing of syn nodes, through the shared label rules.
 
 use quote::ToTokens;
-use sealmap_frontend::labels::squeeze;
+use sealmap_extract::labels::squeeze;
 
 /// Print any syn node compactly (see [`squeeze`]).
 pub(crate) fn tokens(node: &impl ToTokens) -> String {

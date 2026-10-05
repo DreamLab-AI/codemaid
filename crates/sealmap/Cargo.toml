@@ -18,11 +18,11 @@ default = ["cli", "parallel"]
 ## The `sealmap` command-line tool.
 cli = ["dep:clap"]
 ## Parallel parsing (output is identical either way).
-parallel = ["sealmap-rust/parallel", "sealmap-frontend/parallel"]
+parallel = ["sealmap-rust/parallel", "sealmap-extract/parallel"]
 
 [dependencies]
 sealmap-model.workspace = true
-sealmap-frontend.workspace = true
+sealmap-extract.workspace = true
 sealmap-mermaid.workspace = true
 sealmap-rust.workspace = true
 sealmap-corpus.workspace = true

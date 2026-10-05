@@ -1,4 +1,4 @@
-//! Resolution and flow-shape tests for the Rust frontend.
+//! Resolution and flow-shape tests for the Rust language adapter.
 
 use sealmap_model::{CallKind, Codebase, Confidence, RelationKind, SourceSet, Step, SymbolId, SymbolKind};
 use sealmap_rust::{ExternalCalls, RustOptions, extract};

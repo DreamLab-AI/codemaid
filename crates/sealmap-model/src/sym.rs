@@ -48,7 +48,7 @@
 //! The three forms are:
 //!
 //! * **global**: a definition with known kinds all the way down. Everything a
-//!   frontend *defines* has a global id. The version is `.` for "the tree
+//!   language adapter *defines* has a global id. The version is `.` for "the tree
 //!   being analysed", so releasing a new version does not churn every id.
 //! * **path**: a path as written that could not be resolved to kinds, such
 //!   as a call into a dependency (`sym:extern serde_json::to_string`). These

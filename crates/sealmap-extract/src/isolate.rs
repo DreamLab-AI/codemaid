@@ -6,11 +6,11 @@
 //! about 40 KiB in a debug build). [`map_isolated`] therefore runs every job
 //! on threads with [`COLLECT_STACK_BYTES`] of stack, and turns a panic in one
 //! job into a value instead of aborting the run. A stack overflow is an abort
-//! and cannot be caught, which is why the big stack (and a frontend's own
+//! and cannot be caught, which is why the big stack (and a language adapter's own
 //! depth cap) are what actually matter.
 //!
 //! ```
-//! use sealmap_frontend::isolate::{COLLECT_STACK_BYTES, map_isolated};
+//! use sealmap_extract::isolate::{COLLECT_STACK_BYTES, map_isolated};
 //!
 //! let files = ["ok", "boom", "fine"];
 //! let out = map_isolated(

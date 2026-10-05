@@ -1,9 +1,9 @@
-//! # sealmap-frontend
+//! # sealmap-extract
 //!
-//! The language-neutral half of a sealmap frontend. A frontend (the syn-based
+//! The language-neutral half of a sealmap language adapter. A language adapter (the syn-based
 //! `sealmap-rust`, or a future TypeScript one) parses source and walks
 //! function bodies; everything after that is shared and lives here, so two
-//! frontends produce flows, labels, ids and confidences by the same rules:
+//! language adapters produce flows, labels, ids and confidences by the same rules:
 //!
 //! | Module | Owns |
 //! |---|---|
@@ -15,16 +15,16 @@
 //! | [`ids`] | the `sym:` id builder (package, module, item, method and trait-impl ids) |
 //! | [`isolate`] | per-file collection on big stacks with a panic guard |
 //!
-//! It has no parser dependency; a frontend brings its own.
+//! It has no parser dependency; a language adapter brings its own.
 //!
 //! ## Example
 //!
-//! A frontend has walked `fn run() { if ready() { go() } }` and resolves
+//! A language adapter has walked `fn run() { if ready() { go() } }` and resolves
 //! every path call to an internal function:
 //!
 //! ```
-//! use sealmap_frontend::raw::{Callee, RawCall, RawStep};
-//! use sealmap_frontend::{ids, lower};
+//! use sealmap_extract::raw::{Callee, RawCall, RawStep};
+//! use sealmap_extract::{ids, lower};
 //! use sealmap_model::{CallKind, Confidence, Step, SymbolKind};
 //!
 //! let call = |name: &str, line| {
@@ -71,7 +71,7 @@ pub struct Diagnostic {
     pub message: String,
 }
 
-/// Result of a frontend's extraction.
+/// Result of a language adapter's extraction.
 #[derive(Debug, Clone)]
 pub struct Extraction {
     /// The model.

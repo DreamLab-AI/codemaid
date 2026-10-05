@@ -1,6 +1,6 @@
 //! The symbol-id builder.
 //!
-//! Every id a frontend mints goes through here, so all frontends share one
+//! Every id a language adapter mints goes through here, so all language adapters share one
 //! `sym:` grammar (see [`sealmap_model::sym`]):
 //!
 //! | Definition | Id |
@@ -28,7 +28,7 @@
 //! rust-analyzer's `impl#[SelfType][Trait]` form.
 //!
 //! ```
-//! use sealmap_frontend::ids;
+//! use sealmap_extract::ids;
 //! use sealmap_model::SymbolKind;
 //!
 //! let pkg = ids::package("cargo", "app");

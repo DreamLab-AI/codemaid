@@ -154,7 +154,7 @@ fn load(c: &Common, opts: &Options) -> Result<(SourceSet, sealmap::rust::RustOpt
     let mut ro = opts.rust.clone();
     if c.repos.is_empty() {
         // Load only: `run` extracts once. (Calling `extract_dir` here ran the
-        // whole frontend twice and threw the first result away.)
+        // whole language adapter twice and threw the first result away.)
         let sources = sealmap::rust::load_dir(&c.path).map_err(|e| format!("{}: {e}", c.path.display()))?;
         if ro.name == "codebase" {
             ro.name = dir_name(&c.path);

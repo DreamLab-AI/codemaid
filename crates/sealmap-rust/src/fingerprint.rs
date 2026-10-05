@@ -31,7 +31,7 @@
 
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 use quote::ToTokens;
-use sealmap_frontend::fingerprint::{Delim, Fingerprinter};
+use sealmap_extract::fingerprint::{Delim, Fingerprinter};
 use sealmap_model::Fingerprint;
 use syn::visit_mut::{self, VisitMut};
 use syn::{Attribute, Block, Expr, Stmt};

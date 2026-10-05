@@ -1,10 +1,10 @@
-# sealmap-frontend
+# sealmap-extract
 
-[![crates.io](https://img.shields.io/crates/v/sealmap-frontend.svg)](https://crates.io/crates/sealmap-frontend)
-[![docs.rs](https://img.shields.io/docsrs/sealmap-frontend)](https://docs.rs/sealmap-frontend)
+[![crates.io](https://img.shields.io/crates/v/sealmap-extract.svg)](https://crates.io/crates/sealmap-extract)
+[![docs.rs](https://img.shields.io/docsrs/sealmap-extract)](https://docs.rs/sealmap-extract)
 
 The language-neutral half of a [sealmap](https://github.com/DreamLab-AI/sealmap)
-frontend. A frontend parses source and walks function bodies into a raw flow;
+language adapter. A language adapter parses source and walks function bodies into a raw flow;
 everything after that is shared here, so every language gets flows, labels,
 ids and confidences by the same rules:
 
@@ -18,11 +18,11 @@ ids and confidences by the same rules:
 | `ids` | the `sym:` symbol-id builder |
 | `isolate` | per-file collection on big stacks with a panic guard (feature `parallel`: rayon) |
 
-It has no parser dependency; a frontend brings its own.
+It has no parser dependency; a language adapter brings its own.
 
 ```rust
-use sealmap_frontend::raw::{Callee, RawCall, RawStep};
-use sealmap_frontend::{ids, lower};
+use sealmap_extract::raw::{Callee, RawCall, RawStep};
+use sealmap_extract::{ids, lower};
 use sealmap_model::{CallKind, Confidence, SymbolKind};
 
 let call = |name: &str| {

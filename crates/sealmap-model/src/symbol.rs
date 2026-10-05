@@ -7,7 +7,7 @@ use crate::sym::{Descriptor, SymbolId};
 
 /// What kind of thing a [`Symbol`] is.
 ///
-/// The set is a superset of what common languages need; frontends map their
+/// The set is a superset of what common languages need; language adapters map their
 /// own constructs onto the closest variant (a TypeScript `interface` would be
 /// a [`SymbolKind::Trait`], a Python `class` a [`SymbolKind::Struct`]).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -203,7 +203,7 @@ pub struct Symbol {
     /// Where in the file.
     pub span: Span,
     /// Fingerprint of the symbol's contract (name, visibility, attributes,
-    /// generics, parameters, return type; see `sealmap-frontend`'s
+    /// generics, parameters, return type; see `sealmap-extract`'s
     /// `fingerprint` module for the per-kind rules). Whitespace, comments and
     /// position never affect it.
     pub sig_hash: Fingerprint,
@@ -231,7 +231,7 @@ pub struct Symbol {
 impl Symbol {
     /// A symbol with only the required fields set; everything else empty /
     /// private, and both fingerprints unset ([`Fingerprint::is_unset`]).
-    /// Frontends fill in the rest.
+    /// Language adapters fill in the rest.
     pub fn new(id: SymbolId, name: impl Into<String>, kind: SymbolKind, file: SourcePath) -> Self {
         Self {
             parent: id.parent(),
@@ -288,7 +288,7 @@ impl RelationKind {
     }
 }
 
-/// How sure the frontend is that a relation's target is correct.
+/// How sure the language adapter is that a relation's target is correct.
 ///
 /// Static analysis without type inference cannot resolve everything (method
 /// calls on values of unknown type are the classic case). Rather than drop

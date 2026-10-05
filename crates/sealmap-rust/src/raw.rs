@@ -3,11 +3,11 @@
 //! Everything here is owned `String`s and `Vec`s (no syn nodes), so files can
 //! be parsed in parallel and resolved afterwards in a single deterministic
 //! pass. The flow part of it (steps, calls, receivers) is the shared IR from
-//! `sealmap-frontend`; the item, `use` and `impl` tables are Rust's own.
+//! `sealmap-extract`; the item, `use` and `impl` tables are Rust's own.
 
 use sealmap_model::{ContentHash, Fingerprint, MemberKind, SourcePath, Span, SymbolKind, Visibility};
 
-pub(crate) use sealmap_frontend::raw::{Callee, RawCall, RawStep, Recv, Segs};
+pub(crate) use sealmap_extract::raw::{Callee, RawCall, RawStep, Recv, Segs};
 
 use crate::layout::FileRole;
 

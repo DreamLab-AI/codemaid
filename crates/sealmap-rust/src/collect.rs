@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use proc_macro2::Span as PmSpan;
-use sealmap_frontend::fingerprint::Fingerprinter;
+use sealmap_extract::fingerprint::Fingerprinter;
 use sealmap_model::{CallKind, Fingerprint, MemberKind, SourcePath, Span, SymbolKind, Visibility};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
@@ -18,10 +18,10 @@ use crate::fingerprint::{self, Canon};
 use crate::layout::FileRole;
 use crate::raw::*;
 use crate::tidy::tokens;
-use sealmap_frontend::labels::{
+use sealmap_extract::labels::{
     ARG_LITERAL_MAX, DOC_SUMMARY_MAX, LABEL_MAX, SIGNATURE_MAX as SIG_MAX, call_label, clip, condition_label, squeeze,
 };
-use sealmap_frontend::raw::{last_call_mut, place_deferred, push_arms};
+use sealmap_extract::raw::{last_call_mut, place_deferred, push_arms};
 
 /// Expression nesting beyond which flow extraction stops descending. Real
 /// code stays far below it; generated code (long `a + b + ...` or builder

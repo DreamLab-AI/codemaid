@@ -1,7 +1,7 @@
 //! Flow normalisation: lower a raw flow to a model [`Flow`] once calls can be
 //! resolved.
 //!
-//! The frontend supplies the resolver as a closure; this module owns the
+//! The language adapter supplies the resolver as a closure; this module owns the
 //! shape rules, which are the same for every language:
 //!
 //! - a call the resolver drops (returns `None`) disappears;
@@ -12,8 +12,8 @@
 //! - a flow with nothing but returns says nothing about calls and is `None`.
 //!
 //! ```
-//! use sealmap_frontend::lower::lower_flow;
-//! use sealmap_frontend::raw::{Callee, RawCall, RawStep};
+//! use sealmap_extract::lower::lower_flow;
+//! use sealmap_extract::raw::{Callee, RawCall, RawStep};
 //! use sealmap_model::{CallKind, Confidence, Step, SymbolId};
 //!
 //! let call = |n: &str| RawStep::Call(RawCall::new(Callee::Path(vec![n.into()]), n.into(), CallKind::Function, 1));

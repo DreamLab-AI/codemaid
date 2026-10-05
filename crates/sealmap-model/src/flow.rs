@@ -3,7 +3,7 @@
 //!
 //! A [`Flow`] is a tree of [`Step`]s in **source order**. Calls are leaves;
 //! branches, loops and optional blocks are interior nodes that map one-to-one
-//! onto Mermaid `alt` / `else`, `loop` and `opt` fragments. Frontends drop
+//! onto Mermaid `alt` / `else`, `loop` and `opt` fragments. Language adapters drop
 //! anything that contains no calls, so a flow is already the minimal skeleton
 //! of "who talks to whom, in what order, under which condition".
 //!
@@ -155,7 +155,7 @@ pub enum CallKind {
     Function,
     /// Method call: `x.foo()`.
     Method,
-    /// Macro invocation that the frontend chose to keep (`println!` is
+    /// Macro invocation that the language adapter chose to keep (`println!` is
     /// dropped, `tokio::spawn`-like or user macros are kept).
     Macro,
 }
@@ -170,7 +170,7 @@ pub struct Call {
     pub label: String,
     /// How the call is spelled.
     pub kind: CallKind,
-    /// How sure the frontend is about `target`.
+    /// How sure the language adapter is about `target`.
     pub confidence: Confidence,
     /// `.await`ed at the call site.
     pub awaited: bool,
@@ -181,7 +181,7 @@ pub struct Call {
 }
 
 impl Call {
-    /// A synchronous, infallible function call at line 0. Frontends set the remaining fields.
+    /// A synchronous, infallible function call at line 0. Language adapters set the remaining fields.
     pub fn new(target: SymbolId, label: impl Into<String>, confidence: Confidence) -> Self {
         Self {
             target,

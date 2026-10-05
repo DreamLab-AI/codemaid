@@ -468,7 +468,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "sealmap-corpus",
- "sealmap-frontend",
+ "sealmap-extract",
  "sealmap-mermaid",
  "sealmap-model",
  "sealmap-rust",
@@ -488,7 +488,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sealmap-frontend"
+name = "sealmap-extract"
 version = "0.1.0"
 dependencies = [
  "blake3",
@@ -522,7 +522,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "sealmap-frontend",
+ "sealmap-extract",
  "sealmap-model",
  "syn 2.0.119",
  "thiserror",

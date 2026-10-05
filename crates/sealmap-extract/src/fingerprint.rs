@@ -1,17 +1,17 @@
 //! Per-symbol fingerprints: `sig_hash` (the contract) and `body_hash` (the
 //! implementation).
 //!
-//! A frontend feeds a [`Fingerprinter`] a **token stream**: identifiers,
+//! A language adapter feeds a [`Fingerprinter`] a **token stream**: identifiers,
 //! punctuation, literals and delimited groups, in source order. Whitespace and
 //! comments (doc comments included) are never tokens, so reformatting a file
 //! or editing its comments changes no fingerprint. Positions are never
 //! hashed either, so moving an item within a file or to another file changes
-//! neither of its fingerprints. Every frontend uses this one module, which is
+//! neither of its fingerprints. Every language adapter uses this one module, which is
 //! what makes a Rust and a TypeScript fingerprint the same kind of thing.
 //!
 //! # What goes into each hash
 //!
-//! The frontend decides which tokens form the contract and which form the
+//! The language adapter decides which tokens form the contract and which form the
 //! implementation; the rule it follows is:
 //!
 //! | | `sig_hash` | `body_hash` |
@@ -41,12 +41,12 @@
 //! signature and a body with identical tokens still get different values.
 //! [`ALGORITHM`] names the whole scheme; any change to the encoding or the
 //! table above is a new algorithm id, and the golden tests in this crate and
-//! in each frontend fail until it is bumped.
+//! in each language adapter fail until it is bumped.
 //!
 //! # Example
 //!
 //! ```
-//! use sealmap_frontend::fingerprint::{Delim, Fingerprinter, Token};
+//! use sealmap_extract::fingerprint::{Delim, Fingerprinter, Token};
 //!
 //! // `fn add(a: u8) -> u8 { a + 1 }`, body only.
 //! let body = |extra_space: bool| {
@@ -104,7 +104,7 @@ impl Delim {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Token<'a> {
     /// An identifier or keyword, exactly as written (raw-identifier prefixes
-    /// such as Rust's `r#` are the frontend's to strip or keep).
+    /// such as Rust's `r#` are the language adapter's to strip or keep).
     Ident(&'a str),
     /// One punctuation character.
     Punct(char),

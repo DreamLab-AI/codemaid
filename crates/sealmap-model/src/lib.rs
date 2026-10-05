@@ -4,9 +4,9 @@
 //! the symbols they define, and the typed relations between those symbols.
 //!
 //! This crate is the shared vocabulary of the `sealmap` workspace. Language
-//! frontends (such as `sealmap-rust`) *produce* a [`Codebase`]; projections
+//! language adapters (such as `sealmap-rust`) *produce* a [`Codebase`]; projections
 //! (such as `sealmap-corpus`) *consume* one and render Mermaid diagrams from
-//! it. Because both sides only meet here, you can add a frontend for another
+//! it. Because both sides only meet here, you can add a language adapter for another
 //! language, or a new diagram projection, without touching the other half.
 //!
 //! The navigation API is loosely inspired by

@@ -7,12 +7,12 @@
 //! calls had ([`strongest`]).
 //!
 //! ```
-//! use sealmap_frontend::confidence::{ExternalCalls, strongest};
+//! use sealmap_extract::confidence::{ExternalCalls, strongest};
 //! use sealmap_model::Confidence;
 //!
 //! assert_eq!(strongest(Confidence::Inferred, Confidence::Exact), Confidence::Exact);
 //! // External calls are kept under the default policy only if they look
-//! // like a dependency (the frontend decides what that means).
+//! // like a dependency (the language adapter decides what that means).
 //! assert!(ExternalCalls::NonStd.keeps(Confidence::External, || true));
 //! assert!(!ExternalCalls::NonStd.keeps(Confidence::External, || false));
 //! assert!(ExternalCalls::None.keeps(Confidence::Inferred, || false));
@@ -26,7 +26,7 @@ use sealmap_model::{Codebase, Confidence, Relation, RelationKind, SymbolId};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ExternalCalls {
     /// Keep every external call, including `std` and unresolved method calls
-    /// (`?::name`). Verbose; useful for debugging the frontend.
+    /// (`?::name`). Verbose; useful for debugging the language adapter.
     All,
     /// Keep calls into non-std dependencies (`tokio::spawn`,
     /// `serde_json::to_string`); drop `std`/`core`/`alloc` and unresolved

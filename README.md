@@ -126,15 +126,15 @@ cheap and checkable.
 | [`sealmap`](crates/sealmap) | facade and CLI | all below, clap |
 | [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow`; the `sym:` id grammar; per-symbol `sig_hash` / `body_hash`; schema v2 | serde, blake3, ignore |
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
-| [`sealmap-frontend`](crates/sealmap-frontend) | logic shared by every frontend: raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
-| [`sealmap-rust`](crates/sealmap-rust) | Rust frontend (syn), workspace-wide resolution | sealmap-frontend, syn, toml |
+| [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend` 0.1.0): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
+| [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
 | [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
 
 **Planned for 0.2:**
 
 | Crate | Role |
 |---|---|
-| `sealmap-ts` | TypeScript/TSX frontend on oxc, with synthesised ids for anonymous route handlers |
+| `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
 | `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
 | `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
 
@@ -198,15 +198,15 @@ sealmap pack --review                                      # diagrams only, for 
 
 ## Status and roadmap
 
-**v0.1** is working. It is dogfooded on its own source, and the Rust frontend
+**v0.1** is working. It is dogfooded on its own source, and the Rust language adapter
 has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. The hardening
 has landed and fixes four faults found on large real repositories: stack depth,
 `.gitignore` handling, exponential glob resolution, and id collisions.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
-1. Rename to `sealmap-*`; dual licence; land the hardening; extract
-   `sealmap-frontend`.
+1. Rename to `sealmap-*`; dual licence; land the hardening; extract the
+   shared core, now `sealmap-extract` (published as `sealmap-frontend` 0.1.0).
 2. `sym:` id grammar (SCIP-descriptor style), signature and body hashes,
    injective Mermaid ids.
 3. Seal surface (`resolve` / `stale` / `seal-check` / `verify` / `pack`) and
@@ -214,7 +214,9 @@ The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 4. **E0:** replay 100 real commits and count topics flagged per commit, file
    level against sealed, with no LLM involved. This is the first headline
    number.
-5. `sealmap-ts`, with a shared conformance suite as the parity gate.
+5. `sealmap-ts`, **deferred**: built only if E0-R on the Rust repositories
+   shows the precise-staleness gain is real, with a shared conformance suite
+   as the parity gate.
 6. The pre-registered review A/B, dogfooded on this repository.
 
 ## Design and evidence

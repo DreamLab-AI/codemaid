@@ -60,7 +60,7 @@ impl fmt::Display for ContentHash {
 
 /// A per-symbol content fingerprint: the first 16 bytes of a BLAKE3 digest.
 ///
-/// Frontends compute two per symbol (see `sealmap-frontend`'s `fingerprint`
+/// Language adapters compute two per symbol (see `sealmap-extract`'s `fingerprint`
 /// module): `sig_hash` over the contract and `body_hash` over the
 /// implementation. The model only stores, compares, prints and parses them.
 ///
@@ -70,7 +70,7 @@ impl fmt::Display for ContentHash {
 ///
 /// [`Fingerprint::default`] is all zeros and means "not fingerprinted": a
 /// symbol built by hand with [`Symbol::new`](crate::Symbol::new) carries it
-/// until a frontend fills in real values.
+/// until a language adapter fills in real values.
 ///
 /// ```
 /// use sealmap_model::Fingerprint;

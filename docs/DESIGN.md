@@ -99,9 +99,9 @@ Reviewer family, evidence and signatures are skill policy, enforced by
 | Crate | Owns |
 |---|---|
 | `sealmap-model` | language-neutral model; **`sym:` grammar** (SCIP-descriptor style, kind-explicit, no file path, version `.`); `sig_hash` / `body_hash` / optional `flow_hash` (BLAKE3 over comment- and whitespace-insensitive token streams, after rustc fingerprints); schema v2 |
-| `sealmap-frontend` | shared by both frontends: raw flow IR, flow normalisation, call aggregation, confidence lattice, label rules, id builder and hashing. Extracted from `-rust` first, with no behaviour change. This is the parity lever |
-| `sealmap-rust` | syn frontend, hardened (§7) |
-| `sealmap-ts` | oxc frontend (§8) |
+| `sealmap-extract` | (published as `sealmap-frontend` 0.1.0) shared by both language adapters: raw flow IR, flow normalisation, call aggregation, confidence lattice, label rules, id builder and hashing. Extracted from `-rust` first, with no behaviour change. This is the parity lever |
+| `sealmap-rust` | syn language adapter, hardened (§7) |
+| `sealmap-ts` | oxc language adapter (§8); **deferred** until E0-R shows the gain |
 | `sealmap-mermaid` | typed writers, short participant aliases (−26.5 % tokens), **injective** ids with a uniqueness assertion |
 | `sealmap-dense` | agent projection: indented call trees + skeletons with `L<start>-<end>` + `_index.txt`. 0.45× source, about 13 tokens per call edge against 42 |
 | `sealmap-corpus` | generate, the `seal` module (lock parse and canonical write), `resolve`, `seal-check`, `stale`, `pack`, `verify` |
@@ -169,7 +169,12 @@ four new activities (`diagram-polish`, `diagram-narrative`,
 **Result:** VisionClaw generates in **1.0 s**, tokio in 0.24 s, with
 byte-identical output across runs. Tests, clippy, fmt and docs are clean.
 
-## 8. TypeScript frontend
+## 8. TypeScript language adapter
+
+> **Deferred (owner decision, 2026-10-05).** `sealmap-ts` is built only if
+> E0-R on the Rust repositories (§9, step 4 in §10) shows that the
+> precise-staleness gain is real. The design below stands as written for
+> that case.
 
 - **Targets:** co-created / campaignbuilder (about 700 `.ts` / `.tsx`).
 - **Parser:** oxc parser + semantic + resolver, versions pinned exactly.
@@ -181,7 +186,7 @@ byte-identical output across runs. Tests, clippy, fmt and docs are clean.
 - **Parity:** a shared conformance crate of about 40 dual-language cases, with
   a parity gate in CI.
 - **Effort:** 31–36 engineer-days, about 4 weeks elapsed with Rust and TS in
-  parallel after the `sealmap-frontend` split.
+  parallel after the `sealmap-extract` split.
 
 ## 9. Evidence plan
 
@@ -216,7 +221,9 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
 
 1. **Repository.** Rename `DreamLab-AI/codemaid` → `sealmap`, rename the
    crates, change the licence to dual. Apply the hardening patch. Extract
-   `sealmap-frontend`.
+   the shared extraction core, `sealmap-extract` (published as
+   `sealmap-frontend` 0.1.0; renamed in step 2, because "frontend" read as a
+   UI).
 2. **Ids and hashes.** `sym:` grammar, `sig` / `body` hashes, injective
    Mermaid ids, schema v2.
 3. **Seal surface.** `seal` module plus `resolve` / `stale` / `seal-check` /
@@ -228,7 +235,8 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
    Bake via `lib/sealmap.nix`.
 6. **Dogfood.** Seal sealmap's own corpus. `verify` runs non-blocking in CI for
    2 weeks, then blocking.
-7. **`sealmap-ts`** (parallel from step 3), then E0-T on campaignbuilder.
+7. **`sealmap-ts`**, **deferred**: built only if E0-R (step 4) shows the
+   precise-staleness gain is real; then E0-T on campaignbuilder.
 8. **Review A/B.** Calibrate, freeze `PREREG.md`, run the endpoint window
    (≥ 30 commits).
 9. **Migrate VisionFlow** area by area: `cite-to-sym`, then review, then seal,
@@ -243,7 +251,7 @@ to end. **Dogfood:** sealmap's own repository, sealed, is round 0.
 3. **Repository renamed** to `DreamLab-AI/sealmap` (done). **Crate names are
    reserved by a real, documented release** of the renamed 0.1 crates at the
    end of step 1, never by placeholder crates. Crates that do not exist yet
-   (`sealmap-dense`, `sealmap-ts`, `sealmap-frontend` if not split by then)
+   (`sealmap-dense`, `sealmap-ts`, `sealmap-extract` if not split by then)
    are published when they have content.
 4. **Model-routing ADR: yes.** Four activities (`diagram-polish`,
    `diagram-narrative`, `diagram-synthesis`, `seal-review`) and `loom` / `zai`

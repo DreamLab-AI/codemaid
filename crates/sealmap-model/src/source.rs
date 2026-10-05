@@ -16,7 +16,7 @@ use crate::sym::SymbolId;
 pub struct SourceFile {
     /// Normalised path relative to the codebase root.
     pub path: SourcePath,
-    /// Frontend language tag, e.g. `rust`.
+    /// Language tag of the adapter that read it, e.g. `rust`.
     pub language: String,
     /// Id of the module this file defines.
     pub module: SymbolId,
@@ -71,7 +71,7 @@ impl Default for LoadOptions {
 
 /// An in-memory set of source files keyed by [`SourcePath`].
 ///
-/// Frontends read from a `SourceSet`, never from the file system directly.
+/// Language adapters read from a `SourceSet`, never from the file system directly.
 /// That keeps them pure (same set in, same model out), makes them trivially
 /// testable, and lets embedders feed sources from anywhere: a git object
 /// store, an editor buffer, a network service.
