@@ -4,17 +4,23 @@ kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-30 files · 406 symbols · 1133 relations · 150 flows · 720 calls
+37 files · 437 symbols · 1217 relations · 161 flows · 745 calls
 
 ## crates
 ```mermaid
 flowchart LR
   sealmap(["sealmap"])
   sealmap_corpus(["sealmap_corpus"])
+  sealmap_frontend(["sealmap_frontend"])
   sealmap_main(["sealmap_main"])
   sealmap_mermaid(["sealmap_mermaid"])
   sealmap_model(["sealmap_model"])
   sealmap_rust(["sealmap_rust"])
+  Callee{{"Callee"}}
+  RawCall{{"RawCall"}}
+  RawStep{{"RawStep"}}
+  Recv{{"Recv"}}
+  Segs{{"Segs"}}
   blake3{{"blake3"}}
   clap{{"clap"}}
   ignore{{"ignore"}}
@@ -25,6 +31,7 @@ flowchart LR
   serde_json{{"serde_json"}}
   syn{{"syn"}}
   sealmap -->|"9"| sealmap_corpus
+  sealmap -->|"1"| sealmap_frontend
   sealmap -->|"1"| sealmap_mermaid
   sealmap -->|"8"| sealmap_model
   sealmap -->|"4"| sealmap_rust
@@ -32,19 +39,27 @@ flowchart LR
   sealmap_corpus -->|"144"| sealmap_model
   sealmap_corpus -->|"4"| serde
   sealmap_corpus -->|"2"| serde_json
+  sealmap_frontend -->|"1"| rayon
+  sealmap_frontend -->|"44"| sealmap_model
   sealmap_main -->|"3"| clap
   sealmap_main -->|"4"| sealmap
   sealmap_main -->|"7"| sealmap_corpus
+  sealmap_main -->|"1"| sealmap_frontend
   sealmap_main -->|"3"| sealmap_model
-  sealmap_main -->|"4"| sealmap_rust
+  sealmap_main -->|"3"| sealmap_rust
   sealmap_main -->|"1"| serde_json
   sealmap_model -->|"1"| blake3
   sealmap_model -->|"1"| ignore
   sealmap_model -->|"12"| serde
+  sealmap_rust -->|"1"| Callee
+  sealmap_rust -->|"1"| RawCall
+  sealmap_rust -->|"11"| RawStep
+  sealmap_rust -->|"5"| Recv
+  sealmap_rust -->|"12"| Segs
   sealmap_rust -->|"6"| proc_macro2
   sealmap_rust -->|"3"| quote
-  sealmap_rust -->|"1"| rayon
-  sealmap_rust -->|"122"| sealmap_model
+  sealmap_rust -->|"73"| sealmap_frontend
+  sealmap_rust -->|"104"| sealmap_model
   sealmap_rust -->|"62"| syn
 ```
 
@@ -77,6 +92,21 @@ flowchart LR
   sealmap_corpus__sequence -->|"9"| sealmap_corpus__naming
   sealmap_corpus__structure -->|"6"| sealmap_corpus
   sealmap_corpus__structure -->|"2"| sealmap_corpus__naming
+```
+
+## modules: sealmap_frontend
+```mermaid
+flowchart LR
+  sealmap_frontend["sealmap_frontend"]
+  sealmap_frontend__confidence["confidence"]
+  sealmap_frontend__ids["ids"]
+  sealmap_frontend__isolate["isolate"]
+  sealmap_frontend__labels["labels"]
+  sealmap_frontend__lower["lower"]
+  sealmap_frontend__raw["raw"]
+  sealmap_frontend -->|"2"| sealmap_frontend__confidence
+  sealmap_frontend -->|"5"| sealmap_frontend__raw
+  sealmap_frontend__lower -->|"5"| sealmap_frontend__raw
 ```
 
 ## modules: sealmap_mermaid
@@ -149,11 +179,11 @@ flowchart LR
   sealmap_rust -->|"1"| sealmap_rust__resolve
   sealmap_rust__collect -->|"3"| sealmap_rust
   sealmap_rust__collect -->|"3"| sealmap_rust__layout
-  sealmap_rust__collect -->|"32"| sealmap_rust__raw
-  sealmap_rust__collect -->|"25"| sealmap_rust__tidy
+  sealmap_rust__collect -->|"6"| sealmap_rust__raw
+  sealmap_rust__collect -->|"11"| sealmap_rust__tidy
   sealmap_rust__raw -->|"2"| sealmap_rust__layout
-  sealmap_rust__resolve -->|"10"| sealmap_rust
-  sealmap_rust__resolve -->|"16"| sealmap_rust__raw
+  sealmap_rust__resolve -->|"5"| sealmap_rust
+  sealmap_rust__resolve -->|"7"| sealmap_rust__raw
 ```
 
 ## data: sealmap_corpus
@@ -233,6 +263,34 @@ erDiagram
   sealmap_corpus__index__FragmentEntry ||--o{ sealmap_corpus__index__CallRef : "calls"
   sealmap_corpus__index__Index ||--o{ sealmap_corpus__index__DocumentEntry : "documents"
   sealmap_corpus__sequence__Ctx ||..|| sealmap_corpus__CorpusOptions : "opts"
+```
+
+## data: sealmap_frontend
+```mermaid
+erDiagram
+  sealmap_frontend__Diagnostic["Diagnostic"] {
+    SourcePath file
+    String message
+  }
+  sealmap_frontend__Extraction["Extraction"] {
+    Codebase codebase
+    Vec[Diagnostic] diagnostics
+  }
+  sealmap_frontend__raw__Callee["Callee"]
+  sealmap_frontend__raw__RawCall["RawCall"] {
+    Callee callee
+    String label
+    CallKind kind
+    bool awaited
+    bool fallible
+    u32 line
+  }
+  sealmap_frontend__raw__RawStep["RawStep"]
+  sealmap_frontend__raw__Recv["Recv"]
+  sealmap_frontend__Extraction ||--o{ sealmap_frontend__Diagnostic : "diagnostics"
+  sealmap_frontend__raw__Callee ||--|| sealmap_frontend__raw__Recv : "Method"
+  sealmap_frontend__raw__RawCall ||--|| sealmap_frontend__raw__Callee : "callee"
+  sealmap_frontend__raw__RawStep ||--|| sealmap_frontend__raw__RawCall : "Call"
 ```
 
 ## data: sealmap_main
@@ -491,15 +549,6 @@ erDiagram
 ## data: sealmap_rust
 ```mermaid
 erDiagram
-  sealmap_rust__Diagnostic["Diagnostic"] {
-    SourcePath file
-    String message
-  }
-  sealmap_rust__ExternalCalls["ExternalCalls"]
-  sealmap_rust__Extraction["Extraction"] {
-    Codebase codebase
-    Vec[Diagnostic] diagnostics
-  }
   sealmap_rust__RustOptions["RustOptions"] {
     String name
     bool include_tests
@@ -509,25 +558,12 @@ erDiagram
     __aRustOptions opts "&'a RustOptions"
     __amutRawFile raw "&'a mut RawFile"
   }
-  sealmap_rust__collect__FlowWalker["FlowWalker"] {
-    BTreeMap[String_Recv] env "BTreeMap<String, Recv>"
-    u32 depth
-  }
   sealmap_rust__layout__FileRole["FileRole"] {
     String crate_name
     Vec[String] module
     TargetKind target
   }
   sealmap_rust__layout__TargetKind["TargetKind"]
-  sealmap_rust__raw__Callee["Callee"]
-  sealmap_rust__raw__RawCall["RawCall"] {
-    Callee callee
-    String label
-    CallKind kind
-    bool awaited
-    bool fallible
-    u32 line
-  }
   sealmap_rust__raw__RawFile["RawFile"] {
     SourcePath path
     FileRole role
@@ -587,12 +623,10 @@ erDiagram
     Vec[RawUse] uses
     Vec[String] tags
   }
-  sealmap_rust__raw__RawStep["RawStep"]
   sealmap_rust__raw__RawUse["RawUse"] {
     String alias
     Segs target
   }
-  sealmap_rust__raw__Recv["Recv"]
   sealmap_rust__resolve__Resolver["Resolver"] {
     BTreeSet[String] crates
     BTreeMap[String_BTreeMap[String_SymbolId]] items "BTreeMap<String, BTreeMap<String, SymbolId>>"
@@ -605,24 +639,16 @@ erDiagram
     BTreeMap[SymbolId_BTreeSet[String]] trait_methods "BTreeMap<SymbolId, BTreeSet<String>>"
     BTreeMap[String_Vec[String]] globs "BTreeMap<String, Vec<String>>"
   }
-  sealmap_rust__Extraction ||--o{ sealmap_rust__Diagnostic : "diagnostics"
-  sealmap_rust__RustOptions ||--|| sealmap_rust__ExternalCalls : "external_calls"
   sealmap_rust__collect__Collector ||..|| sealmap_rust__RustOptions : "opts"
   sealmap_rust__collect__Collector ||..|| sealmap_rust__raw__RawFile : "raw"
-  sealmap_rust__collect__FlowWalker ||--o{ sealmap_rust__raw__Recv : "env"
   sealmap_rust__layout__FileRole ||--|| sealmap_rust__layout__TargetKind : "target"
-  sealmap_rust__raw__Callee ||--|| sealmap_rust__raw__Recv : "Method"
-  sealmap_rust__raw__RawCall ||--|| sealmap_rust__raw__Callee : "callee"
   sealmap_rust__raw__RawFile ||--|| sealmap_rust__layout__FileRole : "role"
   sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawModule : "modules"
   sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawItem : "items"
   sealmap_rust__raw__RawFile ||--o{ sealmap_rust__raw__RawImpl : "impls"
-  sealmap_rust__raw__RawFn ||--o{ sealmap_rust__raw__RawStep : "flow"
   sealmap_rust__raw__RawImpl ||--o{ sealmap_rust__raw__RawFn : "methods"
   sealmap_rust__raw__RawItem ||--o{ sealmap_rust__raw__RawMember : "members"
   sealmap_rust__raw__RawItem ||--o{ sealmap_rust__raw__RawFn : "methods"
-  sealmap_rust__raw__RawItem ||--o{ sealmap_rust__raw__RawStep : "flow"
   sealmap_rust__raw__RawModule ||--o{ sealmap_rust__raw__RawUse : "uses"
-  sealmap_rust__raw__RawStep ||--|| sealmap_rust__raw__RawCall : "Call"
   sealmap_rust__resolve__Resolver ||--o{ sealmap_rust__raw__RawUse : "uses"
 ```

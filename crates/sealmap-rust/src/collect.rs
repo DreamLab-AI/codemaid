@@ -14,12 +14,12 @@ use syn::{
 use crate::RustOptions;
 use crate::layout::FileRole;
 use crate::raw::*;
-use crate::tidy::{clip, squeeze, tokens};
+use crate::tidy::tokens;
+use sealmap_frontend::labels::{
+    ARG_LITERAL_MAX, DOC_SUMMARY_MAX, LABEL_MAX, SIGNATURE_MAX as SIG_MAX, call_label, clip, condition_label, squeeze,
+};
+use sealmap_frontend::raw::{last_call_mut, place_deferred, push_arms};
 
-/// Max characters for labels on arrows and fragments.
-const LABEL_MAX: usize = 56;
-/// Max characters for a stored signature.
-const SIG_MAX: usize = 200;
 /// Expression nesting beyond which flow extraction stops descending. Real
 /// code stays far below it; generated code (long `a + b + ...` or builder
 /// chains, which syn nests one level per operator) can exceed any fixed
@@ -384,7 +384,7 @@ fn doc_of(attrs: &[Attribute]) -> Option<String> {
         Some(i) => &text[..=i],
         None => text,
     };
-    Some(clip(first, 160))
+    Some(clip(first, DOC_SUMMARY_MAX))
 }
 
 /// Attributes worth keeping as tags.
@@ -681,13 +681,13 @@ impl FlowWalker {
                                 name.clone()
                             };
                             out.push(call(Callee::Path(segs), &shown, &c.args, CallKind::Function, c.span()));
-                            self.flush_deferred(&name, deferred, out);
+                            place_deferred(&name, deferred, LOOPING, out);
                             return;
                         }
                     }
                     other => self.expr(other, out),
                 }
-                self.flush_deferred("", deferred, out);
+                place_deferred("", deferred, LOOPING, out);
             }
             Expr::MethodCall(m) => {
                 self.expr(&m.receiver, out);
@@ -704,7 +704,7 @@ impl FlowWalker {
                     CallKind::Method,
                     m.method.span(),
                 ));
-                self.flush_deferred(&name, deferred, out);
+                place_deferred(&name, deferred, LOOPING, out);
             }
             Expr::Await(a) => {
                 self.expr(&a.base, out);
@@ -896,19 +896,6 @@ impl FlowWalker {
         }
     }
 
-    fn flush_deferred(&self, callee: &str, deferred: Vec<Vec<RawStep>>, out: &mut Vec<RawStep>) {
-        for steps in deferred {
-            if callee.contains("spawn") {
-                out.push(RawStep::Parallel(vec![(format!("{callee}ed task"), steps)]));
-            } else if LOOPING.contains(&callee) {
-                out.push(RawStep::Loop(format!("each via {callee}"), steps));
-            } else {
-                let label = if callee.is_empty() { "closure".to_owned() } else { format!("via {callee}") };
-                out.push(RawStep::Optional(label, steps));
-            }
-        }
-    }
-
     /// Calls inside macro arguments (`vec![f()]`, `assert!(g())`,
     /// `format!("{}", h())`). Macros that do not parse as comma-separated
     /// expressions are skipped.
@@ -944,8 +931,7 @@ impl FlowWalker {
 
 fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep {
     let sketch: Vec<String> = args.iter().map(arg_sketch).collect();
-    let label = clip(&format!("{name}({})", sketch.join(", ")), LABEL_MAX);
-    RawStep::Call(RawCall { callee, label, kind, awaited: false, fallible: false, line: span.start().line as u32 })
+    RawStep::Call(RawCall::new(callee, call_label(name, &sketch), kind, span.start().line as u32))
 }
 
 /// A compact stand-in for an argument: identifiers and short literals are
@@ -953,7 +939,7 @@ fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kin
 fn arg_sketch(e: &Expr) -> String {
     match e {
         Expr::Path(p) => p.path.segments.last().map_or_else(|| "_".into(), |s| s.ident.to_string()),
-        Expr::Lit(l) => clip(&tokens(l), 14),
+        Expr::Lit(l) => clip(&tokens(l), ARG_LITERAL_MAX),
         Expr::Reference(r) => format!("&{}", arg_sketch(&r.expr)),
         Expr::Field(f) => match &f.member {
             syn::Member::Named(n) => format!("{}.{}", arg_sketch(&f.base), n),
@@ -975,21 +961,7 @@ fn cond_label(cond: &Expr) -> String {
         Expr::Let(l) => format!("let {} = {}", squeeze(&tokens(&l.pat)), squeeze(&tokens(&l.expr))),
         other => squeeze(&tokens(other)),
     };
-    clip(&format!("if {text}"), LABEL_MAX).trim_start_matches("if ").to_owned()
-}
-
-fn push_arms(arms: Vec<(String, Vec<RawStep>)>, out: &mut Vec<RawStep>) {
-    if arms.iter().all(|(_, s)| s.is_empty()) {
-        return;
-    }
-    if arms.len() == 1 {
-        let (label, steps) = arms.into_iter().next().unwrap_or_default();
-        out.push(RawStep::Optional(label, steps));
-    } else {
-        // Empty arms are kept here; pass 2 drops them after resolution and
-        // uses their labels to describe what remains.
-        out.push(RawStep::Branch(arms));
-    }
+    condition_label(&text)
 }
 
 fn is_call(e: &Expr) -> bool {
@@ -1000,12 +972,6 @@ fn is_call(e: &Expr) -> bool {
         Expr::Try(t) => is_call(&t.expr),
         _ => false,
     }
-}
-
-/// The last call pushed at this level (fragments pushed after it, such as a
-/// deferred closure, are skipped over).
-fn last_call_mut(out: &mut [RawStep]) -> Option<&mut RawStep> {
-    out.iter_mut().rev().find(|s| matches!(s, RawStep::Call(_)))
 }
 
 /// `Foo::new(..)`, `Foo { .. }`, `Foo::new(..)?`, `Foo::open(..).await` → `Foo`.

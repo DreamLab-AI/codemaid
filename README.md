@@ -126,16 +126,17 @@ cheap and checkable.
 | [`sealmap`](crates/sealmap) | facade and CLI | all below, clap |
 | [`sealmap-model`](crates/sealmap-model) | language-neutral model: `Codebase`, `Symbol`, `Relation`, `Flow` | serde, blake3, ignore |
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart | **none** |
-| [`sealmap-rust`](crates/sealmap-rust) | Rust frontend (syn), workspace-wide resolution | syn, toml, rayon (opt.) |
+| [`sealmap-frontend`](crates/sealmap-frontend) | logic shared by every frontend: raw flow IR, flow lowering, call aggregation, confidence policy, label rules, id builder, panic-isolated collection | sealmap-model, rayon (opt.) |
+| [`sealmap-rust`](crates/sealmap-rust) | Rust frontend (syn), workspace-wide resolution | sealmap-frontend, syn, toml |
 | [`sealmap-corpus`](crates/sealmap-corpus) | projections and index | serde_json |
 
 **Planned for 0.2:**
 
 | Crate | Role |
 |---|---|
-| `sealmap-frontend` | logic shared by every frontend: flow normalisation, call aggregation, labels, id builder and hashing. Parity between languages by construction |
 | `sealmap-ts` | TypeScript/TSX frontend on oxc, with synthesised ids for anonymous route handlers |
 | `sealmap-dense` | the agent projection: indented call trees and skeletons with line spans |
+| `sealmap-frontend` gains | `sym:` ids, signature and body hashing (step 2), so both frontends hash the same way |
 | `sealmap-corpus` gains | the `seal` lockfile module, `resolve`, `stale`, `seal-check`, `pack`, `verify` |
 
 Each crate will be published on crates.io under `MIT OR Apache-2.0`, with full

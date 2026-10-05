@@ -14,6 +14,7 @@ categories = ["development-tools", "visualization"]
 
 [workspace.dependencies]
 sealmap-model = { path = "crates/sealmap-model", version = "0.1.0" }
+sealmap-frontend = { path = "crates/sealmap-frontend", version = "0.1.0", default-features = false }
 sealmap-mermaid = { path = "crates/sealmap-mermaid", version = "0.1.0" }
 sealmap-rust = { path = "crates/sealmap-rust", version = "0.1.0", default-features = false }
 sealmap-corpus = { path = "crates/sealmap-corpus", version = "0.1.0" }

@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-rust/src/lib.rs
 module: sealmap_rust
 language: rust
-source_hash: blake3:43849a51fddc77d8c4790358733b888b1e27f54a3faa58de015b90476beba3fd
-lines: 246
+source_hash: blake3:93366a10a34532f64b47901a922f1e89aaa920d4a1009e99a41b838c9530ee62
+lines: 184
 fragments: 5
 ---
 # `sealmap_rust` · crates/sealmap-rust/src/lib.rs
@@ -14,22 +14,6 @@ fragments: 5
 ```mermaid
 classDiagram
   direction LR
-  class sealmap_rust__Diagnostic["Diagnostic"] {
-    <<struct>>
-    +file: SourcePath
-    +message: String
-  }
-  class sealmap_rust__ExternalCalls["ExternalCalls"] {
-    <<enum>>
-    All
-    NonStd
-    None
-  }
-  class sealmap_rust__Extraction["Extraction"] {
-    <<struct>>
-    +codebase: Codebase
-    +diagnostics: Vec#lt;Diagnostic#gt;
-  }
   class sealmap_rust__Job["Job#lt;'a#gt;"] {
     <<type>>
   }
@@ -42,7 +26,6 @@ classDiagram
   }
   class sealmap_rust {
     <<module>>
-    -const COLLECT_STACK_BYTES: usize
     +mod collect
     -collect_all(jobs: &[Job#lt;'_#gt;], options: &RustOptions) Vec#lt;raw::RawFile#gt;
     +extract(sources: &SourceSet, options: &RustOptions) Extraction
@@ -53,6 +36,9 @@ classDiagram
     +mod resolve
     +mod tidy
   }
+  class sealmap_frontend__Extraction["Extraction"] {
+    <<struct in crates/sealmap-frontend/src/lib.rs>>
+  }
   class sealmap_model__source__SourceSet["SourceSet"] {
     <<struct in crates/sealmap-model/src/source.rs>>
   }
@@ -62,28 +48,25 @@ classDiagram
   class sealmap_model__path__SourcePath["SourcePath"] {
     <<struct in crates/sealmap-model/src/path.rs>>
   }
-  class sealmap_model__codebase__Codebase["Codebase"] {
-    <<struct in crates/sealmap-model/src/codebase.rs>>
-  }
   class sealmap_rust__layout__FileRole["FileRole"] {
     <<struct in crates/sealmap-rust/src/layout.rs>>
   }
+  class sealmap_frontend__confidence__ExternalCalls["ExternalCalls"] {
+    <<enum in crates/sealmap-frontend/src/confidence.rs>>
+  }
+  sealmap_rust ..> sealmap_frontend__Extraction
   sealmap_rust ..> sealmap_model__source__SourceSet
-  sealmap_rust ..> sealmap_rust__Extraction
   sealmap_rust ..> sealmap_rust__Job
   sealmap_rust ..> sealmap_rust__RustOptions
   sealmap_rust ..> sealmap_rust__raw__RawFile
-  sealmap_rust__Diagnostic *-- sealmap_model__path__SourcePath : file
-  sealmap_rust__Extraction *-- sealmap_model__codebase__Codebase : codebase
-  sealmap_rust__Extraction o-- sealmap_rust__Diagnostic : diagnostics
   sealmap_rust__Job ..> sealmap_model__path__SourcePath
   sealmap_rust__Job ..> sealmap_rust__layout__FileRole
-  sealmap_rust__RustOptions *-- sealmap_rust__ExternalCalls : external_calls
+  sealmap_rust__RustOptions *-- sealmap_frontend__confidence__ExternalCalls : external_calls
 ```
 
 ## `sealmap_rust::extract`
-`pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction` · L158-L173
-> Extract a [`Codebase`] from the `.rs` (and `Cargo.toml`) files in `sources`.
+`pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction` · L127-L142
+> Extract a [`Codebase`](sealmap_model::Codebase) from the `.rs` (and `Cargo.toml`) files in `sources`.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust as sealmap_rust mod
@@ -99,29 +82,24 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect_all`
-`fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile>` · L185-L218
-> Pass 1 over every file, on threads with [`COLLECT_STACK_BYTES`] of stack.
+`fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile>` · L146-L156
+> Pass 1 over every file, isolated per file (big stacks, panic guard; see [`sealmap_frontend::isolate`]).
 ```mermaid
 sequenceDiagram
   participant sealmap_rust as sealmap_rust mod
+  participant sealmap_frontend__isolate as isolate mod
   participant sealmap_rust__collect as collect mod
-  participant rayon as rayon ext
-  opt closure
-    opt closure
-      sealmap_rust->>sealmap_rust__collect: collect::collect_file(p, r, t, options)
-    end
-    opt via unwrap_or_else
-      sealmap_rust->>sealmap_rust__collect: collect::failed_file(p, r, t, _)
-    end
+  sealmap_rust->>sealmap_frontend__isolate: map_isolated(jobs, COLLECT_STACK_BYTES, |..|, |..|)
+  opt via map_isolated
+    sealmap_rust->>sealmap_rust__collect: collect::collect_file(p, r, t, options)
   end
-  sealmap_rust->>rayon: ThreadPoolBuilder::ThreadPoolBuilder::new()
-  opt let Ok(pool) = rayon::ThreadPoolBuilder::new().stack…
-    Note over sealmap_rust: return pool.install(| | jobs.par_iter().map(one).collec…
+  opt via map_isolated
+    sealmap_rust->>sealmap_rust__collect: collect::failed_file(p, r, t, _)
   end
 ```
 
 ## `sealmap_rust::load_dir`
-`pub fn load_dir(root: &Path) -> std::io::Result<SourceSet>` · L220-L228
+`pub fn load_dir(root: &Path) -> std::io::Result<SourceSet>` · L158-L166
 > Load the `.rs` and `Cargo.toml` files under `root` (honouring `.gitignore`, skipping `target/`, hidden directories and the like) without extracting them.
 ```mermaid
 sequenceDiagram
@@ -134,7 +112,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::extract_dir`
-`pub fn extract_dir(root: &Path, options: &RustOptions) -> std::io::Result<(SourceSet, Extraction)>` · L230-L246
+`pub fn extract_dir(root: &Path, options: &RustOptions) -> std::io::Result<(SourceSet, Extraction)>` · L168-L184
 > Load `root` from disk (`.rs` and `Cargo.toml` files, skipping `target/`, hidden directories and the like) and [`extract`] it.
 ```mermaid
 sequenceDiagram

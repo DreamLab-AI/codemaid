@@ -2,14 +2,14 @@
 //!
 //! Everything here is owned `String`s and `Vec`s (no syn nodes), so files can
 //! be parsed in parallel and resolved afterwards in a single deterministic
-//! pass.
+//! pass. The flow part of it (steps, calls, receivers) is the shared IR from
+//! `sealmap-frontend`; the item, `use` and `impl` tables are Rust's own.
 
-use sealmap_model::{CallKind, ContentHash, MemberKind, SourcePath, Span, SymbolKind, Visibility};
+use sealmap_model::{ContentHash, MemberKind, SourcePath, Span, SymbolKind, Visibility};
+
+pub(crate) use sealmap_frontend::raw::{Callee, RawCall, RawStep, Recv, Segs};
 
 use crate::layout::FileRole;
-
-/// Path segments as written, generics stripped: `std::collections::HashMap`.
-pub(crate) type Segs = Vec<String>;
 
 #[derive(Debug, Clone)]
 pub(crate) struct RawFile {
@@ -94,48 +94,4 @@ pub(crate) struct RawImpl {
     /// Trait path and its display form (`From<String>`).
     pub trait_: Option<(Segs, String)>,
     pub methods: Vec<RawFn>,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum RawStep {
-    Call(RawCall),
-    Branch(Vec<(String, Vec<RawStep>)>),
-    Loop(String, Vec<RawStep>),
-    Optional(String, Vec<RawStep>),
-    Parallel(Vec<(String, Vec<RawStep>)>),
-    Return(String, u32),
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct RawCall {
-    pub callee: Callee,
-    pub label: String,
-    pub kind: CallKind,
-    pub awaited: bool,
-    pub fallible: bool,
-    pub line: u32,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum Callee {
-    /// `a::b::c(..)`.
-    Path(Segs),
-    /// `recv.name(..)`.
-    Method { recv: Recv, name: String },
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum Recv {
-    /// `self`.
-    SelfValue,
-    /// `self.field`.
-    SelfField(String),
-    /// A local or parameter whose declared/constructed type mentions these
-    /// paths (outermost first, e.g. `Arc<Db>` → `[Arc], [Db]`).
-    Typed(Vec<Segs>),
-    /// A plain variable or field whose type is not evident. Calls on it may
-    /// be matched to a distinctive internal method name (`inferred`).
-    Untyped,
-    /// Anything else (call chains, indexing, literals). Not resolved.
-    Unknown,
 }

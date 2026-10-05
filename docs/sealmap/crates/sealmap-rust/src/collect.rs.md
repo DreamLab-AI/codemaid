@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-rust/src/collect.rs
 module: sealmap_rust::collect
 language: rust
-source_hash: blake3:1a1cf0eb26dc6a76c51fa60a954ce8ea12b82a00e6221e759e8c4da8424b6652
-lines: 1029
+source_hash: blake3:0c4248d8454c8345199f280e8f31530451dda357105dd6875488f58c9e5ff217
+lines: 995
 fragments: 36
 ---
 # `sealmap_rust::collect` · crates/sealmap-rust/src/collect.rs
@@ -32,7 +32,6 @@ classDiagram
     -cond(&mut self, cond: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -expr(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
     -expr_inner(&mut self, e: &Expr, out: &mut Vec#lt;RawStep#gt;)
-    -flush_deferred(&self, callee: &str, deferred: Vec#lt;Vec#lt;RawStep#gt;#gt;, out: &mut Vec#lt;RawStep#gt;)
     -mac(&mut self, m: &syn::Macro, out: &mut Vec#lt;RawStep#gt;)
     -new(env: BTreeMap#lt;String, Recv#gt;) Self
     -recv(&self, e: &Expr) Recv
@@ -42,10 +41,8 @@ classDiagram
   }
   class sealmap_rust__collect["sealmap_rust::collect"] {
     <<module>>
-    -const LABEL_MAX: usize
     -const LOOPING: &[&str]
     ~const MAX_EXPR_DEPTH: u32
-    -const SIG_MAX: usize
     -arg_sketch(e: &Expr) String
     -call(callee: Callee, name: &str, args: &Punctuated#lt;Expr, syn::Token![,]#gt;, kind: CallKind, span: PmSpan) RawStep
     ~collect_file(crate) RawFile
@@ -60,16 +57,26 @@ classDiagram
     -generics_of(g: &Generics) Vec#lt;String#gt;
     -is_call(e: &Expr) bool
     -is_test_attr(a: &Attribute) bool
-    -last_call_mut(out: &mut [RawStep]) Option#lt;&mut RawStep#gt;
     -params_of(sig: &syn::Signature) BTreeMap#lt;String, Recv#gt;
     ~path_segs(crate) Segs
-    -push_arms(arms: Vec#lt;#40;String, Vec#lt;RawStep#gt;#41;#gt;, out: &mut Vec#lt;RawStep#gt;)
     -sig_refs(sig: &syn::Signature, out: &mut Vec#lt;Segs#gt;)
     -span_of(s: PmSpan) Span
     -tags_of(attrs: &[Attribute]) Vec#lt;String#gt;
     -type_refs(ty: &Type, out: &mut Vec#lt;Segs#gt;)
     -vis_of(v: &syn::Visibility) Visibility
     -vis_prefix(v: &syn::Visibility) String
+  }
+  class Callee {
+    <<external>>
+  }
+  class RawStep {
+    <<external>>
+  }
+  class Recv {
+    <<external>>
+  }
+  class Segs {
+    <<external>>
   }
   class proc_macro2__Span["proc_macro2::Span"] {
     <<external>>
@@ -92,26 +99,14 @@ classDiagram
   class sealmap_rust__layout__FileRole["FileRole"] {
     <<struct in crates/sealmap-rust/src/layout.rs>>
   }
-  class sealmap_rust__raw__Callee["Callee"] {
-    <<enum in crates/sealmap-rust/src/raw.rs>>
-  }
   class sealmap_rust__raw__RawFile["RawFile"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
   }
   class sealmap_rust__raw__RawMember["RawMember"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
   }
-  class sealmap_rust__raw__RawStep["RawStep"] {
-    <<enum in crates/sealmap-rust/src/raw.rs>>
-  }
   class sealmap_rust__raw__RawUse["RawUse"] {
     <<struct in crates/sealmap-rust/src/raw.rs>>
-  }
-  class sealmap_rust__raw__Recv["Recv"] {
-    <<enum in crates/sealmap-rust/src/raw.rs>>
-  }
-  class sealmap_rust__raw__Segs["Segs"] {
-    <<type in crates/sealmap-rust/src/raw.rs>>
   }
   class syn__Attribute["syn::Attribute"] {
     <<external>>
@@ -161,6 +156,10 @@ classDiagram
   class syn__Stmt["syn::Stmt"] {
     <<external>>
   }
+  sealmap_rust__collect ..> Callee
+  sealmap_rust__collect ..> RawStep
+  sealmap_rust__collect ..> Recv
+  sealmap_rust__collect ..> Segs
   sealmap_rust__collect ..> proc_macro2__Span
   sealmap_rust__collect ..> sealmap_model__flow__CallKind
   sealmap_rust__collect ..> sealmap_model__path__SourcePath
@@ -168,13 +167,9 @@ classDiagram
   sealmap_rust__collect ..> sealmap_model__symbol__Visibility
   sealmap_rust__collect ..> sealmap_rust__RustOptions
   sealmap_rust__collect ..> sealmap_rust__layout__FileRole
-  sealmap_rust__collect ..> sealmap_rust__raw__Callee
   sealmap_rust__collect ..> sealmap_rust__raw__RawFile
   sealmap_rust__collect ..> sealmap_rust__raw__RawMember
-  sealmap_rust__collect ..> sealmap_rust__raw__RawStep
   sealmap_rust__collect ..> sealmap_rust__raw__RawUse
-  sealmap_rust__collect ..> sealmap_rust__raw__Recv
-  sealmap_rust__collect ..> sealmap_rust__raw__Segs
   sealmap_rust__collect ..> syn__Attribute
   sealmap_rust__collect ..> syn__Expr
   sealmap_rust__collect ..> syn__Fields
@@ -186,15 +181,15 @@ classDiagram
   sealmap_rust__collect ..> syn__UseTree
   sealmap_rust__collect ..> syn__Visibility
   sealmap_rust__collect ..> syn__punctuated__Punctuated
+  sealmap_rust__collect__Collector ..> Segs
   sealmap_rust__collect__Collector ..> sealmap_model__symbol__Span
   sealmap_rust__collect__Collector ..> sealmap_model__symbol__Visibility
   sealmap_rust__collect__Collector o-- sealmap_rust__RustOptions : opts
   sealmap_rust__collect__Collector o-- sealmap_rust__raw__RawFile : raw
-  sealmap_rust__collect__Collector ..> sealmap_rust__raw__Segs
   sealmap_rust__collect__Collector ..> syn__Attribute
   sealmap_rust__collect__Collector ..> syn__Item
-  sealmap_rust__collect__FlowWalker ..> sealmap_rust__raw__RawStep
-  sealmap_rust__collect__FlowWalker o-- sealmap_rust__raw__Recv : env
+  sealmap_rust__collect__FlowWalker ..> RawStep
+  sealmap_rust__collect__FlowWalker o-- Recv : env
   sealmap_rust__collect__FlowWalker ..> syn__Block
   sealmap_rust__collect__FlowWalker ..> syn__Expr
   sealmap_rust__collect__FlowWalker ..> syn__Macro
@@ -268,6 +263,7 @@ sequenceDiagram
   participant sealmap_rust__collect__Collector as Collector
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   participant sealmap_rust__collect__FlowWalker as FlowWalker
   opt closure
     sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_of(vis)
@@ -307,11 +303,11 @@ sequenceDiagram
       end
       alt Fields::Unnamed(u)
         sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(u)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: squeeze(&tokens())
+        sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
       else Fields::Named(n)
         sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(n)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: squeeze(&tokens())
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&squeeze(), LABEL_MAX)
+        sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
+        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&squeeze(), LABEL_MAX)
       end
       sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
     end
@@ -329,7 +325,7 @@ sequenceDiagram
     loop for ti in &t.items
       alt TraitItem::Fn(f)
         sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&tokens(), SIG_MAX)
+        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&tokens(), SIG_MAX)
         sealmap_rust__collect__Collector->>sealmap_rust__collect: sig_refs(&f.sig, &refs)
         alt Some(block)
           sealmap_rust__collect__Collector->>sealmap_rust__collect: params_of(&f.sig)
@@ -344,7 +340,7 @@ sequenceDiagram
       else TraitItem::Type(ty)
         opt via then
           sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&ty.bounds)
-          sealmap_rust__collect__Collector->>sealmap_rust__tidy: squeeze(&tokens())
+          sealmap_rust__collect__Collector->>sealmap_frontend__labels: squeeze(&tokens())
         end
         sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
       else TraitItem::Const(k)
@@ -356,7 +352,7 @@ sequenceDiagram
   else Item::Type(t)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&t.generics)
     sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&t.ty)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&_, SIG_MAX)
+    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&t.ty, &it.sig_refs)
   else Item::Fn(f)
     sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&f.attrs)
@@ -366,18 +362,18 @@ sequenceDiagram
     sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&f.sig.generics)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_prefix(&f.vis)
     sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&_, SIG_MAX)
+    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: fn_tags(&f.sig, &_)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: sig_refs(&f.sig, &it.sig_refs)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: params_of(&f.sig)
     sealmap_rust__collect__Collector->>sealmap_rust__collect__FlowWalker: FlowWalker::new(params_of())
   else Item::Const(k)
     sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&k.ty)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&_, SIG_MAX)
+    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&k.ty, &it.sig_refs)
   else Item::Static(s)
     sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&s.ty)
-    sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&_, SIG_MAX)
+    sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
     sealmap_rust__collect__Collector->>sealmap_rust__collect: type_refs(&s.ty, &it.sig_refs)
   else Item::Impl(i)
     sealmap_rust__collect__Collector->>sealmap_rust__collect__Collector: skip(&i.attrs)
@@ -399,7 +395,7 @@ sequenceDiagram
         sealmap_rust__collect__Collector->>sealmap_rust__collect: span_of(span())
         sealmap_rust__collect__Collector->>sealmap_rust__collect: vis_prefix(&f.vis)
         sealmap_rust__collect__Collector->>sealmap_rust__tidy: tokens(&f.sig)
-        sealmap_rust__collect__Collector->>sealmap_rust__tidy: clip(&_, SIG_MAX)
+        sealmap_rust__collect__Collector->>sealmap_frontend__labels: clip(&_, SIG_MAX)
         sealmap_rust__collect__Collector->>sealmap_rust__collect: doc_of(&f.attrs)
         sealmap_rust__collect__Collector->>sealmap_rust__collect: generics_of(&f.sig.generics)
         sealmap_rust__collect__Collector->>sealmap_rust__collect: fn_tags(&f.sig, &f.attrs)
@@ -464,11 +460,11 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
-  participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   opt text.is_empty()
     Note over sealmap_rust__collect: return None
   end
-  sealmap_rust__collect->>sealmap_rust__tidy: clip(first, 160)
+  sealmap_rust__collect->>sealmap_frontend__labels: clip(first, DOC_SUMMARY_MAX)
 ```
 
 ## `sealmap_rust::collect::tags_of`
@@ -478,11 +474,12 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   loop for a in attrs
     opt multi || KEEP.iter().any(| k | p.is_ident(k))
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(&a.meta)
-      sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
-      sealmap_rust__collect->>sealmap_rust__tidy: clip(&t, LABEL_MAX)
+      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_frontend__labels: clip(&t, LABEL_MAX)
     end
   end
 ```
@@ -501,16 +498,17 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   opt via map
     alt GenericParam::Type(t)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(t)
-      sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
     else GenericParam::Lifetime(l)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(l)
-      sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
     else GenericParam::Const(c)
       sealmap_rust__collect->>sealmap_rust__tidy: tokens(c)
-      sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+      sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
     end
   end
 ```
@@ -682,7 +680,9 @@ sequenceDiagram
 sequenceDiagram
   participant sealmap_rust__collect__FlowWalker as FlowWalker
   participant sealmap_rust__collect as collect mod
+  participant sealmap_frontend__raw as raw mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   alt Expr::Call(c)
     loop for a in &c.args
       sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: arg(a, out, &deferred)
@@ -691,13 +691,13 @@ sequenceDiagram
       sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: path_segs(&p.path)
       opt !name.starts_with(| ch: char | ch.is_uppercase())
         sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: call(Path(), &shown, &c.args, Function, span())
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: flush_deferred(&name, deferred, out)
+        sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
         Note over sealmap_rust__collect__FlowWalker: return
       end
     else other
       sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(other, out)
     end
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: flush_deferred(#quot;#quot;, deferred, out)
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(#quot;#quot;, deferred, LOOPING, out)
   else Expr::MethodCall(m)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&m.receiver, out)
     loop for a in &m.args
@@ -705,18 +705,18 @@ sequenceDiagram
     end
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: recv(&m.receiver)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: call(_, &name, &m.args, Method, span())
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: flush_deferred(&name, deferred, out)
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: place_deferred(&name, deferred, LOOPING, out)
   else Expr::Await(a)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&a.base, out)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: is_call(&a.base)
     opt is_call(&a.base)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: last_call_mut(out)
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: last_call_mut(out)
     end
   else Expr::Try(t)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&t.expr, out)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: is_call(&t.expr)
     opt is_call(&t.expr)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: last_call_mut(out)
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: last_call_mut(out)
     end
   else Expr::If(i)
     loop while let Some(ifx) = cur.take()
@@ -729,30 +729,30 @@ sequenceDiagram
         sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(other)
       end
     end
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: push_arms(arms, out)
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__raw: push_arms(arms, out)
   else Expr::Match(m)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&m.expr, out)
     opt via map
       sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&a.pat)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: squeeze(&tokens())
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
       opt let Some((_, g)) = &a.guard
         sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(g)
-        sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: squeeze(&tokens())
+        sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
       end
       sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub(&a.body)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: clip(&label, LABEL_MAX)
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&label, LABEL_MAX)
     end
   else Expr::ForLoop(f)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: expr(&f.expr, out)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&f.pat)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: squeeze(&tokens())
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
     sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(&f.expr)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: squeeze(&tokens())
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: clip(&_, LABEL_MAX)
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&f.body)
   else Expr::While(w)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect: cond_label(&w.cond)
-    sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: clip(&_, LABEL_MAX)
+    sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: cond(&w.cond, &body)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: sub_block(&w.body)
   else Expr::Loop(l)
@@ -775,8 +775,8 @@ sequenceDiagram
     end
     opt via map_or_else
       sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: tokens(e)
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: squeeze(&tokens())
-      sealmap_rust__collect__FlowWalker->>sealmap_rust__tidy: clip(&_, LABEL_MAX)
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: squeeze(&tokens())
+      sealmap_rust__collect__FlowWalker->>sealmap_frontend__labels: clip(&_, LABEL_MAX)
     end
   else Expr::Macro(m)
     sealmap_rust__collect__FlowWalker->>sealmap_rust__collect__FlowWalker: mac(&m.mac, out)
@@ -866,7 +866,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect::FlowWalker::mac`
-`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L912-L924
+`fn mac(&mut self, m: &syn::Macro, out: &mut Vec<RawStep>)` · L899-L911
 > Calls inside macro arguments (`vec![f()]`, `assert!(g())`, `format!("{}", h())`).
 ```mermaid
 sequenceDiagram
@@ -884,7 +884,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect::FlowWalker::recv`
-`fn recv(&self, e: &Expr) -> Recv` · L926-L942
+`fn recv(&self, e: &Expr) -> Recv` · L913-L929
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect__FlowWalker as FlowWalker
@@ -898,28 +898,29 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect::call`
-`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L945-L949
+`fn call(callee: Callee, name: &str, args: &Punctuated<Expr, syn::Token![,]>, kind: CallKind, span: PmSpan) -> RawStep` · L932-L935
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant syn as syn ext
-  participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   participant proc_macro2 as proc_macro2 ext
   sealmap_rust__collect->>syn: Punctuated::iter()
-  sealmap_rust__collect->>sealmap_rust__tidy: clip(&_, LABEL_MAX)
+  sealmap_rust__collect->>sealmap_frontend__labels: call_label(name, &sketch)
   sealmap_rust__collect->>proc_macro2: Span::start()
 ```
 
 ## `sealmap_rust::collect::arg_sketch`
-`fn arg_sketch(e: &Expr) -> String` · L951-L971
+`fn arg_sketch(e: &Expr) -> String` · L937-L957
 > A compact stand-in for an argument: identifiers and short literals are kept, everything else becomes `_`.
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   alt Expr::Lit(l)
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(l)
-    sealmap_rust__collect->>sealmap_rust__tidy: clip(&tokens(), 14)
+    sealmap_rust__collect->>sealmap_frontend__labels: clip(&tokens(), ARG_LITERAL_MAX)
   else Expr::Reference(r)
     sealmap_rust__collect->>sealmap_rust__collect: arg_sketch(&r.expr)
   else Expr::Field(f)
@@ -932,25 +933,26 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect::cond_label`
-`fn cond_label(cond: &Expr) -> String` · L973-L979
+`fn cond_label(cond: &Expr) -> String` · L959-L965
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
   participant sealmap_rust__tidy as tidy mod
+  participant sealmap_frontend__labels as labels mod
   alt Expr::Let(l)
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(&l.pat)
-    sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(&l.expr)
-    sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
   else other
     sealmap_rust__collect->>sealmap_rust__tidy: tokens(other)
-    sealmap_rust__collect->>sealmap_rust__tidy: squeeze(&tokens())
+    sealmap_rust__collect->>sealmap_frontend__labels: squeeze(&tokens())
   end
-  sealmap_rust__collect->>sealmap_rust__tidy: clip(&_, LABEL_MAX)
+  sealmap_rust__collect->>sealmap_frontend__labels: condition_label(&text)
 ```
 
 ## `sealmap_rust::collect::is_call`
-`fn is_call(e: &Expr) -> bool` · L995-L1003
+`fn is_call(e: &Expr) -> bool` · L967-L975
 ```mermaid
 sequenceDiagram
   participant sealmap_rust__collect as collect mod
@@ -964,7 +966,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect::constructed_type`
-`fn constructed_type(e: &Expr) -> Option<Segs>` · L1011-L1029
+`fn constructed_type(e: &Expr) -> Option<Segs>` · L977-L995
 > `Foo::new(..)`, `Foo { ..
 ```mermaid
 sequenceDiagram

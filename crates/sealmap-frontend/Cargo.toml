@@ -1,0 +1,24 @@
+[package]
+name = "sealmap-frontend"
+description = "Language-neutral frontend core for sealmap: raw flow IR, flow lowering, call aggregation, confidence policy, label rules, symbol-id builder and panic-isolated collection"
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = ["parallel"]
+## Run isolated collection on a rayon pool. Output is identical with or without it.
+parallel = ["dep:rayon"]
+
+[dependencies]
+sealmap-model.workspace = true
+rayon = { workspace = true, optional = true }
+
+[lints]
+workspace = true

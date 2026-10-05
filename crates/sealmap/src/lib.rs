@@ -21,6 +21,7 @@
 //! |---|---|
 //! | [`model`] (`sealmap-model`) | language-neutral code model and in-memory sources |
 //! | [`mermaid`] (`sealmap-mermaid`) | zero-dependency typed Mermaid writers |
+//! | [`frontend`] (`sealmap-frontend`) | language-neutral frontend core: flow IR and lowering, confidence, labels, ids |
 //! | [`rust`] (`sealmap-rust`) | Rust frontend (syn) |
 //! | [`corpus`] (`sealmap-corpus`) | projections, index, 1:1 contract |
 //!
@@ -65,6 +66,7 @@ use std::io;
 use std::path::Path;
 
 pub use sealmap_corpus as corpus;
+pub use sealmap_frontend as frontend;
 pub use sealmap_mermaid as mermaid;
 pub use sealmap_model as model;
 pub use sealmap_rust as rust;

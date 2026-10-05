@@ -2,13 +2,13 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use sealmap_frontend::{aggregate_calls, ids, lower};
 use sealmap_model::{
-    Arm, Call, Codebase, Confidence, Exit, Flow, Member, Relation, RelationKind, SourceFile, Step, Symbol, SymbolId,
-    SymbolKind,
+    Call, Codebase, Confidence, Flow, Member, Relation, RelationKind, SourceFile, Symbol, SymbolId, SymbolKind,
 };
 
 use crate::raw::*;
-use crate::{Diagnostic, ExternalCalls, RustOptions};
+use crate::{Diagnostic, RustOptions};
 
 /// Crates whose items are never interesting as relation targets.
 const STD_ROOTS: &[&str] = &["std", "core", "alloc"];
@@ -224,21 +224,21 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
         cb.add_file(SourceFile {
             path: f.path.clone(),
             language: "rust".into(),
-            module: SymbolId::new(f.role.module.join("::")),
+            module: ids::module_id(&f.role.module),
             hash: f.hash.clone(),
             lines: f.text_lines,
         });
         for m in &f.modules {
-            let id = SymbolId::new(m.path.join("::"));
+            let id = ids::module_id(&m.path);
             let mut s =
                 Symbol::new(id.clone(), m.path.last().cloned().unwrap_or_default(), SymbolKind::Module, f.path.clone());
-            s.parent = (m.path.len() > 1).then(|| SymbolId::new(m.path[..m.path.len() - 1].join("::")));
+            s.parent = ids::parent_module_id(&m.path);
             s.span = m.span;
             s.doc = m.doc.clone();
             s.visibility = m.vis.clone();
             s.tags = m.tags.clone();
             cb.add_symbol(s);
-            let module = m.path.join("::");
+            let module = ids::module_path(&m.path);
             for u in &m.uses {
                 if u.alias == "*" {
                     if let Some(t) = r.resolve_internal(&module, &u.target, None) {
@@ -253,8 +253,8 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
             }
         }
         for it in &f.items {
-            let module = it.module.join("::");
-            let id = SymbolId::new(format!("{module}::{}", it.name));
+            let module = ids::module_path(&it.module);
+            let id = ids::item_id(&module, &it.name);
             let mut s = Symbol::new(id.clone(), &it.name, it.kind, f.path.clone());
             s.visibility = it.vis.clone();
             s.span = it.span;
@@ -281,14 +281,14 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
                 s.flow = r.flow(&ctx, &it.flow, opts);
             }
             for m in &it.methods {
-                let mid = id.child(&m.name);
+                let mid = ids::method_id(&id, None, &m.name);
                 let ms = r.method_symbol(&mid, &id, m, f, &ctx, opts, &mut cb);
                 cb.add_symbol(ms);
             }
             cb.add_symbol(s);
         }
         for imp in &f.impls {
-            let module = imp.module.join("::");
+            let module = ids::module_path(&imp.module);
             let Some(self_segs) = &imp.self_ty else { continue };
             let (ty, _) = r.resolve(&module, self_segs, None);
             let trait_seg = imp.trait_.as_ref().map(|(segs, disp)| {
@@ -296,14 +296,11 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
                 if keep_ref(&t) || r.internal.contains(&t) {
                     cb.add_relation(Relation::new(ty.clone(), t, RelationKind::Implements, c));
                 }
-                format!("<{}>", disp.replace("::", "."))
+                ids::trait_impl_segment(disp)
             });
             let ctx = FlowCtx { module: &module, self_ty: Some(&ty) };
             for m in &imp.methods {
-                let mid = match &trait_seg {
-                    Some(t) => ty.child(t).child(&m.name),
-                    None => ty.child(&m.name),
-                };
+                let mid = ids::method_id(&ty, trait_seg.as_deref(), &m.name);
                 let mut ms = r.method_symbol(&mid, &ty, m, f, &ctx, opts, &mut cb);
                 if let Some((_, disp)) = &imp.trait_ {
                     ms.tags.insert(0, format!("impl {disp}"));
@@ -313,19 +310,7 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, opts: &RustOptions) -> (Cod
         }
     }
 
-    // Aggregate call edges from flows.
-    let mut calls: BTreeMap<(SymbolId, SymbolId), Confidence> = BTreeMap::new();
-    for s in cb.symbols.values() {
-        if let Some(flow) = &s.flow {
-            for c in flow.calls() {
-                let e = calls.entry((s.id.clone(), c.target.clone())).or_insert(c.confidence);
-                *e = (*e).min(c.confidence);
-            }
-        }
-    }
-    for ((from, to), c) in calls {
-        cb.add_relation(Relation::new(from, to, RelationKind::Calls, c));
-    }
+    aggregate_calls(&mut cb);
     (cb, diags)
 }
 
@@ -385,11 +370,11 @@ impl Resolver {
         };
         for f in files {
             for m in &f.modules {
-                let id = m.path.join("::");
+                let id = ids::module_path(&m.path);
                 r.internal.insert(SymbolId::new(&id));
                 r.uses.entry(id.clone()).or_default().extend(m.uses.iter().cloned());
                 if m.path.len() > 1 {
-                    let parent = m.path[..m.path.len() - 1].join("::");
+                    let parent = ids::module_path(&m.path[..m.path.len() - 1]);
                     r.items
                         .entry(parent)
                         .or_default()
@@ -397,8 +382,8 @@ impl Resolver {
                 }
             }
             for it in &f.items {
-                let module = it.module.join("::");
-                let id = SymbolId::new(format!("{module}::{}", it.name));
+                let module = ids::module_path(&it.module);
+                let id = ids::item_id(&module, &it.name);
                 r.internal.insert(id.clone());
                 r.items.entry(module.clone()).or_default().entry(it.name.clone()).or_insert(id.clone());
                 if matches!(it.kind, SymbolKind::Struct | SymbolKind::Union | SymbolKind::Enum) {
@@ -412,7 +397,7 @@ impl Resolver {
                     }
                     for m in &it.methods {
                         names.insert(m.name.clone());
-                        let mid = id.child(&m.name);
+                        let mid = ids::method_id(&id, None, &m.name);
                         r.internal.insert(mid.clone());
                         r.methods.entry(id.clone()).or_default().insert(m.name.clone(), mid.clone());
                         r.by_name.entry(m.name.clone()).or_default().insert(mid);
@@ -447,19 +432,16 @@ impl Resolver {
                     if imp.trait_.is_some() != pass_trait {
                         continue;
                     }
-                    let module = imp.module.join("::");
+                    let module = ids::module_path(&imp.module);
                     let Some(segs) = &imp.self_ty else { continue };
                     let (ty, _) = r.resolve(&module, segs, None);
                     let tseg = imp.trait_.as_ref().map(|(segs, disp)| {
                         let (t, _) = r.resolve(&module, segs, Some(&ty));
                         r.impls.entry(ty.clone()).or_default().insert(t);
-                        format!("<{}>", disp.replace("::", "."))
+                        ids::trait_impl_segment(disp)
                     });
                     for m in &imp.methods {
-                        let mid = match &tseg {
-                            Some(t) => ty.child(t).child(&m.name),
-                            None => ty.child(&m.name),
-                        };
+                        let mid = ids::method_id(&ty, tseg.as_deref(), &m.name);
                         r.internal.insert(mid.clone());
                         r.methods.entry(ty.clone()).or_default().entry(m.name.clone()).or_insert(mid.clone());
                         r.by_name.entry(m.name.clone()).or_default().insert(mid);
@@ -480,7 +462,7 @@ impl Resolver {
                 let root = id.as_str().split("::").next().unwrap_or("");
                 if self.crates.contains(root) { (id, Confidence::Inferred) } else { (id, Confidence::External) }
             }
-            None => (SymbolId::new(segs.join("::")), Confidence::External),
+            None => (ids::path_id(segs), Confidence::External),
         }
     }
 
@@ -529,13 +511,13 @@ impl Resolver {
                     full.extend(rest.iter().cloned());
                     return self
                         .walk(module, &full, self_ty, depth + 1, use_globs)
-                        .or_else(|| Some(SymbolId::new(full.join("::"))));
+                        .or_else(|| Some(ids::path_id(&full)));
                 } else if let Some(id) = use_globs.then(|| self.glob(module, name)).flatten() {
                     id
                 } else if self.crates.contains(name) {
                     SymbolId::new(name)
                 } else {
-                    return Some(SymbolId::new(segs.join("::")));
+                    return Some(ids::path_id(segs));
                 }
             }
         };
@@ -650,81 +632,7 @@ impl Resolver {
     }
 
     fn flow(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Option<Flow> {
-        let mut steps = self.steps(ctx, raw, opts);
-        // A trailing top-level `return` is just the end of the function.
-        if matches!(steps.last(), Some(Step::Return(_))) {
-            steps.pop();
-        }
-        // A flow that only returns says nothing about calls.
-        if steps.iter().all(|s| matches!(s, Step::Return(_))) {
-            return None;
-        }
-        Some(Flow::new(steps))
-    }
-
-    fn steps(&self, ctx: &FlowCtx<'_>, raw: &[RawStep], opts: &RustOptions) -> Vec<Step> {
-        let mut out = Vec::new();
-        for s in raw {
-            match s {
-                RawStep::Call(c) => {
-                    if let Some(call) = self.call(ctx, c, opts) {
-                        out.push(Step::Call(call));
-                    }
-                }
-                RawStep::Branch(raw_arms) => {
-                    let first_label = raw_arms.first().map(|(l, _)| l.clone()).unwrap_or_default();
-                    let all: Vec<(usize, Arm)> = raw_arms
-                        .iter()
-                        .enumerate()
-                        .map(|(i, (label, steps))| {
-                            (i, Arm { label: label.clone(), steps: self.steps(ctx, steps, opts) })
-                        })
-                        .filter(|(_, a)| !a.steps.is_empty())
-                        .collect();
-                    match all.len() {
-                        0 => {}
-                        1 => {
-                            // One arm left: say which condition guards it.
-                            let (i, arm) = all.into_iter().next().expect("one arm");
-                            let label = if i > 0 && arm.label.is_empty() {
-                                format!("not {first_label}")
-                            } else {
-                                arm.label.trim_start_matches("if ").to_owned()
-                            };
-                            out.push(Step::Optional { label, body: arm.steps });
-                        }
-                        _ => out.push(Step::Branch { arms: all.into_iter().map(|(_, a)| a).collect() }),
-                    }
-                }
-                RawStep::Parallel(arms) => {
-                    let arms = self.arms(ctx, arms, opts);
-                    if arms.iter().any(|a| !a.steps.is_empty()) {
-                        out.push(Step::Parallel { arms });
-                    }
-                }
-                RawStep::Loop(label, body) => {
-                    let body = self.steps(ctx, body, opts);
-                    if !body.is_empty() {
-                        out.push(Step::Loop { label: label.clone(), body });
-                    }
-                }
-                RawStep::Optional(label, body) => {
-                    let body = self.steps(ctx, body, opts);
-                    if !body.is_empty() {
-                        out.push(Step::Optional { label: label.clone(), body });
-                    }
-                }
-                RawStep::Return(label, line) => out.push(Step::Return(Exit { label: label.clone(), line: *line })),
-            }
-        }
-        out
-    }
-
-    fn arms(&self, ctx: &FlowCtx<'_>, arms: &[(String, Vec<RawStep>)], opts: &RustOptions) -> Vec<Arm> {
-        arms.iter()
-            .map(|(label, steps)| Arm { label: label.clone(), steps: self.steps(ctx, steps, opts) })
-            .filter(|a| !a.steps.is_empty())
-            .collect()
+        lower::lower_flow(raw, &mut |c: &RawCall| self.call(ctx, c, opts))
     }
 
     fn call(&self, ctx: &FlowCtx<'_>, c: &RawCall, opts: &RustOptions) -> Option<Call> {
@@ -744,30 +652,13 @@ impl Resolver {
             }
             Callee::Method { recv, name } => self.method(ctx, recv, name)?,
         };
-        let keep = match confidence {
-            Confidence::Exact | Confidence::Inferred => true,
-            Confidence::External => match opts.external_calls {
-                ExternalCalls::All => true,
-                ExternalCalls::NonStd => {
-                    let root = target.as_str().split("::").next().unwrap_or("");
-                    // External roots that look like crates (lower-case);
-                    // unresolved type names are not dependencies.
-                    keep_ref(&target)
-                        && root.starts_with(|c: char| c.is_ascii_lowercase())
-                        && !self.crates.contains(root)
-                }
-                ExternalCalls::None => false,
-            },
-        };
-        keep.then(|| Call {
-            target,
-            label: c.label.clone(),
-            kind: c.kind,
-            confidence,
-            awaited: c.awaited,
-            fallible: c.fallible,
-            line: c.line,
-        })
+        let keep = opts.external_calls.keeps(confidence, || {
+            let root = target.as_str().split("::").next().unwrap_or("");
+            // External roots that look like crates (lower-case); unresolved
+            // type names are not dependencies.
+            keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.crates.contains(root)
+        });
+        keep.then(|| c.to_call(target, confidence))
     }
 
     /// Resolve a method call. Returns `None` only when the call should be
@@ -786,21 +677,21 @@ impl Resolver {
             Recv::Untyped => return Some(self.by_name_only(name)),
             Recv::Unknown => None,
         };
-        let Some(ty) = ty else { return Some((SymbolId::new(format!("?::{name}")), Confidence::External)) };
+        let Some(ty) = ty else { return Some((ids::unresolved_method_id(name), Confidence::External)) };
         if let Some(id) = self.methods.get(&ty).and_then(|m| m.get(name)) {
             return Some((id.clone(), Confidence::Exact));
         }
         if self.trait_methods.get(&ty).is_some_and(|n| n.contains(name)) {
-            return Some((ty.child(name), Confidence::Exact));
+            return Some((ids::method_id(&ty, None, name), Confidence::Exact));
         }
         for tr in self.impls.get(&ty).into_iter().flatten() {
             if self.trait_methods.get(tr).is_some_and(|n| n.contains(name)) {
-                return Some((tr.child(name), Confidence::Exact));
+                return Some((ids::method_id(tr, None, name), Confidence::Exact));
             }
         }
         // Known type, method not defined in the codebase: a derived or std
         // trait method on an internal type, or a dependency's method.
-        Some((ty.child(name), Confidence::External))
+        Some((ids::method_id(&ty, None, name), Confidence::External))
     }
 
     /// The type a method is called on, from the declared type's paths
@@ -833,7 +724,7 @@ impl Resolver {
                 }
             }
         }
-        (SymbolId::new(format!("?::{name}")), Confidence::External)
+        (ids::unresolved_method_id(name), Confidence::External)
     }
 }
 

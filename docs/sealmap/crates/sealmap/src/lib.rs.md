@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap/src/lib.rs
 module: sealmap
 language: rust
-source_hash: blake3:a09758772955fed4cb36bb3366fac22806e8c00219328bbe6fea8ab6bdffd5a2
-lines: 116
+source_hash: blake3:4725e7fd842637884a92f47c771282874859d632ac3b01a68a1dfc0277279ac1
+lines: 118
 fragments: 4
 ---
 # `sealmap` · crates/sealmap/src/lib.rs
@@ -45,7 +45,7 @@ classDiagram
 ```
 
 ## `sealmap::generate_dir`
-`pub fn generate_dir(root: &Path, options: &Options) -> io::Result<Corpus>` · L84-L88
+`pub fn generate_dir(root: &Path, options: &Options) -> io::Result<Corpus>` · L86-L90
 > Load, extract and project a single directory.
 ```mermaid
 sequenceDiagram
@@ -57,7 +57,7 @@ sequenceDiagram
 ```
 
 ## `sealmap::generate_repos`
-`pub fn generate_repos(repos: &[(&str, &Path)], options: &Options) -> io::Result<Corpus>` · L90-L101
+`pub fn generate_repos(repos: &[(&str, &Path)], options: &Options) -> io::Result<Corpus>` · L92-L103
 > Load several repositories as one codebase.
 ```mermaid
 sequenceDiagram
@@ -70,7 +70,7 @@ sequenceDiagram
 ```
 
 ## `sealmap::load_repos`
-`pub fn load_repos(repos: &[(&str, &Path)]) -> io::Result<SourceSet>` · L103-L116
+`pub fn load_repos(repos: &[(&str, &Path)]) -> io::Result<SourceSet>` · L105-L118
 > Load several repositories into one [`SourceSet`] under `<name>/` prefixes.
 ```mermaid
 sequenceDiagram

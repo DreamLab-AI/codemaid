@@ -367,6 +367,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "sealmap-corpus",
+ "sealmap-frontend",
  "sealmap-mermaid",
  "sealmap-model",
  "sealmap-rust",
@@ -383,6 +384,14 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "sealmap-frontend"
+version = "0.1.0"
+dependencies = [
+ "rayon",
+ "sealmap-model",
 ]
 
 [[package]]
@@ -406,7 +415,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "rayon",
+ "sealmap-frontend",
  "sealmap-model",
  "syn 2.0.119",
  "thiserror",
