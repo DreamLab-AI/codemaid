@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-frontend/src/lib.rs
 module: sealmap_frontend
 language: rust
-source_hash: blake3:e0d8f58b26957d65c55e06e76d1a8c06dad888ea9fd7354bad5976b8e74bf1a2
-lines: 78
+source_hash: blake3:415a52feeeac8ba8ca4bd453a257b72faa69663e114fe63ef4fd90e5d752c4d1
+lines: 83
 fragments: 1
 ---
 # `sealmap_frontend` · crates/sealmap-frontend/src/lib.rs
@@ -23,6 +23,9 @@ classDiagram
     <<struct>>
     +codebase: Codebase
     +diagnostics: Vec#lt;Diagnostic#gt;
+  }
+  class sealmap_frontend__ReadmeDoctests["ReadmeDoctests"] {
+    <<struct>>
   }
   class sealmap_frontend {
     <<module>>

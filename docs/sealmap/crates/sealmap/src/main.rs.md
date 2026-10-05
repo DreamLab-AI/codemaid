@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap/src/main.rs
 module: sealmap_main
 language: rust
-source_hash: blake3:d5b8f4d9f4b04a1ef773ac8654c23b15f6fc9c47318d7904141c80ba7f572c5d
-lines: 179
+source_hash: blake3:0e8c2311d0889a2e2d80d29925ab8fa4d8cbf5cf2cb4f991bbffb20137b3eb7f
+lines: 182
 fragments: 4
 ---
 # `sealmap_main` · crates/sealmap/src/main.rs
@@ -64,7 +64,7 @@ classDiagram
 ```
 
 ## `sealmap_main::main`
-`fn main() -> ExitCode` · L72-L81
+`fn main() -> ExitCode` · L75-L84
 ```mermaid
 sequenceDiagram
   participant sealmap_main as sealmap_main mod
@@ -74,7 +74,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_main::run`
-`fn run(cli: Cli) -> Result<ExitCode, String>` · L83-L148
+`fn run(cli: Cli) -> Result<ExitCode, String>` · L86-L151
 ```mermaid
 sequenceDiagram
   participant sealmap_main as sealmap_main mod
@@ -106,7 +106,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_main::load`
-`fn load(c: &Common, opts: &Options) -> Result<(SourceSet, sealmap::rust::RustOptions), String>` · L150-L172
+`fn load(c: &Common, opts: &Options) -> Result<(SourceSet, sealmap::rust::RustOptions), String>` · L153-L175
 ```mermaid
 sequenceDiagram
   participant sealmap_main as sealmap_main mod

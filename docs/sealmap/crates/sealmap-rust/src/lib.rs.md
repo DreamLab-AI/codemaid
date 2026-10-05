@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-rust/src/lib.rs
 module: sealmap_rust
 language: rust
-source_hash: blake3:93366a10a34532f64b47901a922f1e89aaa920d4a1009e99a41b838c9530ee62
-lines: 184
+source_hash: blake3:3566c25d5958aee8dbf655733a5d1d8cce12ce19f1962e3d16a1190c80fbc19c
+lines: 190
 fragments: 5
 ---
 # `sealmap_rust` · crates/sealmap-rust/src/lib.rs
@@ -16,6 +16,9 @@ classDiagram
   direction LR
   class sealmap_rust__Job["Job#lt;'a#gt;"] {
     <<type>>
+  }
+  class sealmap_rust__ReadmeDoctests["ReadmeDoctests"] {
+    <<struct>>
   }
   class sealmap_rust__RustOptions["RustOptions"] {
     <<struct>>
@@ -65,7 +68,7 @@ classDiagram
 ```
 
 ## `sealmap_rust::extract`
-`pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction` · L127-L142
+`pub fn extract(sources: &SourceSet, options: &RustOptions) -> Extraction` · L128-L143
 > Extract a [`Codebase`](sealmap_model::Codebase) from the `.rs` (and `Cargo.toml`) files in `sources`.
 ```mermaid
 sequenceDiagram
@@ -82,7 +85,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::collect_all`
-`fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile>` · L146-L156
+`fn collect_all(jobs: &[Job<'_>], options: &RustOptions) -> Vec<raw::RawFile>` · L147-L157
 > Pass 1 over every file, isolated per file (big stacks, panic guard; see [`sealmap_frontend::isolate`]).
 ```mermaid
 sequenceDiagram
@@ -99,7 +102,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::load_dir`
-`pub fn load_dir(root: &Path) -> std::io::Result<SourceSet>` · L158-L166
+`pub fn load_dir(root: &Path) -> std::io::Result<SourceSet>` · L159-L167
 > Load the `.rs` and `Cargo.toml` files under `root` (honouring `.gitignore`, skipping `target/`, hidden directories and the like) without extracting them.
 ```mermaid
 sequenceDiagram
@@ -112,7 +115,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_rust::extract_dir`
-`pub fn extract_dir(root: &Path, options: &RustOptions) -> std::io::Result<(SourceSet, Extraction)>` · L168-L184
+`pub fn extract_dir(root: &Path, options: &RustOptions) -> std::io::Result<(SourceSet, Extraction)>` · L169-L185
 > Load `root` from disk (`.rs` and `Cargo.toml` files, skipping `target/`, hidden directories and the like) and [`extract`] it.
 ```mermaid
 sequenceDiagram

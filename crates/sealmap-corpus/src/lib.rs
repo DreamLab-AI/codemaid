@@ -78,6 +78,7 @@
 //! ```
 
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod contract;
 mod document;
@@ -247,3 +248,8 @@ fn to_json(value: &impl serde::Serialize, pretty: bool) -> String {
 fn readme() -> String {
     include_str!("corpus_readme.md").to_owned()
 }
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

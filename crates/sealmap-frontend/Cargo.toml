@@ -7,8 +7,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sealmap-frontend"
 authors.workspace = true
-keywords.workspace = true
+keywords = ["static-analysis", "call-graph", "codemap", "mermaid", "llm"]
 categories.workspace = true
 
 [features]

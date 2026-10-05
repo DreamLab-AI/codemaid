@@ -68,6 +68,7 @@
 //! ```
 
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod codebase;
 pub mod flow;
@@ -90,3 +91,8 @@ pub use symbol::{
 /// Bumped whenever a field is added, removed or changes meaning, so agents and
 /// tools reading a persisted model can refuse a schema they do not understand.
 pub const MODEL_SCHEMA_VERSION: u32 = 1;
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

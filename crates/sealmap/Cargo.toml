@@ -1,12 +1,14 @@
 [package]
 name = "sealmap"
 description = "Deterministic, dense codebase-to-Mermaid generation for LLM agents: sequence, class, ER and dependency diagrams in a contract-enforced 1:1 corpus"
-readme = "../../README.md"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sealmap"
 authors.workspace = true
 keywords.workspace = true
 categories.workspace = true

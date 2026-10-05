@@ -7,8 +7,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sealmap-rust"
 authors.workspace = true
-keywords.workspace = true
+keywords = ["rust", "syn", "static-analysis", "call-graph", "mermaid"]
 categories.workspace = true
 
 [features]

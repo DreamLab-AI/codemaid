@@ -1,14 +1,16 @@
 [package]
 name = "sealmap-mermaid"
-description = "Typed, deterministic Mermaid writers (sequence, class, flowchart) with safe escaping"
+description = "Typed, deterministic Mermaid writers (sequence, class, ER, flowchart) with safe escaping and injective ids; no dependencies"
 readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/sealmap-mermaid"
 authors.workspace = true
-keywords.workspace = true
+keywords = ["mermaid", "diagram", "sequence-diagram", "class-diagram", "markdown"]
 categories.workspace = true
 
 [dependencies]

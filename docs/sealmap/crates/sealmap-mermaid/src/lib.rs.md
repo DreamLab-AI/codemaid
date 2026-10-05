@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-mermaid/src/lib.rs
 module: sealmap_mermaid
 language: rust
-source_hash: blake3:ff155f488defa98ed2c44f4c3b4120406bc5d99df1f5a81a22a952bcbc29269d
-lines: 77
+source_hash: blake3:080101d5aa5890bd0f3632b7935f667b7c7e08ce7389e70166097ae73b7ffda7
+lines: 83
 fragments: 1
 ---
 # `sealmap_mermaid` · crates/sealmap-mermaid/src/lib.rs
@@ -14,6 +14,9 @@ fragments: 1
 ```mermaid
 classDiagram
   direction LR
+  class sealmap_mermaid__ReadmeDoctests["ReadmeDoctests"] {
+    <<struct>>
+  }
   class sealmap_mermaid {
     <<module>>
     +mod class

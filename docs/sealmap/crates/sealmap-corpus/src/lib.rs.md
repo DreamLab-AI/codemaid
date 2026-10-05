@@ -3,8 +3,8 @@ sealmap: 1
 source: crates/sealmap-corpus/src/lib.rs
 module: sealmap_corpus
 language: rust
-source_hash: blake3:8e8e49cffd2ddd776b409d62e540c40211856a0930a26ce8f27f036683c36c34
-lines: 249
+source_hash: blake3:747c71d3a83a1f518f03cd45c2445c247571aeaf7bf777b5639f6a900da23310
+lines: 255
 fragments: 6
 ---
 # `sealmap_corpus` · crates/sealmap-corpus/src/lib.rs
@@ -44,6 +44,9 @@ classDiagram
     ~children(crate) impl Iterator#lt;Item = &'a Symbol#gt; + '_
     ~in_file(crate) impl Iterator#lt;Item = &'a Symbol#gt; + '_
     -new(cb: &'a Codebase) Self
+  }
+  class sealmap_corpus__ReadmeDoctests["ReadmeDoctests"] {
+    <<struct>>
   }
   class sealmap_corpus {
     <<module>>
@@ -95,7 +98,7 @@ classDiagram
 ```
 
 ## `sealmap_corpus::Corpus::document`
-`pub fn document(&self, path: &str) -> Option<&str>` · L166-L169
+`pub fn document(&self, path: &str) -> Option<&str>` · L167-L170
 > Contents of a generated file by relative path.
 ```mermaid
 sequenceDiagram
@@ -105,7 +108,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_corpus::generate`
-`pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus` · L172-L193
+`pub fn generate(codebase: &Codebase, options: &CorpusOptions) -> Corpus` · L173-L194
 > Generate the full corpus in memory.
 ```mermaid
 sequenceDiagram
@@ -135,7 +138,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_corpus::document_path`
-`pub fn document_path(source: &SourcePath) -> SourcePath` · L230-L233
+`pub fn document_path(source: &SourcePath) -> SourcePath` · L231-L234
 > Map a source path to its document path (`src/a.rs` → `src/a.rs.md`).
 ```mermaid
 sequenceDiagram
@@ -145,7 +148,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_corpus::is_reserved`
-`pub fn is_reserved(path: &SourcePath) -> bool` · L235-L238
+`pub fn is_reserved(path: &SourcePath) -> bool` · L236-L239
 > `true` for corpus-level files (`_index.json`, ...).
 ```mermaid
 sequenceDiagram
@@ -156,7 +159,7 @@ sequenceDiagram
 ```
 
 ## `sealmap_corpus::to_json`
-`fn to_json(value: &impl serde::Serialize, pretty: bool) -> String` · L240-L245
+`fn to_json(value: &impl serde::Serialize, pretty: bool) -> String` · L241-L246
 ```mermaid
 sequenceDiagram
   participant sealmap_corpus as sealmap_corpus mod

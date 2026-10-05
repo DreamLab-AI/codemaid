@@ -61,6 +61,7 @@
 //! ```
 
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod class;
 mod er;
@@ -75,3 +76,8 @@ pub use escape::{Ident, escape_text, escape_type};
 pub use flowchart::{EdgeStyle, Flowchart, NodeShape};
 pub use sequence::{Arrow, BlockKind, SeqBuilder, SequenceDiagram};
 pub use writer::CodeWriter;
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

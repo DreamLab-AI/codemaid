@@ -91,6 +91,7 @@
 //! ```
 
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod collect;
 mod layout;
@@ -182,3 +183,8 @@ pub fn extract_dir(root: &Path, options: &RustOptions) -> std::io::Result<(Sourc
     let extraction = extract(&sources, &options);
     Ok((sources, extraction))
 }
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

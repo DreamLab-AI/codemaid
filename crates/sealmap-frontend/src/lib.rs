@@ -76,3 +76,8 @@ pub struct Extraction {
     /// Non-fatal problems, in file order.
     pub diagnostics: Vec<Diagnostic>,
 }
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

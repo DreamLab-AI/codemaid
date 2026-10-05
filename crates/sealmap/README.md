@@ -1,0 +1,48 @@
+# sealmap
+
+[![crates.io](https://img.shields.io/crates/v/sealmap.svg)](https://crates.io/crates/sealmap)
+[![docs.rs](https://img.shields.io/docsrs/sealmap)](https://docs.rs/sealmap)
+
+Deterministic code maps for LLM development harnesses: the facade and
+command-line tool of [sealmap](https://github.com/DreamLab-AI/sealmap).
+
+sealmap reads source without compiling it, builds a language-neutral model
+(symbols, relations, the ordered call flow of every function) and projects it
+into Mermaid diagrams with one document per source file. The same sources
+always give byte-identical output. The 0.2 line adds stable symbol ids,
+signature and body hashes, and sealed diagram contracts checked in CI (planned;
+see the [design](https://github.com/DreamLab-AI/sealmap/blob/main/docs/DESIGN.md)).
+
+| Crate | Role |
+|---|---|
+| [`sealmap-model`](https://crates.io/crates/sealmap-model) | language-neutral code model |
+| [`sealmap-mermaid`](https://crates.io/crates/sealmap-mermaid) | typed Mermaid writers, no dependencies |
+| [`sealmap-frontend`](https://crates.io/crates/sealmap-frontend) | logic shared by every language frontend |
+| [`sealmap-rust`](https://crates.io/crates/sealmap-rust) | Rust frontend (syn) |
+| [`sealmap-corpus`](https://crates.io/crates/sealmap-corpus) | projections, index, write and verify |
+
+## Command line
+
+```sh
+cargo install sealmap
+
+sealmap generate .                  # write the corpus, model and index to .sealmap/
+sealmap verify   .                  # exit 1 if .sealmap/ no longer matches the sources
+sealmap model    .  > model.json    # just the model
+sealmap generate --repo api=../api --repo core=../core -o .sealmap   # several repositories as one
+```
+
+## Library
+
+```rust,no_run
+use std::path::Path;
+
+let corpus = sealmap::generate_dir(Path::new("."), &sealmap::Options::default())?;
+let report = sealmap::corpus::write(Path::new(".sealmap"), &corpus)?;
+println!("{} files updated", report.entries.len());
+# Ok::<(), std::io::Error>(())
+```
+
+## Licence
+
+Licensed under either of [Apache License, Version 2.0](https://github.com/DreamLab-AI/sealmap/blob/main/LICENSE-APACHE) or [MIT licence](https://github.com/DreamLab-AI/sealmap/blob/main/LICENSE-MIT), at your option. Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 licence, shall be dual licensed as above, without any additional terms or conditions.

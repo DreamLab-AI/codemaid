@@ -4,7 +4,7 @@ kind: overview
 codebase: sealmap
 ---
 # sealmap overview
-37 files · 437 symbols · 1217 relations · 161 flows · 745 calls
+37 files · 443 symbols · 1217 relations · 161 flows · 745 calls
 
 ## crates
 ```mermaid

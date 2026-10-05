@@ -8,6 +8,7 @@ edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/DreamLab-AI/sealmap"
+homepage = "https://github.com/DreamLab-AI/sealmap"
 authors = ["jjohare"]
 keywords = ["mermaid", "diagram", "codemap", "static-analysis", "llm"]
 categories = ["development-tools", "visualization"]

@@ -61,6 +61,7 @@
 //! (`sealmap verify`).
 
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use std::io;
 use std::path::Path;
@@ -116,3 +117,8 @@ pub fn load_repos(repos: &[(&str, &Path)]) -> io::Result<SourceSet> {
     }
     Ok(all)
 }
+
+/// Compiles and runs the README examples as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

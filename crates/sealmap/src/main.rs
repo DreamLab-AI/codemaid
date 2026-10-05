@@ -7,6 +7,9 @@
 //! sealmap generate --repo api=../api --repo core=../core -o corpus
 //! ```
 
+#![forbid(unsafe_code)]
+#![deny(missing_docs)]
+
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
