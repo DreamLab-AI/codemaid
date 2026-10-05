@@ -7,12 +7,13 @@ adrs: []
 sources:
   - crates/sealmap-model/src/hash.rs
   - crates/sealmap-model/src/symbol.rs
+  - crates/sealmap-corpus/src/seal/check.rs
   - crates/sealmap-model/src/codebase.rs
   - crates/sealmap-model/src/source.rs
   - crates/sealmap-extract/src/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
@@ -29,11 +30,11 @@ The model crate only stores, compares, prints, parses and merges these values
 feed a fingerprint are chosen per kind of symbol is the extraction core's job
 and is drawn in EXT-06. After this topic you should know what each value
 means, how two `#[cfg]` twins that share an id end up with one fingerprint,
-and what the pair is designed to let the planned `verify` decide.
+and what the pair lets the seal check decide (built; drawn in COR-04).
 
 The fingerprints arrived in commit `0a304ba` (step 2 of the 0.2 plan,
-`docs/DESIGN.md:227`), after rustc's split between a definition's identity
-and its query fingerprints (`docs/DESIGN.md:101`).
+`docs/DESIGN.md:259`), after rustc's split between a definition's identity
+and its query fingerprints (`docs/DESIGN.md:130`).
 
 ## For the business
 
@@ -48,8 +49,8 @@ That split is what lets an adopter route maintenance by cost. A behaviour
 change is a cheap re-review; a contract change is worth a more careful look.
 The values are deliberately blind to formatting and comments, so a
 reformatting commit costs nothing at all. The tooling that acts on this split
-(seals and `verify`) is designed but not built (DEL-02); what exists today is
-the pair of values on every symbol in every generated model.
+(seals, `sealmap verify` and `sealmap stale`) now exists (COR-04); this
+repository's own topics are not sealed yet.
 
 ## MOD-02.1 The two hash types
 
@@ -189,37 +190,47 @@ so the JSON is readable and identical to what a lock would hold.
 **Invariant:** a malformed fingerprint string fails deserialisation instead of
 reading as zeros (`crates/sealmap-model/src/hash.rs:166`).
 
-## MOD-02.5 What the pair is meant to decide
+## MOD-02.5 What the pair decides
 
 ```mermaid
 flowchart TB
-    S["a sealed symbol at HEAD<br/>planned, docs/DESIGN.md:79"]
-    R{"does its id still resolve?"}
-    SG{"sig_hash equal?"}
-    BD{"body_hash equal?"}
-    HOLDS["holds<br/>docs/DESIGN.md:83"]
-    BEH["behaviour, body only<br/>docs/DESIGN.md:84"]
-    CON["contract<br/>docs/DESIGN.md:85"]
-    ABS["absent, rename suspected<br/>when another id has the same body<br/>docs/DESIGN.md:86"]
+    S["a sealed symbol: id, sig, body<br/>check.rs:138"]
+    R{"is the id in the model?"}
+    PU{"is it the module of a file<br/>tagged parse_error?<br/>check.rs:146"}
+    SG{"sig_hash equal?<br/>check.rs:147"}
+    BD{"body_hash equal?<br/>check.rs:150"}
+    AU{"is an ancestor module<br/>tagged parse_error?<br/>check.rs:155"}
+    UNP["unparsable, fail closed"]
+    HOLDS["holds<br/>check.rs:153"]
+    BEH["behaviour, body only"]
+    CON["contract"]
+    ABS["absent: same-kind ids with the sealed<br/>body are rename candidates<br/>check.rs:158"]
     S --> R
-    R -->|no| ABS
-    R -->|yes| SG
+    R -->|yes| PU
+    PU -->|yes| UNP
+    PU -->|no| SG
     SG -->|no| CON
     SG -->|yes| BD
     BD -->|yes| HOLDS
     BD -->|no| BEH
+    R -->|no| AU
+    AU -->|yes| UNP
+    AU -->|no| ABS
 ```
 
-**What it shows.** The decision table the accepted design builds on the two
-fingerprints: a body-only change is behaviour, a signature change is contract,
-and a vanished id whose body reappears elsewhere is a suspected rename.
+**What it shows.** The decision the seal check takes from the two
+fingerprints: a body-only change is behaviour, a signature change is
+contract, and a vanished id whose body reappears in a symbol of the same kind
+is a suspected rename. Unparsable code is decided first, so it is never
+reported as holding or absent (`crates/sealmap-corpus/src/seal/check.rs:146`,
+`crates/sealmap-corpus/src/seal/check.rs:155`); the design's table is
+`docs/DESIGN.md:99`-`107`.
 
 **Why it is this way.** The name sits in `sig_hash` and never in `body_hash`,
 which is what makes a rename detectable by body
 (`crates/sealmap-extract/src/fingerprint.rs:26`-`27`); the README states the
-same table for users (`README.md:131`-`138`).
+same table for users (`README.md:188`-`195`).
 
-**Drift (DESIGN.md vs code):** the crate-surface table lists an optional
-`flow_hash` beside `sig_hash` and `body_hash` (`docs/DESIGN.md:101`); the
-model has only the two (`crates/sealmap-model/src/symbol.rs:209`-`212`), and
-commit `0a304ba` records that it was not added.
+The crate-surface table records that an optional `flow_hash` was considered
+and not built (`docs/DESIGN.md:130`); the model has only the two
+(`crates/sealmap-model/src/symbol.rs:209`-`212`), as commit `0a304ba` left it.

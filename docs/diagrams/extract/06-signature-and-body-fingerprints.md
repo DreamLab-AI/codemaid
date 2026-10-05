@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/tests/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: fec7affdba38c57717d55676d297f418a8060a10
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
@@ -40,7 +40,7 @@ fingerprint as it was, so no reviewed diagram is flagged. Changing what a
 function does changes its body fingerprint; changing how it is called changes
 its signature fingerprint. The README records the experiment behind the
 claim: reflowing tokio, VisionClaw and sealmap at a 50-column width changed no
-id and no hash (`README.md:140`-`141`).
+id and no hash (`README.md:197`-`198`).
 
 The one gap an adopter should know about is macros: when a macro's arguments
 are not ordinary expressions, its body is only normalised token by token, so
@@ -125,7 +125,7 @@ keeps its `body_hash` and a rename detector can match it
 **Open:** because the impl header is part of every method's contract
 (`crates/sealmap-rust/src/collect.rs:450`-`452`), adding a bound to an
 impl's `where` clause changes the `sig_hash` of every method in it; the design's
-contract class (`docs/DESIGN.md:85`) does not say whether that is meant to
+contract class (`docs/DESIGN.md:105`) does not say whether that is meant to
 read as a contract change for each of them.
 
 ## EXT-06.3 What goes into each value

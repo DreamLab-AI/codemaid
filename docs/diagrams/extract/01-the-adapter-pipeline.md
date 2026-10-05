@@ -14,7 +14,7 @@ sources:
   - crates/sealmap-extract/src/isolate.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: fec7affdba38c57717d55676d297f418a8060a10
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
@@ -25,11 +25,11 @@ A language adapter turns a `SourceSet` into a `Codebase` in three passes:
 (`crates/sealmap-rust/src/lib.rs:14`-`27`). `sealmap-rust` is the only adapter
 today; the language-neutral half it shares with any future adapter lives in
 `sealmap-extract`, split out in commit `a02b381` with byte-identical output
-before and after (`docs/DESIGN.md:102`).
+before and after (`docs/DESIGN.md:131`).
 
 This topic is the skeleton those passes hang on: the `extract` entry point,
 the Cargo layout rules, the panic-isolated big-stack collection that came
-from the hardening work (`docs/DESIGN.md:163`), and the order in which
+from the hardening work (`docs/DESIGN.md:195`), and the order in which
 `resolve::build` assembles the model. The passes' insides are their own
 topics: ids (EXT-02), the flow walker (EXT-03), lowering and confidence
 (EXT-04), resolution (EXT-05) and fingerprints (EXT-06).
@@ -43,7 +43,7 @@ runs on any checkout, including one that does not build, and needs no
 toolchain at run time. It never fails a whole run because of one bad file:
 a file that does not parse, or that trips a bug, becomes a warning and a
 placeholder entry. And it is fast enough to sit in CI: the README records
-1.13 s for a 934-file workspace (`README.md:247`).
+1.13 s for a 934-file workspace (`README.md:314`).
 
 The residual risk is a file nested deeply enough to exhaust even the large
 stack: that still ends the process, because a stack overflow cannot be
@@ -160,7 +160,7 @@ a panic in one file becomes a placeholder `RawFile` whose error becomes a
 diagnostic, and the run continues.
 
 **Why it is this way.** The VisionClaw stack overflow came from deeply nested
-generics on rayon's default 2 MiB stacks (`docs/DESIGN.md:163`); syn costs
+generics on rayon's default 2 MiB stacks (`docs/DESIGN.md:195`); syn costs
 about 40 KiB per nesting level in a debug build
 (`crates/sealmap-extract/src/isolate.rs:3`-`7`). Address space is reserved,
 not memory, so the large stack is cheap (`crates/sealmap-extract/src/isolate.rs:27`-`29`).

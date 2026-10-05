@@ -10,7 +10,7 @@ sources:
   - crates/sealmap-extract/src/ids.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
@@ -26,8 +26,8 @@ operations are cheap.
 The id is the identity half of rustc's identity/freshness split
 (`crates/sealmap-model/src/sym.rs:3`-`9`): the content half lives in
 fingerprints (MOD-02). It was introduced in commit `5973a4e` as step 2 of the
-0.2 plan (`docs/DESIGN.md:227`), replacing the 0.1 `::` path ids whose
-`::` → `__` mangling was not injective (`docs/DESIGN.md:166`).
+0.2 plan (`docs/DESIGN.md:259`), replacing the 0.1 `::` path ids whose
+`::` → `__` mangling was not injective (`docs/DESIGN.md:198`).
 
 The builder that mints ids for real definitions is `sealmap-extract`'s
 `ids` module (EXT-02); this topic covers the grammar it targets. What this
@@ -48,7 +48,7 @@ For a harness owner the property that matters is that the name is exact and
 unambiguous. Two different functions can never print the same id, and a
 mistyped id is refused rather than quietly matched to something close. That
 is what later lets a seal say "this topic was reviewed against exactly these
-functions" (planned, see DEL-02) and be believed in CI without a model
+functions" (built, see COR-04) and be believed in CI without a model
 in the loop.
 
 ## MOD-01.1 The id's shape as types
@@ -106,7 +106,7 @@ are plain string operations, and a parent sorts before its children because
 its text is a prefix of theirs (`crates/sealmap-model/src/sym.rs:101`-`104`).
 The owner chose SCIP's descriptor suffixes so a global id maps to a SCIP
 symbol by swapping the prefix (`crates/sealmap-model/src/sym.rs:11`-`13`),
-which is what keeps a later `export --scip` cheap (`docs/DESIGN.md:120`).
+which is what keeps a later `export --scip` cheap (`docs/DESIGN.md:150`).
 
 **Invariant:** two ids are equal exactly when their texts are, because only
 canonical text is ever stored; `parse` refuses anything that does not print
@@ -270,8 +270,8 @@ strict prefix of the child's (`crates/sealmap-model/tests/sym_props.rs:92`).
 
 ```mermaid
 flowchart TB
-    D1["DESIGN.md section 4<br/>sym grammar, kind-explicit, no file path<br/>docs/DESIGN.md:101"]
-    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:122"]
+    D1["DESIGN.md section 4<br/>sym grammar, kind-explicit, no file path<br/>docs/DESIGN.md:130"]
+    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:179"]
     C1["grammar in rustdoc<br/>crates/sealmap-model/src/sym.rs:17"]
     C2["property tests<br/>crates/sealmap-model/tests/sym_props.rs:75"]
     C3["id builder, one per adapter<br/>crates/sealmap-extract/src/ids.rs:3"]
@@ -286,6 +286,6 @@ grammar as the authority, and the property tests and the shared id builder
 are the two things that hold the code to it.
 
 **Why it is this way.** The README says the grammar "is documented in
-`sealmap_model::sym`" (`README.md:123`) rather than restating it, so there is
-one source; the README's example table (`README.md:111`-`117`) is
+`sealmap_model::sym`" (`README.md:180`) rather than restating it, so there is
+one source; the README's example table (`README.md:168`-`174`) is
 illustrative.

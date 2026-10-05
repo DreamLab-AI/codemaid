@@ -12,7 +12,7 @@ sources:
   - crates/sealmap-extract/src/labels.rs
   - crates/sealmap-model/src/flow.rs
   - README.md
-verified_commit: fec7affdba38c57717d55676d297f418a8060a10
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 

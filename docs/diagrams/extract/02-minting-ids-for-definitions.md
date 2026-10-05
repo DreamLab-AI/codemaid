@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/src/lib.rs
   - crates/sealmap-model/src/symbol.rs
   - README.md
-verified_commit: fec7affdba38c57717d55676d297f418a8060a10
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
@@ -25,7 +25,7 @@ resolver decides which type a method belongs to.
 The rule that matters most is that a method sits under the type that owns
 it, never under its `impl` block (`crates/sealmap-extract/src/ids.rs:20`-`28`):
 splitting an `impl` or moving it to another file keeps every method id. The
-README promises the same thing to users (`README.md:119`-`121`). This came
+README promises the same thing to users (`README.md:176`-`178`). This came
 with the grammar in commit `5973a4e`; the undefined-member rule at the end of
 this topic came with the dogfood fix in `6c8a9b0`.
 
@@ -39,7 +39,7 @@ no reviewed diagram. A real rename, or moving a function to another module,
 does change the name, which is what a reviewer would expect to look at again.
 
 One limit for adopters to know: items that a macro generates are not seen,
-so they get no name and cannot be cited or sealed (`README.md:257`).
+so they get no name and cannot be cited or sealed (`README.md:324`).
 
 ## EXT-02.1 The id table
 
@@ -174,7 +174,7 @@ the trailing commas rustfmt adds to a broken generic list removed.
 
 **Why it is this way.** Ids must not change when rustfmt reflows a line; the
 README's claim that reflowing tokio, VisionClaw and sealmap at
-`max_width = 50` changes no id (`README.md:140`-`141`) depends on this rule
+`max_width = 50` changes no id (`README.md:197`-`198`) depends on this rule
 (`crates/sealmap-rust/src/collect.rs:488`-`492`).
 
 **Invariant:** `(T,)` and `(T)` stay distinct in a trait's text, because only

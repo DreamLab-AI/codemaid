@@ -1,6 +1,6 @@
 ---
 id: DEL-02
-title: Design versus code, what 0.2 plans and the tree does not yet do
+title: Design versus code after the seal surface
 area: delivery
 governing: [docs/DESIGN.md, README.md]
 adrs: []
@@ -12,57 +12,56 @@ sources:
   - .github/workflows/ci.yml
   - crates/sealmap/Cargo.toml
   - crates/sealmap/src/main.rs
-  - crates/sealmap-corpus/src/lib.rs
-verified_commit: af4b8b44098e3f9a8cd01a550715f02827f1a8cd
+  - crates/sealmap-corpus/src/seal/lock.rs
+  - crates/sealmap-corpus/src/seal/check.rs
+verified_commit: ae478d90d2b910101a1aa065cb4655e7defea332
 ---
 ## For developers
 
 `docs/DESIGN.md` was accepted on 2026-10-05 with every recommendation taken
-(`docs/DESIGN.md:3`), and the same day steps 1 and 2 of its order of work
-landed: the rename, licence, hardening and shared extraction core, then
-`sym:` ids, fingerprints, schema v2, injective Mermaid ids, the resolver fix
-and the MSRV job (`README.md:271`-`277`). Everything after step 2 is design
-only. This topic is the catalogue of that gap: what the design and README
-describe that the code at `af4b8b4` does not do, where the two documents speak
-in the present tense about planned work, and the open questions the design
-leaves.
+(`docs/DESIGN.md:3`). Steps 1 and 2 of its order of work landed the same day,
+and the seal half of step 3 followed: the lock, `resolve`, `stale`,
+`seal-check`, `verify`, `seal sign`, and the retirement of the committed
+generated corpus (`docs/DESIGN.md:261`-`265`, `README.md:346`-`349`). What
+remains of step 3 is `pack` and `sealmap-dense`. This topic is the catalogue
+of the gap at `ae478d9`: what the design still describes that the code does
+not do, and the questions the design leaves open.
 
 It is a catalogue, not a plan. The design's order of work
-(`docs/DESIGN.md:220`-`243`) is the plan; the register entries below are the
-state of play against it. Topics elsewhere carry the gaps local to their
-subsystem (the missing `flow_hash` in MOD-02, the stale id-suffix row in
-MER-02, `generate --check` in COR-03).
+(`docs/DESIGN.md:252`-`277`) is the plan. Where the build settled something
+the design left loose, DESIGN now records it as built (`docs/DESIGN.md:72`-`74`,
+`docs/DESIGN.md:80`-`94`, `docs/DESIGN.md:113`-`121`), and the subsystem topics carry the detail: the
+seal module in COR-04, the seal commands in COR-05, `generate --check` in
+COR-03.
 
 ## For the business
 
-What an adopter can use today is the deterministic substrate: stable ids,
-signature and body fingerprints on every symbol, and the generated per-file
-corpus with its index. What the project is *for*, sealed diagrams that CI can
-check without a model and precise "which topics need a look" after a commit,
-is designed in detail but not built. The headline cost saving has not been
-measured yet either: the evidence plan's first endpoint is step 4.
+An adopter can now use what the project is *for*: hand-written diagram topics
+cite functions by stable id, a lockfile records the exact versions a reviewer
+checked them against, and one command in CI says whether every seal still
+holds, with no model involved. After a commit, a second command lists only
+the topics whose sealed functions changed.
 
-That matters for planning. A harness that wires in `sealmap verify` today gets
-the mechanical drift check, which will change meaning when the seal gate takes
-the name. The TypeScript adapter, needed for TypeScript estates, is deferred
-until the Rust measurement shows the gain is real, so a TypeScript-heavy
-adopter should not plan on it.
+Two things are still to come before the first 0.2 release: bounded review
+packs for an outside reviewer, and the dense agent projection. The headline
+cost saving is not measured yet; that is step 4. And this repository has not
+sealed its own diagrams yet, so its CI does not run the seal gate (step 6).
 
 ## DEL-02.1 The design's layers against the tree
 
 ```mermaid
 flowchart TB
     subgraph AUTH["Authored layer, docs/DESIGN.md:39"]
-        A1["topics citing sym ids,<br/>gated by sealmap verify"]
-        A1S["exists as a convention, verify<br/>does not read topics<br/>sealmap-corpus/src/lib.rs:22"]
+        A1["topics citing sym ids"]
+        A1S["built: citations are found and checked<br/>by sealmap verify, check.rs:359"]
     end
     subgraph SEAL["Sealed layer, docs/DESIGN.md:40"]
         S1["seals.lock plus a sealed pointer<br/>per topic"]
-        S1S["NOT BUILT"]
+        S1S["built: canonical lock, pointer,<br/>topic_hash, lock.rs:57"]
     end
     subgraph GEN["Generated layer, docs/DESIGN.md:41"]
         G1["model, index, dense projection,<br/>optional 1:1 Mermaid, gitignored"]
-        G1S["model, index and 1:1 Mermaid exist,<br/>dense does not, still committed"]
+        G1S["model, index, 1:1 Mermaid under<br/>a gitignored .sealmap, .gitignore:3<br/>dense NOT BUILT"]
     end
     subgraph PACK["Review pack, docs/DESIGN.md:42"]
         P1["pegged topics, dense slices,<br/>source windows"]
@@ -75,49 +74,47 @@ flowchart TB
     AUTH --> SEAL --> GEN --> PACK
 ```
 
-**What it shows.** Of the four artefact layers in the design, only the
-generated one exists, and it exists in its 0.1 form: committed under
-`docs/sealmap/` and CI-gated, without the dense projection.
+**What it shows.** The authored and sealed layers exist; the generated layer
+exists without its dense projection and is no longer committed; the review
+pack does not exist.
 
-**Why it is this way.** Step 3 is the seal surface and `sealmap-dense`, with
-the committed corpus retired in the same step (`docs/DESIGN.md:229`-`231`);
-the tree stops after step 2.
+**Why it is this way.** Step 3 split in two: the seal surface first, then
+`pack` and `sealmap-dense` (`docs/DESIGN.md:263`-`265`). The generated corpus
+is rebuilt on demand and never trusted from disk (`docs/DESIGN.md:44`-`48`).
 
-**Debt (designed, not built):** seals do not exist: no lock format, no
-`sealed:` pointer, no `topic_hash` (`docs/DESIGN.md:48`-`77`); the CLI has
-`generate`, `verify` and `model` only (`crates/sealmap/src/main.rs:28`-`36`).
-
-**Tension (DESIGN.md vs CI):** the design lists the committed 0.1 corpus and
-its CI drift gate as retired (`docs/DESIGN.md:44`-`46`), while CI still runs
-`sealmap verify` against the committed `docs/sealmap`
-(`.github/workflows/ci.yml:24`-`25`) and the README dates the retirement to
-0.2 (`README.md:293`-`294`).
+**Debt (designed, not built):** `sealmap-dense`, the agent projection the
+README credits with 0.45× source size and about 13 tokens per call edge
+(`README.md:59`), does not exist (`docs/DESIGN.md:135`); the review pack it
+feeds is designed (`docs/DESIGN.md:42`) and planned in the README
+(`README.md:42`-`44`) but absent from the binary
+(`crates/sealmap/src/main.rs:40`-`56`).
 
 ## DEL-02.2 The order of work and where the tree stands
 
 ```mermaid
 flowchart TB
-    S1["1 repository: rename, dual licence,<br/>hardening, sealmap-extract<br/>DONE, docs/DESIGN.md:222"]
-    S2["2 ids and hashes: sym grammar, sig and body,<br/>injective ids, schema v2<br/>DONE, docs/DESIGN.md:227"]
-    S3["3 seal surface and sealmap-dense,<br/>retire the committed corpus,<br/>first crates.io publish<br/>docs/DESIGN.md:229"]
-    S4["4 E0-R on VisionClaw and agentbox<br/>docs/DESIGN.md:232"]
-    S5["5 sealmap skill, routing ADR<br/>docs/DESIGN.md:233"]
-    S6["6 dogfood: seal this corpus<br/>docs/DESIGN.md:236"]
-    S7["7 sealmap-ts, deferred<br/>docs/DESIGN.md:238"]
-    S8["8 review A/B<br/>docs/DESIGN.md:240"]
-    S9["9 migrate VisionFlow<br/>docs/DESIGN.md:242"]
+    S1["1 repository: rename, dual licence,<br/>hardening, sealmap-extract<br/>DONE, docs/DESIGN.md:254"]
+    S2["2 ids and hashes: sym grammar, sig and body,<br/>injective ids, schema v2<br/>DONE, docs/DESIGN.md:259"]
+    S3["3 seal surface DONE, retirement DONE;<br/>pack and sealmap-dense remain,<br/>then the first 0.2 publish<br/>docs/DESIGN.md:261"]
+    S4["4 E0-R on VisionClaw and agentbox<br/>docs/DESIGN.md:266"]
+    S5["5 sealmap skill, routing ADR<br/>docs/DESIGN.md:267"]
+    S6["6 dogfood: seal this corpus<br/>docs/DESIGN.md:270"]
+    S7["7 sealmap-ts, deferred<br/>docs/DESIGN.md:272"]
+    S8["8 review A/B<br/>docs/DESIGN.md:274"]
+    S9["9 migrate VisionFlow<br/>docs/DESIGN.md:276"]
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
 ```
 
-**What it shows.** Nine steps, two done. The first number the design is built
-to produce, topics flagged per commit file-level against sealed, comes at
-step 4 and depends on step 3.
+**What it shows.** Two steps done and the larger half of the third. The first
+number the design is built to produce, topics flagged per commit file-level
+against sealed, comes at step 4; `stale --since` is the tool it needs, and it
+exists.
 
 **Why it is this way.** The evidence endpoints are a fixed sequence, each
-tested only if the previous one holds (`docs/DESIGN.md:193`-`194`).
+tested only if the previous one holds (`docs/DESIGN.md:225`-`226`).
 
 **Open:** the endpoints are to be pre-registered in `PREREG.md` before any run
-(`docs/DESIGN.md:194`), and the design cites its evidence as `research/01`
+(`docs/DESIGN.md:226`), and the design cites its evidence as `research/01`
 to `05` in a design-session scratchpad (`docs/DESIGN.md:4`-`5`); neither is in
 the repository, so where do the pre-registration and the evidence live?
 
@@ -125,69 +122,76 @@ the repository, so where do the pre-registration and the evidence live?
 
 ```mermaid
 flowchart TB
-    subgraph PLAN["planned CLI, docs/DESIGN.md:112-120"]
-        RS["resolve sym id"]
+    subgraph PLAN["designed CLI, docs/DESIGN.md:141-150"]
+        RS["resolve"]
         STL["stale since rev"]
         SC["seal-check"]
-        VF2["verify: seal-check across the corpus,<br/>the CI gate"]
-        PK["pack topics or diff, review,<br/>max-bytes"]
+        VF["verify"]
+        SG["seal sign"]
         GC["generate with --check"]
+        PK["pack"]
+        EX["export --scip, later"]
     end
-    subgraph NOW["present CLI, sealmap/src/main.rs:28-36"]
-        G["generate"]
-        V["verify: 1:1 drift check"]
-        M["model"]
+    subgraph NOW["present CLI, sealmap/src/main.rs:40-56"]
+        C1["resolve, seal-check, verify,<br/>stale, seal sign"]
+        C2["generate with --check, model"]
     end
-    GC -.->|no --check flag| G
-    VF2 -.->|same name, other meaning| V
+    RS --> C1
+    STL --> C1
+    SC --> C1
+    VF --> C1
+    SG --> C1
+    GC --> C2
+    PK -.->|not built| NOW
+    EX -.->|not built| NOW
 ```
 
-**What it shows.** Five of the planned commands do not exist; the two that
-share names with present commands mean different things.
+**What it shows.** Every designed command except `pack` and the later
+`export --scip` exists, and `verify` now means the seal gate only; the old
+drift check is `generate --check`.
 
-**Why it is this way.** The design keeps git out of the libraries, with
-`--since` as CLI sugar (`docs/DESIGN.md:122`-`123`); none of the seal surface
-has been started, so none of that plumbing exists.
+**Why it is this way.** Git stays out of the libraries: `--since` exports the
+revision with `git archive` and reads it as a second model
+(`docs/DESIGN.md:152`-`155`, `crates/sealmap/src/main.rs:494`-`503`).
 
-**Debt (designed, not built):** `resolve`, `stale`, `seal-check` and `pack`
-are designed (`docs/DESIGN.md:114`-`118`) and planned in the README
-(`README.md:220`-`227`) but absent from the binary
-(`crates/sealmap/src/main.rs:28`-`36`).
+**Debt (designed, not built):** `pack` is designed with a byte budget and a
+shard plan (`docs/DESIGN.md:148`) and listed as planned in the README
+(`README.md:289`-`294`), but the binary has no such command
+(`crates/sealmap/src/main.rs:40`-`56`).
 
-**Tension (verify, today vs planned):** the README's planned `sealmap verify`
-is "the CI gate" over seals (`README.md:225`), while the present `verify` is the
-1:1 drift check (`crates/sealmap/src/main.rs:32`-`33`); one name, two contracts.
-
-## DEL-02.4 A sealed topic's planned life
+## DEL-02.4 A sealed topic's life, as built
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Sealed: skill seal step signs the lock
+    [*] --> Sealed: seal sign writes the entry and the pointer
     Sealed --> Holds: ids resolve, sig and body match
     Sealed --> Behaviour: body changed
     Sealed --> Contract: signature changed
-    Sealed --> Absent: id gone, body found elsewhere
-    Sealed --> Unparsable: file fails to parse
-    Sealed --> ProseChanged: topic_hash differs
+    Sealed --> Absent: id gone, candidates listed
+    Sealed --> Unparsable: a file that may hold it fails to parse
+    Sealed --> ProseEdited: topic_hash differs
+    Sealed --> LockFault: pointer and lock disagree, or lock not canonical
     Behaviour --> Sealed: cheap cross-family review, sign
     Contract --> Sealed: ADR addendum, re-consolidate, review, sign
-    Absent --> Sealed: confirm rename
+    Absent --> Sealed: confirm rename, edit the citation, sign
+    ProseEdited --> Sealed: review the edit, sign
     Holds --> [*]
 ```
 
-**What it shows.** The lifecycle the design gives a sealed topic, from the
-`verify` table and the build-with-quality re-seal step
-(`docs/DESIGN.md:79`-`92`, `docs/DESIGN.md:136`). None of it runs today;
-the fingerprints it depends on do (MOD-02).
+**What it shows.** The lifecycle the design gives a sealed topic
+(`docs/DESIGN.md:99`-`111`), now with every state reachable from the code;
+the review between a failing state and the next seal is the skill's step, not
+the crate's.
 
-**Why it is this way.** Code, topic and lock are to land in one commit, ending
-today's two-commit "change then re-stamp" routine (`README.md:101`-`102`).
+**Why it is this way.** Code, topic and lock land in one commit, ending the
+two-commit "change then re-stamp" routine (`README.md:104`-`105`); `seal sign`
+re-derives the entry from the code, so the lock is never hand-edited
+(`docs/DESIGN.md:80`-`85`).
 
-**Debt (designed, not built):** `stale`, which flags only topics whose sealed
-symbols changed, is the design's answer to file-granular staleness
-(`docs/DESIGN.md:115`, `README.md:39`-`41`); without it a code commit still
-flags every topic citing a changed file, the cost the README measures at a
-median 10 of 45 topics per commit (`README.md:57`).
+**Open:** reviewer family, evidence and signatures are left to a skill script,
+`seal-gate.mjs`, next to `verify` (`docs/DESIGN.md:123`-`124`); `seal sign`
+records whatever reviewer string it is given, so until that script exists
+nothing enforces the cross-family rule.
 
 ## DEL-02.5 Crates planned against crates present
 
@@ -198,12 +202,12 @@ flowchart TB
         H2["sealmap-extract"]
         H3["sealmap-rust"]
         H4["sealmap-mermaid"]
-        H5["sealmap-corpus: generate, verify, write"]
+        H5["sealmap-corpus: generate, write,<br/>and the seal module"]
         H6["sealmap facade: features cli, parallel<br/>sealmap/Cargo.toml:17"]
     end
-    subgraph PLANNED["planned, docs/DESIGN.md:99-108"]
+    subgraph PLANNED["planned, docs/DESIGN.md:128-137"]
         P1["sealmap-dense: call trees and<br/>skeletons with line spans"]
-        P2["sealmap-corpus gains seal, resolve,<br/>seal-check, stale, pack"]
+        P2["sealmap-corpus gains pack"]
         P3["sealmap-ts on oxc, DEFERRED"]
         P4["facade: sealmap-ts behind a default<br/>feature, oxc needs MSRV 1.97"]
     end
@@ -211,51 +215,47 @@ flowchart TB
 ```
 
 **What it shows.** Six crates exist; one more is planned, one is deferred, and
-the corpus crate and facade are planned to grow.
+the corpus crate is planned to gain `pack`.
 
 **Why it is this way.** The owner deferred `sealmap-ts` on 2026-10-05: it is
 built only if E0-R on the Rust repositories shows the precise-staleness gain
-is real (`docs/DESIGN.md:174`-`177`, `README.md:199`).
+is real (`docs/DESIGN.md:272`-`273`, `README.md:256`).
 
-**Debt (designed, not built):** `sealmap-dense`, the agent projection the
-README credits with 0.45× source size and about 13 tokens per call edge
-(`README.md:59`), does not exist (`docs/DESIGN.md:106`); the workspace has six
-members and none of them is it (`Cargo.toml:3`).
+**Debt:** the workspace is still at version `0.1.0` (`Cargo.toml:6`), and the
+lock records its writer as `sealmap` plus that version
+(`crates/sealmap-corpus/src/seal/lock.rs:21`), so a lock signed by this tree
+names a released version that has no seal module until the 0.2 bump.
 
-**Open:** `sealmap-ts` is deferred (`docs/DESIGN.md:104`), yet the crate
+**Open:** `sealmap-ts` is deferred (`docs/DESIGN.md:133`), yet the crate
 surface still plans it behind a *default* facade feature because oxc needs
-MSRV 1.97 (`docs/DESIGN.md:108`); if it is ever built, does the facade's 1.85
+MSRV 1.97 (`docs/DESIGN.md:137`); if it is ever built, does the facade's 1.85
 MSRV survive a default feature that needs 1.97?
 
-## DEL-02.6 Present-tense claims about planned work
+## DEL-02.6 Dogfooding the gate on this repository
 
 ```mermaid
 flowchart TB
-    R1["generated output under .sealmap,<br/>gitignored<br/>README.md:73, README.md:88"]
-    C1[".gitignore holds only target<br/>.gitignore:1"]
-    R2["the CLI only shells out to git<br/>for --since<br/>README.md:260-261"]
-    C2["no --since flag, no git call<br/>sealmap/src/main.rs:38-73"]
-    R3["Bounded: pack refuses with a shard plan<br/>README.md:241-242"]
-    C3["no pack command<br/>sealmap/src/main.rs:28-36"]
-    R1 -.-> C1
-    R2 -.-> C2
-    R3 -.-> C3
+    T["16 topics, path:line citations"]
+    V["sealmap verify<br/>check.rs:359"]
+    C["topics with no seal and no citation:<br/>coverage only, never a failure<br/>check.rs:391-392"]
+    M["MER-02 cites a fixture id in prose:<br/>an unsealed citation, exit 1<br/>check.rs:390"]
+    CI["no CI job runs verify yet<br/>ci.yml:9-80"]
+    T --> V
+    V --> C
+    V --> M
+    V -.-> CI
 ```
 
-**What it shows.** Three README statements describe planned behaviour as if it
-existed.
+**What it shows.** Run on this repository at `ae478d9`, `sealmap verify` treats
+fifteen topics as legacy coverage and fails on one: MER-02 writes an example
+id from a fixture crate (`shop`) as an inline code span, which reads as a
+citation of a symbol nobody sealed.
 
-**Why it is this way.** The README separates "exist" from "planned" in its
-opening list and roadmap (`README.md:29`-`44`), but the layer table, the
-properties list and the "what it does not do" list were written for the
-designed system.
+**Why it is this way.** Legacy `path:line` topics must not fail the gate, or
+a corpus could not migrate one topic at a time (`docs/DESIGN.md:119`-`121`);
+a global-shaped id in a code span is always a citation, so a mistyped one
+fails rather than vanishing (COR-04).
 
-**Drift (README vs .gitignore):** the README says generated output goes to a
-gitignored `.sealmap/` (`README.md:73`, `README.md:88`); the repository's
-`.gitignore` ignores only `/target` (`.gitignore:1`), and the CLI writes to
-`.sealmap` by default (`crates/sealmap/src/main.rs:47`).
-
-**Drift (README vs CLI):** "the CLI only shells out to `git` for `--since`"
-(`README.md:260`-`261`) and "`pack` refuses an over-budget request with a
-shard plan" (`README.md:241`-`242`) are written in the present tense; neither
-`--since` nor `pack` exists (`crates/sealmap/src/main.rs:28`-`73`).
+**Debt:** step 6 needs MER-02's example id moved into a fenced block or
+reworded before `verify` can run in CI on this repository
+(`crates/sealmap-corpus/src/seal/check.rs:390`, `docs/DESIGN.md:270`-`271`).

@@ -5,25 +5,33 @@ file per subsystem, each explained twice (for whoever inherits the code, and
 for the agent-harness owners who adopt sealmap), around Mermaid diagrams whose
 every mechanism claim cites `path:line` at the commit stamped in the topic.
 
-This corpus is **not** `docs/sealmap/`. That directory is sealmap's own
-generated, one-document-per-source-file output, checked by `sealmap verify`
-in CI. This one is written by hand with the `diagrams-as-code` method and
-checked by `tools/diagram-index-gen.cjs`. It catalogues the state of play and
-proposes no fixes; the register is the input to later work, not a plan.
+This corpus is **not** sealmap's generated output. That is the
+one-document-per-source-file corpus `sealmap generate` writes into the
+gitignored `.sealmap/` (it was committed as `docs/sealmap/` until step 3).
+This one is written by hand with the `diagrams-as-code` method and checked by
+`tools/diagram-index-gen.cjs`. It catalogues the state of play and proposes no
+fixes; the register is the input to later work, not a plan.
 
-All topics are verified against `af4b8b4` (the tip of `main` when the corpus
-was written). Governing documents: [`docs/DESIGN.md`](../DESIGN.md) (accepted
+Its citations are still `path:line`; none of its topics is sealed yet. Sealing
+this corpus with `sealmap seal sign` is step 6 of the design (DEL-02.6 lists
+what stands in the way). All topics are verified against `ae478d9`, the commit
+that added the seal surface; the corpus was first written at `af4b8b4`.
+Governing documents: [`docs/DESIGN.md`](../DESIGN.md) (accepted
 design) and the root [`README.md`](../../README.md). There are no ADRs.
 
 ## Doors
 
 - **New to the code?** Read in order: MOD-01 (ids) → MOD-03 (the model) →
-  EXT-01 (the adapter pipeline) → COR-01 (the generated corpus).
+  EXT-01 (the adapter pipeline) → COR-01 (the generated corpus) → COR-04
+  (seals).
 - **Deciding whether to adopt sealmap in a harness?** Read the "For the
-  business" sections of MOD-02, EXT-05, DEL-01 and DEL-02, then
+  business" sections of MOD-02, EXT-05, COR-04, COR-05, DEL-01 and DEL-02, then
   [REGISTER.md](REGISTER.md).
 - **Changing the resolver or the walker?** EXT-03, EXT-04, EXT-05, and the
   Debt rows from them in the register.
+- **Sealing a corpus, or wiring the seal gate into a harness?** COR-04 (what
+  each class means and where it is decided), then COR-05 (the commands and
+  their exit codes).
 - **Planning 0.2 work?** DEL-02 is the gap between `docs/DESIGN.md` and the
   code; [DECISIONS-TIMELINE.md](DECISIONS-TIMELINE.md) is how it got here.
 
@@ -34,7 +42,7 @@ design) and the root [`README.md`](../../README.md). There are no ADRs.
 | model | MOD | `sealmap-model`: the `sym:` grammar, hashes and fingerprints, the `Codebase`, sources, schema v2 |
 | extract | EXT | `sealmap-extract` plus `sealmap-rust`: the adapter pipeline, ids, flow walker, lowering and confidence, resolution, fingerprinting |
 | mermaid | MER | `sealmap-mermaid`: typed writers, escaping, injective diagram ids |
-| corpus | COR | `sealmap-corpus` plus the facade and CLI: generate, the index, projections, verify and write |
+| corpus | COR | `sealmap-corpus` plus the facade and CLI: generate, the index, projections, write and `generate --check`; seals, the lock and the seal commands |
 | delivery | DEL | CI, the MSRV job, determinism, publication, and design versus code |
 
 ## Checking and regenerating
@@ -52,7 +60,7 @@ new commit, correct the lines that moved, and bump that topic's
 `verified_commit`; leave topics whose sources did not change on their stamp.
 
 <!-- BEGIN GENERATED DIAGRAM INDEX -->
-_16 topic files, 86 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
+_18 topic files, 96 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram-index-gen.cjs docs/diagrams`.
 
 ### model
 
@@ -86,12 +94,14 @@ _16 topic files, 86 diagrams. Regenerate with_ `node docs/diagrams/tools/diagram
 |----|-------|----------|-------|-----------|------|
 | COR-01 | [Generating the 1:1 corpus and its index](corpus/01-generating-the-corpus-and-index.md) | 5 | sequenceDiagram, flowchart, classDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 | COR-02 | [Structure, sequence and overview projections](corpus/02-structure-sequence-and-overview-projections.md) | 5 | sequenceDiagram, flowchart | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
-| COR-03 | [Verify, write and the command line](corpus/03-verify-write-and-the-cli.md) | 5 | sequenceDiagram, flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| COR-03 | [Generate --check, write and the command line](corpus/03-generate-check-write-and-the-cli.md) | 5 | sequenceDiagram, flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| COR-04 | [Seals, the lock and the checks](corpus/04-seals-the-lock-and-the-checks.md) | 6 | classDiagram, flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| COR-05 | [The seal commands, resolve, verify, stale and sign](corpus/05-the-seal-commands.md) | 4 | sequenceDiagram, flowchart | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 
 ### delivery
 
 | ID | Topic | Diagrams | Kinds | Governing | ADRs |
 |----|-------|----------|-------|-----------|------|
 | DEL-01 | [CI, the MSRV job and the determinism guarantees](delivery/01-ci-msrv-and-determinism.md) | 5 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
-| DEL-02 | [Design versus code, what 0.2 plans and the tree does not yet do](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| DEL-02 | [Design versus code after the seal surface](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 <!-- END GENERATED DIAGRAM INDEX -->
