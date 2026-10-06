@@ -137,3 +137,13 @@ a point the registration leaves open.
   only, flow changed while `sig_hash` and `body_hash` are both unchanged
   (resolution drift caused by edits elsewhere), or symbol present on one side
   only.
+
+### 2026-10-06 #2: what "eligible" counts in the power rule (written before the first E0c run, no number seen)
+
+"Fewer than 20 eligible pairs → underpowered" is read as the **pooled
+population** of eligible pairs: flagged by T_file^seq and not T_flow, and
+after the stamp, summed over VisionClaw and agentbox. It is not read as the
+drawn sample size. The drawn size is reported beside it. If the population is
+under 20, endpoint 4 is reported as UNDERPOWERED (not passed), and E0c does not
+hold, because it needs endpoint 4 to succeed. This verdict is written whether
+or not any pair is judged.
