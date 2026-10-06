@@ -139,8 +139,16 @@ pub fn verify(dir: &Path, expected: &Corpus) -> io::Result<Report> {
 /// modified files, delete orphaned generated documents (and nothing else).
 /// Unchanged files are not touched, so mtimes stay stable. Returns what was
 /// changed.
+///
+/// `write` never follows a symbolic link below `dir`: if any path it would
+/// write or delete runs through one (a linked file or a linked directory), it
+/// fails with [`io::ErrorKind::InvalidInput`] naming that path, before it
+/// changes anything. `dir` itself may be a link.
 pub fn write(dir: &Path, expected: &Corpus) -> io::Result<Report> {
     let report = verify(dir, expected)?;
+    for e in &report.entries {
+        refuse_links(dir, &e.path)?;
+    }
     for e in &report.entries {
         let path = dir.join(e.path.as_str());
         match e.drift {
@@ -157,6 +165,26 @@ pub fn write(dir: &Path, expected: &Corpus) -> io::Result<Report> {
         }
     }
     Ok(report)
+}
+
+/// Fail if any existing component of `rel` below `dir` is a symbolic link.
+fn refuse_links(dir: &Path, rel: &SourcePath) -> io::Result<()> {
+    let mut cur = dir.to_path_buf();
+    for part in rel.as_str().split('/') {
+        cur.push(part);
+        match fs::symlink_metadata(&cur) {
+            Ok(m) if m.file_type().is_symlink() => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    format!("refusing to write {rel}: {} is a symbolic link", cur.display()),
+                ));
+            }
+            Ok(_) => {}
+            Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(()),
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(())
 }
 
 fn remove_empty_parents(root: &Path, file: &Path) {

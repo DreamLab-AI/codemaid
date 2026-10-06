@@ -285,3 +285,43 @@ fn write_leaves_authored_markdown_that_mentions_the_marker() {
     }
     fs::remove_dir_all(&dir).unwrap();
 }
+
+/// Review finding ER `gen X-12` / `var X-03` / `prefix X-03`: `read_rec` does
+/// not follow symlinks, so a link at an expected path read as `Missing`, and
+/// `write` then wrote through it, outside the output directory. A link to a
+/// directory let `write` create documents under the link's target.
+#[cfg(unix)]
+#[test]
+fn write_never_writes_through_a_symlink() {
+    use std::os::unix::fs::symlink;
+    let root = std::env::temp_dir().join(format!("sealmap-symlink-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&root);
+    let (dir, outside) = (root.join("out"), root.join("outside"));
+    fs::create_dir_all(&dir).unwrap();
+    fs::create_dir_all(&outside).unwrap();
+    let c = corpus(SHOP);
+
+    // A link at an expected file path.
+    fs::write(outside.join("victim.txt"), "precious").unwrap();
+    symlink(outside.join("victim.txt"), dir.join("_README.md")).unwrap();
+    let err = write(&dir, &c).unwrap_err();
+    assert!(err.to_string().contains("_README.md"), "{err}");
+    assert_eq!(fs::read_to_string(outside.join("victim.txt")).unwrap(), "precious");
+    // Refused before anything was written.
+    assert!(!dir.join("src").exists());
+
+    // A link to a directory on the way to an expected path.
+    fs::remove_file(dir.join("_README.md")).unwrap();
+    symlink(&outside, dir.join("src")).unwrap();
+    let err = write(&dir, &c).unwrap_err();
+    assert!(err.to_string().contains("src"), "{err}");
+    let mut leaked: Vec<_> = fs::read_dir(&outside).unwrap().map(|e| e.unwrap().file_name()).collect();
+    leaked.sort();
+    assert_eq!(leaked, ["victim.txt"]);
+
+    // With the link gone, `write` converges as usual.
+    fs::remove_file(dir.join("src")).unwrap();
+    write(&dir, &c).unwrap();
+    assert!(verify(&dir, &c).unwrap().is_clean());
+    fs::remove_dir_all(&root).unwrap();
+}

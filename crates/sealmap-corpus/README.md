@@ -7,7 +7,7 @@ Projects a `sealmap_model::Codebase` into a corpus of dense Mermaid diagrams
 with exactly one document per source file, plus an overview, a JSON index that
 links every call to the fragment that expands it, and the model itself. It
 also writes the corpus to disk and checks a directory against it, touching
-only files it generated.
+only files it generated and never writing through a symbolic link.
 
 Its `seal` module keeps hand-written diagram topics true to the code. A
 topic cites symbols by `sym:` id; `seals.lock` records the `sig_hash` and

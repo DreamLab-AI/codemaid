@@ -354,6 +354,10 @@ A diagrams-only `--review` mode is designed but not built
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
 to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
 
+**Unreleased** (on `main`, not yet on crates.io): fixes for defects found by
+the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
+`generate` never writes through a symbolic link.
+
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
 1. **Done.** Rename to `sealmap-*`; dual licence; land the hardening; extract the

@@ -2,6 +2,13 @@
 
 All crates in this workspace share one version.
 
+## Unreleased
+
+### Fixed
+- `write` (and so `sealmap generate`) followed symbolic links in the output
+  directory and could write outside it. It now refuses, before changing
+  anything, any path that runs through a link below the output directory.
+
 ## 0.2.0 — 2026-10-06
 
 ### Added
