@@ -15,6 +15,10 @@ All crates in this workspace share one version.
   definition's flow, so the second twin's calls were missing from its sequence
   and from the call relations. Twins whose flows differ now become the arms of
   one branch, each labelled `cfg twin at <file>:<line>`.
+- An impl whose self type is not a path (a tuple, slice, array, function
+  pointer or trait object) was skipped with all its methods and calls. Its
+  methods are now anchored like those of any type the codebase does not
+  define, e.g. ``sym:cargo app . impl#[`(u8, u8)`][T]go().``.
 
 ## 0.2.0 — 2026-10-06
 

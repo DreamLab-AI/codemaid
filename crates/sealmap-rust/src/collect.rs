@@ -474,6 +474,7 @@ impl Collector<'_> {
                 self.raw.impls.push(RawImpl {
                     module: module.clone(),
                     self_ty,
+                    self_text: tokens(&i.self_ty),
                     trait_,
                     type_params: param_names(&i.generics),
                     methods,

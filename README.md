@@ -359,7 +359,8 @@ to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
 the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
 `generate` never writes through a symbolic link; `if let` and `while let`
 bindings no longer leak past their block; `#[cfg]` twins keep every
-definition's calls.
+definition's calls; impls on tuples, slices and other non-path types keep
+their methods.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 

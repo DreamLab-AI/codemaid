@@ -296,8 +296,7 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, plan: &Plan, opts: &RustOpt
         }
         for imp in &f.impls {
             let module = module_sym(&imp.module);
-            let Some(self_segs) = &imp.self_ty else { continue };
-            let (ty, _) = r.resolve(&module, self_segs, None, Ns::Type);
+            let ty = r.impl_self(&module, imp);
             if let Some((segs, _)) = &imp.trait_ {
                 let (t, c) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                 if keep_ref(&t) || r.internal.contains(&t) {
@@ -334,7 +333,7 @@ fn crate_package(krate: &str) -> Package {
 /// The id of method `name` from impl block `imp` whose self type resolved
 /// to `ty`.
 fn impl_method(module: &SymbolId, ty: &SymbolId, imp: &RawImpl, name: &str) -> SymbolId {
-    let self_ty = imp.self_ty.as_ref().map(|s| s.join("::")).unwrap_or_default();
+    let self_ty = imp.self_ty.as_ref().map_or_else(|| imp.self_text.clone(), |s| s.join("::"));
     let trait_ = imp.trait_.as_ref().map(|(_, disp)| disp.as_str());
     ids::impl_method_id(module, ty, &self_ty, trait_, name)
 }
@@ -563,8 +562,7 @@ impl<'p> Resolver<'p> {
                         continue;
                     }
                     let module = module_sym(&imp.module);
-                    let Some(segs) = &imp.self_ty else { continue };
-                    let (ty, _) = r.resolve(&module, segs, None, Ns::Type);
+                    let ty = r.impl_self(&module, imp);
                     if let Some((segs, _)) = &imp.trait_ {
                         let (t, _) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                         r.impls.entry(ty.clone()).or_default().insert(t);
@@ -579,6 +577,18 @@ impl<'p> Resolver<'p> {
             }
         }
         r
+    }
+
+    /// The type an impl block in `module` implements. A self type that is
+    /// not a path (a tuple, slice, array, function pointer or trait object)
+    /// is no type of the codebase, so it is the path id of the type as
+    /// written; its methods are anchored under it in the module
+    /// ([`ids::impl_method_id`]).
+    fn impl_self(&self, module: &SymbolId, imp: &RawImpl) -> SymbolId {
+        match &imp.self_ty {
+            Some(segs) => self.resolve(module, segs, None, Ns::Type).0,
+            None => SymbolId::path([imp.self_text.as_str()]).expect("one segment is a non-empty path"),
+        }
     }
 
     /// Resolve `segs` as written in `module`, looking the final segment up

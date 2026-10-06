@@ -120,3 +120,44 @@ fn cfg_twins_keep_every_definitions_flow() {
         .collect();
     assert_eq!(to, [c]);
 }
+
+/// ER `prefix X-09`: an impl whose self type is not a path (a tuple, slice,
+/// array, reference to one, function pointer or trait object) was skipped,
+/// with every method and call in it. Such methods are anchored like methods
+/// of any type the codebase does not define: under `impl#[<type as written>]`
+/// in the impl's module.
+#[test]
+fn impls_on_non_path_types_keep_their_methods() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        fn helper() {}
+        pub trait T { fn go(&self); }
+        impl T for (u8, u8) { fn go(&self) { helper(); } }
+        impl T for [u8] { fn go(&self) { helper(); } }
+        impl T for &[u8] { fn go(&self) { helper(); } }
+        impl T for [u8; 4] { fn go(&self) { helper(); } }
+        impl T for fn(u8) { fn go(&self) { helper(); } }
+        impl dyn T { pub fn twice(&self) { self.go(); helper(); } }
+        "#,
+    )]);
+    let helper = exact("sym:cargo ledger . helper().");
+    let methods: Vec<String> = cb.symbols.keys().map(|k| k.to_string()).filter(|k| k.contains(" impl#")).collect();
+    assert_eq!(
+        methods,
+        [
+            "sym:cargo ledger . impl#[`&[u8]`][T]go().",
+            "sym:cargo ledger . impl#[`(u8, u8)`][T]go().",
+            "sym:cargo ledger . impl#[`[u8; 4]`][T]go().",
+            "sym:cargo ledger . impl#[`[u8]`][T]go().",
+            "sym:cargo ledger . impl#[`dyn T`]twice().",
+            "sym:cargo ledger . impl#[`fn(u8)`][T]go().",
+        ]
+    );
+    for m in &methods {
+        assert!(calls(&cb, m).contains(&helper), "{m} lost its call");
+        let s = cb.symbol(&SymbolId::parse(m).unwrap()).unwrap();
+        assert!(s.parent.is_some(), "{m} has no parent");
+    }
+    // Each self type keeps its own id: `[u8]` and `&[u8]` are different impls.
+}
