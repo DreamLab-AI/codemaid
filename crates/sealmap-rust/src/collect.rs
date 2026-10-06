@@ -1186,8 +1186,12 @@ impl FlowWalker {
                 while let Some(ifx) = cur.take() {
                     let label = cond_label(&ifx.cond);
                     let mut cond_steps = Vec::new();
+                    // An `if let` binding is in scope in its own block only,
+                    // not in the else branches or after the `if`.
+                    let saved = self.env.clone();
                     self.cond(&ifx.cond, &mut cond_steps);
                     let body = self.sub_block(&ifx.then_branch);
+                    self.env = saved;
                     if first {
                         out.append(&mut cond_steps);
                         arms.push((label, body));
@@ -1247,8 +1251,10 @@ impl FlowWalker {
             Expr::While(w) => {
                 let label = clip(&format!("while {}", cond_label(&w.cond)), LABEL_MAX);
                 let mut body = Vec::new();
+                let saved = self.env.clone();
                 self.cond(&w.cond, &mut body);
                 body.extend(self.sub_block(&w.body));
+                self.env = saved;
                 if !body.is_empty() {
                     out.push(RawStep::Loop(label, body));
                 }

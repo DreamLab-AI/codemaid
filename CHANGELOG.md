@@ -8,6 +8,9 @@ All crates in this workspace share one version.
 - `write` (and so `sealmap generate`) followed symbolic links in the output
   directory and could write outside it. It now refuses, before changing
   anything, any path that runs through a link below the output directory.
+- A binding made by an `if let` or `while let` condition stayed in scope after
+  the statement (and in its `else` branches), so a later call on a shadowed
+  outer name was drawn as an Exact call on the condition's type.
 
 ## 0.2.0 — 2026-10-06
 

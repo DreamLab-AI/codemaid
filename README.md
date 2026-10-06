@@ -218,7 +218,8 @@ A method call on a std or dependency value is never drawn as a call to an
 internal method that happens to share its name. For example, `Path::parent`
 on a value taken from an `Option<&Path>` is no longer bound to an internal
 `parent`. Parts taken apart by `if let`, `match` or `for` inherit what is
-known about their origin.
+known about their origin. Those bindings end with their block, so they never
+retype a shadowed name after it.
 
 ## Where sealmap sits in the estate
 
@@ -356,7 +357,8 @@ to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
 
 **Unreleased** (on `main`, not yet on crates.io): fixes for defects found by
 the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
-`generate` never writes through a symbolic link.
+`generate` never writes through a symbolic link; `if let` and `while let`
+bindings no longer leak past their block.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 
