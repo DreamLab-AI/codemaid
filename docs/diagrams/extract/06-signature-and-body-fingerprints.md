@@ -11,7 +11,7 @@ sources:
   - crates/sealmap-rust/tests/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -40,7 +40,7 @@ fingerprint as it was, so no reviewed diagram is flagged. Changing what a
 function does changes its body fingerprint; changing how it is called changes
 its signature fingerprint. The README records the experiment behind the
 claim: reflowing tokio, VisionClaw and sealmap at a 50-column width changed no
-id and no hash (`README.md:198`-`199`).
+id and no hash (`README.md:200`-`201`).
 
 The one gap an adopter should know about is macros: when a macro's arguments
 are not ordinary expressions, its body is only normalised token by token, so
@@ -98,15 +98,15 @@ checkouts fingerprint like their plain equivalents
 sequenceDiagram
     autonumber
     participant IT as Collector.item<br/>sealmap-rust/src/collect.rs:431
-    participant IH as impl_header<br/>sealmap-rust/src/collect.rs:548
-    participant CA as callable<br/>sealmap-rust/src/collect.rs:526
+    participant IH as impl_header<br/>sealmap-rust/src/collect.rs:549
+    participant CA as callable<br/>sealmap-rust/src/collect.rs:527
     participant FD as feed_canonical<br/>sealmap-rust/src/fingerprint.rs:50
-    participant FM as fold_member<br/>sealmap-rust/src/collect.rs:516
+    participant FM as fold_member<br/>sealmap-rust/src/collect.rs:517
     IT->>IH: new sig hasher gets the impl header (sealmap-rust/src/collect.rs:451)
     IH-->>IT: attrs, unsafety, generics, trait, self type, where
     IT->>CA: header so far, method attrs, vis, signature, block (sealmap-rust/src/collect.rs:453)
-    CA->>CA: attrs, vis, sig sections into the sig hasher (sealmap-rust/src/collect.rs:533)
-    CA->>FD: the block alone into a body hasher (sealmap-rust/src/collect.rs:542)
+    CA->>CA: attrs, vis, sig sections into the sig hasher (sealmap-rust/src/collect.rs:534)
+    CA->>FD: the block alone into a body hasher (sealmap-rust/src/collect.rs:543)
     FD-->>CA: canonical copy fed
     CA-->>IT: sig_hash, body_hash
     IT->>FM: fold name and both values into the module body (sealmap-rust/src/collect.rs:454)
@@ -118,7 +118,7 @@ module's body.
 
 **Why it is this way.** The body never sees the name, so a renamed function
 keeps its `body_hash` and a rename detector can match it
-(`crates/sealmap-rust/src/collect.rs:523`-`525`); the test
+(`crates/sealmap-rust/src/collect.rs:524`-`526`); the test
 `renaming_changes_the_id_and_keeps_the_body_hash` pins it
 (`crates/sealmap-rust/tests/fingerprint.rs:228`).
 
@@ -132,19 +132,19 @@ read as a contract change for each of them.
 
 ```mermaid
 flowchart TB
-    subgraph CALL["callables, sealmap-rust/src/collect.rs:526"]
+    subgraph CALL["callables, sealmap-rust/src/collect.rs:527"]
         CS["sig: attrs, vis, signature,<br/>plus impl or trait header"]
         CB["body: the block"]
     end
-    subgraph DATA["struct, enum, union, sealmap-rust/src/collect.rs:575"]
+    subgraph DATA["struct, enum, union, sealmap-rust/src/collect.rs:576"]
         DS["sig: the whole declaration"]
         DB["body: generics and fields or<br/>variants, no name"]
     end
-    subgraph TRAIT["traits, sealmap-rust/src/collect.rs:616"]
+    subgraph TRAIT["traits, sealmap-rust/src/collect.rs:617"]
         TS["sig: header and every member signature"]
         TB["body: every member, defaults included"]
     end
-    subgraph VALUE["const, static, sealmap-rust/src/collect.rs:655"]
+    subgraph VALUE["const, static, sealmap-rust/src/collect.rs:656"]
         VS["sig: everything but the value"]
         VB["body: the value"]
     end
@@ -161,7 +161,7 @@ implements it.
 
 **Why it is this way.** Data-type fields are fed one by one, each with its own
 separator, so the trailing comma of a field list never enters the stream
-(`crates/sealmap-rust/src/collect.rs:571`-`574`).
+(`crates/sealmap-rust/src/collect.rs:572`-`575`).
 
 **Open:** a module's `body_hash` folds the values of every member
 (`crates/sealmap-rust/src/collect.rs:179`-`181`), so it changes on any edit

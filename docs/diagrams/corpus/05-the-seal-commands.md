@@ -10,7 +10,7 @@ sources:
   - crates/sealmap-corpus/src/seal/check.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -108,7 +108,7 @@ model when it is there, else its sealed hashes, so `--since` reports what
 changed since that revision whatever the lock says
 (`crates/sealmap-corpus/src/seal/check.rs:486`-`489`). The CLI test commits a
 behaviour change, edits a signature after it, and sees only the contract
-change with `--since HEAD` (`crates/sealmap/tests/cli.rs:116`, `crates/sealmap/tests/cli.rs:141`).
+change with `--since HEAD` (`crates/sealmap/tests/cli.rs:125`, `crates/sealmap/tests/cli.rs:150`).
 
 **Debt:** `--since` needs `tar` on the path as well as `git`
 (`crates/sealmap/src/main.rs:622`), and a process killed mid-run leaves its
@@ -163,6 +163,6 @@ always means the command could not run.
 **Why it is this way.** `stale` is a report, not a gate, so a skill can call
 it on every commit without failing the build; the design gives it exit 0
 (`docs/DESIGN.md:157`). `resolve` fails when the id is not found so a script
-that checks diagram edges can branch on it (`README.md:291`-`292`); the codes
-are pinned end to end (`crates/sealmap/tests/cli.rs:55`,
-`crates/sealmap/tests/cli.rs:96`).
+that checks diagram edges can branch on it (`README.md:294`-`295`); the codes
+are pinned end to end (`crates/sealmap/tests/cli.rs:64`,
+`crates/sealmap/tests/cli.rs:105`).

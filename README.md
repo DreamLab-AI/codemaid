@@ -177,6 +177,8 @@ sym:? insert                              a method on a receiver of unknown type
 The suffix gives the kind: `/` module, `#` type or trait, `().` function or
 method, `.` const or static, `!` macro. Methods sit under the type that owns
 them, so splitting an `impl` or moving it to another file keeps every id.
+A crate name held by more than one directory is qualified with the package
+directory (`sym:cargo a/core . run().`), so two same-named crates never merge.
 Printing is injective and parsing accepts only canonical text (property
 tested). The grammar is documented in `sealmap_model::sym`.
 
@@ -218,7 +220,8 @@ A method call on a std or dependency value is never drawn as a call to an
 internal method that happens to share its name. For example, `Path::parent`
 on a value taken from an `Option<&Path>` is no longer bound to an internal
 `parent`. Parts taken apart by `if let`, `match` or `for` inherit what is
-known about their origin.
+known about their origin. Those bindings end with their block, so they never
+retype a shadowed name after it.
 
 ## Where sealmap sits in the estate
 
@@ -353,6 +356,14 @@ A diagrams-only `--review` mode is designed but not built
 **0.2.0** is released. It is dogfooded on its own source, and the Rust language
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
 to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
+
+**Unreleased** (on `main`, not yet on crates.io): fixes for defects found by
+the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
+`generate` never writes through a symbolic link; `if let` and `while let`
+bindings no longer leak past their block; `#[cfg]` twins keep every
+definition's calls; impls on tuples, slices and other non-path types keep
+their methods; `--no-model` removes a model left by an earlier run;
+same-named crates stay apart, and clashing `--repo` names are refused.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 

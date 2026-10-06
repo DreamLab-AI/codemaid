@@ -15,7 +15,7 @@ sources:
   - crates/sealmap-corpus/tests/contract.rs
   - crates/sealmap-model/src/codebase.rs
   - docs/DESIGN.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -81,7 +81,7 @@ calls `?`; control-flow steps become fragments and early returns become notes.
 
 **Why it is this way.** The first lane is the owner (the type for a method,
 the module for a free function), the participant a symbol belongs to in a
-sequence (`crates/sealmap-model/src/codebase.rs:145`-`147`). A path call's
+sequence (`crates/sealmap-model/src/codebase.rs:173`-`175`). A path call's
 label already names its owner, so the lane prefix is added only when it is not
 already there (`crates/sealmap-corpus/src/sequence.rs:83`-`88`), the fix for
 `Hasher::Hasher::new_derive_key` pinned by

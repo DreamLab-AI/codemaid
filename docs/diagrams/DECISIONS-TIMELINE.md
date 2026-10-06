@@ -1,7 +1,7 @@
 # Decisions timeline
 
 The register's sibling view: decisions and their reversals in time order,
-drawn from `git log` on `main` (all of it on 2026-10-05) and from
+drawn from `git log` on `main` (2026-10-05, and the ER fixes on 2026-10-06) and from
 `docs/DESIGN.md`. Times are commit times as recorded (UTC unless marked).
 Hand-written; the generator does not produce it. A `docs/DESIGN.md:N` reference
 in a row dated before step 3 is a line of the design at `af4b8b4`, the
@@ -59,6 +59,21 @@ revision that row describes.
 | 23:08 | `dd88e1f` | **`sealmap pack`**: topics verbatim, dense slices, source windows; refused with per-topic sizes over budget, or `--shard`. Built as `--diff REV` against the working tree and `--budget`, not the designed `--diff old new` and `--max-bytes`; `--review` not built. | The diagrams-only `--review` stays designed only (COR-06.3). |
 | 23:12 | `926144c` | Reading the dense projection of `pack`: a path's leading segment never resolves to a function, so the CLI's `fn pack` no longer captures `pack::shard(..)`. | — |
 | 23:12 | `673d58c` | Shards planned from sizes; the dense projection had shown a quadratic copy. **Every topic is re-stamped** at `4ed7a51`; COR-06 is new. | — |
+
+## Fixes from the ER review (2026-10-06)
+
+Six defects confirmed by the adjudicators of the ER experiment
+(`docs/evidence/ER/RESULTS.md`), each fixed after a test that failed first.
+VisionClaw call edges were counted before and after: none lost.
+
+| When | Commit | Decision | Later |
+|---|---|---|---|
+| 10:06 | `6cc7db0` | `write` refuses, before changing anything, any path that runs through a symbolic link below the output directory (COR-03.3). | — |
+| 10:08 | `09b2751` | `if let` and `while let` bindings end with their block; the leak retyped shadowed names after it (EXT-03.7). On VisionClaw: two Inferred edges recovered. | — |
+| 10:12 | `e0c9c0a` | `#[cfg]` twins keep every definition's flow, as arms of one branch labelled `cfg twin at <file>:<line>` (MOD-02.3). | — |
+| 10:14 | `81ed572` | Impls on tuples, slices, arrays, function pointers and trait objects keep their methods, anchored under `impl#[<type as written>]` (EXT-02.3). | — |
+| 10:15 | `e8b34a0` | A sealmap `_model.json` that a `--no-model` generation leaves out is orphaned (COR-03.2). | — |
+| 10:22 | `b9a6aeb` | **Same-named crates stay apart**: a crate name held by more than one directory is qualified with it (`a/core`), and `path` dependencies pick the crate a name means; clashing `--repo` names are refused (EXT-01.2, EXT-05.5). **Every topic whose citations moved is re-stamped here.** | — |
 
 ## Reversals at a glance
 

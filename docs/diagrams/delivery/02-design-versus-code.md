@@ -15,7 +15,8 @@ sources:
   - crates/sealmap-corpus/src/seal/lock.rs
   - crates/sealmap-corpus/src/seal/check.rs
   - crates/sealmap-corpus/src/pack.rs
-verified_commit: 6cefaf431511f380d989b93790241b903077d673
+  - bench/e0/Cargo.toml
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -24,7 +25,7 @@ verified_commit: 6cefaf431511f380d989b93790241b903077d673
 and step 3 followed in the tree: the lock, `resolve`, `stale`, `seal-check`,
 `verify`, `seal sign`, the retirement of the committed generated corpus,
 `sealmap-dense` with its `sealmap dense` subcommand, and `pack`
-(`docs/DESIGN.md:298`-`303`, `README.md:364`-`367`). Step 3 closed with
+(`docs/DESIGN.md:298`-`303`, `README.md:375`-`378`). Step 3 closed with
 the 0.2.0 publish (`docs/DESIGN.md:302`-`303`). This topic is the catalogue of the gap once `pack`
 landed: what the design still describes that the code does not do, and the
 questions the design leaves open.
@@ -214,6 +215,7 @@ flowchart TB
         H5["sealmap-corpus: generate, write,<br/>the seal module and pack"]
         H7["sealmap-dense: skeletons, call trees,<br/>index, budgeted slices<br/>sealmap/Cargo.toml:29"]
         H6["sealmap facade: features cli, parallel<br/>sealmap/Cargo.toml:17"]
+        H8["bench/e0: the E0 harness,<br/>a member, never published<br/>bench/e0/Cargo.toml:5"]
     end
     subgraph PLANNED["planned, docs/DESIGN.md:128-137"]
         P3["sealmap-ts on oxc, DEFERRED"]
@@ -223,11 +225,13 @@ flowchart TB
 ```
 
 **What it shows.** Seven crates exist, `sealmap-dense` the newest, and the
-corpus crate has gained `pack`; one crate is deferred.
+corpus crate has gained `pack`; one crate is deferred. The workspace has an
+eighth member, the E0 benchmark harness, which is never published
+(`bench/e0/Cargo.toml:5`).
 
 **Why it is this way.** The owner deferred `sealmap-ts` on 2026-10-05: it is
 built only if E0-R on the Rust repositories shows the precise-staleness gain
-is real (`docs/DESIGN.md:310`-`311`, `README.md:258`).
+is real (`docs/DESIGN.md:310`-`311`, `README.md:261`).
 
 Closed in the 0.2.0 release: the workspace is at `0.2.0` (`Cargo.toml:6`),
 so a lock signed by this tree names `sealmap` 0.2.0, the first release that

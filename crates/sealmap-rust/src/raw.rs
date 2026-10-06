@@ -104,7 +104,11 @@ pub(crate) struct RawItem {
 #[derive(Debug, Clone)]
 pub(crate) struct RawImpl {
     pub module: Segs,
+    /// The self type's path, `None` when it is not a path (a tuple, slice,
+    /// array, function pointer or trait object).
     pub self_ty: Option<Segs>,
+    /// The self type as written, compacted.
+    pub self_text: String,
     /// Trait path and its display form (`From<String>`).
     pub trait_: Option<(Segs, String)>,
     /// Names of the impl block's generic type and const parameters.

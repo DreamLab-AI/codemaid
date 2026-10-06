@@ -2,6 +2,37 @@
 
 All crates in this workspace share one version.
 
+## Unreleased
+
+### Fixed
+- `write` (and so `sealmap generate`) followed symbolic links in the output
+  directory and could write outside it. It now refuses, before changing
+  anything, any path that runs through a link below the output directory.
+- A binding made by an `if let` or `while let` condition stayed in scope after
+  the statement (and in its `else` branches), so a later call on a shadowed
+  outer name was drawn as an Exact call on the condition's type.
+- `#[cfg]` twins (two definitions with one id) kept only the first
+  definition's flow, so the second twin's calls were missing from its sequence
+  and from the call relations. Twins whose flows differ now become the arms of
+  one branch, each labelled `cfg twin at <file>:<line>`.
+- An impl whose self type is not a path (a tuple, slice, array, function
+  pointer or trait object) was skipped with all its methods and calls. Its
+  methods are now anchored like those of any type the codebase does not
+  define, e.g. ``sym:cargo app . impl#[`(u8, u8)`][T]go().``.
+- `generate --no-model` left a `_model.json` from an earlier run in place,
+  and `generate --check` passed with it. A sealmap model the generation leaves
+  out is now orphaned: reported by `--check`, deleted by `generate`. A
+  `_model.json` that is not a sealmap model is still left alone.
+- Crates with the same name (two packages, or test, bench and example
+  targets with one file name in two packages) became one crate, and their
+  symbols merged. A crate name held by more than one directory is now
+  qualified with the package directory (`sym:cargo a/core . run().`, `./core`
+  at the root); a path naming such a crate resolves through the caller's
+  manifest (`path` dependencies, also via `[workspace.dependencies]`), or stays
+  external when it is still ambiguous. Two `--repo` entries with one name, or
+  one nested in the other's prefix, are refused instead of overwriting each
+  other's files.
+
 ## 0.2.0 — 2026-10-06
 
 ### Added

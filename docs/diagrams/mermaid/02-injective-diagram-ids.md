@@ -14,7 +14,7 @@ sources:
   - crates/sealmap-model/src/sym.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -178,7 +178,7 @@ with a collision suffix, then rebuilt on the typed `sym:` id.
 
 **Why it is this way.** Once ids had structure, the structure could be encoded
 directly, and the suffix and its dead helper were removed (commit `337301a`).
-The README describes the current scheme (`README.md:210`-`213`).
+The README describes the current scheme (`README.md:212`-`215`).
 
 The design's hardening table now records the fix as it was built: injective
 readable ids derived from `sym:` ids, with no hash suffix

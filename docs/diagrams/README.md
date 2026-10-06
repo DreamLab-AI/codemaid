@@ -14,8 +14,9 @@ fixes; the register is the input to later work, not a plan.
 
 Its citations are still `path:line`; none of its topics is sealed yet. Sealing
 this corpus with `sealmap seal sign` is step 6 of the design (DEL-02.6 lists
-what stands in the way). All topics are verified against `ae478d9`, the commit
-that added the seal surface; the corpus was first written at `af4b8b4`.
+what stands in the way). Topics are verified against `b9a6aeb`, the last of
+the ER review fixes, except COR-01 and COR-04, whose citations did not move
+and stay on `4ed7a51`; the corpus was first written at `af4b8b4`.
 Governing documents: [`docs/DESIGN.md`](../DESIGN.md) (accepted
 design) and the root [`README.md`](../../README.md). There are no ADRs.
 

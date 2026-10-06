@@ -13,7 +13,7 @@ sources:
   - crates/sealmap-extract/src/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -138,23 +138,29 @@ algorithm id (`crates/sealmap-extract/src/fingerprint.rs:77`).
 sequenceDiagram
     autonumber
     participant AD as adapter
-    participant CB as add_symbol<br/>codebase.rs:71
+    participant CB as add_symbol<br/>codebase.rs:98
     participant FP as Fingerprint.merge<br/>hash.rs:138
     AD->>CB: first definition of an id
-    CB->>CB: insert as is (codebase.rs:84)
+    CB->>CB: insert as is (codebase.rs:112)
     AD->>CB: second definition, same id, other cfg
-    CB->>FP: fold sig_hash (codebase.rs:74)
+    CB->>FP: fold sig_hash (codebase.rs:101)
     FP->>FP: sort the pair, keyed hash of both (hash.rs:139)
     FP-->>CB: merged sig_hash
-    CB->>FP: fold body_hash (codebase.rs:75)
+    CB->>FP: fold body_hash (codebase.rs:102)
     FP-->>CB: merged body_hash
-    CB->>CB: extend members, add new tags (codebase.rs:76)
-    Note over CB: DEBT: scalar fields such as file and span<br/>keep the first twin only, codebase.rs:67
+    CB->>CB: differing flows become one branch,<br/>an arm per twin (codebase.rs:103, codebase.rs:244)
+    CB->>CB: extend members, add new tags (codebase.rs:104)
+    Note over CB: DEBT: scalar fields such as file and span<br/>keep the first twin only, codebase.rs:68
 ```
 
 **What it shows.** Two definitions with one id, typically
 `#[cfg(unix)]` and `#[cfg(windows)]` twins, become one symbol whose
-fingerprints are an order-independent fold of both.
+fingerprints are an order-independent fold of both. Their flows are kept
+too: when they differ (other than in line numbers) each twin becomes an arm
+of one branch labelled `cfg twin at <file>:<line>`, so the second twin's calls
+reach the sequence and the call relations
+(`crates/sealmap-model/src/codebase.rs:73`-`76`,
+`crates/sealmap-model/src/codebase.rs:244`-`259`).
 
 **Why it is this way.** A seal on a cfg-gated function has to notice an edit
 to either twin; folding both values with a dedicated key context means an
@@ -162,8 +168,10 @@ edit to either changes the result, whichever twin was seen first
 (`crates/sealmap-model/src/hash.rs:126`-`130`).
 
 **Debt:** the merged symbol keeps only the first twin's file, span, signature
-and doc (`crates/sealmap-model/src/codebase.rs:66`-`70`), so the second
-definition has no location anywhere in the model.
+and doc (`crates/sealmap-model/src/codebase.rs:67`-`71`), so the second
+definition has no location in the model except in a twin arm's label, which
+exists only when the twins' flows differ
+(`crates/sealmap-model/src/codebase.rs:238`-`239`).
 
 ## MOD-02.4 A fingerprint's life
 
@@ -229,7 +237,7 @@ reported as holding or absent (`crates/sealmap-corpus/src/seal/check.rs:146`,
 **Why it is this way.** The name sits in `sig_hash` and never in `body_hash`,
 which is what makes a rename detectable by body
 (`crates/sealmap-extract/src/fingerprint.rs:26`-`27`); the README states the
-same table for users (`README.md:189`-`196`).
+same table for users (`README.md:191`-`198`).
 
 The crate-surface table records that an optional `flow_hash` was considered
 and not built (`docs/DESIGN.md:130`); the model has only the two

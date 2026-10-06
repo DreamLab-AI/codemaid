@@ -20,7 +20,7 @@ sources:
   - crates/sealmap/src/main.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 6cefaf431511f380d989b93790241b903077d673
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -37,7 +37,7 @@ licence in `0d1fe6b`; the committed generated corpus and its drift gate were
 retired in step 3, when CI started checking determinism instead. None of the
 0.2 crates in this tree is published yet; the README's roadmap puts the first
 0.2 crates.io release after step 3, which is now done in the tree
-(`README.md:364`-`367`).
+(`README.md:375`-`378`).
 
 ## For the business
 
@@ -95,8 +95,8 @@ generator.
 is that two generations agree byte for byte (`.github/workflows/ci.yml:24`-`25`),
 not that a committed copy matches. Testing with `--no-default-features`
 exercises the sequential collection path, which must give the same output as
-the parallel one (`crates/sealmap-rust/src/lib.rs:72`-`75`). The Mermaid job
-is the proof that typed writers produce valid diagrams (`README.md:321`-`324`).
+the parallel one (`crates/sealmap-rust/src/lib.rs:78`-`81`). The Mermaid job
+is the proof that typed writers produce valid diagrams (`README.md:324`-`327`).
 
 **Debt:** the MSRV job runs only `build` and `test` with default features
 (`.github/workflows/ci.yml:46`-`47`); clippy, docs and the
@@ -113,13 +113,13 @@ sequenceDiagram
     autonumber
     participant DV as a 1.85 toolchain
     participant MF as workspace manifest<br/>Cargo.toml:35
-    participant LK as Cargo.lock<br/>Cargo.lock:263
+    participant LK as Cargo.lock<br/>Cargo.lock:289
     participant CI as msrv job<br/>ci.yml:39
     participant DS as downstream crate, no lock
     DV->>MF: requirement ignore 0.4.23 or later (Cargo.toml:35)
     Note over MF: rust-version 1.85 for every crate, Cargo.toml:8
     DV->>LK: --locked build (ci.yml:46)
-    LK-->>DV: ignore 0.4.29, builds on 1.85 (Cargo.lock:264)
+    LK-->>DV: ignore 0.4.29, builds on 1.85 (Cargo.lock:290)
     CI-->>DV: green
     DS->>MF: resolves the newest compatible ignore
     MF-->>DS: 0.4.30 declares no rust-version, resolver cannot avoid it
@@ -139,7 +139,7 @@ dependency because the model crate's loader honours ignore files
 
 **Tension (MSRV vs dependency):** `ignore` 0.4.30 needs Rust 1.88 without
 declaring it (`Cargo.toml:32`-`33`), against the declared MSRV 1.85
-(`Cargo.toml:8`); only the lockfile pin to 0.4.29 (`Cargo.lock:264`) keeps the
+(`Cargo.toml:8`); only the lockfile pin to 0.4.29 (`Cargo.lock:290`) keeps the
 MSRV true, and a published crate ships without that lock.
 
 ## DEL-01.3 Where byte-identical output comes from
@@ -150,7 +150,7 @@ flowchart TB
     P["normalised relative paths<br/>sealmap-model/src/lib.rs:27"]
     H["BLAKE3, never a seeded hasher<br/>sealmap-model/src/lib.rs:30"]
     A["no timestamps, absolute paths,<br/>user names or environment<br/>sealmap-model/src/lib.rs:33"]
-    PO["parallel results in input order<br/>sealmap-rust/src/lib.rs:72"]
+    PO["parallel results in input order<br/>sealmap-rust/src/lib.rs:78"]
     BY["byte-identical model, corpus, index and pack"]
     T1["extraction deterministic regardless of<br/>insertion order, tests/extract.rs:231"]
     T2["generation byte-identical across runs<br/>and input order, tests/contract.rs:93"]

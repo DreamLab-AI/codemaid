@@ -17,7 +17,7 @@ sources:
   - crates/sealmap-rust/src/tidy.rs
   - crates/sealmap-rust/src/lib.rs
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -44,7 +44,7 @@ This is where sealmap is honest about what it does not know. Every call in
 every diagram carries one of three tags: `exact` (resolved through explicit
 paths, imports or declared types), `inferred` (matched by a weaker rule) or
 `external` (outside the analysed code). Nothing is guessed silently
-(`README.md:318`-`320`), and the generated sequence diagrams mark inferred
+(`README.md:321`-`323`), and the generated sequence diagrams mark inferred
 calls with a `~` so a reviewer can see which arrows to doubt (COR-01).
 
 By default calls into the standard library and calls on values of unknown
@@ -57,10 +57,10 @@ calls; the policy can be widened to everything for debugging.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant RS as Resolver.flow<br/>resolve.rs:817
+    participant RS as Resolver.flow<br/>resolve.rs:838
     participant LF as lower_flow<br/>lower.rs:36
     participant LS as lower_steps<br/>lower.rs:53
-    participant CB as resolver closure<br/>resolve.rs:818
+    participant CB as resolver closure<br/>resolve.rs:839
     RS->>LF: raw steps and a call resolver
     LF->>LS: lower the top level (lower.rs:40)
     loop each raw step
@@ -168,23 +168,23 @@ the strongest confidence of the call sites behind it
 sequenceDiagram
     autonumber
     participant LS as lower_steps<br/>lower.rs:53
-    participant CA as Resolver.call<br/>resolve.rs:821
-    participant ME as Resolver.method<br/>resolve.rs:858
+    participant CA as Resolver.call<br/>resolve.rs:842
+    participant ME as Resolver.method<br/>resolve.rs:879
     participant EC as ExternalCalls.keeps<br/>confidence.rs:46
     LS->>CA: raw call
     alt path call
-        CA->>CA: Self outside an impl, drop, else Self and self go on (resolve.rs:830-831)
-        CA->>CA: prelude name not shadowed, drop (resolve.rs:833)
-        CA->>CA: resolve the path in the value namespace (resolve.rs:836)
-        CA->>CA: bare unknown local name, drop as a closure (resolve.rs:839)
+        CA->>CA: Self outside an impl, drop, else Self and self go on (resolve.rs:851-852)
+        CA->>CA: prelude name not shadowed, drop (resolve.rs:854)
+        CA->>CA: resolve the path in the value namespace (resolve.rs:857)
+        CA->>CA: bare unknown local name, drop as a closure (resolve.rs:860)
     else method call
-        CA->>ME: receiver and name (resolve.rs:844)
+        CA->>ME: receiver and name (resolve.rs:865)
         ME-->>CA: target and confidence, or None to drop
     end
-    CA->>EC: confidence, plus a dependency test (resolve.rs:846)
+    CA->>EC: confidence, plus a dependency test (resolve.rs:867)
     EC-->>CA: keep or not
-    Note over CA: a dependency is a lower-case external root<br/>that is not a workspace crate, resolve.rs:851
-    CA-->>LS: Call with target, label, kind, flags, line (resolve.rs:853)
+    Note over CA: a dependency is a lower-case external root<br/>that is not a workspace crate, resolve.rs:872
+    CA-->>LS: Call with target, label, kind, flags, line (resolve.rs:874)
 ```
 
 **What it shows.** Path calls to prelude names (`Some`, `Vec::new`, `drop`)
@@ -193,10 +193,10 @@ whether an external target counts as a dependency.
 
 **Why it is this way.** The Rust adapter's documentation states the default
 plainly: std, prelude constructors and calls on receivers of unknown type are
-dropped so diagrams stay dense (`crates/sealmap-rust/src/lib.rs:64`-`68`).
+dropped so diagrams stay dense (`crates/sealmap-rust/src/lib.rs:70`-`74`).
 
 **Debt:** "looks like a dependency" is a lower-case first letter on the
-target's root (`crates/sealmap-rust/src/resolve.rs:851`), so an unresolved
+target's root (`crates/sealmap-rust/src/resolve.rs:872`), so an unresolved
 lower-case path that is a local module alias or a misspelling is kept and drawn
 as a dependency lane.
 
@@ -207,7 +207,7 @@ flowchart TB
     T["a syn node"]
     TS["token stream printed with a space<br/>between every token<br/>tidy.rs:8"]
     SQ["squeeze: fixed-point spacing rules,<br/>then call parens and arrows restored<br/>labels.rs:57"]
-    AS["argument sketch: names and short<br/>literals kept, anything else underscore<br/>collect.rs:1459"]
+    AS["argument sketch: names and short<br/>literals kept, anything else underscore<br/>collect.rs:1466"]
     CL["call_label: name of sketches<br/>clipped to 56 chars<br/>labels.rs:116"]
     CO["condition_label: clipped as if<br/>prefixed with if<br/>labels.rs:122"]
     CP["clip on a char boundary with an ellipsis<br/>labels.rs:104"]

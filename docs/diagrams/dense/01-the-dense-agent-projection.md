@@ -20,7 +20,7 @@ sources:
   - crates/sealmap-corpus/src/structure.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -278,15 +278,15 @@ byte under the budget, it is refused, with the overflow named
 flowchart TB
     R["dense.txt of sealmap<br/>read as an agent would"]
     S["Self::f calls dropped:<br/>SymbolId.global showed no calls"]
-    SF["call paths starting Self or self<br/>resolve before the prelude check<br/>resolve.rs:830-833"]
+    SF["call paths starting Self or self<br/>resolve before the prelude check<br/>resolve.rs:851-854"]
     G["guard calls never walked:<br/>is_shared had no caller"]
-    GF["the guard is walked after the<br/>arm's bindings, collect.rs:1223-1224"]
+    GF["the guard is walked after the<br/>arm's bindings, collect.rs:1228-1229"]
     L["struct-literal receivers lost:<br/>Parser.id under SymbolId.parse"]
-    LF["a struct literal names its type<br/>collect.rs:1392"]
+    LF["a struct literal names its type<br/>collect.rs:1399"]
     N["a guessed edge vanished when<br/>another crate added root methods"]
-    NF["guesses count only crates the caller<br/>can reach, resolve.rs:954-967<br/>layout.rs:59"]
+    NF["guesses count only crates the caller<br/>can reach, resolve.rs:975-988<br/>layout.rs:75"]
     P["pack's own calls bound to<br/>the CLI's fn pack"]
-    PF["a path prefix is a module or type<br/>resolve.rs:392, resolve.rs:649"]
+    PF["a path prefix is a module or type<br/>resolve.rs:391, resolve.rs:666"]
     R --> S --> SF
     R --> G --> GF
     R --> L --> LF
@@ -310,16 +310,16 @@ function.
 the prelude list for type references (`crates/sealmap-rust/src/resolve.rs:60`),
 and the call filter checked that list before resolving. A call path starting
 `Self` now resolves to the enclosing impl's self type through the resolver's
-`Self` arm (`crates/sealmap-rust/src/resolve.rs:661`), exactly as `Type::f(..)`
+`Self` arm (`crates/sealmap-rust/src/resolve.rs:678`), exactly as `Type::f(..)`
 does. Outside any impl it names nothing and is dropped
-(`crates/sealmap-rust/src/resolve.rs:830`-`833`). `self::f(..)` was dropped by
+(`crates/sealmap-rust/src/resolve.rs:851`-`854`). `self::f(..)` was dropped by
 the same check and resolves too. `Self::from_repr` in `SymbolId::global`
 (`crates/sealmap-model/src/sym.rs:406`) is now an exact edge. On VisionClaw
 this alone adds 477 exact and 20 inferred edges.
 
 **Closed (`d227dd8`):** calls in a match guard were only formatted into the
 arm label. The guard is now walked once the arm's bindings are in scope, and
-its calls open the arm (`crates/sealmap-rust/src/collect.rs:1223`-`1224`). The
+its calls open the arm (`crates/sealmap-rust/src/collect.rs:1228`-`1229`). The
 guard calling `is_shared` (`crates/sealmap-corpus/src/structure.rs:194`) gives
 it its caller.
 
@@ -328,7 +328,7 @@ it its caller.
 (`crates/sealmap-model/src/sym.rs:437`), was lost. The cause, traced:
 `recv()` classed a struct literal as an unknown receiver, so the call resolved
 to `sym:? id`, which the default external policy drops. A struct literal now
-names its own type (`crates/sealmap-rust/src/collect.rs:1392`).
+names its own type (`crates/sealmap-rust/src/collect.rs:1399`).
 
 **Closed (`613b9ba`):** the by-name guess for an unknown receiver accepted a
 method name only if it was unique in the whole workspace, so `TreeWriter::root`
@@ -337,9 +337,9 @@ and `CallerWriter::root` in sealmap-dense (`crates/sealmap-dense/src/tree.rs:92`
 `Resolver` to `SymbolId::root` in sealmap-rust, a crate that cannot name
 sealmap-dense. Candidates now come only from crates the caller can reach:
 itself, its package's library, and the workspace packages its manifest lists
-(`crates/sealmap-rust/src/layout.rs:59`, `crates/sealmap-rust/src/layout.rs:135`).
+(`crates/sealmap-rust/src/layout.rs:75`, `crates/sealmap-rust/src/layout.rs:247`).
 Two or more reachable candidates are a genuine ambiguity, and no edge is
-guessed; the call stays `sym:? name` (`crates/sealmap-rust/src/resolve.rs:954`-`968`).
+guessed; the call stays `sym:? name` (`crates/sealmap-rust/src/resolve.rs:975`-`989`).
 On VisionClaw this drops 62 guesses into crates the caller does not depend on,
 such as std's `as_secs()` bound to another crate's `Timestamp::as_secs`.
 
@@ -347,5 +347,5 @@ such as std's `as_secs()` bound to another crate's `Timestamp::as_secs`.
 call to `sealmap_main::pack::shard`. The local `fn pack` captured the
 imported module `pack`, because a leading path segment fell back from the
 type namespace to values. A segment with more after it now consults the type
-namespace alone (`crates/sealmap-rust/src/resolve.rs:392`,
-`crates/sealmap-rust/src/resolve.rs:649`).
+namespace alone (`crates/sealmap-rust/src/resolve.rs:391`,
+`crates/sealmap-rust/src/resolve.rs:666`).

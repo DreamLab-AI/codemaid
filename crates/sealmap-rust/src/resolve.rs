@@ -296,8 +296,7 @@ pub(crate) fn build(name: &str, files: Vec<RawFile>, plan: &Plan, opts: &RustOpt
         }
         for imp in &f.impls {
             let module = module_sym(&imp.module);
-            let Some(self_segs) = &imp.self_ty else { continue };
-            let (ty, _) = r.resolve(&module, self_segs, None, Ns::Type);
+            let ty = r.impl_self(&module, imp);
             if let Some((segs, _)) = &imp.trait_ {
                 let (t, c) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                 if keep_ref(&t) || r.internal.contains(&t) {
@@ -334,7 +333,7 @@ fn crate_package(krate: &str) -> Package {
 /// The id of method `name` from impl block `imp` whose self type resolved
 /// to `ty`.
 fn impl_method(module: &SymbolId, ty: &SymbolId, imp: &RawImpl, name: &str) -> SymbolId {
-    let self_ty = imp.self_ty.as_ref().map(|s| s.join("::")).unwrap_or_default();
+    let self_ty = imp.self_ty.as_ref().map_or_else(|| imp.self_text.clone(), |s| s.join("::"));
     let trait_ = imp.trait_.as_ref().map(|(_, disp)| disp.as_str());
     ids::impl_method_id(module, ty, &self_ty, trait_, name)
 }
@@ -563,8 +562,7 @@ impl<'p> Resolver<'p> {
                         continue;
                     }
                     let module = module_sym(&imp.module);
-                    let Some(segs) = &imp.self_ty else { continue };
-                    let (ty, _) = r.resolve(&module, segs, None, Ns::Type);
+                    let ty = r.impl_self(&module, imp);
                     if let Some((segs, _)) = &imp.trait_ {
                         let (t, _) = r.resolve(&module, segs, Some(&ty), Ns::Type);
                         r.impls.entry(ty.clone()).or_default().insert(t);
@@ -581,6 +579,25 @@ impl<'p> Resolver<'p> {
         r
     }
 
+    /// `true` when `root` (a crate key, or a crate name as code spells it)
+    /// names a crate of the codebase.
+    fn is_crate(&self, root: &str) -> bool {
+        self.crates.contains(root)
+            || self.plan.crates.get(root).is_some_and(|keys| keys.iter().any(|k| self.crates.contains(k)))
+    }
+
+    /// The type an impl block in `module` implements. A self type that is
+    /// not a path (a tuple, slice, array, function pointer or trait object)
+    /// is no type of the codebase, so it is the path id of the type as
+    /// written; its methods are anchored under it in the module
+    /// ([`ids::impl_method_id`]).
+    fn impl_self(&self, module: &SymbolId, imp: &RawImpl) -> SymbolId {
+        match &imp.self_ty {
+            Some(segs) => self.resolve(module, segs, None, Ns::Type).0,
+            None => SymbolId::path([imp.self_text.as_str()]).expect("one segment is a non-empty path"),
+        }
+    }
+
     /// Resolve `segs` as written in `module`, looking the final segment up
     /// in `ns` first. Returns the canonical id and how sure we are.
     /// Unresolvable paths come back as a path id with
@@ -595,7 +612,7 @@ impl<'p> Resolver<'p> {
         match self.walk(module, segs, self_ty, ns, 0, true) {
             Some(id) if self.internal.contains(&id) => (id, Confidence::Exact),
             Some(id) => {
-                let in_workspace = id.root().is_some_and(|root| self.crates.contains(root.as_ref()));
+                let in_workspace = id.root().is_some_and(|root| self.is_crate(&root));
                 (id, if in_workspace { Confidence::Inferred } else { Confidence::External })
             }
             None => (ids::path_id(segs).unwrap_or_else(|| ids::unresolved_method_id("")), Confidence::External),
@@ -675,8 +692,12 @@ impl<'p> Resolver<'p> {
                     return self.walk(module, &full, self_ty, ns, depth + 1, use_globs).or_else(|| ids::path_id(&full));
                 } else if let Some(id) = use_globs.then(|| self.glob(module, name, ns_at(0))).flatten() {
                     id
-                } else if self.crates.contains(name) {
-                    module_sym(&[name.to_owned()])
+                } else if let Some(key) = module
+                    .root()
+                    .and_then(|from| self.plan.crate_named(&from, name))
+                    .filter(|key| self.crates.contains(*key))
+                {
+                    module_sym(&[key.to_owned()])
                 } else {
                     return ids::path_id(segs);
                 }
@@ -848,7 +869,7 @@ impl<'p> Resolver<'p> {
             let root = root.as_deref().unwrap_or("");
             // External roots that look like crates (lower-case); unresolved
             // type names are not dependencies.
-            keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.crates.contains(root)
+            keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.is_crate(root)
         });
         keep.then(|| c.to_call(target, confidence))
     }

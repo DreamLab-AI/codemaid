@@ -14,7 +14,7 @@ sources:
   - crates/sealmap-model/Cargo.toml
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -57,10 +57,10 @@ current one.
 classDiagram
     direction LR
     class Codebase {
-        +schema_version u32  codebase.rs:18
-        +files BTreeMap path to SourceFile  codebase.rs:22
-        +symbols BTreeMap SymbolId to Symbol  codebase.rs:24
-        +relations BTreeSet Relation  codebase.rs:26
+        +schema_version u32  codebase.rs:19
+        +files BTreeMap path to SourceFile  codebase.rs:23
+        +symbols BTreeMap SymbolId to Symbol  codebase.rs:25
+        +relations BTreeSet Relation  codebase.rs:27
     }
     class SourceFile {
         +path language module hash lines  source.rs:16
@@ -93,19 +93,19 @@ classDiagram
 carry a flow; a relation always carries a confidence.
 
 **Why it is this way.** Ordered collections make serialisation deterministic
-and every query iterate in key order (`crates/sealmap-model/src/codebase.rs:12`-`14`).
+and every query iterate in key order (`crates/sealmap-model/src/codebase.rs:13`-`15`).
 Confidence is on every relation because there is no type checker behind the
-model, and nothing is meant to be guessed silently (`README.md:318`-`320`).
+model, and nothing is meant to be guessed silently (`README.md:321`-`323`).
 
 **Invariant:** a relation from a symbol to itself is never stored
-(`crates/sealmap-model/src/codebase.rs:91`).
+(`crates/sealmap-model/src/codebase.rs:119`).
 
 **Debt:** `relations_from` is a range scan because `Relation` orders by
-`from` first (`crates/sealmap-model/src/codebase.rs:130`-`133`), but
+`from` first (`crates/sealmap-model/src/codebase.rs:158`-`161`), but
 `relations_to`, `children` and `symbols_in_file` scan everything
-(`crates/sealmap-model/src/codebase.rs:136`,
-`crates/sealmap-model/src/codebase.rs:122`,
-`crates/sealmap-model/src/codebase.rs:112`); projections that call them per
+(`crates/sealmap-model/src/codebase.rs:164`,
+`crates/sealmap-model/src/codebase.rs:150`,
+`crates/sealmap-model/src/codebase.rs:140`); projections that call them per
 document have had to build their own indexes (COR-01).
 
 ## MOD-03.2 Loading a directory
@@ -186,16 +186,16 @@ with nothing to pop is an error rather than a clamp
 sequenceDiagram
     autonumber
     participant CL as tool or agent
-    participant FJ as from_json<br/>codebase.rs:47
+    participant FJ as from_json<br/>codebase.rs:48
     participant SJ as serde_json
     CL->>FJ: text of a _model.json
-    FJ->>SJ: probe only schema_version and schema (codebase.rs:49)
+    FJ->>SJ: probe only schema_version and schema (codebase.rs:50)
     SJ-->>FJ: both optional numbers
-    FJ->>FJ: take schema_version, else v1 schema (:54)
+    FJ->>FJ: take schema_version, else v1 schema (:55)
     alt not version 2
-        FJ-->>CL: ModelJsonError.Version with found and expected (codebase.rs:56)
+        FJ-->>CL: ModelJsonError.Version with found and expected (codebase.rs:57)
     else version 2
-        FJ->>SJ: full deserialise (codebase.rs:58)
+        FJ->>SJ: full deserialise (codebase.rs:59)
         SJ-->>FJ: Codebase, ids parsed as canonical sym text
         FJ-->>CL: Codebase
     end
@@ -207,11 +207,11 @@ than failing on a missing field.
 
 **Why it is this way.** Schema v2 changed the meaning of every id, so a v1
 model read as v2 would be wrong in every row. The README states the refusal
-for users (`README.md:203`-`206`). Every `SymbolId` inside is parsed through
+for users (`README.md:205`-`208`). Every `SymbolId` inside is parsed through
 the canonical-only parser, so a hand-edited id fails the whole read.
 
 **Invariant:** `Codebase::new` always stamps the current schema version
-(`crates/sealmap-model/src/codebase.rs:32`), so nothing written by this build
+(`crates/sealmap-model/src/codebase.rs:33`), so nothing written by this build
 can fail its own reader on version.
 
 ## MOD-03.5 A flow is the skeleton of a sequence diagram
@@ -251,4 +251,4 @@ sequence into another's without guessing (`crates/sealmap-model/src/flow.rs:10`-
 **Debt:** `Flow::calls` collects every call into a fresh vector before
 iterating, and `call_count` builds that vector just to count it
 (`crates/sealmap-model/src/flow.rs:55`-`64`); `Codebase::stats` does this
-once per symbol (`crates/sealmap-model/src/codebase.rs:169`).
+once per symbol (`crates/sealmap-model/src/codebase.rs:197`).
