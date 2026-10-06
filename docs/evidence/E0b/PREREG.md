@@ -68,3 +68,90 @@ Region hashing moves into the sealmap crates only if E0b holds.
 ## Amendments
 
 None.
+
+The "None." above was true at registration. The entries below were written
+while building the harness, **before the first E0b run and before any E0b
+endpoint was computed**. Each records how an ambiguous point was made
+concrete; none changes the region rule's list of nodes, an endpoint, a
+threshold, the window, the seed or the sampling.
+
+### 2026-10-06 #1: node paths follow sealmap's canonical tree
+
+sealmap's normalisation treats `=> { e }` as `=> e` and `|x| { e }` as
+`|x| e`. On the raw tree the first has one more node (the statement `e` inside
+the block), so a brace-only rustfmt rewrite would move a citation's node path
+and count as a change, although the region hash, and the symbol's
+`body_hash`, are unchanged. Node identity is therefore read on the same
+canonical form the hash uses: a match-arm or closure body block that sealmap's
+own `Canon` collapses is transparent, its single statement is not a region,
+and the walk continues into the expression. Whether a body collapses is
+decided by running sealmap's `Canon` on the arm or closure, not by a second
+copy of the rule.
+
+### 2026-10-06 #2: kinds, ordinals and the top-level-item case
+
+The node kinds are `arm`, `branch`, `loop`, `closure`, `async`, `stmt`,
+`field`, `variant`, `trait_item`, `impl_item` and `item`, following the rule's
+list. A path step's ordinal counts the earlier siblings **of the same kind**
+under the same parent region (or under S). The branches of one
+`if … else if … else` chain are siblings, because an `else if` is not itself a
+region. S is never its own region, even when its kind is listed. The
+top-level-item case applies when E0 mapped the line to a file's root module.
+By E0 amendment #5 that happens when the line is inside no item symbol. It
+does not apply to an inline `mod` symbol. Struct fields and enum variants are
+not sealmap symbols, so a citation on a field line maps to its type and
+narrows to `field#n`.
+
+### 2026-10-06 #3: "innermost" among overlapping nodes
+
+The innermost qualifying node is the deepest one (the longest node path)
+whose line span contains the cited line. Among equally deep nodes that share
+the line, it is the one with the smallest line span, and then the first in
+source order. Line spans include attributes and doc comments, as sealmap's
+symbol spans do.
+
+### 2026-10-06 #4: comparing a region between P and C
+
+A citation whose region is S itself is compared exactly as E0 compares a
+symbol: `sig_hash` and `body_hash`, presence at one side only, and E0's
+conservative absent-at-both rule. A narrower region is compared by its hash.
+The hash is `Fingerprinter::body()` over the node's tokens through sealmap's
+`feed` and `Canon`, with no section label. A closure body is taken from the
+canonical closure and a statement from its canonical block, so
+context-dependent rewrites apply as they do inside S. A narrower region
+counts as changed in these cases:
+
+- the hashes differ;
+- the path is found at exactly one side;
+- S is at both sides and the path is found at neither (conservative, since
+  the file changed);
+- S is absent at both sides and the cited file changed (E0's rule).
+
+Each side reads S's file as named by that side's model. A region whose
+symbol's file is byte-identical at P and C is unchanged without parsing.
+
+### 2026-10-06 #5: finding S's syntax node
+
+S's node is the item, impl item, trait item, field or variant whose span
+matches S's sealmap span exactly, lines and columns, under sealmap's own
+convention. Ties go to the first node in pre-order. The root module is the
+whole file. If S's node cannot be found at the stamp, the citation's region
+is S, and the number of such citations is reported.
+
+### 2026-10-06 #6: "after the topic's stamp" and the 20-pair floor
+
+A (commit C, parent P) pair counts as after the topic's stamp in that
+repository when the stamp is an ancestor of P or equal to it. In other words,
+C was made after the topic text was verified. C equal to the stamp does not
+count. A topic with no usable stamp has no eligible pairs. "Fewer than 20
+eligible pairs" is counted over both repositories pooled, and the per-repo
+counts are reported. The draw follows E0 amendment #8: window order, then
+topic order, one ChaCha8 generator seeded 20261006, VisionClaw then agentbox.
+
+### 2026-10-06 #7: where the normaliser comes from
+
+sealmap-rust's normaliser (`crates/sealmap-rust/src/fingerprint.rs`) is
+crate-private. The harness compiles that file unchanged into `bench/e0` with a
+`#[path]` module, so the published crates' API does not change and no second
+copy of the normalisation exists. Endpoint 2's `.rs` restriction is E0
+amendment #10's: each topic's `.rs` sources and citations.
