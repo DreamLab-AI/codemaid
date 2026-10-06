@@ -283,3 +283,26 @@ fn pack_diff_selects_topics_whose_cited_symbols_changed_since_a_revision() {
     assert!(since_base.contains("\ntopics: LED-01\n") && !since_base.contains("+dirty"), "{since_base}");
     assert_eq!(code(&sealmap(&dir, &["pack", "--diff", "no-such-rev"])), 2);
 }
+
+/// ER `gen X-08`: every `--repo` is loaded under its `NAME/` prefix, so two
+/// repositories with one name (or one name nested in another's prefix)
+/// silently overwrote each other's files. Such a set is now refused.
+#[test]
+fn repos_with_clashing_names_are_refused() {
+    let a = scratch("repo-clash-a");
+    let b = scratch("repo-clash-b");
+    edit(&b, "src/accounts.rs", "deposit", "credit");
+    let (pa, pb) = (format!("api={}", a.display()), format!("api={}", b.display()));
+    let o = sealmap(&a, &["model", "--repo", &pa, "--repo", &pb]);
+    assert_eq!(code(&o), 2, "{}", stdout(&o));
+    let err = String::from_utf8_lossy(&o.stderr);
+    assert!(err.contains("api"), "{err}");
+    let nested = format!("api/v2={}", b.display());
+    assert_ne!(code(&sealmap(&a, &["model", "--repo", &pa, "--repo", &nested])), 0);
+
+    // The library refuses the same set.
+    assert!(sealmap::load_repos(&[("api", a.as_path()), ("api", b.as_path())]).is_err());
+    // Distinct names load both.
+    let both = sealmap::load_repos(&[("api", a.as_path()), ("web", b.as_path())]).unwrap();
+    assert!(both.get_str("api/src/accounts.rs").is_some() && both.get_str("web/src/accounts.rs").is_some());
+}

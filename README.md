@@ -177,6 +177,8 @@ sym:? insert                              a method on a receiver of unknown type
 The suffix gives the kind: `/` module, `#` type or trait, `().` function or
 method, `.` const or static, `!` macro. Methods sit under the type that owns
 them, so splitting an `impl` or moving it to another file keeps every id.
+A crate name held by more than one directory is qualified with the package
+directory (`sym:cargo a/core . run().`), so two same-named crates never merge.
 Printing is injective and parsing accepts only canonical text (property
 tested). The grammar is documented in `sealmap_model::sym`.
 
@@ -360,7 +362,8 @@ the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
 `generate` never writes through a symbolic link; `if let` and `while let`
 bindings no longer leak past their block; `#[cfg]` twins keep every
 definition's calls; impls on tuples, slices and other non-path types keep
-their methods; `--no-model` removes a model left by an earlier run.
+their methods; `--no-model` removes a model left by an earlier run;
+same-named crates stay apart, and clashing `--repo` names are refused.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 

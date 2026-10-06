@@ -23,6 +23,15 @@ All crates in this workspace share one version.
   and `generate --check` passed with it. A sealmap model the generation leaves
   out is now orphaned: reported by `--check`, deleted by `generate`. A
   `_model.json` that is not a sealmap model is still left alone.
+- Crates with the same name (two packages, or test, bench and example
+  targets with one file name in two packages) became one crate, and their
+  symbols merged. A crate name held by more than one directory is now
+  qualified with the package directory (`sym:cargo a/core . run().`, `./core`
+  at the root); a path naming such a crate resolves through the caller's
+  manifest (`path` dependencies, also via `[workspace.dependencies]`), or stays
+  external when it is still ambiguous. Two `--repo` entries with one name, or
+  one nested in the other's prefix, are refused instead of overwriting each
+  other's files.
 
 ## 0.2.0 — 2026-10-06
 

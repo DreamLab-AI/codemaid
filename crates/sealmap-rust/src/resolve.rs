@@ -579,6 +579,13 @@ impl<'p> Resolver<'p> {
         r
     }
 
+    /// `true` when `root` (a crate key, or a crate name as code spells it)
+    /// names a crate of the codebase.
+    fn is_crate(&self, root: &str) -> bool {
+        self.crates.contains(root)
+            || self.plan.crates.get(root).is_some_and(|keys| keys.iter().any(|k| self.crates.contains(k)))
+    }
+
     /// The type an impl block in `module` implements. A self type that is
     /// not a path (a tuple, slice, array, function pointer or trait object)
     /// is no type of the codebase, so it is the path id of the type as
@@ -605,7 +612,7 @@ impl<'p> Resolver<'p> {
         match self.walk(module, segs, self_ty, ns, 0, true) {
             Some(id) if self.internal.contains(&id) => (id, Confidence::Exact),
             Some(id) => {
-                let in_workspace = id.root().is_some_and(|root| self.crates.contains(root.as_ref()));
+                let in_workspace = id.root().is_some_and(|root| self.is_crate(&root));
                 (id, if in_workspace { Confidence::Inferred } else { Confidence::External })
             }
             None => (ids::path_id(segs).unwrap_or_else(|| ids::unresolved_method_id("")), Confidence::External),
@@ -685,8 +692,12 @@ impl<'p> Resolver<'p> {
                     return self.walk(module, &full, self_ty, ns, depth + 1, use_globs).or_else(|| ids::path_id(&full));
                 } else if let Some(id) = use_globs.then(|| self.glob(module, name, ns_at(0))).flatten() {
                     id
-                } else if self.crates.contains(name) {
-                    module_sym(&[name.to_owned()])
+                } else if let Some(key) = module
+                    .root()
+                    .and_then(|from| self.plan.crate_named(&from, name))
+                    .filter(|key| self.crates.contains(*key))
+                {
+                    module_sym(&[key.to_owned()])
                 } else {
                     return ids::path_id(segs);
                 }
@@ -858,7 +869,7 @@ impl<'p> Resolver<'p> {
             let root = root.as_deref().unwrap_or("");
             // External roots that look like crates (lower-case); unresolved
             // type names are not dependencies.
-            keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.crates.contains(root)
+            keep_ref(&target) && root.starts_with(|c: char| c.is_ascii_lowercase()) && !self.is_crate(root)
         });
         keep.then(|| c.to_call(target, confidence))
     }

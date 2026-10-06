@@ -35,7 +35,13 @@
 //! crate (see `sealmap_extract::ids` for the full table):
 //! `sym:cargo shop . db/Db#insert().`. Binary, test, example and bench
 //! targets are packages of their own (`shop_main`, `test_it`, ...), so a
-//! binary and the library never share an id.
+//! binary and the library never share an id. A crate name that more than
+//! one directory holds (two packages called `core`, or a `tests/it.rs` in
+//! two packages) is qualified with the package directory, `./` at the root:
+//! `sym:cargo a/core . run().`. A path such as `core::run` then names the
+//! one such crate the caller's manifest depends on (a `path` dependency,
+//! directly or through `[workspace.dependencies]`, picks it); when that is
+//! still ambiguous the call is left external.
 //!
 //! ## Fingerprints
 //!

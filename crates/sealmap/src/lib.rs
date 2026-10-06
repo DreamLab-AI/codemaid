@@ -122,7 +122,22 @@ pub fn generate_repos(repos: &[(&str, &Path)], options: &Options) -> io::Result<
 }
 
 /// Load several repositories into one [`SourceSet`] under `<name>/` prefixes.
+///
+/// Fails with [`io::ErrorKind::InvalidInput`] when one name is used twice or
+/// is a prefix directory of another (`api` and `api/v2`), since one
+/// repository's files would then replace the other's.
 pub fn load_repos(repos: &[(&str, &Path)]) -> io::Result<SourceSet> {
+    for (i, (a, _)) in repos.iter().enumerate() {
+        for (b, _) in &repos[i + 1..] {
+            let nested = |x: &str, y: &str| y.strip_prefix(x).is_some_and(|rest| rest.starts_with('/'));
+            if a == b || nested(a, b) || nested(b, a) {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    format!("repository names `{a}` and `{b}` clash: each repository needs its own prefix"),
+                ));
+            }
+        }
+    }
     let load = model::LoadOptions { extensions: vec!["rs".into(), "toml".into()], ..Default::default() };
     let mut all = SourceSet::new();
     for (name, path) in repos {

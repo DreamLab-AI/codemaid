@@ -161,3 +161,36 @@ fn impls_on_non_path_types_keep_their_methods() {
     }
     // Each self type keeps its own id: `[u8]` and `&[u8]` are different impls.
 }
+
+/// ER `prefix X-08`: crate ids carry the crate name only, so two packages
+/// with one name became one crate and their symbols merged. A crate name
+/// claimed by more than one directory is now qualified with the directory,
+/// and a name reference picks the package the caller's manifest depends on.
+#[test]
+fn same_named_crates_stay_apart() {
+    let cb = model(&[
+        ("a/Cargo.toml", "[package]\nname = \"core1\""),
+        ("a/src/lib.rs", "pub fn run() { alpha() }\nfn alpha() {}"),
+        ("b/Cargo.toml", "[package]\nname = \"core1\""),
+        ("b/src/lib.rs", "pub fn run() { beta() }\nfn beta() {}"),
+        ("b/src/main.rs", "fn main() { core1::run() }"),
+        ("app/Cargo.toml", "[package]\nname = \"app\"\n[dependencies]\ncore1 = { path = \"../a\" }"),
+        ("app/src/lib.rs", "pub fn go() { core1::run() }"),
+        ("ws/Cargo.toml", "[workspace]\nmembers = [\"svc\"]\n[workspace.dependencies]\ncore1 = { path = \"../b\" }"),
+        ("ws/svc/Cargo.toml", "[package]\nname = \"svc\"\n[dependencies]\ncore1.workspace = true"),
+        ("ws/svc/src/lib.rs", "pub fn go() { core1::run() }"),
+        ("any/Cargo.toml", "[package]\nname = \"any\"\n[dependencies]\ncore1 = \"1\""),
+        ("any/src/lib.rs", "pub fn go() { core1::run() }"),
+    ]);
+    assert_eq!(calls(&cb, "sym:cargo a/core1 . run()."), [exact("sym:cargo a/core1 . alpha().")]);
+    assert_eq!(calls(&cb, "sym:cargo b/core1 . run()."), [exact("sym:cargo b/core1 . beta().")]);
+    // A binary names its own package's library.
+    assert_eq!(calls(&cb, "sym:cargo core1_main . main()."), [exact("sym:cargo b/core1 . run().")]);
+    // A path dependency, directly or through the workspace table, picks one.
+    assert_eq!(calls(&cb, "sym:cargo app . go()."), [exact("sym:cargo a/core1 . run().")]);
+    assert_eq!(calls(&cb, "sym:cargo svc . go()."), [exact("sym:cargo b/core1 . run().")]);
+    // A dependency that names either is ambiguous: no internal edge is drawn.
+    assert!(calls(&cb, "sym:cargo any . go().").iter().all(|(t, _)| !t.contains("core1 . run")));
+    // Unique names stay plain.
+    assert!(cb.symbols.keys().any(|k| k.to_string() == "sym:cargo app ."));
+}
