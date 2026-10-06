@@ -190,3 +190,15 @@ To show what symbol gating does on the code sealmap-rust can read, the report
 adds an **exploratory, post-hoc** row: T_file and T_sym recomputed over the same
 100 commits with each topic restricted to its `.rs` sources and citations. It is
 not an endpoint, does not enter the verdict and carries no threshold.
+
+### 2026-10-06 #12: endpoint 4 is not judged (written after endpoint 1 failed)
+
+Endpoint 1 failed (R = 1.19, CI 1.12–1.28, against 2.0), so E0 does not hold
+whatever endpoint 4 shows. The drawn sample also has a defect the registration
+did not foresee: 29 of the 40 pairs are on commits older than the topic's
+`verified_commit`, so the topic text was written after the change and a judge
+would mostly answer "no" for that reason alone. Spending ~50 judge runs on a
+moot and biased endpoint is not justified. The sample, prompts and protocol stay
+in `judge/` unjudged, and endpoint 4 is reported as **not run**, not as passed.
+A future E0 that needs endpoint 4 should draw only from commits after each
+topic's stamp.
