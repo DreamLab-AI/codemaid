@@ -508,12 +508,16 @@ version = "0.0.0"
 dependencies = [
  "blake3",
  "fancy-regex",
+ "proc-macro2",
+ "quote",
  "rand",
  "rand_chacha",
+ "sealmap-extract",
  "sealmap-model",
  "sealmap-rust",
  "serde",
  "serde_json",
+ "syn 2.0.119",
 ]
 
 [[package]]

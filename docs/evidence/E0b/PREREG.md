@@ -155,3 +155,27 @@ crate-private. The harness compiles that file unchanged into `bench/e0` with a
 `#[path]` module, so the published crates' API does not change and no second
 copy of the normalisation exists. Endpoint 2's `.rs` restriction is E0
 amendment #10's: each topic's `.rs` sources and citations.
+
+### 2026-10-06 #8: two lookup checks; the run as found (written after the first run)
+
+The first E0b run gave endpoint 1 R_region = 1.20 (CI 1.13–1.29) and
+endpoint 2 R_region = 1.37 (CI 1.26–1.54), both below 2.0. That run counted
+565 VisionClaw region events where S was present at P and C but the cited
+path was found at neither side. To rule out a harness bug behind that number,
+two checks were added after the run. One counts symbols that the model holds
+but whose syntax node was not found at P or C. The other counts region files
+that did not parse at P or C. Both are 0 in both repositories, so the
+events are the path drift that amendment #4's conservative rule counts. The
+counters change no return value, the re-run printed the same endpoint
+figures, and no rule was changed.
+
+That rule also explains the 16 VisionClaw (commit, topic) flags set by
+T_region but not T_sym. In each, S's body hash is equal at P and C, but the
+node path taken at a later stamp exists at neither side. They are reported
+in RESULTS "Checks" and left in the counts.
+
+Endpoint 4 has 36 eligible pairs (35 VisionClaw, 1 agentbox), which is at
+least 20, so the endpoint is not underpowered. The draw takes 30 + 1, because
+agentbox has fewer than 10 ("or all if fewer"). Endpoints 1 and 2 both
+failed, so E0b does not hold whatever endpoint 4 shows. The sample and
+prompts are in `judge/`, unjudged, and endpoint 4 is reported as PENDING.

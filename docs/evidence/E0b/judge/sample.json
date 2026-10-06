@@ -1,0 +1,366 @@
+{
+  "population": [
+    [
+      "visionclaw",
+      35
+    ],
+    [
+      "agentbox",
+      1
+    ]
+  ],
+  "pairs": [
+    {
+      "id": "vc-01",
+      "repo": "visionclaw",
+      "commit": "e4fcc51267be7a1d07bdb6a3b6cf91b3236de608",
+      "parent": "c4570c081ee315712abb0b35d0dd2e36f3b4f9b0",
+      "topic": "VC-22",
+      "commit_precedes_stamp": false,
+      "diff_lines": 69,
+      "prompt": "judge/vc-01.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-02",
+      "repo": "visionclaw",
+      "commit": "e4fcc51267be7a1d07bdb6a3b6cf91b3236de608",
+      "parent": "c4570c081ee315712abb0b35d0dd2e36f3b4f9b0",
+      "topic": "VC-35",
+      "commit_precedes_stamp": false,
+      "diff_lines": 684,
+      "prompt": "judge/vc-02.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-03",
+      "repo": "visionclaw",
+      "commit": "94dc0ff609237e06f5f0cbf4e93941f867a63260",
+      "parent": "1e55daebb83520852286dfbc388b017ee5bd8b56",
+      "topic": "VC-01",
+      "commit_precedes_stamp": false,
+      "diff_lines": 128,
+      "prompt": "judge/vc-03.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-04",
+      "repo": "visionclaw",
+      "commit": "94dc0ff609237e06f5f0cbf4e93941f867a63260",
+      "parent": "1e55daebb83520852286dfbc388b017ee5bd8b56",
+      "topic": "VC-03",
+      "commit_precedes_stamp": false,
+      "diff_lines": 128,
+      "prompt": "judge/vc-04.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-05",
+      "repo": "visionclaw",
+      "commit": "1d3e14a30a085b1e1d60e379f577e1b55070c56b",
+      "parent": "1be74d23929ac248b3fd0352e4d75496f6cd181c",
+      "topic": "VC-03",
+      "commit_precedes_stamp": false,
+      "diff_lines": 13,
+      "prompt": "judge/vc-05.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-06",
+      "repo": "visionclaw",
+      "commit": "1d3e14a30a085b1e1d60e379f577e1b55070c56b",
+      "parent": "1be74d23929ac248b3fd0352e4d75496f6cd181c",
+      "topic": "VC-04",
+      "commit_precedes_stamp": false,
+      "diff_lines": 212,
+      "prompt": "judge/vc-06.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-07",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-09",
+      "commit_precedes_stamp": false,
+      "diff_lines": 388,
+      "prompt": "judge/vc-07.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-08",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-10",
+      "commit_precedes_stamp": false,
+      "diff_lines": 12,
+      "prompt": "judge/vc-08.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-09",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-11",
+      "commit_precedes_stamp": false,
+      "diff_lines": 12,
+      "prompt": "judge/vc-09.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-10",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-12",
+      "commit_precedes_stamp": false,
+      "diff_lines": 12,
+      "prompt": "judge/vc-10.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-11",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-13",
+      "commit_precedes_stamp": false,
+      "diff_lines": 96,
+      "prompt": "judge/vc-11.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-12",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-16",
+      "commit_precedes_stamp": false,
+      "diff_lines": 59,
+      "prompt": "judge/vc-12.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-13",
+      "repo": "visionclaw",
+      "commit": "c0906ed6e201dd09b3e9baab642c0b0b67adca88",
+      "parent": "3fd5b4777229379ce47d28e99d3048a315cfa584",
+      "topic": "VC-18",
+      "commit_precedes_stamp": false,
+      "diff_lines": 12,
+      "prompt": "judge/vc-13.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-14",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-01",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-14.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-15",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-09",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-15.prompt.md",
+      "stamp": "dd420fbc722a7a4a50e968162ac6c3eaff6972b2"
+    },
+    {
+      "id": "vc-16",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-20",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-16.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-17",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-21",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-17.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-18",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-22",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-18.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-19",
+      "repo": "visionclaw",
+      "commit": "8a501fbbce44cbb3bee0084e9a9b30abe6f46e47",
+      "parent": "f63667fdde90458707e8f1bf258a53bb36b0cb57",
+      "topic": "VC-25",
+      "commit_precedes_stamp": false,
+      "diff_lines": 548,
+      "prompt": "judge/vc-19.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-20",
+      "repo": "visionclaw",
+      "commit": "8bdece469a3ad29b1b60a86490da1aa841dc89bb",
+      "parent": "b9452618916b9a71500bc3a8cc378b3d4685e78c",
+      "topic": "VC-12",
+      "commit_precedes_stamp": false,
+      "diff_lines": 381,
+      "prompt": "judge/vc-20.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-21",
+      "repo": "visionclaw",
+      "commit": "8bdece469a3ad29b1b60a86490da1aa841dc89bb",
+      "parent": "b9452618916b9a71500bc3a8cc378b3d4685e78c",
+      "topic": "VC-18",
+      "commit_precedes_stamp": false,
+      "diff_lines": 381,
+      "prompt": "judge/vc-21.prompt.md",
+      "stamp": "7d3ea2edb067432a57e6fe1fd951fd8254380bb8"
+    },
+    {
+      "id": "vc-22",
+      "repo": "visionclaw",
+      "commit": "8bdece469a3ad29b1b60a86490da1aa841dc89bb",
+      "parent": "b9452618916b9a71500bc3a8cc378b3d4685e78c",
+      "topic": "VC-20",
+      "commit_precedes_stamp": false,
+      "diff_lines": 76,
+      "prompt": "judge/vc-22.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-23",
+      "repo": "visionclaw",
+      "commit": "8bdece469a3ad29b1b60a86490da1aa841dc89bb",
+      "parent": "b9452618916b9a71500bc3a8cc378b3d4685e78c",
+      "topic": "VC-22",
+      "commit_precedes_stamp": false,
+      "diff_lines": 55,
+      "prompt": "judge/vc-23.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-24",
+      "repo": "visionclaw",
+      "commit": "8bdece469a3ad29b1b60a86490da1aa841dc89bb",
+      "parent": "b9452618916b9a71500bc3a8cc378b3d4685e78c",
+      "topic": "VC-25",
+      "commit_precedes_stamp": false,
+      "diff_lines": 79,
+      "prompt": "judge/vc-24.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-25",
+      "repo": "visionclaw",
+      "commit": "e7e6b61d82fac8232a88229d6edadb198c64ce29",
+      "parent": "271085c218b364590be4ea824d558c374aa64057",
+      "topic": "VC-32",
+      "commit_precedes_stamp": false,
+      "diff_lines": 24,
+      "prompt": "judge/vc-25.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-26",
+      "repo": "visionclaw",
+      "commit": "7b633060820cb50a6772fdf3b5035c292ea92854",
+      "parent": "90a7a85ce04f62730746f23d3fa5cfb48d99b59c",
+      "topic": "VC-22",
+      "commit_precedes_stamp": false,
+      "diff_lines": 89,
+      "prompt": "judge/vc-26.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-27",
+      "repo": "visionclaw",
+      "commit": "7b633060820cb50a6772fdf3b5035c292ea92854",
+      "parent": "90a7a85ce04f62730746f23d3fa5cfb48d99b59c",
+      "topic": "VC-23",
+      "commit_precedes_stamp": false,
+      "diff_lines": 89,
+      "prompt": "judge/vc-27.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-28",
+      "repo": "visionclaw",
+      "commit": "80521967954698f729002d5ccbba6302d2fc0ced",
+      "parent": "d5ecd38a2de3012e42509c27b950f6cd17e3fee4",
+      "topic": "VC-20",
+      "commit_precedes_stamp": false,
+      "diff_lines": 51,
+      "prompt": "judge/vc-28.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-29",
+      "repo": "visionclaw",
+      "commit": "80521967954698f729002d5ccbba6302d2fc0ced",
+      "parent": "d5ecd38a2de3012e42509c27b950f6cd17e3fee4",
+      "topic": "VC-22",
+      "commit_precedes_stamp": false,
+      "diff_lines": 51,
+      "prompt": "judge/vc-29.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "vc-30",
+      "repo": "visionclaw",
+      "commit": "80521967954698f729002d5ccbba6302d2fc0ced",
+      "parent": "d5ecd38a2de3012e42509c27b950f6cd17e3fee4",
+      "topic": "VC-36",
+      "commit_precedes_stamp": false,
+      "diff_lines": 22,
+      "prompt": "judge/vc-30.prompt.md",
+      "stamp": "58f04f2eb272a2707737f2065f8241b931229e81"
+    },
+    {
+      "id": "ab-01",
+      "repo": "agentbox",
+      "commit": "daca70814b793b7e09151990d93db198130e05d7",
+      "parent": "c696cea891e61a5c4455000cea75061e8347f595",
+      "topic": "AB-13",
+      "commit_precedes_stamp": false,
+      "diff_lines": 22,
+      "prompt": "judge/ab-01.prompt.md",
+      "stamp": "c4ed3ec6505858e1e5ead651c29115d2f74e5546"
+    }
+  ],
+  "experiment": "E0b",
+  "before_stamp_filter": [
+    [
+      "visionclaw",
+      120
+    ],
+    [
+      "agentbox",
+      11
+    ]
+  ]
+}

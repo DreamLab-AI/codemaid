@@ -16,6 +16,9 @@ pub struct Sym {
     pub file: String,
     pub start: u32,
     pub end: u32,
+    /// Columns of the span (1-based), used by E0b to find the symbol's syntax node.
+    pub start_col: u32,
+    pub end_col: u32,
     pub sig: [u8; 16],
     pub body: [u8; 16],
     pub module: bool,
@@ -42,6 +45,8 @@ impl Model {
                     file: s.file.as_str().to_string(),
                     start: s.span.start_line,
                     end: s.span.end_line,
+                    start_col: s.span.start_col,
+                    end_col: s.span.end_col,
                     sig: *s.sig_hash.as_bytes(),
                     body: *s.body_hash.as_bytes(),
                     module: s.kind == SymbolKind::Module,

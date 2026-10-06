@@ -17,19 +17,19 @@ pub const R_THRESHOLD: f64 = 2.0;
 /// The pre-registered hidden-change ceiling.
 pub const HIDDEN_CEILING: f64 = 0.10;
 
-fn round(x: f64) -> Value {
+pub(crate) fn round(x: f64) -> Value {
     if x.is_finite() { json!((x * 10_000.0).round() / 10_000.0) } else { Value::Null }
 }
 
-fn opt(x: Option<f64>) -> Value {
+pub(crate) fn opt(x: Option<f64>) -> Value {
     x.map_or(Value::Null, round)
 }
 
-fn share(n: usize, d: usize) -> Value {
+pub(crate) fn share(n: usize, d: usize) -> Value {
     if d == 0 { Value::Null } else { round(n as f64 / d as f64) }
 }
 
-fn boot(b: &Bootstrap) -> Value {
+pub(crate) fn boot(b: &Bootstrap) -> Value {
     json!({"resamples": b.resamples, "seed": b.seed, "ci95": [round(b.lo), round(b.hi)], "infinite_resamples": b.infinite,
            "method": "percentile, nearest rank (250th and 9750th of 10000 sorted)"})
 }
@@ -411,7 +411,7 @@ fn g<'a>(v: &'a Value, path: &[&str]) -> &'a Value {
     path.iter().fold(v, |acc, k| &acc[*k])
 }
 
-fn num(v: &Value) -> String {
+pub(crate) fn num(v: &Value) -> String {
     match v {
         Value::Null => "n/a".into(),
         Value::Number(n) => {

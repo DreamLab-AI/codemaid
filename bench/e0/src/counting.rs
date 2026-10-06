@@ -22,7 +22,7 @@ pub enum SymChange {
     AbsentBothFileChanged,
 }
 
-fn compare(id: &str, p: &Model, c: &Model) -> SymChange {
+pub(crate) fn compare(id: &str, p: &Model, c: &Model) -> SymChange {
     match (p.syms.get(id), c.syms.get(id)) {
         (Some(a), Some(b)) if a.sig != b.sig || a.body != b.body => SymChange::Hash,
         (Some(_), Some(_)) => SymChange::Same,
