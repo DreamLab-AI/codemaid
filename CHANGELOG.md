@@ -2,6 +2,22 @@
 
 All crates in this workspace share one version.
 
+## Unreleased
+
+### Docs
+- The README positions sealmap as a deterministic code lens for Rust
+  (extraction, generated views, `dense`, `pack`) and adds "What the evidence
+  says", with a table linking every experiment's results. The seal commands
+  (`seal sign`, `verify`, `seal-check`, `stale`, `resolve`) stay documented,
+  marked experimental and not recommended for corpus upkeep: every staleness
+  rule finer than per-file lost real changes (recall 0.76 to 0.38) for at most
+  about 2× fewer flags. The claim that seals cut upkeep is removed.
+- `docs/DESIGN.md` opens with a dated status after the evidence programme:
+  the code-lens surface is kept, seal and staleness work is frozen, and the
+  TypeScript adapter is dropped.
+- The diagram topics whose prose contradicted that status are updated and
+  re-stamped.
+
 ## 0.2.1 — 2026-10-06
 
 ### Fixed

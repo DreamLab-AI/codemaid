@@ -2,13 +2,13 @@
 
 # sealmap
 
-### Deterministic code maps and sealed diagram contracts for LLM development harnesses
+### A deterministic code lens for Rust: extraction, generated views, `dense` and `pack`
 
 [![Licence](https://img.shields.io/badge/Licence-MIT%20OR%20Apache--2.0-blue?style=flat-square)](#licence)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange?style=flat-square)](Cargo.toml)
-[![Status](https://img.shields.io/badge/status-0.2%20seal%20surface%20in%20tree-yellow?style=flat-square)](docs/DESIGN.md)
+[![Status](https://img.shields.io/badge/status-0.2.1%20code%20lens%3B%20seals%20experimental-yellow?style=flat-square)](docs/DESIGN.md)
 
-*The seal and the distillation do the work, not a bigger model.*
+*Views generated from the source, byte for byte the same on every run.*
 
 </div>
 
@@ -16,39 +16,39 @@
 
 ## What is sealmap?
 
-sealmap is the deterministic layer under an LLM diagrams-as-code workflow.
+sealmap reads Rust source without compiling it and builds a language-neutral
+model: symbols, relations, and the ordered call flow of every function. From
+that model it generates views that a person or an agent can read in place of
+the code. The libraries run no model and make no network calls, and the same
+tree always gives the same bytes. Anything it cannot resolve exactly is
+tagged `inferred` or `external` rather than guessed, so a view says how far
+it can be trusted.
 
-**The workflow it serves.** Code and a dense corpus of Mermaid diagrams are
-written in lockstep, one subsystem topic at a time. The whole corpus is then
-analysed for a holistic view of the system. In the DreamLab estate this has
-proven to be one of the most effective ways to build large codebases with
-agents. It has one structural cost: **keeping the diagrams true**.
+What it is good for, on the evidence ([below](#what-the-evidence-says)):
 
-**What sealmap does.** It reads source without compiling it and builds a
-language-neutral model: symbols, relations, and the ordered call flow of every
-function. From that model it provides five things, all of which exist in
-this tree:
+- **Generated views that find bugs.** Mermaid sequence and class diagrams and
+  the dense projection draw what the code does, not what its docs say.
+  Reading them caught regressions, resolver bugs and a projection bug in
+  sealmap's own code that its tests had missed.
+- **`dense`, a compact agent projection:** Rust-like skeletons with line
+  spans and indented call trees, at 0.17–0.29× the source.
+- **`pack`, a deterministic, budgeted review pack:** chosen topics, dense
+  slices of the code they cite, and bounded source windows. It is
+  byte-identical on every run, and over budget it refuses rather than cuts.
+- **Stable symbol ids and content hashes.** `sym:` ids hold no path or line,
+  so moving code keeps them; signature and body hashes ignore formatting.
 
-- **Stable symbol ids** (exist), with no file path or line number in them,
-  so moving code never breaks a citation.
-- **Two content hashes per symbol** (exist), one for the signature and one
-  for the body, both insensitive to whitespace, comments and formatting.
-- **Seals** (exist). A lockfile records that a hand-consolidated diagram topic was
-  reviewed against *these exact versions* of the functions it describes.
-  `sealmap verify` enforces that in CI, with no LLM involved.
-- **Precise staleness** (exists). When code changes, only the topics whose sealed
-  symbols actually changed are flagged for another look. Topics that merely
-  share a file with the change are left alone.
-- **On-demand review packs** (exist). `sealmap pack` builds a bounded,
-  byte-identical blob from chosen topics (or the topics whose code changed
-  since a revision), dense slices of the code they cite, and source windows.
-  It feeds an external reviewer, a seal review or a debugging session.
+**Seals and staleness are experimental, not recommended for corpus upkeep.**
+`seal sign`, `verify`, `seal-check`, `stale` and `resolve` exist and behave as
+documented. But every staleness rule finer than per-file that we measured
+missed real changes, in exchange for at most about 2× fewer flags. The
+upkeep that works is per-file flags, batched weekly and triaged by a model
+(EH).
 
 **What stays with the LLM skill:** the narratives, the register of tensions
-and debt, the choice of what to merge, and the review that produces a seal.
-sealmap does the bookkeeping that makes that judgement cheap to keep true.
+and debt, and every judgement about whether a diagram is still true.
 
-## Why it exists (measured)
+## Size, measured
 
 All figures come from the estate's own corpora (2026-10-05).
 
@@ -60,106 +60,106 @@ All figures come from the estate's own corpora (2026-10-05).
 | A dense agent projection is | **0.17–0.29×** source (0.32–0.46× with its index), 13–18 tokens per call edge against 34–53 for Mermaid, on sealmap, tokio and VisionClaw ([`sealmap-dense`](crates/sealmap-dense)) |
 | Diagrams alone carry real review signal | a blind, diagrams-only critical review rediscovered 7 of 30 known tensions with no register visible (pilot, n = 1) |
 
-**The design follows from these numbers:**
+## What the evidence says
 
-- Keep the human corpus consolidated and LLM-written.
-- Make its citations symbol-granular and sealed.
-- Generate everything mechanical on demand and never commit it.
+Each experiment was pre-registered, run as registered and published as
+found, failures included. The records are under [`docs/evidence/`](docs/evidence).
+
+**What held.**
+
+- **The extraction and its views find real defects.** Reading sealmap's
+  Mermaid and `dense` views of its own code caught 2 regressions, 5 resolver
+  bugs and 1 projection bug that the tests had missed, and removed 138 wrong
+  call edges ([consult record](docs/evidence/consult/2026-10-06-codex.md)).
+  The ER review found the six defects fixed in 0.2.1 ([`CHANGELOG.md`](CHANGELOG.md)).
+- **`dense` is small:** 0.17–0.29× source on sealmap, tokio and VisionClaw.
+- **`pack` is deterministic and budgeted:** one request gives one byte
+  sequence whatever the topic order, and an over-budget request is refused.
+
+**What did not.**
+
+- **Finer staleness loses real changes.** On 60 blind-labelled (topic,
+  commit) pairs, 29 of them stale, per-file flags caught all 29. Per-symbol
+  body hashes (the seal rule) caught 0.76 of them, per-region 0.66, call flow
+  0.45 and changed-line overlap 0.38. In exchange they flagged 1.19×, 1.20×,
+  1.53× and 1.96× fewer topics on VisionClaw. Seals do not cut upkeep.
+- **Upkeep that works:** per-file flags batched weekly, with a model
+  triaging each flag. Over the E0 window that projects to about 118 expensive
+  re-authors, against 1,943 per-commit re-checks (−94%) and 229 weekly ones
+  (−48%); batching does most of the work. Sonnet 5.5 was the only triage
+  model with recall ≥ 0.90 (0.93), on labels that Sonnet itself produced.
+- **Sequence-only corpora: no.** Dropping every other diagram kind cost more
+  review recall than dropping the same bytes at random (EK). A sequence-first
+  rewrite invented facts in 10 of 20 topics, and in 7 of 20 behind a
+  cross-family fidelity gate (ES, ES2).
+- **The corpus pack did not beat source for review when the source fits.**
+  Full source gave as many or more confirmed findings under each of three
+  reviewers (ER, ER-glm). sealmap is small, so this says nothing about a
+  repository too large for one context.
+
+| Experiment | Question | Outcome |
+|---|---|---|
+| [E0](docs/evidence/E0/RESULTS.md) | Per-symbol staleness: ≥ 2× fewer topics flagged than per-file? | No: 1.19× |
+| [E0b](docs/evidence/E0b/RESULTS.md) | Per-region (innermost arm, branch or statement)? | No: 1.20×, 1.37× on Rust alone |
+| [E0c](docs/evidence/E0c/RESULTS.md), [endpoint 4](docs/evidence/E0c/ENDPOINT4.md) | Flag only on a call-flow change? | No: 1.53×, and 44% of the pairs it skipped were real changes |
+| [E0d](docs/evidence/E0d/RESULTS.md), [endpoint 4](docs/evidence/E0d/ENDPOINT4.md) | Changed-line overlap; every rule read with its recall | No: recall 0.38; only per-file reaches 1.0 |
+| [EH](docs/evidence/EH/RESULTS.md) | Batching plus cheap model triage? | Yes: weekly batches, Sonnet 5.5 triage |
+| [EK](docs/evidence/EK/RESULTS.md) | Is a sequence-only corpus as good for review? | No: worse than random removal |
+| [ES](docs/evidence/ES/RESULTS.md) | A sequence-first rewrite by GLM-5.3-Flash? | No: invented facts in 10 of 20 topics |
+| [ES2](docs/evidence/ES2/RESULTS.md) | The same behind a different-family fidelity gate? | No: invented facts in 7 of 20 topics |
+| [ER](docs/evidence/ER/RESULTS.md) | Corpus pack against full source, for review? | No: source as good or better |
+| [ER-glm](docs/evidence/ER-glm/RESULTS.md) | ER with a third reviewer (exploratory) | Agrees with ER |
+| [consult](docs/evidence/consult/2026-10-06-codex.md) | An outside challenge to the programme | Keep the inspectable views; test upkeep in shadow |
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  code[source tree] -->|extract| model[(code model<br/>ids · sig/body hashes)]
-  model --> gen[".sealmap/ (gitignored)<br/>dense projection · index · optional 1:1 Mermaid"]
-  topics["docs/diagrams/**<br/>authored topics citing sym: ids"] --> verify{sealmap verify}
-  lock["seals.lock<br/>topic → (id, sig, body)"] --> verify
-  model --> verify
-  verify -->|holds| ci[CI green]
-  verify -->|behaviour · contract · absent| stale[sealmap stale → re-review → re-seal]
-  topics --> pack[sealmap pack]
+  code[Rust source tree] -->|extract, no compile| model[(code model<br/>sym ids · sig/body hashes · call flow)]
+  model --> views[".sealmap/ (gitignored)<br/>Mermaid sequence and class · dense · index"]
+  topics["docs/diagrams/**<br/>authored topics"] --> pack[sealmap pack]
   model --> pack
-  pack --> judge[external review · seal review · debugging]
+  views --> read[a person or agent reads the code]
+  pack --> judge[external review · debugging]
+  model -.->|experimental| seals[seal sign · verify · stale]
 ```
 
 | Layer | Artefact | Committed | Written by |
 |---|---|---|---|
-| **Authored** | consolidated topics, narratives, register; citations are `sym:` ids | yes | the LLM skill |
-| **Sealed** | `seals.lock`, plus a static `sealed:` pointer per topic | yes | the skill's seal step (a reviewed decision) |
-| **Generated** | model, index, dense projection, optional 1:1 Mermaid | **never** | `sealmap generate`, rebuilt in seconds |
+| **Authored** | consolidated topics, narratives, register | yes | the LLM skill |
+| **Generated** | model, index, dense projection, 1:1 Mermaid | **never** | `sealmap generate` and `sealmap dense`, rebuilt in seconds |
+| **Sealed** (experimental) | `seals.lock`, plus a `sealed:` pointer per topic | only if you seal | `sealmap seal sign` |
 
-### What a seal check reports
+### Seals (experimental)
+
+A seal records that a topic was reviewed against exact versions of the
+symbols it cites (`sym:` ids in inline code spans). `sealmap verify` then
+classifies each sealed symbol. It works as specified, but a symbol whose body
+hash holds can still have changed in a way that makes the topic wrong: the
+seal rule caught 0.76 of real staleness in E0d. Treat `holds` as "no cited
+body changed", never as "the topic is still true". The lock is canonical
+TOML that `verify` byte-checks; reviewer and model are opaque strings.
 
 | Condition | Class | CI |
 |---|---|---|
 | id resolves, both hashes match (code moves included) | `holds` | pass |
-| signature same, body changed | `behaviour` | fail → cheap re-review |
-| signature changed | `contract` | fail → re-consolidate, ADR addendum |
-| id gone; candidates of the same kind with the sealed body are listed | `absent` (rename suspected) | fail → confirm rename |
+| signature same, body changed | `behaviour` | fail |
+| signature changed | `contract` | fail |
+| id gone; candidates of the same kind with the sealed body are listed | `absent` (rename suspected) | fail |
 | a file that may hold the id no longer parses | `unparsable` | fail (fail closed) |
 | a `sym:` id cited but not sealed, or not a canonical id | `unsealed-citation` | fail |
 | a lock entry whose topic file is gone, or a sealed symbol no longer cited | `orphan` | fail |
 | topic prose edited since sealing | `prose-edited` | fail |
 | `sealed:` pointer and lock disagree, or the lock is not canonical | `lock-fault` | fail |
 
-Code, topic and lock land in **one commit**. No second "re-stamp" commit is
-needed.
-
-### A seal, end to end
-
-A topic cites symbols as inline code spans (ids contain spaces, so the code
-span is the delimiter):
-
-```markdown
----
-id: LED-01
-title: Accounts
-area: ledger
----
-Money goes in through `sym:cargo ledger . accounts/LedgerAccount#deposit().`.
-```
-
-Sealing it derives the entry from the current code and adds one pointer
-line to the front matter:
-
 ```console
 $ sealmap seal sign LED-01 --reviewer zai:glm-5.3 --model claude:sonnet
 sealmap: sealed LED-01 (ledger/01-accounts.md) with 1 symbol(s) into ./docs/diagrams/seals.lock
-$ cat docs/diagrams/seals.lock
-version = 1
-algorithm = "sm1"
-generator = "sealmap 0.2.0"
-
-[[topic]]
-id = "LED-01"
-file = "ledger/01-accounts.md"
-topic_hash = "blake3-16:…"
-reviewer = "zai:glm-5.3"
-model = "claude:sonnet"
-date = "2026-10-05"
-symbols = [
-  { id = "sym:cargo ledger . accounts/LedgerAccount#deposit().", sig = "blake3-16:…", body = "blake3-16:…" },
-]
-$ sealmap verify && echo green
-green
-```
-
-Edit `deposit`'s body and the gate goes red, naming the topic, the symbol
-and the class:
-
-```console
 $ sealmap verify
 behaviour         LED-01   sym:cargo ledger . accounts/LedgerAccount#deposit(). body blake3-16:… -> blake3-16:… (src/accounts.rs:4-6)
-$ echo $?
-1
 ```
 
-`topic_hash` is BLAKE3 over the topic text with line endings normalised and
-the `sealed:` line removed, truncated to 16 bytes; the lock is TOML in one
-canonical form that `sealmap` writes and `verify` byte-checks. Reviewer and
-model are opaque strings: reviewer policy belongs to the calling skill.
-
-## Ids and hashes (exist today)
+## Ids and hashes
 
 ### `sym:` ids
 
@@ -233,16 +233,16 @@ cheap and checkable.
 
 | Sibling | Relationship |
 |:--------|:-------------|
-| [agentbox](https://github.com/DreamLab-AI/agentbox) `diagrams-as-code` skill | Writes the authored corpus. With sealmap, its line-resolution role costs zero tokens and its citations become `sym:` ids |
+| [agentbox](https://github.com/DreamLab-AI/agentbox) `diagrams-as-code` skill | Writes the authored corpus, citing `path:line`. `sealmap generate`, `dense` and `resolve` help it find what to cite |
 | agentbox `sealmap-review` skill (shipped) | Diagrams-only external review (Gemini 3.8 Flash, critical and pre-mortem lenses) and an inline check against the cited code. It can swap its own packer for `sealmap pack` |
-| agentbox `build-with-quality` skill | Takes review findings as hypotheses to test. Gains a **re-seal** step driven by `sealmap stale` |
-| agentbox `sealmap` skill (planned) | The seal workflow, model tiering per step, and the A/B bench |
+| agentbox `build-with-quality` skill | Takes review findings as hypotheses to test. Corpus upkeep is per-file flags batched weekly with model triage (EH), not `sealmap stale` |
+| agentbox `sealmap` skill | **Not planned:** it was to run the seal workflow, which is frozen |
 | [diagram-ir](https://github.com/DreamLab-AI/diagram-ir) | The inverse direction: reads hand-written Mermaid back into an IR. The skill pairs it with `sealmap resolve` to catch invented edges |
 | [VisionFlow](https://github.com/DreamLab-AI/VisionFlow) | Ecosystem canon, and the largest Rust corpus sealmap is tested on |
 
 ## Crates
 
-**Today (0.2.1 on crates.io: ids and hashes, the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
+**Today (0.2.1 on crates.io: extraction, ids and hashes, `sealmap-dense`, `pack`, and the experimental seal surface; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
@@ -251,20 +251,20 @@ cheap and checkable.
 | [`sealmap-mermaid`](crates/sealmap-mermaid) | typed, escaping Mermaid writers: sequence, class, ER, flowchart; injective diagram ids from `sym:` ids (feature `model`) | sealmap-model (opt.; **none** without it) |
 | [`sealmap-extract`](crates/sealmap-extract) | logic shared by every language adapter (replaces `sealmap-frontend`, now a deprecated forwarding shim): raw flow IR, flow lowering, call aggregation, confidence policy, label rules, `sym:` id builder, token-stream fingerprints, panic-isolated collection | sealmap-model, blake3, rayon (opt.) |
 | [`sealmap-rust`](crates/sealmap-rust) | Rust language adapter (syn), workspace-wide resolution | sealmap-extract, syn, toml |
-| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign`; the `pack` module: review packs and change selection | sealmap-dense, serde_json, toml, blake3 |
+| [`sealmap-corpus`](crates/sealmap-corpus) | projections and index; the `pack` module: review packs and change selection; the experimental `seal` module: lock format, `topic_hash`, `verify`, `seal_check`, `stale`, `resolve`, `sign` | sealmap-dense, serde_json, toml, blake3 |
 | [`sealmap-dense`](crates/sealmap-dense) | the agent projection: Rust-like skeletons with `L<start>-<end>` spans, indented call trees (each callable expanded once; `^` / `↺` / `…` marks; `~` inferred, `?` external), a short-name `_index.txt`, and byte-budgeted slices that refuse rather than truncate | sealmap-model |
 
-**Planned:**
+**Dropped:**
 
 | Crate | Role |
 |---|---|
-| `sealmap-ts` | **deferred:** TypeScript/TSX language adapter on oxc, built only if E0-R shows the precise-staleness gain is real |
+| `sealmap-ts` | **dropped:** TypeScript/TSX language adapter on oxc. It was to be built only if finer staleness proved its worth, and it did not (E0–E0d) |
 
 Each crate is published on crates.io under `MIT OR Apache-2.0`, with full
 rustdoc. Depend on the facade for the common path. A project that only needs
 safe Mermaid output can depend on `sealmap-mermaid` alone.
 
-## Quickstart (today)
+## Quickstart
 
 ```sh
 cargo install --path crates/sealmap
@@ -276,19 +276,19 @@ sealmap model    .  > model.json     # just the model
 # Several repositories as one codebase (cross-repo calls resolve):
 sealmap generate --repo api=../api --repo core=../core -o .sealmap
 
-# Seals over docs/diagrams/ (lock: docs/diagrams/seals.lock; -C ROOT, --diagrams DIR, --json)
+# Experimental, not for corpus upkeep: seals over docs/diagrams/ (lock: docs/diagrams/seals.lock; -C ROOT, --diagrams DIR, --json)
 sealmap resolve 'sym:cargo my_crate . net/Client#connect().'   # span + hashes, or absent + rename candidates
 sealmap seal sign CP-03 --reviewer zai:glm-5.3 --model claude:sonnet   # seal a topic from the current code
 sealmap verify                                               # the CI gate: exit 1 unless everything holds
 sealmap seal-check CP-03 CP-07                               # classify chosen lock entries
-sealmap stale --since main                                   # sealed symbols changed since a revision; exit 0
+sealmap stale --since main                                   # sealed symbols changed since a revision; misses real changes (E0d)
 
 # The dense agent projection: dense.txt + _index.txt into .sealmap/dense
 sealmap dense . --stats
 
 # Review packs: topics + dense slices of the code they cite + source windows
 sealmap pack CP-03 CP-07 --budget 200000 > pack.txt          # refused (exit 1, sizes named) if over budget
-sealmap pack --diff main --budget 200000 --shard -o packs/   # topics whose cited code changed, split by topic
+sealmap pack --diff main --budget 200000 --shard -o packs/   # topics whose cited symbols changed (symbol-level: misses some), split by topic
 ```
 
 Exit codes: 0 success; 1 a check failed, an id is not found, or a seal was
@@ -348,47 +348,43 @@ A diagrams-only `--review` mode is designed but not built
 - **It runs no model, makes no network calls, and spawns no processes** in the
   libraries. The CLI only shells out to `git` (and `tar`) for `stale --since`
   and `pack --diff`, and to `git` for a pack's revision line.
+- **It does not tell you a diagram is still true.** No staleness rule we
+  measured below per-file kept recall; that judgement stays with a reviewer.
 - **It knows nothing about reviewers.** The lock holds opaque strings, and
   reviewer policy (cross-family review, evidence) lives in the skill layer.
 
 ## Status and roadmap
 
-**0.2.1** is released. It is dogfooded on its own source, and the Rust language
-adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
-to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
-
-**0.2.1** (on crates.io): fixes for defects found by
-the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
-`generate` never writes through a symbolic link; `if let` and `while let`
-bindings no longer leak past their block; `#[cfg]` twins keep every
-definition's calls; impls on tuples, slices and other non-path types keep
-their methods; `--no-model` removes a model left by an earlier run;
+**0.2.1** is released. The Rust language adapter has been run on sealmap
+itself, VisionClaw, tokio, axum, ripgrep and oxdraw; changes are listed in
+[`CHANGELOG.md`](CHANGELOG.md). 0.2.1 fixes the defects found by the ER
+review experiment: `generate` never writes through a symbolic link; `if let`
+and `while let` bindings no longer leak past their block; `#[cfg]` twins keep
+every definition's calls; impls on tuples, slices and other non-path types
+keep their methods; `--no-model` removes a model left by an earlier run;
 same-named crates stay apart, and clashing `--repo` names are refused.
 
-The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
+After the evidence programme (2026-10-06; [`docs/DESIGN.md`](docs/DESIGN.md)
+has the full status):
 
-1. **Done.** Rename to `sealmap-*`; dual licence; land the hardening; extract the
-   shared core, now `sealmap-extract` (once `sealmap-frontend`, now a deprecated shim).
-2. **Done.** `sym:` id grammar (SCIP-descriptor style), signature and body
-   hashes, schema v2, injective Mermaid ids, the `Path::parent` resolver fix,
-   and CI on the MSRV.
-3. **Done, released in 0.2.0.** Seal surface: the lock, `resolve`, `stale`,
-   `seal-check`, `verify`, `seal sign` and `pack`; `sealmap-dense` and
-   `sealmap dense`; the committed generated corpus is retired. Published to
-   crates.io as 0.2.0.
-4. **E0:** replay 100 real commits and count topics flagged per commit, file
-   level against sealed, with no LLM involved. This is the first headline
-   number.
-5. `sealmap-ts`, **deferred**: built only if E0-R on the Rust repositories
-   shows the precise-staleness gain is real, with a shared conformance suite
-   as the parity gate.
-6. The pre-registered review A/B, dogfooded on this repository.
+- **Kept:** extraction, `sym:` ids and hashes, the generated Mermaid views,
+  `dense`, `pack` and `generate --check`. This is the code lens, and further
+  work goes here.
+- **Frozen:** the seal surface (`seal sign`, `verify`, `seal-check`, `stale`,
+  `resolve`) and every finer-than-per-file staleness rule. The commands stay
+  and keep their tests; no new seal or staleness work is planned, and this
+  repository does not seal its own corpus.
+- **Dropped:** `sealmap-ts`, the TypeScript adapter. It was to be built only
+  if finer staleness proved its worth, and it did not (E0–E0d).
 
 ## Design and evidence
 
-- [`docs/DESIGN.md`](docs/DESIGN.md): the governing design. It covers the
-  layers, seal format, crate surface, skills, model-per-step tiering, evidence
-  plan and owner decisions.
+- [`docs/DESIGN.md`](docs/DESIGN.md): the governing design, with its status
+  after the evidence programme at the top. Below that it records the design
+  as accepted on 2026-10-05: layers, seal format, crate surface, skills,
+  model-per-step tiering, evidence plan and owner decisions.
+- [`docs/evidence/`](docs/evidence): pre-registrations, results and raw
+  material for every experiment in the table above.
 - [`docs/diagrams/`](docs/diagrams): the hand-authored, citation-verified
   diagram corpus of this repository. The v0.1 generated self-corpus
   (`docs/sealmap/`) is retired: `sealmap generate` rebuilds it into the

@@ -1,5 +1,47 @@
 # sealmap design
 
+## Status after the evidence programme (2026-10-06)
+
+The design below was accepted on 2026-10-05 and is kept as written, as the
+record of what was decided and why. Its central bet was that symbol-granular
+seals would make a hand-written corpus cheap to keep true. The pre-registered
+experiments in [`evidence/`](evidence) tested that bet, and it did not hold.
+This section governs where it and the text below disagree.
+
+**Kept: the code-lens surface.** Extraction (`sealmap-extract`,
+`sealmap-rust`), the model and its `sym:` ids and hashes, the generated Mermaid
+views, `sealmap-dense`, `pack` and `generate --check`. Reading the generated
+views of sealmap's own code caught 2 regressions, 5 resolver bugs and 1
+projection bug that the tests had missed ([`evidence/consult/`](evidence/consult/2026-10-06-codex.md));
+`dense` is 0.17–0.29× source; `pack` is deterministic and refuses rather than
+truncates. Further work goes here.
+
+**Frozen: seals and fine-grained staleness.** `seal sign`, `verify`,
+`seal-check`, `stale` and `resolve` stay in the crates and the CLI with their
+tests, documented as experimental and not recommended for corpus upkeep. On
+60 blind-labelled (topic, commit) pairs, per-file flags caught every stale
+pair; per-symbol caught 0.76 (E0), per-region 0.66 (E0b), call flow 0.45 (E0c)
+and changed-line overlap 0.38 (E0d), for at most about 2× fewer flags
+([`evidence/E0d/ENDPOINT4.md`](evidence/E0d/ENDPOINT4.md)). The upkeep that
+works is per-file flags batched weekly, triaged by a model (EH). §3's seal
+workflow, §9's endpoint 4 ("cheaper upkeep") and §10's steps 4–6, 8 and 9
+are closed. Step 4 ran as E0–E0d and step 8's review comparison as ER;
+the `sealmap` skill, the dogfood seal of this corpus and the VisionFlow
+migration will not be built.
+
+**Dropped.**
+
+- **`sealmap-ts`** (§8; §10 step 7). It was gated on finer staleness proving
+  its worth, and it did not.
+- **Sequence-only corpora.** Removing the other diagram kinds cost review
+  recall (EK), and sequence-first rewrites invented facts (ES, ES2). Mixed
+  corpora stay.
+- **The corpus pack as a replacement for source in review** where the source
+  fits in one context: full source did as well or better (ER, ER-glm). This
+  does not settle repositories too large for one context.
+
+---
+
 Status: accepted by the owner, 2026-10-05 (all §11 recommendations taken). Supersedes the v0.1 README's
 "committed 1:1 corpus with a drift gate" premise. Evidence: `research/01`–`05` in
 the design session scratchpad. Each section below names the report it summarises.
