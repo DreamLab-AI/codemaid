@@ -1,0 +1,65 @@
+{
+ "pair": "vc-03",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 7.18,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff adds roughly 100+ lines (`class_ref_iri`, `BaseClassIndex`) to `elevation_actor.rs` before the test module, so the VC-23.9 citation of the frontmatter-only test assertion at `elevation_actor.rs:1800-1806` now points at the wrong lines.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 24412,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 464,
+  "output_tokens_details": {
+   "thinking_tokens": 348
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 24412,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 464,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 24412,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 24412
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 464,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 24412,
+   "webSearchRequests": 0,
+   "costUSD": 0.102717,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 348,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.102717,
+ "duration_api_ms": 5644,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

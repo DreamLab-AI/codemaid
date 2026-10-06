@@ -1,0 +1,53 @@
+{
+ "pair": "vc-20",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 21.2,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff is purely additive to management_api_client.rs (a new TaskInfo.did_nostr field and a new get_chain_payments method) and alters nothing the topic describes \u2014 its only reference to that file (VC-05.9's ManagementApiClient participant) cites no line numbers and concerns the untouched brief/debrief methods.",
+ "usage": {
+  "input_tokens": 14585,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 1052,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 14585,
+   "outputTokens": 1052,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.07963600000000001,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.07963600000000001,
+ "duration_api_ms": 20229,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,65 @@
+{
+ "pair": "vc-17",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 23.02,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff updates solid-pod-rs dependency versions and adds a patch section for nostr-bbs-core, but the topic's diagrams describe observability architecture, canary systems, health probes, and the build loop\u2014none of which are affected by dependency version changes.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 8795,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1998,
+  "output_tokens_details": {
+   "thinking_tokens": 1927
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 8795,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1998,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 8795,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 8795
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1998,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 8795,
+   "webSearchRequests": 0,
+   "costUSD": 0.028205300000000003,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1927,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.028205300000000003,
+ "duration_api_ms": 21655,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

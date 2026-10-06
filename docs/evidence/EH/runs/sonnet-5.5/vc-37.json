@@ -1,0 +1,65 @@
+{
+ "pair": "vc-37",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 7.64,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The new `vc:group` block (+7 lines) near line 234 of `oxigraph_graph_repository.rs` pushes `clear_graph` below the topic's `oxigraph_graph_repository.rs:1226` citation (VC-22.1 and VC-22.10). The assert-graph write is also now `CLEAR SILENT GRAPH`, not the `CLEAR GRAPH` shown in VC-22.8 and VC-22.10.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 14545,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 523,
+  "output_tokens_details": {
+   "thinking_tokens": 363
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 14545,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 523,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 14545,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 14545
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 523,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 14545,
+   "webSearchRequests": 0,
+   "costUSD": 0.063839,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 363,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.063839,
+ "duration_api_ms": 6064,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

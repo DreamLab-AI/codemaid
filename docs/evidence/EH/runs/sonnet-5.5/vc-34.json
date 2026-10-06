@@ -1,0 +1,65 @@
+{
+ "pair": "vc-34",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.85,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff centralizes NIP-98 URL reconstruction into `utils::auth::nip98_request_url` (empty X-Forwarded-* now ignored). The WS `/wss` handler now uses it, so VC-03.4's \"reconstruct url from X-Forwarded-Proto/-Host\" step and VC-03.3/VC-03.5 inline-flow citations (auth.rs:142, auth_extractor.rs:132) are outdated. Line numbers in `http_handler.rs`, `auth_extractor.rs`, and `auth.rs` also shifted.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 21337,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 201,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 21337,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 201,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 21337,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 21337
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 201,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 21337,
+   "webSearchRequests": 0,
+   "costUSD": 0.08778699999999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.08778699999999999,
+ "duration_api_ms": 2064,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

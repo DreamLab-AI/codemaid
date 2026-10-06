@@ -1,0 +1,65 @@
+{
+ "pair": "vc-43",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 19.22,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff modifies image generation workflow selection (adding MiniMax H3 support, removing Salad wrapper) but doesn't alter the get_global_storage call that VC-26.1 Note1 references as the only image_gen_handler.rs concern.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 20049,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1559,
+  "output_tokens_details": {
+   "thinking_tokens": 1487
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 20049,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1559,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 20049,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 20049
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1559,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 20049,
+   "webSearchRequests": 0,
+   "costUSD": 0.0485183,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1487,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0485183,
+ "duration_api_ms": 17988,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

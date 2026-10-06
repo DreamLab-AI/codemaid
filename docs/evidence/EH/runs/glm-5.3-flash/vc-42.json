@@ -1,0 +1,53 @@
+{
+ "pair": "vc-42",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 99.14,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The commit inserts 7 new lines into BASELINE-architecture.md's \"Known divergences\" section immediately before the bullet VC-36.3 cites as \":237\" (the stale ?token= fallback record), shifting it to ~:244 and leaving :237 pointing at the new sidestr/payment bullet (the :209-210 cite in VC-36.2 is unaffected).",
+ "usage": {
+  "input_tokens": 19012,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 5781,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 19012,
+   "outputTokens": 5781,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.191668,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.191668,
+ "duration_api_ms": 98175,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

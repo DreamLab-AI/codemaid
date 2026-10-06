@@ -1,0 +1,65 @@
+{
+ "pair": "vc-35",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 24.08,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: Line citations to speech_socket_handler.rs:998 and socket_flow_handler/http_handler.rs are now inaccurate; the connection_url derivation logic has been extracted to crate::utils::auth::nip98_request_url(&req), moving the implementation out of the cited locations.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 13491,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 2151,
+  "output_tokens_details": {
+   "thinking_tokens": 2069
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13491,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 2151,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 13491,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13491
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 2151,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 13491,
+   "webSearchRequests": 0,
+   "costUSD": 0.0383623,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 2069,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0383623,
+ "duration_api_ms": 22568,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

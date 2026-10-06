@@ -1,0 +1,65 @@
+{
+ "pair": "ab-01",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.57,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The relay consumer now opens an extra forum-relay connection for kind 31403 (AB-13.1 topology, AB-13.7 sequence and AB-13.15 ACSP consumer notes omit it), and the topic's cited line numbers in relay-consumer.js, nostr-bridge.js and flake.nix have shifted.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 32641,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 120,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 32641,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 120,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 32641,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 32641
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 120,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 32641,
+   "webSearchRequests": 0,
+   "costUSD": 0.132193,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.132193,
+ "duration_api_ms": 1624,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

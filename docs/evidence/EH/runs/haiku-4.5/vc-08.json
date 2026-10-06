@@ -1,0 +1,65 @@
+{
+ "pair": "vc-08",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 29.85,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff reaffirms ADR-2111's status as \"proposed / none / inactive\" and confirms FsPaymentStore remains host-owned, which aligns with the topic's statement that the pay system changes are \"PROPOSED, NOT LIVE.\"",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 22369,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 2578,
+  "output_tokens_details": {
+   "thinking_tokens": 2510
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 22369,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 2578,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 22369,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 22369
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 2578,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 22369,
+   "webSearchRequests": 0,
+   "costUSD": 0.0582533,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 2510,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0582533,
+ "duration_api_ms": 28542,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

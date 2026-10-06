@@ -1,0 +1,65 @@
+{
+ "pair": "vc-15",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.72,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts two lines at solid_proxy_handler.rs:1126, so every later citation in VC-05.15 (e.g. :1130, :1168, :1226, :1267, :1313, :1752) is now off by two.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 22279,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 290,
+  "output_tokens_details": {
+   "thinking_tokens": 205
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 22279,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 290,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 22279,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 22279
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 290,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 22279,
+   "webSearchRequests": 0,
+   "costUSD": 0.092445,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 205,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.092445,
+ "duration_api_ms": 2742,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

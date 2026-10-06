@@ -1,0 +1,65 @@
+{
+ "pair": "vc-36",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 7.66,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff shifts cited line numbers. In `src/utils/auth.rs` it inserts about 32 lines before the `auth.rs:154-169` bypass resolve, and in `graph_scene.gd` the longer comment pushes `_describe_write_failure:1153` and later cites (1193, 1211, 1223) down by one. It also rewrites the 401/403 remedy text and the prod-profile guidance for dev mode.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 35113,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 645,
+  "output_tokens_details": {
+   "thinking_tokens": 493
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 35113,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 645,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 35113,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 35113
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 645,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 35113,
+   "webSearchRequests": 0,
+   "costUSD": 0.147331,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 493,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.147331,
+ "duration_api_ms": 6200,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

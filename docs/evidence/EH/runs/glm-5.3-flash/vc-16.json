@@ -1,0 +1,53 @@
+{
+ "pair": "vc-16",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 37.24,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only changes Cargo.toml \u2014 bumping the solid-pod-rs pin (still a crates.io version pin, so VC-07.1's N3 claim \"crates.io VERSION pin, not a git rev\" remains true, and no version number is cited in the topic) and adding a [patch.crates-io] entry for nostr-bbs-core \u2014 leaving every cited symbol, line range (e.g. Cargo.toml:2-4 workspace members), and diagram statement intact.",
+ "usage": {
+  "input_tokens": 6745,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 1752,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 6745,
+   "outputTokens": 1752,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.062276000000000005,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.062276000000000005,
+ "duration_api_ms": 36231,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

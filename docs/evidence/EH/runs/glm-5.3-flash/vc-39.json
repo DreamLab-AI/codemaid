@@ -1,0 +1,53 @@
+{
+ "pair": "vc-39",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 83.75,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: Removing 7 lines in materialise_domain_roots (github_sync_service.rs:848-913) shifts every later citation in the topic (1505, 1521, 1619, 1653, 1687, 1883, 1979, 2016, 2159, 2206) off by 7, and the new sync_corpus.rs import shifts :23 and :56-64 by 1, so the diagrams' path:line citations no longer land.",
+ "usage": {
+  "input_tokens": 6497,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 4669,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 6497,
+   "outputTokens": 4669,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.119368,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.119368,
+ "duration_api_ms": 82800,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

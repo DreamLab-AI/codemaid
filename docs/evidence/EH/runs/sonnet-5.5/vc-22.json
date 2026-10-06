@@ -1,0 +1,65 @@
+{
+ "pair": "vc-22",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 6.08,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts a 13-line `UpdateChainPayments` handler into `graph_service_supervisor.rs` above the `UpdateNodePositions` handler, so the topic's citations at `:1989`, `:2000` and `:2013` now point at the wrong lines. The 4 lines added near the top of `graph_state_actor.rs` also shift the `:858` and `:861` citations.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 16361,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 513,
+  "output_tokens_details": {
+   "thinking_tokens": 373
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 16361,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 513,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 16361,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 16361
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 513,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 16361,
+   "webSearchRequests": 0,
+   "costUSD": 0.071003,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 373,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.071003,
+ "duration_api_ms": 4348,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,65 @@
+{
+ "pair": "vc-14",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 53.52,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: Diff modifies internal FsPaymentStore implementation (storage model, removes credit() method, updates debit() to use WebLedger.charge()) and tests, but HTTP handler behavior remains unchanged\u2014store.get_balance() and store.debit() methods still exist and handlers route through them the same way; diagram only describes endpoint behavior (/pay/.balance, /pay/{resource}, /pay/.deposit) and ADR-2111 status (stays proposed, FsPaymentStore host-owned), both still accurate post-diff.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 23692,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 4801,
+  "output_tokens_details": {
+   "thinking_tokens": 4672
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 23692,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 4801,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 23692,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 23692
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 4801,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 23692,
+   "webSearchRequests": 0,
+   "costUSD": 0.0720143,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 4672,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0720143,
+ "duration_api_ms": 52172,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

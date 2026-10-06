@@ -1,0 +1,65 @@
+{
+ "pair": "vc-01",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 43.61,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff adds ~107 lines of new code (BaseClassIndex struct, class_ref_iri, parse_draft_axioms_against, check_draft_disjointness) before the `run_consistency_gate` function and shifts all subsequent line numbers significantly; the citations in VC-05.17 (e.g., :1479, :1227, :1301, :1308, :1534 for decision_record and related calls) would no longer point to the correct source locations.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 26504,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 4103,
+  "output_tokens_details": {
+   "thinking_tokens": 3978
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 26504,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 4103,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 26504,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 26504
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 4103,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 26504,
+   "webSearchRequests": 0,
+   "costUSD": 0.0741483,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 3978,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0741483,
+ "duration_api_ms": 42168,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

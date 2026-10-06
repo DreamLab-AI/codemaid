@@ -1,0 +1,65 @@
+{
+ "pair": "vc-16",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.71,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: Note N3 in VC-07.1 says solid-pod-rs is a crates.io version pin, not a git rev; the diff re-pins it to an exact `=0.5.0-alpha.12` and adds a `[patch.crates-io]` git override (nostr-bbs-core at rev b73ec8c), which the topic's workspace/dependency statement doesn't reflect.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 11591,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 134,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 11591,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 134,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 11591,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 11591
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 134,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 11591,
+   "webSearchRequests": 0,
+   "costUSD": 0.048133,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.048133,
+ "duration_api_ms": 1854,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

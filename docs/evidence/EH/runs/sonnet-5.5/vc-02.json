@@ -1,0 +1,65 @@
+{
+ "pair": "vc-02",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.88,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts ~20 lines into oxigraph_ontology_repository.rs, shifting every later line number the topic cites (append_derived_quads:730, DERIVED_FENCE 744-747, 782-791, 818-824, clear_inferred_graph:693 and others), so those citations are now wrong.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 13935,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 113,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13935,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 113,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 13935,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13935
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 113,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 13935,
+   "webSearchRequests": 0,
+   "costUSD": 0.057298999999999996,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.057298999999999996,
+ "duration_api_ms": 2143,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,53 @@
+{
+ "pair": "vc-18",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 63.52,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: Note4 cites the live dependency as \"Cargo.toml:222, 0.4.0-alpha.15\" and says ADR-2111's version move is \"PROPOSED, not live\", but the diff bumps solid-pod-rs/-nostr/-idp/-server to =0.5.0-alpha.12 in lockstep with the forum (implementing exactly that move), and the added `inherited: false` lines shift cited line numbers by +2 in solid_proxy_handler.rs (e.g. 1267/1313, 1374-1422, 1753-1787) and ontology_pull.rs (e.g. 293/294, 359, 387).",
+ "usage": {
+  "input_tokens": 9803,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 3948,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 9803,
+   "outputTokens": 3948,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.118428,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.118428,
+ "duration_api_ms": 62584,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

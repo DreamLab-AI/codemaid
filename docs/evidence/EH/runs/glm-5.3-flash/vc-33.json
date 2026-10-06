@@ -1,0 +1,53 @@
+{
+ "pair": "vc-33",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 42.49,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only revises ADR-2108's disposition prose (adds owner decision and amendment scoping the dev profile to the owner's rig, dropping Track C/CY-C wording); the topic makes no claim about the ADR's disposition or deployment-profile triage, and its technical claims (compose :90 `:-1` default, write-denied notice, test_write_denied_notice) all remain accurate.",
+ "usage": {
+  "input_tokens": 18201,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 2284,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 18201,
+   "outputTokens": 2284,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.11874,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.11874,
+ "duration_api_ms": 41540,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

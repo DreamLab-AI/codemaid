@@ -1,0 +1,65 @@
+{
+ "pair": "vc-33",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 64.8,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The amendment clarifies that dev mode is dev-only (owner's rig), but the topic's VC-36.15 already describes it as \"DEV SERVICE ONLY\" with \"the default never reaches a release deploy\"; the topic documents the owner's rig scenario consistently with the amendment's decision.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 22711,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 6206,
+  "output_tokens_details": {
+   "thinking_tokens": 6129
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 22711,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 6206,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 22711,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 22711
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 6206,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 22711,
+   "webSearchRequests": 0,
+   "costUSD": 0.07707729999999999,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 6129,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.07707729999999999,
+ "duration_api_ms": 63575,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

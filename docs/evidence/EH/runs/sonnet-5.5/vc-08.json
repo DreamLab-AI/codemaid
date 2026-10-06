@@ -1,0 +1,65 @@
+{
+ "pair": "vc-08",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 6.21,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only appends a new section at line ~208 of ADR-2111, so the topic's citations (:38, :83, :95-96) keep their line numbers, and the new section leaves the record `proposed / none / inactive`, which matches the topic's claims.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 30174,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 252,
+  "output_tokens_details": {
+   "thinking_tokens": 161
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 30174,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 252,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 30174,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 30174
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 252,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 30174,
+   "webSearchRequests": 0,
+   "costUSD": 0.123645,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 161,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.123645,
+ "duration_api_ms": 4327,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

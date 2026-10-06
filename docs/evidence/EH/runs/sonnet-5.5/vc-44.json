@@ -1,0 +1,65 @@
+{
+ "pair": "vc-44",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.5,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff swaps one environment line (COMFYUI_SALAD_URL for IMAGE_GEN_MODEL) at about line 228 of docker-compose.unified.yml. It adds and removes one line each, so the cited lines :83-90 do not shift, and the topic only covers the VISIONCLAW_DEV_MODE default.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 29153,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 254,
+  "output_tokens_details": {
+   "thinking_tokens": 132
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 29153,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 254,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 29153,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 29153
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 254,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 29153,
+   "webSearchRequests": 0,
+   "costUSD": 0.11958099999999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 132,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.11958099999999999,
+ "duration_api_ms": 2726,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

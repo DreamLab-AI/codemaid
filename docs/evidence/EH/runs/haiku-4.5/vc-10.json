@@ -1,0 +1,65 @@
+{
+ "pair": "vc-10",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 11.99,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff modifies payment handler line numbers and AnchorConfirmer documentation in BASELINE-architecture.md, which are orthogonal to VC-32's WebSocket transport and binary protocol diagrams\u2014the topic makes no statements about payment infrastructure, sidestr, or ledger systems.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 12444,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 859,
+  "output_tokens_details": {
+   "thinking_tokens": 784
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 12444,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 859,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 12444,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 12444
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 859,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 12444,
+   "webSearchRequests": 0,
+   "costUSD": 0.029808300000000003,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 784,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.029808300000000003,
+ "duration_api_ms": 10304,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,65 @@
+{
+ "pair": "vc-38",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.48,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: VC-23.9 cites `oxigraph_ontology_repository.rs:1598` and `:1619` as class IRI mint sites. The diff adds 2 comment lines before 1598 and 8 more lines before 1619, so both citations now point at the wrong lines.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 12585,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 353,
+  "output_tokens_details": {
+   "thinking_tokens": 254
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 12585,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 353,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 12585,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 12585
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 353,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 12585,
+   "webSearchRequests": 0,
+   "costUSD": 0.054299,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 254,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.054299,
+ "duration_api_ms": 3610,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

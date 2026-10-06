@@ -1,0 +1,65 @@
+{
+ "pair": "vc-25",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 36.23,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff adds \"chain_payment\" to a test array in dag_rank_tests (line 4662), which is test code; the topic documents that certain labels (equivalent_class, same_as, sub_property_of) are excluded from hierarchy and others (is_subclass_of, subclass_of, SUBCLASS_OF, hierarchical, HIERARCHICAL) are accepted\u2014adding one more excluded label to the test suite does not contradict these statements.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 21961,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 3190,
+  "output_tokens_details": {
+   "thinking_tokens": 3076
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 21961,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 3190,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 21961,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 21961
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 3190,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 21961,
+   "webSearchRequests": 0,
+   "costUSD": 0.060497300000000004,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 3076,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.060497300000000004,
+ "duration_api_ms": 34839,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

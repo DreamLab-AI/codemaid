@@ -1,0 +1,53 @@
+{
+ "pair": "ab-02",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 180.81,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff adds an unrelated ADR-2109 forum-governance gate ([sovereign_mesh.forum_governance] in agentbox.toml projected via flake.nix into management-api env) plus backward-compatible nostr-bridge subscribe opts \u2014 no AB-28 statement or invariant about the manifest binary, boot projection sequence, colloquy gates' semantics, the MCP fleet roster, or licensing is contradicted (only cited line numbers drift by +21/+7).",
+ "usage": {
+  "input_tokens": 13238,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 8524,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 13238,
+   "outputTokens": 8524,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.22343200000000002,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.22343200000000002,
+ "duration_api_ms": 179470,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

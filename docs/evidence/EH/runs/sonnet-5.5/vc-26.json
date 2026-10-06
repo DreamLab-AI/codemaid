@@ -1,0 +1,65 @@
+{
+ "pair": "vc-26",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.41,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: VC-16.8 cites github_sync_service.rs line numbers (materialise_domain_roots at :853, `domain_membership_edge` built at :2238, with `ensure_source_domain` at :2380) that the diff shifts. It also describes materialise_domain_roots as producing \"one root per populated domain\" with counter-minted ids, whereas it now reconciles roots at slug-derived ids via `plan_domain_roots`.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 17481,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 152,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 17481,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 152,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 17481,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 17481
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 152,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 17481,
+   "webSearchRequests": 0,
+   "costUSD": 0.071873,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.071873,
+ "duration_api_ms": 3576,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,65 @@
+{
+ "pair": "vc-06",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 35.76,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff removes a git patch for nostr-bbs-core, which is consistent with the topic's assertion that solid-pod-rs is now a crates.io version pin; this removal is part of migrating away from git-based patches to version pins, not contradicting the documented state.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 7683,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 3419,
+  "output_tokens_details": {
+   "thinking_tokens": 3343
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 7683,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 3419,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 7683,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 7683
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 3419,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 7683,
+   "webSearchRequests": 0,
+   "costUSD": 0.0330863,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 3343,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0330863,
+ "duration_api_ms": 34414,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

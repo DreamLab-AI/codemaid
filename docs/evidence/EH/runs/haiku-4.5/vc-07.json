@@ -1,0 +1,65 @@
+{
+ "pair": "vc-07",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 21.19,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The removed `[patch.crates-io]` section for nostr-bbs-core is not referenced anywhere in the topic; all cited line numbers (254, 283-285, 222) precede the deletion and remain valid; no statement or diagram would be contradicted by removing an unmentioned build-system patch.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 10773,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1828,
+  "output_tokens_details": {
+   "thinking_tokens": 1744
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 10773,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1828,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 10773,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 10773
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1828,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 10773,
+   "webSearchRequests": 0,
+   "costUSD": 0.0313113,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1744,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0313113,
+ "duration_api_ms": 19862,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

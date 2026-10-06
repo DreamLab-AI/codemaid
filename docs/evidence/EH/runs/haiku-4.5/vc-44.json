@@ -1,0 +1,65 @@
+{
+ "pair": "vc-44",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 13.89,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff changes ComfyUI image generation configuration in docker-compose.yml (lines unrelated to VisionClaw_DEV_MODE), which is not addressed anywhere in VC-36's documentation of the Godot XR client architecture, transport, rendering, HUD, or agent systems.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 21949,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1098,
+  "output_tokens_details": {
+   "thinking_tokens": 1021
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 21949,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1098,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 21949,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 21949
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1098,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 21949,
+   "webSearchRequests": 0,
+   "costUSD": 0.0500133,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1021,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0500133,
+ "duration_api_ms": 12460,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

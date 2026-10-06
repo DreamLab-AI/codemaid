@@ -1,0 +1,53 @@
+{
+ "pair": "vc-27",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 37.34,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The rewrite of `materialise_domain_roots` (old lines 851\u2013943 replaced by 58 lines, net \u221235) shifts every post-line-943 citation in github_sync_service.rs \u2014 VC-20.3's run_post_sync_reasoning:1235, get_classes:1240, load_ontology:1270, store_inference_results:1285 and VC-20.4's select_inferred_edges_for_sync:1156, batch_add_edges:1339, docstring 1143\u20131150 \u2014 so those path:line references no longer point at the described code.",
+ "usage": {
+  "input_tokens": 12282,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 1912,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 12282,
+   "outputTokens": 1912,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.08762400000000001,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.08762400000000001,
+ "duration_api_ms": 36422,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

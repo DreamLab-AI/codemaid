@@ -1,0 +1,65 @@
+{
+ "pair": "ab-02",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.82,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff shifts agentbox.toml and flake.nix line numbers that the topic cites (e.g. `flake.nix:1793`, `agentbox.toml:998/1005/1234`, `flake.nix:2308`), and it adds a `[sovereign_mesh.forum_governance]` block and a `nostr-bridge.js` `subscribe()` signature change that the topic's AB-28.8 fleet description does not reflect.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 19403,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 154,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 19403,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 154,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 19403,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 19403
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 154,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 19403,
+   "webSearchRequests": 0,
+   "costUSD": 0.079581,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.079581,
+ "duration_api_ms": 1939,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

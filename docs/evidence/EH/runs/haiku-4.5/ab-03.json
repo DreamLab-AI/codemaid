@@ -1,0 +1,65 @@
+{
+ "pair": "ab-03",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 22.83,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: External dependency version pin update; topic documents agentbox's internal service architecture and dispatch flows which remain unchanged.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 11501,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1974,
+  "output_tokens_details": {
+   "thinking_tokens": 1940
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 11501,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1974,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 11501,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 11501
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1974,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 11501,
+   "webSearchRequests": 0,
+   "costUSD": 0.0334973,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1940,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0334973,
+ "duration_api_ms": 21322,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

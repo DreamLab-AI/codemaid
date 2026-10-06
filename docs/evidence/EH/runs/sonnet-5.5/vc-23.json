@@ -1,0 +1,65 @@
+{
+ "pair": "vc-23",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 6.33,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts about 10 lines into `edge.rs` above `asserts_subsumption`, so the topic's citations `edge.rs:234`, `237-238` and `234-243` now point at the wrong lines. The `:12` citation for `DOMAIN_MEMBER_EDGE_TYPE` is unaffected, since the new constant is added after it.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 9706,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 386,
+  "output_tokens_details": {
+   "thinking_tokens": 257
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 9706,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 386,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 9706,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 9706
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 386,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 9706,
+   "webSearchRequests": 0,
+   "costUSD": 0.043113,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 257,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.043113,
+ "duration_api_ms": 4607,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

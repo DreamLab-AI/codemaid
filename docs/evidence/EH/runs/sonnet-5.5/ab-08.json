@@ -1,0 +1,65 @@
+{
+ "pair": "ab-08",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.66,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff removes only the `ruflo_console` feature flag line from agentbox.toml, which the topic never mentions; the cited agentbox.toml lines (864-878) are the Loom/condense settings, not this flag, and no diagram statement becomes wrong.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 6539,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 95,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 6539,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 95,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 6539,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 6539
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 95,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 6539,
+   "webSearchRequests": 0,
+   "costUSD": 0.027534999999999997,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.027534999999999997,
+ "duration_api_ms": 1797,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

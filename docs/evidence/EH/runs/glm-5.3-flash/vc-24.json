@@ -1,0 +1,53 @@
+{
+ "pair": "vc-24",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 24.08,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff rewrites VC-27.7's documented poll loop (tokio::join!(list_tasks(), get_system_status()) at agent_monitor_actor.rs:333-334 becomes a three-way join adding get_chain_payments, with new ProcessChainPayments/GetChainPaymentsView handlers and did_nostr now populated instead of None) and adds TaskInfo.did_nostr plus a new endpoint to management_api_client.rs, invalidating both the behavior statements and the cited line numbers (e.g. list_tasks :345-373, stop_task :375-400).",
+ "usage": {
+  "input_tokens": 13298,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 1260,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 13298,
+   "outputTokens": 1260,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.07864800000000001,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.07864800000000001,
+ "duration_api_ms": 23113,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

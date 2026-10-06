@@ -1,0 +1,65 @@
+{
+ "pair": "vc-27",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 71.09,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff refactors `materialise_domain_roots` into pure functions but doesn't modify any of the functions documented in the topic's diagrams (run_post_sync_reasoning, select_inferred_edges_for_sync, WhelkInferenceEngine::infer, store_inference_results, etc.); the statements and flow descriptions in VC-20.3 and VC-20.4 remain accurate.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 15611,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 6764,
+  "output_tokens_details": {
+   "thinking_tokens": 6656
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 15611,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 6764,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 15611,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 15611
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 6764,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 15611,
+   "webSearchRequests": 0,
+   "costUSD": 0.06566730000000001,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 6656,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.06566730000000001,
+ "duration_api_ms": 69719,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

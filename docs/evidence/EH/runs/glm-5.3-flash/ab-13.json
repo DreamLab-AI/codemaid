@@ -1,0 +1,53 @@
+{
+ "pair": "ab-13",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 99.56,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The commit inserts two lines into each of agentbox.toml (at ~line 1578) and flake.nix (at ~line 258) above every cited dream-machine region, shifting the topic's line citations \u2014 agentbox.toml:2129-2134/2175-2178/2191/2201-2213 and flake.nix:2590-2599 \u2014 off by two, so those path:line statements no longer point at the described content (the faucet/sidestr additions themselves touch nothing the topic claims about).",
+ "usage": {
+  "input_tokens": 20295,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 4664,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 20295,
+   "outputTokens": 4664,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.174716,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.174716,
+ "duration_api_ms": 98625,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

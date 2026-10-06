@@ -1,0 +1,53 @@
+{
+ "pair": "vc-38",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 91.17,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts lines in oxigraph_ontology_repository.rs (CLEAR SILENT comments at ~:1593 and an 8-line metadata loop at ~:1613) before/around the class_iri mint sites cited in VC-23.9 as \":1598, :1619\", shifting them to ~:1600 and ~:1629 so those path:line citations no longer point at the mint sites.",
+ "usage": {
+  "input_tokens": 7702,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 4830,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 7702,
+   "outputTokens": 4830,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.127664,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.127664,
+ "duration_api_ms": 90224,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

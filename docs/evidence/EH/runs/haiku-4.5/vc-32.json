@@ -1,0 +1,65 @@
+{
+ "pair": "vc-32",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 32.3,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The ADR-2108 amendment clarifies the Trust box deployment uses LAN-only prod profile with NIP-98 signing\u2014consistent with VC-36's architecture (presence at :3001, NIP-98 in VC-36.3/11, dev-mode-off branch in VC-36.15) and adds no contradictions.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 22459,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 2799,
+  "output_tokens_details": {
+   "thinking_tokens": 2707
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 22459,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 2799,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 22459,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 22459
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 2799,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 22459,
+   "webSearchRequests": 0,
+   "costUSD": 0.0595383,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 2707,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0595383,
+ "duration_api_ms": 30968,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

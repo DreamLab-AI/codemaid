@@ -1,0 +1,65 @@
+{
+ "pair": "vc-30",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.38,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff collapses a 10-line inline `Edge` block near line 916 into one call, shifting every later line in `github_sync_service.rs` up by 9. Citations such as `filter_changed_files` :1979, `process_batch_incremental` :1505, `process_fetched_file` :1687 and `page_is_kg_included` :2159 therefore no longer land on those functions.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 7971,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 384,
+  "output_tokens_details": {
+   "thinking_tokens": 250
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 7971,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 384,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 7971,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 7971
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 384,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 7971,
+   "webSearchRequests": 0,
+   "costUSD": 0.036153000000000005,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 250,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.036153000000000005,
+ "duration_api_ms": 3753,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

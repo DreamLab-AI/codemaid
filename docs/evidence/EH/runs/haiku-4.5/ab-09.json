@@ -1,0 +1,65 @@
+{
+ "pair": "ab-09",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 27.12,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff adds poker_citizen multi-seat configuration and supervisord programs (priority 265) but does not modify dream-engine configuration, dream.config.json, dream_machine settings in agentbox.toml, or any dream-cycle-specific supervisord setup (dream-engine remains priority 230). No diagram or statement in AB-23 is contradicted.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 25323,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 2303,
+  "output_tokens_details": {
+   "thinking_tokens": 2212
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 25323,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 2303,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 25323,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 25323
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 2303,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 25323,
+   "webSearchRequests": 0,
+   "costUSD": 0.06278629999999999,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 2212,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.06278629999999999,
+ "duration_api_ms": 25649,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

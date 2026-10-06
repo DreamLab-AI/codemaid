@@ -1,0 +1,65 @@
+{
+ "pair": "vc-16",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 14.37,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: the diff updates solid-pod-rs dependency versions and adds a patch.crates-io section; it makes no changes to the source code architecture, hexagonal structure, CQRS layer, port/adapter organization, or any structural facts documented in the topic.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 8556,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1207,
+  "output_tokens_details": {
+   "thinking_tokens": 1139
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 8556,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1207,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 8556,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 8556
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1207,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 8556,
+   "webSearchRequests": 0,
+   "costUSD": 0.0237723,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1139,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0237723,
+ "duration_api_ms": 12701,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

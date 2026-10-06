@@ -1,0 +1,62 @@
+{
+  "agentbox": {
+    "commit": {
+      "rechecks": 1224,
+      "windows": 100,
+      "windows_with_flags": 100
+    },
+    "commits": 100,
+    "date_field": "E0 commits[].date, converted to UTC",
+    "day": {
+      "ratio_vs_commit": 7.463,
+      "rechecks": 164,
+      "windows": 6,
+      "windows_with_flags": 6
+    },
+    "week": {
+      "ratio_vs_commit": 18.269,
+      "rechecks": 67,
+      "windows": 2,
+      "windows_with_flags": 2
+    },
+    "window": {
+      "ratio_vs_commit": 33.081,
+      "rechecks": 37,
+      "windows": 1,
+      "windows_with_flags": 1
+    }
+  },
+  "pooled": {
+    "commit": 1943,
+    "day": 526,
+    "week": 229,
+    "window": 73
+  },
+  "visionclaw": {
+    "commit": {
+      "rechecks": 719,
+      "windows": 100,
+      "windows_with_flags": 100
+    },
+    "commits": 100,
+    "date_field": "E0 commits[].date, converted to UTC",
+    "day": {
+      "ratio_vs_commit": 1.986,
+      "rechecks": 362,
+      "windows": 21,
+      "windows_with_flags": 21
+    },
+    "week": {
+      "ratio_vs_commit": 4.438,
+      "rechecks": 162,
+      "windows": 6,
+      "windows_with_flags": 6
+    },
+    "window": {
+      "ratio_vs_commit": 19.972,
+      "rechecks": 36,
+      "windows": 1,
+      "windows_with_flags": 1
+    }
+  }
+}

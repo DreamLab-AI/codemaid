@@ -1,0 +1,65 @@
+{
+ "pair": "vc-29",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 22.58,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff modifies cloudflare tunnel profile configuration and its deploy comment, but the topic contains no statements about tunnel profiles, cloudflare ingress settings, or ADR-2119. The topic's only docker-compose.unified.yml citations (lines 83-90 for VISIONCLAW_DEV_MODE) are unaffected.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 22150,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1967,
+  "output_tokens_details": {
+   "thinking_tokens": 1879
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 22150,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1967,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 22150,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 22150
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1967,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 22150,
+   "webSearchRequests": 0,
+   "costUSD": 0.0547603,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1879,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0547603,
+ "duration_api_ms": 21266,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

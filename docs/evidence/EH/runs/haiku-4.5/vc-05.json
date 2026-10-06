@@ -1,0 +1,65 @@
+{
+ "pair": "vc-05",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 20.46,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff removes a nostr-bbs-core patch comment from Cargo.toml, but the topic makes no statements about dependency patches\u2014it only references the default features list (line 254), which remains unchanged.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 13359,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1586,
+  "output_tokens_details": {
+   "thinking_tokens": 1527
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13359,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1586,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 13359,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13359
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1586,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 13359,
+   "webSearchRequests": 0,
+   "costUSD": 0.0352733,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1527,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0352733,
+ "duration_api_ms": 18998,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

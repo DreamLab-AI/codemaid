@@ -1,0 +1,65 @@
+{
+ "pair": "vc-20",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 25.67,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff adds a new optional field `did_nostr` to `TaskInfo` and a new method `get_chain_payments()` to `ManagementApiClient`, both purely additive changes. The topic's sole reference to `ManagementApiClient` (VC-05.9) documents `create_brief`, `execute_brief`, and `create_debrief`, whose signatures and behavior remain unchanged.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 17476,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 2335,
+  "output_tokens_details": {
+   "thinking_tokens": 2231
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 17476,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 2335,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 17476,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 17476
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 2335,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 17476,
+   "webSearchRequests": 0,
+   "costUSD": 0.0472523,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 2231,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0472523,
+ "duration_api_ms": 24488,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

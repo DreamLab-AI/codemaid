@@ -1,0 +1,65 @@
+{
+ "pair": "ab-09",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.52,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff inserts 15 lines into agentbox.toml before line 1638 and about 18 lines into flake.nix before line 2590. That shifts the topic's line citations (agentbox.toml:2129-2213, flake.nix:2590-2599), so they now point at the wrong lines.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 33819,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 396,
+  "output_tokens_details": {
+   "thinking_tokens": 291
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 33819,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 396,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 33819,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 33819
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 396,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 33819,
+   "webSearchRequests": 0,
+   "costUSD": 0.139665,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 291,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.139665,
+ "duration_api_ms": 3645,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

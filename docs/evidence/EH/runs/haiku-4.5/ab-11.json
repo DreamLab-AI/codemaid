@@ -1,0 +1,65 @@
+{
+ "pair": "ab-11",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 12.86,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff changes a sidechain producer interval parameter in agentbox.toml, which is unrelated to role isolation, the identity port, accounts, secrets delivery, environment classes, or the rehearsal tests covered in this topic.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 10140,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1137,
+  "output_tokens_details": {
+   "thinking_tokens": 1076
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 10140,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1137,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 10140,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 10140
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1137,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 10140,
+   "webSearchRequests": 0,
+   "costUSD": 0.0265903,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1076,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0265903,
+ "duration_api_ms": 11279,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

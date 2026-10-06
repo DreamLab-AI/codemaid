@@ -1,0 +1,65 @@
+{
+ "pair": "ab-02",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 46.72,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The addition of 22 lines (forum_governance section) to agentbox.toml before the pods section shifts all downstream line references; cited lines for consultants (1234, 1245, 1251, 1258, 1263) and colloquy (998, 1005, 1011, 1015\u20131017, 1025) are now incorrect.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 14686,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 4162,
+  "output_tokens_details": {
+   "thinking_tokens": 4065
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 14686,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 4162,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 14686,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 14686
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 4162,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 14686,
+   "webSearchRequests": 0,
+   "costUSD": 0.0508073,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 4065,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0508073,
+ "duration_api_ms": 45379,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,3728 @@
+{
+ "decision": "sonnet-5.5 is the triage layer",
+ "experiment": "EH",
+ "part1_batching": {
+  "agentbox": {
+   "commit": {
+    "rechecks": 1224,
+    "windows": 100,
+    "windows_with_flags": 100
+   },
+   "commits": 100,
+   "date_field": "E0 commits[].date, converted to UTC",
+   "day": {
+    "ratio_vs_commit": 7.463,
+    "rechecks": 164,
+    "windows": 6,
+    "windows_with_flags": 6
+   },
+   "week": {
+    "ratio_vs_commit": 18.269,
+    "rechecks": 67,
+    "windows": 2,
+    "windows_with_flags": 2
+   },
+   "window": {
+    "ratio_vs_commit": 33.081,
+    "rechecks": 37,
+    "windows": 1,
+    "windows_with_flags": 1
+   }
+  },
+  "pooled": {
+   "commit": 1943,
+   "day": 526,
+   "week": 229,
+   "window": 73
+  },
+  "visionclaw": {
+   "commit": {
+    "rechecks": 719,
+    "windows": 100,
+    "windows_with_flags": 100
+   },
+   "commits": 100,
+   "date_field": "E0 commits[].date, converted to UTC",
+   "day": {
+    "ratio_vs_commit": 1.986,
+    "rechecks": 362,
+    "windows": 21,
+    "windows_with_flags": 21
+   },
+   "week": {
+    "ratio_vs_commit": 4.438,
+    "rechecks": 162,
+    "windows": 6,
+    "windows_with_flags": 6
+   },
+   "window": {
+    "ratio_vs_commit": 19.972,
+    "rechecks": 36,
+    "windows": 1,
+    "windows_with_flags": 1
+   }
+  }
+ },
+ "part2_triage": {
+  "decision": "sonnet-5.5 is the triage layer",
+  "gold": {
+   "pairs": 60,
+   "stale": 29
+  },
+  "models": {
+   "glm-5.3-flash": {
+    "by_stratum": {
+     "agentbox": {
+      "flagged": 3,
+      "missed_stale": [
+       "ab-02"
+      ],
+      "n": 15,
+      "precision": 1.0,
+      "precision_wilson95": [
+       0.4385,
+       1.0
+      ],
+      "recall": 0.75,
+      "recall_k": 3,
+      "recall_wilson95": [
+       0.3006,
+       0.9544
+      ],
+      "rejected": 12,
+      "rejection_rate": 0.8,
+      "rejection_wilson95": [
+       0.5481,
+       0.9295
+      ],
+      "stale": 4
+     },
+     "visionclaw": {
+      "flagged": 22,
+      "missed_stale": [
+       "vc-14",
+       "vc-15",
+       "vc-23"
+      ],
+      "n": 45,
+      "precision": 1.0,
+      "precision_wilson95": [
+       0.8513,
+       1.0
+      ],
+      "recall": 0.88,
+      "recall_k": 22,
+      "recall_wilson95": [
+       0.7004,
+       0.9583
+      ],
+      "rejected": 23,
+      "rejection_rate": 0.5111,
+      "rejection_wilson95": [
+       0.37,
+       0.6504
+      ],
+      "stale": 25
+     }
+    },
+    "cost": {
+     "max_wall_s": 253.31,
+     "mean_cost_usd_claude_code_reported": 0.11507,
+     "mean_input_side_tokens": 13303.2,
+     "mean_output_tokens": 3250.7,
+     "mean_total_tokens": 16554.0,
+     "mean_wall_s": 65.6,
+     "median_total_tokens": 15323.5,
+     "median_wall_s": 54.2,
+     "sum_cost_usd_claude_code_reported": 6.904
+    },
+    "flagged": 25,
+    "infra_failed": [],
+    "infra_retries": 0,
+    "missed_stale": [
+     "ab-02",
+     "vc-14",
+     "vc-15",
+     "vc-23"
+    ],
+    "n": 60,
+    "pairs": [
+     {
+      "cost_usd": 0.232388,
+      "gold_stale": true,
+      "id": "ab-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The commit adds a new forum-governance ingress path absent from the topic \u2014 `[sovereign_mesh.forum_governance]` in agentbox.toml, flake.nix env projection (AGENTBOX_FORUM_GOVERNANCE_RELAY/_SIGNERS), a second relay connection/31403 subscription plus cursor state inside RelayConsumer.start() that AB-13.1's topology and AB-13.7's boot diagram don't draw \u2014 and it shifts many cited l",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 21627,
+       "output_tokens": 7294
+      },
+      "total_tokens": 28921,
+      "triage": "yes",
+      "wall_s": 132.1
+     },
+     {
+      "cost_usd": 0.22343200000000002,
+      "gold_stale": true,
+      "id": "ab-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds an unrelated ADR-2109 forum-governance gate ([sovereign_mesh.forum_governance] in agentbox.toml projected via flake.nix into management-api env) plus backward-compatible nostr-bridge subscribe opts \u2014 no AB-28 statement or invariant about the manifest binary, boot projection sequence, colloquy gates' semantics, the MCP fleet roster, or licensing is contradicted (only",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 13238,
+       "output_tokens": 8524
+      },
+      "total_tokens": 21762,
+      "triage": "no",
+      "wall_s": 180.81
+     },
+     {
+      "cost_usd": 0.06736,
+      "gold_stale": false,
+      "id": "ab-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only swaps the pinned VisionClaw vaultSrc commit hash (a 1-for-1 line replacement at flake.nix:42), shifting no cited line numbers and touching no statement or diagram in AB-27, which never references the vault pin.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10575,
+       "output_tokens": 1253
+      },
+      "total_tokens": 11828,
+      "triage": "no",
+      "wall_s": 23.56
+     },
+     {
+      "cost_usd": 0.06658,
+      "gold_stale": false,
+      "id": "ab-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only swaps the pinned VisionClaw commit hash in flake.nix's `vaultSrc.url` (a 1-for-1 line replacement, so no line shifts), and the topic makes no statement about the VisionClaw pin or corpus door \u2014 its flake.nix citations (supervisord :2308, colloquy symlink :1784-1793, mcpHubServers :183-186) are all elsewhere and untouched.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10675,
+       "output_tokens": 1194
+      },
+      "total_tokens": 11869,
+      "triage": "no",
+      "wall_s": 32.48
+     },
+     {
+      "cost_usd": 0.08386,
+      "gold_stale": false,
+      "id": "ab-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the `vaultSrc` VisionClaw pin hash in flake.nix \u2014 a same-line replacement with no line shifts, and no statement or diagram in AB-15 references the pinned hash or any vault behavior tied to that revision (the topic's vault claims are just the rebuild-class bake of `/opt/agentbox/bin/vault`, which stays true).",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 13865,
+       "output_tokens": 1420
+      },
+      "total_tokens": 15285,
+      "triage": "no",
+      "wall_s": 27.45
+     },
+     {
+      "cost_usd": 0.05047599999999999,
+      "gold_stale": false,
+      "id": "ab-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the VisionClaw `vaultSrc` pin at flake.nix:42, which the topic never cites or describes \u2014 all its flake.nix citations (sidechain program baking, upstream bake linking) are untouched and line-stable since it's a one-line value swap.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10124,
+       "output_tokens": 499
+      },
+      "total_tokens": 10623,
+      "triage": "no",
+      "wall_s": 12.62
+     },
+     {
+      "cost_usd": 0.068844,
+      "gold_stale": false,
+      "id": "ab-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the pinned VisionClaw vaultSrc hash (flake.nix ~line 42), which the topic never cites, and the one-for-one line replacement shifts no line numbers, so every cited flake.nix line (3314, 3612, 3632, 3639\u20133654) and all role-isolation statements remain accurate.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 9976,
+       "output_tokens": 1447
+      },
+      "total_tokens": 11423,
+      "triage": "no",
+      "wall_s": 27.28
+     },
+     {
+      "cost_usd": 0.036236,
+      "gold_stale": false,
+      "id": "ab-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only deletes the unrelated `ruflo_console = false` flag at agentbox.toml ~1899, which no topic statement or diagram references; all agentbox.toml citations (lines 864\u2013878) precede it, so line numbers and described behavior are unaffected.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 3920,
+       "output_tokens": 1015
+      },
+      "total_tokens": 6215,
+      "triage": "no",
+      "wall_s": 30.0
+     },
+     {
+      "cost_usd": 0.135456,
+      "gold_stale": true,
+      "id": "ab-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts +15 lines in agentbox.toml (~1641) and +18 lines in flake.nix (~299) before the topic's cited locations, shifting them \u2014 agentbox.toml:2175-2213 ([dream_machine], placeholders, window, llm_provider) and flake.nix:2590-2599 (dream-engine supervisor block) no longer sit at their cited lines.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 22309,
+       "output_tokens": 2311
+      },
+      "total_tokens": 24620,
+      "triage": "yes",
+      "wall_s": 44.32
+     },
+     {
+      "cost_usd": 0.06538400000000001,
+      "gold_stale": false,
+      "id": "ab-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the txbt4 producer's dispatch interval and adds a comment at agentbox.toml:1592; the topic's sole agentbox.toml citation (line 1578, the faucet treasury key path) is untouched, and no statement or diagram in AB-16 concerns the producer interval.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 13242,
+       "output_tokens": 608
+      },
+      "total_tokens": 15130,
+      "triage": "no",
+      "wall_s": 14.28
+     },
+     {
+      "cost_usd": 0.048707999999999994,
+      "gold_stale": false,
+      "id": "ab-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the sidestr-producer-dreamlab-txbt4 `interval` value in a section AB-36 never describes (its only agentbox.toml citations are `[security].role_isolation` at line 2129, unaffected since a single line is replaced by a single line with no line shift).",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 8818,
+       "output_tokens": 659
+      },
+      "total_tokens": 10757,
+      "triage": "no",
+      "wall_s": 17.58
+     },
+     {
+      "cost_usd": 0.052152000000000004,
+      "gold_stale": false,
+      "id": "ab-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only flips `[sidechain.dreamlab-txbt4]` and adds a `ruflo_console` build-closure gate \u2014 neither touches the `[memory_learning]` keys the topic cites (lines ~438-472), and the added line sits below that block so no cited line numbers drift.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 9663,
+       "output_tokens": 675
+      },
+      "total_tokens": 10338,
+      "triage": "no",
+      "wall_s": 16.68
+     },
+     {
+      "cost_usd": 0.174716,
+      "gold_stale": true,
+      "id": "ab-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The commit inserts two lines into each of agentbox.toml (at ~line 1578) and flake.nix (at ~line 258) above every cited dream-machine region, shifting the topic's line citations \u2014 agentbox.toml:2129-2134/2175-2178/2191/2201-2213 and flake.nix:2590-2599 \u2014 off by two, so those path:line statements no longer point at the described content (the faucet/sidestr additions themselves tou",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 20295,
+       "output_tokens": 4664
+      },
+      "total_tokens": 26239,
+      "triage": "yes",
+      "wall_s": 99.56
+     },
+     {
+      "cost_usd": 0.058964,
+      "gold_stale": false,
+      "id": "ab-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the `verified_commit:` metadata field in three ADR frontmatters (ADR-2002/2009/2013); the topic makes no claims about those commit pointers, and no cited behavior, anchor, or diagram content changes.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 12427,
+       "output_tokens": 450
+      },
+      "total_tokens": 14157,
+      "triage": "no",
+      "wall_s": 10.77
+     },
+     {
+      "cost_usd": 0.061228,
+      "gold_stale": false,
+      "id": "ab-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the pinned VisionClaw vaultSrc commit in flake.nix; the topic's sole flake.nix reference (AB-22.10: mcp/mcp.json consumed by flake.nix) and all cited lines/behaviours remain accurate.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 10678,
+       "output_tokens": 913
+      },
+      "total_tokens": 12871,
+      "triage": "no",
+      "wall_s": 18.31
+     },
+     {
+      "cost_usd": 0.17231200000000002,
+      "gold_stale": true,
+      "id": "vc-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts ~180 lines into src/actors/elevation_actor.rs (BaseClassIndex/gate rewrite) before every line VC-05.17 cites \u2014 :990 Handler<RunCycle>, :1227/:1301/:1308 record_decision, :1479 decision_record, :1495-1504, :1534 \u2014 so those citations no longer point at the described code, even though the messaging-topology claims themselves still hold.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 21864,
+       "output_tokens": 4230
+      },
+      "total_tokens": 27374,
+      "triage": "yes",
+      "wall_s": 79.3
+     },
+     {
+      "cost_usd": 0.063364,
+      "gold_stale": false,
+      "id": "vc-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only adds a new read-only `class_iris()` method plus a test in oxigraph_ontology_repository.rs at ~line 2152, and every topic citation to that file (lines 48\u2013824) sits before the insertion point, so no cited line, invariant, or write-authority statement changes.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 8187,
+       "output_tokens": 1518
+      },
+      "total_tokens": 10985,
+      "triage": "no",
+      "wall_s": 27.95
+     },
+     {
+      "cost_usd": 0.15793200000000002,
+      "gold_stale": true,
+      "id": "vc-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts ~370 lines into src/actors/elevation_actor.rs (new BaseClassIndex/class_ref_iri/parse_draft_axioms_against, rewritten run_consistency_gate), which shifts the topic's cited assertion elevation_actor.rs:1800-1806 (VC-23.9 NoFence node) and adds new ngm::class_iri mint sites (class_ref_iri, wikilink-target resolution) beyond the mint-site list in VC-23.9's DriftX n",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 15299,
+       "output_tokens": 4824
+      },
+      "total_tokens": 21403,
+      "triage": "yes",
+      "wall_s": 84.33
+     },
+     {
+      "cost_usd": 0.22192399999999998,
+      "gold_stale": true,
+      "id": "vc-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts 15 lines into src/handlers/solid_proxy_handler.rs above every line VC-03.15 cites (:1312 init_pod_nip98, :1352, :1655, :1786), so those path:line citations no longer resolve to the described code.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 10952,
+       "output_tokens": 8893
+      },
+      "total_tokens": 21125,
+      "triage": "yes",
+      "wall_s": 181.1
+     },
+     {
+      "cost_usd": 0.056516000000000004,
+      "gold_stale": false,
+      "id": "vc-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The topic's only Cargo.toml citation is the default feature set at Cargo.toml:254, which is untouched by the removal of the `[patch.crates-io]` nostr-bbs-core block (~line 291) that the topic never mentions.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 10800,
+       "output_tokens": 653
+      },
+      "total_tokens": 12733,
+      "triage": "no",
+      "wall_s": 15.12
+     },
+     {
+      "cost_usd": 0.044164,
+      "gold_stale": false,
+      "id": "vc-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only removes the `[patch.crates-io]` nostr-bbs-core git pin from Cargo.toml (~line 291); the topic's Cargo.toml claims (workspace members at lines 2-4, orphan graph-cognition-extract, solid-pod-rs being a crates.io version pin rather than a git rev) are unaffected and remain accurate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 6012,
+       "output_tokens": 993
+      },
+      "total_tokens": 8285,
+      "triage": "no",
+      "wall_s": 18.9
+     },
+     {
+      "cost_usd": 0.113848,
+      "gold_stale": false,
+      "id": "vc-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only removes a `[patch.crates-io]` nostr-bbs-core pin at Cargo.toml:294-300, which the topic never references; all cited Cargo.toml lines (222, 254, 283-285) lie before the hunk and their content and numbering are unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10077,
+       "output_tokens": 3677
+      },
+      "total_tokens": 13754,
+      "triage": "no",
+      "wall_s": 82.16
+     },
+     {
+      "cost_usd": 0.130812,
+      "gold_stale": false,
+      "id": "vc-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends a 2026-10-03 blocktrails/solid-pod-rs section to ADR-2111 that explicitly leaves the record \"proposed / none / inactive\" with no code change, so the topic's pay-scope claims about the proposal and its line citations (:38, :83, :95-96 \u2014 all before the insertion at ~:211) remain accurate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 18284,
+       "output_tokens": 2871
+      },
+      "total_tokens": 22435,
+      "triage": "no",
+      "wall_s": 61.5
+     },
+     {
+      "cost_usd": 0.13772399999999999,
+      "gold_stale": true,
+      "id": "vc-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts two net-new lines into docs/BASELINE-architecture.md (~line 238), shifting the content this topic cites at :246 (BrokerActor never merged), :247 (~936 LOC sizing), and :297 (ADR-2006 closeout quote) down to :248/:249/:299, so those path:line citations no longer resolve to the claimed text.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 14287,
+       "output_tokens": 4016
+      },
+      "total_tokens": 19583,
+      "triage": "yes",
+      "wall_s": 68.81
+     },
+     {
+      "cost_usd": 0.214632,
+      "gold_stale": false,
+      "id": "vc-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only amends BASELINE-architecture.md's ADR-2111/payment-confirmer paragraph (pay_handler.rs/ritual.rs citations, Blocktrails verify note), which VC-32 never references; the topic's sole BASELINE claim (the ADR-2058 query-token \"Known divergence\" note) is untouched and all other cited sources are code files unmodified by this commit.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 9929,
+       "output_tokens": 8733
+      },
+      "total_tokens": 19942,
+      "triage": "no",
+      "wall_s": 168.0
+     },
+     {
+      "cost_usd": 0.04348,
+      "gold_stale": false,
+      "id": "vc-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only rewrites the payment-host/confirmer paragraph at BASELINE-architecture.md:235-238 (a hunk starting at :233), after the topic's only citations to that file (:218-228 server RBAC posture), and it touches no file or claim VC-33 describes.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 7496,
+       "output_tokens": 662
+      },
+      "total_tokens": 9438,
+      "triage": "no",
+      "wall_s": 14.59
+     },
+     {
+      "cost_usd": 0.182192,
+      "gold_stale": false,
+      "id": "vc-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only rewrites the sidestr/ADR-2111 payment-host divergence bullet in BASELINE-architecture.md (~lines 235-240), which the topic never cites or describes \u2014 the topic's references to that file (the :209-210 90fps note in VC-36.2 and the unmodified ADR-2058 token-fallback bullet in VC-36.3) are untouched.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 17774,
+       "output_tokens": 5542
+      },
+      "total_tokens": 24596,
+      "triage": "no",
+      "wall_s": 98.06
+     },
+     {
+      "cost_usd": 0.100692,
+      "gold_stale": true,
+      "id": "vc-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts two comment lines into Cargo.toml (~L220), shifting the topic's cited dev-runtime profile at Cargo.toml:301 (VC-08.9) so that citation no longer points at the profile definition.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 6559,
+       "output_tokens": 3710
+      },
+      "total_tokens": 11549,
+      "triage": "yes",
+      "wall_s": 75.37
+     },
+     {
+      "cost_usd": 0.13693200000000003,
+      "gold_stale": true,
+      "id": "vc-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only refactors FsPaymentStore internals the topic never describes (per-did JSON files \u2192 single ledger.json, removal of an unused `credit` method, receipt-based deposits in tests); every VC-04.27 claim \u2014 routes, auth/disabled gates, get_balance/debit flows, stub deposit 501, and ADR-2111's proposed-not-live status with FsPaymentStore still host-owned \u2014 remains accurate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 19189,
+       "output_tokens": 2996
+      },
+      "total_tokens": 23465,
+      "triage": "no",
+      "wall_s": 62.68
+     },
+     {
+      "cost_usd": 0.146836,
+      "gold_stale": true,
+      "id": "vc-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only adds an `inherited: false` field to `build_pod_root_acl`'s WAC struct literal \u2014 pod/LDP ACL internals that VC-05.15 explicitly defers to VC-26 \u2014 so no route, auth flow, or handler behavior the topic documents is altered.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 14100,
+       "output_tokens": 4509
+      },
+      "total_tokens": 19889,
+      "triage": "no",
+      "wall_s": 102.46
+     },
+     {
+      "cost_usd": 0.062276000000000005,
+      "gold_stale": false,
+      "id": "vc-16",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes Cargo.toml \u2014 bumping the solid-pod-rs pin (still a crates.io version pin, so VC-07.1's N3 claim \"crates.io VERSION pin, not a git rev\" remains true, and no version number is cited in the topic) and adding a [patch.crates-io] entry for nostr-bbs-core \u2014 leaving every cited symbol, line range (e.g. Cargo.toml:2-4 workspace members), and diagram statement intact",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 6745,
+       "output_tokens": 1752
+      },
+      "total_tokens": 9777,
+      "triage": "no",
+      "wall_s": 37.24
+     },
+     {
+      "cost_usd": 0.111508,
+      "gold_stale": true,
+      "id": "vc-17",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts 9 lines ([patch.crates-io] block) before [profile.release] in Cargo.toml, shifting the [profile.dev-runtime] profile cited at Cargo.toml:301 in VC-08.9 down to ~310, so that path:line citation no longer points at the profile definition.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 8397,
+       "output_tokens": 3896
+      },
+      "total_tokens": 12293,
+      "triage": "yes",
+      "wall_s": 64.47
+     },
+     {
+      "cost_usd": 0.118428,
+      "gold_stale": true,
+      "id": "vc-18",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Note4 cites the live dependency as \"Cargo.toml:222, 0.4.0-alpha.15\" and says ADR-2111's version move is \"PROPOSED, not live\", but the diff bumps solid-pod-rs/-nostr/-idp/-server to =0.5.0-alpha.12 in lockstep with the forum (implementing exactly that move), and the added `inherited: false` lines shift cited line numbers by +2 in solid_proxy_handler.rs (e.g. 1267/1313, 1374-1422,",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 9803,
+       "output_tokens": 3948
+      },
+      "total_tokens": 15031,
+      "triage": "yes",
+      "wall_s": 63.52
+     },
+     {
+      "cost_usd": 0.09484000000000001,
+      "gold_stale": true,
+      "id": "vc-19",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds a new UpdateChainPayments handler to GraphServiceSupervisor (making VC-02.3's exhaustive `grep impl Handler<` routing table incomplete and shifting H22\u2013H28 line citations), and gives AgentMonitorActor a new chain-payments poll/messages surface (ProcessChainPayments, GetChainPaymentsView, UpdateChainPayments, did_nostr now populated) not shown in VC-02.20, plus ~70 ",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 11691,
+       "output_tokens": 2391
+      },
+      "total_tokens": 15362,
+      "triage": "yes",
+      "wall_s": 42.35
+     },
+     {
+      "cost_usd": 0.07963600000000001,
+      "gold_stale": false,
+      "id": "vc-20",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff is purely additive to management_api_client.rs (a new TaskInfo.did_nostr field and a new get_chain_payments method) and alters nothing the topic describes \u2014 its only reference to that file (VC-05.9's ManagementApiClient participant) cites no line numbers and concerns the untouched brief/debrief methods.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 14585,
+       "output_tokens": 1052
+      },
+      "total_tokens": 16917,
+      "triage": "no",
+      "wall_s": 21.2
+     },
+     {
+      "cost_usd": 0.151708,
+      "gold_stale": true,
+      "id": "vc-21",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts ~231 lines into agent_monitor_actor.rs and ~11 into bots_handler.rs ahead of the topic's citations (e.g. :253/:255/:235-244/:574 and bots_handler.rs :301/:522), so those path:line pointers no longer land on the MANAGEMENT_API_*/MOCK_AGENTS/PRIMARY_PROVIDER reads the diagrams describe.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 13783,
+       "output_tokens": 4816
+      },
+      "total_tokens": 19879,
+      "triage": "yes",
+      "wall_s": 93.19
+     },
+     {
+      "cost_usd": 0.12440399999999999,
+      "gold_stale": true,
+      "id": "vc-22",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Purely additive chain-payments code, but it inserts 13 lines into graph_service_supervisor.rs before the cited UpdateNodePositions forwarding lines (1989/2000/2013) and 4 lines into graph_state_actor.rs before cited lines 858/861, so those path:line citations in VC-13.3/VC-13.6 no longer point at the described code.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10761,
+       "output_tokens": 4068
+      },
+      "total_tokens": 14829,
+      "triage": "yes",
+      "wall_s": 87.82
+     },
+     {
+      "cost_usd": 0.182504,
+      "gold_stale": true,
+      "id": "vc-23",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Purely additive \u2014 the new chain_payment edge type is Structural and never passes asserts_subsumption, with tests enforcing exactly the ADR-2035 invariant VC-16.8 documents, so no described flow, behavior, or relationship becomes wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 5867,
+       "output_tokens": 7939
+      },
+      "total_tokens": 15086,
+      "triage": "no",
+      "wall_s": 154.34
+     },
+     {
+      "cost_usd": 0.07864800000000001,
+      "gold_stale": true,
+      "id": "vc-24",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff rewrites VC-27.7's documented poll loop (tokio::join!(list_tasks(), get_system_status()) at agent_monitor_actor.rs:333-334 becomes a three-way join adding get_chain_payments, with new ProcessChainPayments/GetChainPaymentsView handlers and did_nostr now populated instead of None) and adds TaskInfo.did_nostr plus a new endpoint to management_api_client.rs, invalidating bo",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 13298,
+       "output_tokens": 1260
+      },
+      "total_tokens": 15838,
+      "triage": "yes",
+      "wall_s": 24.08
+     },
+     {
+      "cost_usd": 0.10526,
+      "gold_stale": false,
+      "id": "vc-25",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only adds a \"chain_payment\" entry to an existing label list inside the `mod dag_rank_tests` test loop at force_compute_actor.rs:~4663 \u2014 a test-data change that alters no production behaviour, matches (and doesn't contradict) the topic's description of the DAG-rank predicate's rejects, and sits after every cited line number (all \u2264 :4580), so no citation or statement in VC",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 17556,
+       "output_tokens": 1739
+      },
+      "total_tokens": 20575,
+      "triage": "no",
+      "wall_s": 38.5
+     },
+     {
+      "cost_usd": 0.14026000000000002,
+      "gold_stale": true,
+      "id": "vc-26",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff rewrites materialise_domain_roots into a plan/reconcile flow (derived root IDs, stale-root/spoke purges) and inserts ~370 lines, so VC-16.8's citations no longer resolve \u2014 DOMAIN_ROOTS at :854 and the domain_membership_edge call at :919 are gone, and its definition (:2238) plus ensure_source_domain (:2372/:2380) have moved.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 10751,
+       "output_tokens": 4850
+      },
+      "total_tokens": 16881,
+      "triage": "yes",
+      "wall_s": 99.13
+     },
+     {
+      "cost_usd": 0.08762400000000001,
+      "gold_stale": true,
+      "id": "vc-27",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The rewrite of `materialise_domain_roots` (old lines 851\u2013943 replaced by 58 lines, net \u221235) shifts every post-line-943 citation in github_sync_service.rs \u2014 VC-20.3's run_post_sync_reasoning:1235, get_classes:1240, load_ontology:1270, store_inference_results:1285 and VC-20.4's select_inferred_edges_for_sync:1156, batch_add_edges:1339, docstring 1143\u20131150 \u2014 so those path:line refe",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 12282,
+       "output_tokens": 1912
+      },
+      "total_tokens": 15474,
+      "triage": "yes",
+      "wall_s": 37.34
+     },
+     {
+      "cost_usd": 0.15154800000000002,
+      "gold_stale": false,
+      "id": "vc-28",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only re-profiles the cloudflared ingress service under a new `tunnel` profile (ADR-2119 comment), which touches no voice claim or diagram; the sole citation into this file (docker-compose.unified.yml:329 xinference consumer) stays substantively true, its content merely shifting one line.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 10658,
+       "output_tokens": 5433
+      },
+      "total_tokens": 17371,
+      "triage": "no",
+      "wall_s": 120.87
+     },
+     {
+      "cost_usd": 0.108444,
+      "gold_stale": false,
+      "id": "vc-29",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only re-profiles the cloudflared tunnel service (lines ~267\u2013296, ADR-2119 ingress), which the topic never references; all docker-compose.unified.yml citations (dev service env, lines 83\u201390) sit above the change and are untouched.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 19001,
+       "output_tokens": 1622
+      },
+      "total_tokens": 20623,
+      "triage": "no",
+      "wall_s": 29.55
+     },
+     {
+      "cost_usd": 0.104256,
+      "gold_stale": true,
+      "id": "vc-30",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff nets -9 lines at github_sync_service.rs:916, shifting every later line citation in VC-21.1/21.2 (process_batch_incremental :1505, process_fetched_file :1687, filter_changed_files :1979, page_is_kg_included :2159, enrich_node_from_frontmatter :2206, etc.) off the cited functions, though the domain-membership edge-type change itself is not covered by the topic.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 4860,
+       "output_tokens": 4228
+      },
+      "total_tokens": 10368,
+      "triage": "yes",
+      "wall_s": 85.34
+     },
+     {
+      "cost_usd": 0.08291200000000001,
+      "gold_stale": true,
+      "id": "vc-31",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff deletes 9 lines in github_sync_service.rs (hunk at :916) before many cited locations, shifting rebuild_assert_graph (:999), save_ontology_graph (:1056), and batch_add_nodes (:1611) cited throughout VC-22.1/22.8/22.10 so those path:line citations no longer point at the described code.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 8049,
+       "output_tokens": 2523
+      },
+      "total_tokens": 11852,
+      "triage": "yes",
+      "wall_s": 46.91
+     },
+     {
+      "cost_usd": 0.11219199999999999,
+      "gold_stale": false,
+      "id": "vc-32",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends a new R2 amendment to ADR-2108 recording a LAN-only Trust deployment and a launch.sh tunnel defect; it changes no code and contradicts nothing the topic claims about the dev-mode default, NIP-98 auth, or the cited docker-compose/launch behaviour.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 19253,
+       "output_tokens": 1759
+      },
+      "total_tokens": 21012,
+      "triage": "no",
+      "wall_s": 73.96
+     },
+     {
+      "cost_usd": 0.11874,
+      "gold_stale": false,
+      "id": "vc-33",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only revises ADR-2108's disposition prose (adds owner decision and amendment scoping the dev profile to the owner's rig, dropping Track C/CY-C wording); the topic makes no claim about the ADR's disposition or deployment-profile triage, and its technical claims (compose :90 `:-1` default, write-denied notice, test_write_denied_notice) all remain accurate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 18201,
+       "output_tokens": 2284
+      },
+      "total_tokens": 21765,
+      "triage": "no",
+      "wall_s": 42.49
+     },
+     {
+      "cost_usd": 0.287464,
+      "gold_stale": true,
+      "id": "vc-34",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The refactor inserts `nip98_request_url` into src/utils/auth.rs, moving `verify_access` off its cited auth.rs:142 (now ~:174, cited as an anchor in VC-03.4, VC-03.5 and VC-03.6), and the auth_extractor.rs hunk nets ~-24 lines, shifting every cited line past :146 (:174/:185/:200/:211/:252 in VC-03.3) so those path:line anchors no longer point at the described code, even though th",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 14366,
+       "output_tokens": 11500
+      },
+      "total_tokens": 25866,
+      "triage": "yes",
+      "wall_s": 253.31
+     },
+     {
+      "cost_usd": 0.143616,
+      "gold_stale": true,
+      "id": "vc-35",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-35.4 documents the connection_url derivation as inline scheme/host/path_and_query code at speech_socket_handler.rs:998, :1000 (and mirrored in the graph socket at http_handler.rs:364), but this diff deletes both inline blocks and replaces them with a shared crate::utils::auth::nip98_request_url(&req) helper, so the cited derivation code (including its handler-specific unwrap_",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 12149,
+       "output_tokens": 4751
+      },
+      "total_tokens": 16900,
+      "triage": "yes",
+      "wall_s": 99.01
+     },
+     {
+      "cost_usd": 0.22366799999999998,
+      "gold_stale": true,
+      "id": "vc-36",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff edits graph_scene.gd's `_describe_write_failure` (new remedy text, +2 line shift) and inserts `nip98_request_url` plus ~194 test lines into auth.rs, so the topic's citations (graph_scene.gd:1153/:1173/:1886/:2634-2638/:3669 etc., auth.rs:154-169) now point at wrong lines, and VC-36.16's \"141 headless tests\" becomes 142 with the added signer.rs test.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 21528,
+       "output_tokens": 6865
+      },
+      "total_tokens": 29673,
+      "triage": "yes",
+      "wall_s": 125.55
+     },
+     {
+      "cost_usd": 0.09512400000000001,
+      "gold_stale": true,
+      "id": "vc-37",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The +7-line insertion at oxigraph_graph_repository.rs:234 shifts clear_graph off its twice-cited line :1226 (VC-22.1, VC-22.10), and the diff changes described write behavior \u2014 CLEAR GRAPH becomes CLEAR SILENT GRAPH in save_ontology_graph/clear_inferred_graph and the assert-graph INSERT now also emits source_domain/maturity metadata quads beyond the topic's \"class nodes + class-",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 8512,
+       "output_tokens": 3041
+      },
+      "total_tokens": 12833,
+      "triage": "yes",
+      "wall_s": 64.59
+     },
+     {
+      "cost_usd": 0.127664,
+      "gold_stale": true,
+      "id": "vc-38",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts lines in oxigraph_ontology_repository.rs (CLEAR SILENT comments at ~:1593 and an 8-line metadata loop at ~:1613) before/around the class_iri mint sites cited in VC-23.9 as \":1598, :1619\", shifting them to ~:1600 and ~:1629 so those path:line citations no longer point at the mint sites.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 7702,
+       "output_tokens": 4830
+      },
+      "total_tokens": 13812,
+      "triage": "yes",
+      "wall_s": 91.17
+     },
+     {
+      "cost_usd": 0.119368,
+      "gold_stale": true,
+      "id": "vc-39",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Removing 7 lines in materialise_domain_roots (github_sync_service.rs:848-913) shifts every later citation in the topic (1505, 1521, 1619, 1653, 1687, 1883, 1979, 2016, 2159, 2206) off by 7, and the new sync_corpus.rs import shifts :23 and :56-64 by 1, so the diagrams' path:line citations no longer land.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 6497,
+       "output_tokens": 4669
+      },
+      "total_tokens": 11166,
+      "triage": "yes",
+      "wall_s": 83.75
+     },
+     {
+      "cost_usd": 0.05178,
+      "gold_stale": false,
+      "id": "vc-40",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only extracts InstancedLabels' duplicated getDomainColor/DOMAIN_COLORS helpers into ../utils/domainColors \u2014 a behaviour-preserving refactor of code the topic makes no claims about; the topic's InstancedLabels statements (deleted isXRMode prop chain, removed vrMode gating) are untouched.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 8355,
+       "output_tokens": 918
+      },
+      "total_tokens": 9273,
+      "triage": "no",
+      "wall_s": 21.72
+     },
+     {
+      "cost_usd": 0.057696,
+      "gold_stale": false,
+      "id": "vc-41",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends a \"Source qualification \u2014 2026-10-01\" section to ADR-2111 (inserted around line 83, leaving the line-4 citation intact) reaffirming it stays `proposed / none / inactive`, which matches the topic's Note4 claim that ADR-2111 is proposed and not live; nothing in VC-26's diagrams or statements is contradicted.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 10234,
+       "output_tokens": 838
+      },
+      "total_tokens": 11072,
+      "triage": "no",
+      "wall_s": 17.86
+     },
+     {
+      "cost_usd": 0.191668,
+      "gold_stale": true,
+      "id": "vc-42",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The commit inserts 7 new lines into BASELINE-architecture.md's \"Known divergences\" section immediately before the bullet VC-36.3 cites as \":237\" (the stale ?token= fallback record), shifting it to ~:244 and leaving :237 pointing at the new sidestr/payment bullet (the :209-210 cite in VC-36.2 is unaffected).",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 19012,
+       "output_tokens": 5781
+      },
+      "total_tokens": 24793,
+      "triage": "yes",
+      "wall_s": 99.14
+     },
+     {
+      "cost_usd": 0.08998,
+      "gold_stale": false,
+      "id": "vc-43",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only reworks image_gen_handler.rs's ComfyUI model-selection/pipeline internals; the topic's sole claim touching that file \u2014 that it calls get_global_storage unconditionally (VC-26.1 note) \u2014 is untouched, and no Solid pod, proxy, or JSS statement is altered.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 16036,
+       "output_tokens": 1279
+      },
+      "total_tokens": 18595,
+      "triage": "no",
+      "wall_s": 31.11
+     },
+     {
+      "cost_usd": 0.091716,
+      "gold_stale": false,
+      "id": "vc-44",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The commit only swaps the unrelated COMFYUI_SALAD_URL env var for IMAGE_GEN_MODEL at docker-compose.unified.yml:228 \u2014 a line-for-line replacement that neither touches nor shifts the lines 83-90 the topic cites for VISIONCLAW_DEV_MODE, and the topic never mentions ComfyUI or image-gen config.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 1280,
+       "input_tokens": 17645,
+       "output_tokens": 1044
+      },
+      "total_tokens": 19969,
+      "triage": "no",
+      "wall_s": 31.64
+     },
+     {
+      "cost_usd": 0.059884,
+      "gold_stale": false,
+      "id": "vc-45",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only retracts a GPU-vs-CPU speedup figure in configuration.md's GPU/physics section (~line 154), which VC-28 never cites or depends on \u2014 the topic's sole configuration.md reference (line 220, Perplexity env docs) is untouched.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 0,
+       "cache_read_input_tokens": 0,
+       "input_tokens": 8456,
+       "output_tokens": 1303
+      },
+      "total_tokens": 9759,
+      "triage": "no",
+      "wall_s": 26.89
+     }
+    ],
+    "precision": 1.0,
+    "precision_wilson95": [
+     0.8668,
+     1.0
+    ],
+    "projection": {
+     "agentbox": {
+      "expected_reauthors": 27.9,
+      "per_commit_baseline": 1224,
+      "sensitivity_stratum_rate": 13.4,
+      "weekly_rechecks": 67
+     },
+     "pooled": {
+      "expected_reauthors": 95.4,
+      "per_commit_baseline": 1943,
+      "saving_vs_per_commit": 0.9509,
+      "saving_vs_weekly_batching": 0.5834,
+      "sensitivity_stratum_rate": 92.6,
+      "weekly_rechecks": 229
+     },
+     "visionclaw": {
+      "expected_reauthors": 67.5,
+      "per_commit_baseline": 719,
+      "sensitivity_stratum_rate": 79.2,
+      "weekly_rechecks": 162
+     }
+    },
+    "qualifies": false,
+    "recall": 0.8621,
+    "recall_k": 25,
+    "recall_wilson95": [
+     0.6944,
+     0.945
+    ],
+    "rejected": 35,
+    "rejection_per_1k_tokens": 0.03524,
+    "rejection_rate": 0.5833,
+    "rejection_wilson95": [
+     0.4573,
+     0.6994
+    ],
+    "stale": 29,
+    "unparsable": []
+   },
+   "haiku-4.5": {
+    "by_stratum": {
+     "agentbox": {
+      "flagged": 2,
+      "missed_stale": [
+       "ab-09",
+       "ab-13"
+      ],
+      "n": 15,
+      "precision": 1.0,
+      "precision_wilson95": [
+       0.3424,
+       1.0
+      ],
+      "recall": 0.5,
+      "recall_k": 2,
+      "recall_wilson95": [
+       0.15,
+       0.85
+      ],
+      "rejected": 13,
+      "rejection_rate": 0.8667,
+      "rejection_wilson95": [
+       0.6212,
+       0.9626
+      ],
+      "stale": 4
+     },
+     "visionclaw": {
+      "flagged": 9,
+      "missed_stale": [
+       "vc-03",
+       "vc-04",
+       "vc-09",
+       "vc-13",
+       "vc-14",
+       "vc-15",
+       "vc-17",
+       "vc-22",
+       "vc-23",
+       "vc-27",
+       "vc-30",
+       "vc-31",
+       "vc-36",
+       "vc-38",
+       "vc-39",
+       "vc-42"
+      ],
+      "n": 45,
+      "precision": 1.0,
+      "precision_wilson95": [
+       0.7008,
+       1.0
+      ],
+      "recall": 0.36,
+      "recall_k": 9,
+      "recall_wilson95": [
+       0.2025,
+       0.5548
+      ],
+      "rejected": 36,
+      "rejection_rate": 0.8,
+      "rejection_wilson95": [
+       0.6618,
+       0.891
+      ],
+      "stale": 25
+     }
+    },
+    "cost": {
+     "max_wall_s": 127.84,
+     "mean_cost_usd_claude_code_reported": 0.0442,
+     "mean_input_side_tokens": 20956,
+     "mean_output_tokens": 2801,
+     "mean_total_tokens": 23757,
+     "mean_wall_s": 31.07,
+     "median_total_tokens": 22874.5,
+     "median_wall_s": 24.62,
+     "sum_cost_usd_claude_code_reported": 2.6519
+    },
+    "flagged": 11,
+    "infra_failed": [],
+    "infra_retries": 0,
+    "missed_stale": [
+     "ab-09",
+     "ab-13",
+     "vc-03",
+     "vc-04",
+     "vc-09",
+     "vc-13",
+     "vc-14",
+     "vc-15",
+     "vc-17",
+     "vc-22",
+     "vc-23",
+     "vc-27",
+     "vc-30",
+     "vc-31",
+     "vc-36",
+     "vc-38",
+     "vc-39",
+     "vc-42"
+    ],
+    "n": 60,
+    "pairs": [
+     {
+      "cost_usd": 0.0790333,
+      "gold_stale": true,
+      "id": "ab-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: AB-13.7's startup sequence diagram omits the new `await this._startForumGovernance()` call added to RelayConsumer.start(); AB-13.1's topology diagram omits the new forum relay subscription that RelayConsumer now maintains alongside the loopback relay connection.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 24349,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 5942
+      },
+      "total_tokens": 36463,
+      "triage": "yes",
+      "wall_s": 70.38
+     },
+     {
+      "cost_usd": 0.0508073,
+      "gold_stale": true,
+      "id": "ab-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The addition of 22 lines (forum_governance section) to agentbox.toml before the pods section shifts all downstream line references; cited lines for consultants (1234, 1245, 1251, 1258, 1263) and colloquy (998, 1005, 1011, 1015\u20131017, 1025) are now incorrect.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 14686,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 4162
+      },
+      "total_tokens": 25020,
+      "triage": "yes",
+      "wall_s": 46.72
+     },
+     {
+      "cost_usd": 0.0334973,
+      "gold_stale": false,
+      "id": "ab-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: External dependency version pin update; topic documents agentbox's internal service architecture and dispatch flows which remain unchanged.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 11501,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1974
+      },
+      "total_tokens": 19647,
+      "triage": "no",
+      "wall_s": 22.83
+     },
+     {
+      "cost_usd": 0.0400123,
+      "gold_stale": false,
+      "id": "ab-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only updates the VisionClaw repository pin in flake.nix; the TOPIC documents agentbox-manifest subcommands, boot sequences, TUI round-trip, and MCP servers (all internal to agentbox), none of which are affected by an external dependency version pin change.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 11461,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3293
+      },
+      "total_tokens": 20926,
+      "triage": "no",
+      "wall_s": 34.72
+     },
+     {
+      "cost_usd": 0.0421743,
+      "gold_stale": false,
+      "id": "ab-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff updates only the VisionClaw dependency pin in flake.nix; the topic documents agentbox's capability-gating architecture and flows, which remain unchanged by a dependency version bump unless that version introduces breaking changes the topic relies on. No statements or diagrams in AB-15 make VisionClaw-version-specific claims.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 15012,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2305
+      },
+      "total_tokens": 23489,
+      "triage": "no",
+      "wall_s": 28.16
+     },
+     {
+      "cost_usd": 0.0288983,
+      "gold_stale": false,
+      "id": "ab-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only updates the VisionClaw commit pin in flake.nix (lines 39-42), which does not affect any of the sidechain producer, mirror, faucet, or role isolation code documented in AB-34 \u2014 all cited references in the topic point to lines 241-2832 in flake.nix.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 10379,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1503
+      },
+      "total_tokens": 18054,
+      "triage": "no",
+      "wall_s": 17.76
+     },
+     {
+      "cost_usd": 0.032028299999999996,
+      "gold_stale": false,
+      "id": "ab-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff updates only the VisionClaw commit hash in flake.nix line 42, changing no line numbers; the topic's role isolation implementation (accounts, configs, identity port, rehearsal) and line number citations remain unaffected.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 9864,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2335
+      },
+      "total_tokens": 18371,
+      "triage": "no",
+      "wall_s": 20.77
+     },
+     {
+      "cost_usd": 0.0148713,
+      "gold_stale": false,
+      "id": "ab-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff removes `ruflo_console` setting at line 1895, which is unrelated to the ontology scheduler/monitor configuration cited in the topic (agentbox.toml:864-878).",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 4883,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 896
+      },
+      "total_tokens": 11951,
+      "triage": "no",
+      "wall_s": 11.38
+     },
+     {
+      "cost_usd": 0.06278629999999999,
+      "gold_stale": true,
+      "id": "ab-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds poker_citizen multi-seat configuration and supervisord programs (priority 265) but does not modify dream-engine configuration, dream.config.json, dream_machine settings in agentbox.toml, or any dream-cycle-specific supervisord setup (dream-engine remains priority 230). No diagram or statement in AB-23 is contradicted.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 25323,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2303
+      },
+      "total_tokens": 33798,
+      "triage": "no",
+      "wall_s": 27.12
+     },
+     {
+      "cost_usd": 0.044360300000000005,
+      "gold_stale": false,
+      "id": "ab-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff changes only the poll interval for sidestr-producer (600s \u2192 60s), not secrets custody, seccomp, or runtime profiles discussed in the topic.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 15570,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2519
+      },
+      "total_tokens": 24261,
+      "triage": "no",
+      "wall_s": 26.25
+     },
+     {
+      "cost_usd": 0.0265903,
+      "gold_stale": false,
+      "id": "ab-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff changes a sidechain producer interval parameter in agentbox.toml, which is unrelated to role isolation, the identity port, accounts, secrets delivery, environment classes, or the rehearsal tests covered in this topic.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 10140,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1137
+      },
+      "total_tokens": 17449,
+      "triage": "no",
+      "wall_s": 12.86
+     },
+     {
+      "cost_usd": 0.0259003,
+      "gold_stale": false,
+      "id": "ab-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Changes affect sidechain.dreamlab-txbt4 and ruflo_console gates, not memory_learning configuration or learning loop sources.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 10165,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 989
+      },
+      "total_tokens": 17326,
+      "triage": "no",
+      "wall_s": 12.6
+     },
+     {
+      "cost_usd": 0.054280300000000004,
+      "gold_stale": true,
+      "id": "ab-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds sidechain faucet configuration (faucet_units, faucet_sats) which is outside the dream-engine scope; AB-23's sources do not reference sidestr or faucet mechanics.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 24270,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1023
+      },
+      "total_tokens": 31465,
+      "triage": "no",
+      "wall_s": 12.93
+     },
+     {
+      "cost_usd": 0.0366623,
+      "gold_stale": false,
+      "id": "ab-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only updates verified_commit metadata fields in ADR files; no source code files referenced in the topic's citations (proxy.mjs, flake.nix, auth.js, nostr-bridge.js, gateway.cjs, etc.) are changed.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 14801,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1287
+      },
+      "total_tokens": 22260,
+      "triage": "no",
+      "wall_s": 15.27
+     },
+     {
+      "cost_usd": 0.0353643,
+      "gold_stale": false,
+      "id": "ab-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff updates a VisionClaw commit pin for reproducibility, but the topic makes no claims about VisionClaw's specific content at any commit\u2014it documents agentbox skills infrastructure mechanisms (routing, discovery, MCP servers) that remain accurate regardless of which VisionClaw commit is pinned.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 12802,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1827
+      },
+      "total_tokens": 20801,
+      "triage": "no",
+      "wall_s": 21.39
+     },
+     {
+      "cost_usd": 0.0741483,
+      "gold_stale": true,
+      "id": "vc-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds ~107 lines of new code (BaseClassIndex struct, class_ref_iri, parse_draft_axioms_against, check_draft_disjointness) before the `run_consistency_gate` function and shifts all subsequent line numbers significantly; the citations in VC-05.17 (e.g., :1479, :1227, :1301, :1308, :1534 for decision_record and related calls) would no longer point to the correct source loca",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 26504,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 4103
+      },
+      "total_tokens": 36779,
+      "triage": "yes",
+      "wall_s": 43.61
+     },
+     {
+      "cost_usd": 0.0368613,
+      "gold_stale": false,
+      "id": "vc-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff adds new functions at lines 2152+ in oxigraph_ontology_repository.rs, but all topic citations for this file reference lines \u2264791, so line numbers are unaffected and the new `class_iris()` helper doesn't contradict any diagrams or statements.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10208,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3164
+      },
+      "total_tokens": 19544,
+      "triage": "no",
+      "wall_s": 32.83
+     },
+     {
+      "cost_usd": 0.0691373,
+      "gold_stale": true,
+      "id": "vc-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds ADR-2125 implementation (draft wikilink resolution against base classes, sibling-only disjointness validation) which extends elevation_actor.rs but doesn't contradict any statements or diagrams in VC-23 \u2014 the core descriptions of mint sites and class IRI schema still hold, though line number citations become stale due to ~211 added lines.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 18876,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 6152
+      },
+      "total_tokens": 31200,
+      "triage": "no",
+      "wall_s": 69.27
+     },
+     {
+      "cost_usd": 0.0384623,
+      "gold_stale": true,
+      "id": "vc-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff implements WAC \u00a74.2 ACL inheritance for Solid pod resources, which operates outside the request lifecycle/identity/RBAC flows documented in VC-03; the topic makes no claims about ACL evaluation semantics that this change contradicts.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13491,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2171
+      },
+      "total_tokens": 21834,
+      "triage": "no",
+      "wall_s": 26.19
+     },
+     {
+      "cost_usd": 0.0352733,
+      "gold_stale": false,
+      "id": "vc-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff removes a nostr-bbs-core patch comment from Cargo.toml, but the topic makes no statements about dependency patches\u2014it only references the default features list (line 254), which remains unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13359,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1586
+      },
+      "total_tokens": 21117,
+      "triage": "no",
+      "wall_s": 20.46
+     },
+     {
+      "cost_usd": 0.0330863,
+      "gold_stale": false,
+      "id": "vc-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff removes a git patch for nostr-bbs-core, which is consistent with the topic's assertion that solid-pod-rs is now a crates.io version pin; this removal is part of migrating away from git-based patches to version pins, not contradicting the documented state.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 7683,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3419
+      },
+      "total_tokens": 17274,
+      "triage": "no",
+      "wall_s": 35.76
+     },
+     {
+      "cost_usd": 0.0313113,
+      "gold_stale": false,
+      "id": "vc-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The removed `[patch.crates-io]` section for nostr-bbs-core is not referenced anywhere in the topic; all cited line numbers (254, 283-285, 222) precede the deletion and remain valid; no statement or diagram would be contradicted by removing an unmentioned build-system patch.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10773,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1828
+      },
+      "total_tokens": 18773,
+      "triage": "no",
+      "wall_s": 21.19
+     },
+     {
+      "cost_usd": 0.0582533,
+      "gold_stale": false,
+      "id": "vc-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff reaffirms ADR-2111's status as \"proposed / none / inactive\" and confirms FsPaymentStore remains host-owned, which aligns with the topic's statement that the pay system changes are \"PROPOSED, NOT LIVE.\"",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22369,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2578
+      },
+      "total_tokens": 31119,
+      "triage": "no",
+      "wall_s": 29.85
+     },
+     {
+      "cost_usd": 0.0384753,
+      "gold_stale": true,
+      "id": "vc-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff updates BASELINE-architecture.md line numbers for pay_handler.rs and ritual.rs (payment subsystem), which are not mentioned in or relevant to VC-05's governance-and-identity handlers.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17040,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 754
+      },
+      "total_tokens": 23966,
+      "triage": "no",
+      "wall_s": 10.2
+     },
+     {
+      "cost_usd": 0.029808300000000003,
+      "gold_stale": false,
+      "id": "vc-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff modifies payment handler line numbers and AnchorConfirmer documentation in BASELINE-architecture.md, which are orthogonal to VC-32's WebSocket transport and binary protocol diagrams\u2014the topic makes no statements about payment infrastructure, sidestr, or ledger systems.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 12444,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 859
+      },
+      "total_tokens": 19475,
+      "triage": "no",
+      "wall_s": 11.99
+     },
+     {
+      "cost_usd": 0.022858299999999998,
+      "gold_stale": false,
+      "id": "vc-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff modifies payment infrastructure (FsPaymentStore, AnchorConfirmer, sidestr) in BASELINE-architecture.md; topic concerns only browser-client identity, NIP-07/NIP-98, passkeys, and RBAC with no coverage of payment systems.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 9059,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 823
+      },
+      "total_tokens": 16054,
+      "triage": "no",
+      "wall_s": 10.88
+     },
+     {
+      "cost_usd": 0.0485553,
+      "gold_stale": false,
+      "id": "vc-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff updates line references for payment handler and sidestr-confirmer code in BASELINE-architecture.md, which are unrelated to the XR client implementation systems documented in this topic.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22190,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 710
+      },
+      "total_tokens": 29072,
+      "triage": "no",
+      "wall_s": 9.88
+     },
+     {
+      "cost_usd": 0.0277653,
+      "gold_stale": true,
+      "id": "vc-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds a feature flag to the solid-pod-rs dependency; none of the documented observability, canary, health-probe, or build-loop mechanisms in VC-08 are affected by this configuration change.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8120,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2180
+      },
+      "total_tokens": 16472,
+      "triage": "no",
+      "wall_s": 25.17
+     },
+     {
+      "cost_usd": 0.0720143,
+      "gold_stale": true,
+      "id": "vc-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff modifies internal FsPaymentStore implementation (storage model, removes credit() method, updates debit() to use WebLedger.charge()) and tests, but HTTP handler behavior remains unchanged\u2014store.get_balance() and store.debit() methods still exist and handlers route through them the same way; diagram only describes endpoint behavior (/pay/.balance, /pay/{resource}, /pay/.deposi",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 23692,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 4801
+      },
+      "total_tokens": 34665,
+      "triage": "no",
+      "wall_s": 53.52
+     },
+     {
+      "cost_usd": 0.0397513,
+      "gold_stale": true,
+      "id": "vc-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds an `inherited: false` field to an internal `AclDocument` struct in `build_pod_root_acl` (line 1123), which is not cited or discussed in the topic; the change is an internal implementation detail that does not affect any handler routes, sequences, or behavior documented in VC-05.15.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 16843,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1088
+      },
+      "total_tokens": 24103,
+      "triage": "no",
+      "wall_s": 13.95
+     },
+     {
+      "cost_usd": 0.0237723,
+      "gold_stale": false,
+      "id": "vc-16",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: the diff updates solid-pod-rs dependency versions and adds a patch.crates-io section; it makes no changes to the source code architecture, hexagonal structure, CQRS layer, port/adapter organization, or any structural facts documented in the topic.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8556,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1207
+      },
+      "total_tokens": 15935,
+      "triage": "no",
+      "wall_s": 14.37
+     },
+     {
+      "cost_usd": 0.028205300000000003,
+      "gold_stale": true,
+      "id": "vc-17",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff updates solid-pod-rs dependency versions and adds a patch section for nostr-bbs-core, but the topic's diagrams describe observability architecture, canary systems, health probes, and the build loop\u2014none of which are affected by dependency version changes.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8795,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1998
+      },
+      "total_tokens": 16965,
+      "triage": "no",
+      "wall_s": 23.02
+     },
+     {
+      "cost_usd": 0.055071300000000004,
+      "gold_stale": true,
+      "id": "vc-18",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-26.1 Note4 states ADR-2111 is \"PROPOSED, not live (decision_status proposed, implementation_status none)\" with 0.4.0-alpha.15; the diff implements it by upgrading to 0.5.0-alpha.12 and adding nostr-bbs-core git patch (lockstep with forum), making that statement wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 12123,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 6040
+      },
+      "total_tokens": 24335,
+      "triage": "yes",
+      "wall_s": 64.34
+     },
+     {
+      "cost_usd": 0.047998299999999994,
+      "gold_stale": true,
+      "id": "vc-19",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-02.3 claims to show all GraphServiceSupervisor handlers via grep but now omits the new `UpdateChainPayments` handler; line numbers for handlers after the insertion point (H22 onwards) have shifted by ~13 lines.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 14974,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3485
+      },
+      "total_tokens": 24631,
+      "triage": "yes",
+      "wall_s": 38.17
+     },
+     {
+      "cost_usd": 0.0472523,
+      "gold_stale": false,
+      "id": "vc-20",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds a new optional field `did_nostr` to `TaskInfo` and a new method `get_chain_payments()` to `ManagementApiClient`, both purely additive changes. The topic's sole reference to `ManagementApiClient` (VC-05.9) documents `create_brief`, `execute_brief`, and `create_debrief`, whose signatures and behavior remain unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17476,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2335
+      },
+      "total_tokens": 25983,
+      "triage": "no",
+      "wall_s": 25.67
+     },
+     {
+      "cost_usd": 0.0507183,
+      "gold_stale": true,
+      "id": "vc-21",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Diff adds substantial code to agent_monitor_actor.rs (new imports, functions, struct fields, message handlers), shifting all subsequent line numbers; VC-09.12 cites specific lines in that file (e.g., :253, :255, :264-267, :287-290, :574) for MANAGEMENT_API and MOCK_AGENTS that will no longer be correct.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17904,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2857
+      },
+      "total_tokens": 26933,
+      "triage": "yes",
+      "wall_s": 34.1
+     },
+     {
+      "cost_usd": 0.040757299999999996,
+      "gold_stale": true,
+      "id": "vc-22",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff adds chain payment handling and UpdateChainPayments message forwarding to GraphStateActor, but doesn't modify the position broadcast pipeline (UpdateNodePositions forwarding, GetGraphData polling, binary encoding) or WebSocket flows described in the topic.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 11981,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3234
+      },
+      "total_tokens": 21387,
+      "triage": "no",
+      "wall_s": 35.55
+     },
+     {
+      "cost_usd": 0.025120299999999998,
+      "gold_stale": true,
+      "id": "vc-23",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: chain_payment edges are Structural (not Hierarchical) and don't assert subsumption, consistent with VC-16.8's description of how domain_member and other non-ranking edges work; the topic's invariant and open issues apply only to hierarchical edges with owl_property_iri provenance.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 7170,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2031
+      },
+      "total_tokens": 15373,
+      "triage": "no",
+      "wall_s": 23.51
+     },
+     {
+      "cost_usd": 0.0455413,
+      "gold_stale": true,
+      "id": "vc-24",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-27.7 diagram shows only two concurrent API calls (list_tasks, get_system_status) but the diff adds a third (get_chain_payments); the diagram omits the entire new ProcessChainPayments handler flow that projects sidechain payments to UpdateChainPayments; line numbers in ManagementApiClient notes are shifted by the insertion.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 16288,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2468
+      },
+      "total_tokens": 24928,
+      "triage": "yes",
+      "wall_s": 28.73
+     },
+     {
+      "cost_usd": 0.060497300000000004,
+      "gold_stale": false,
+      "id": "vc-25",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff adds \"chain_payment\" to a test array in dag_rank_tests (line 4662), which is test code; the topic documents that certain labels (equivalent_class, same_as, sub_property_of) are excluded from hierarchy and others (is_subclass_of, subclass_of, SUBCLASS_OF, hierarchical, HIERARCHICAL) are accepted\u2014adding one more excluded label to the test suite does not contradict these st",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 21961,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 3190
+      },
+      "total_tokens": 31323,
+      "triage": "no",
+      "wall_s": 36.23
+     },
+     {
+      "cost_usd": 0.0687223,
+      "gold_stale": true,
+      "id": "vc-26",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The refactoring moves `domain_membership_edge(root_id, member_id)` calls into the new `plan_domain_roots` function (around line 2378) rather than directly in `materialise_domain_roots`, changing the flow diagram VC-16.8's P3\u2192P4 relationship and invalidating the cited line numbers (919, 2238).",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13551,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 8199
+      },
+      "total_tokens": 27922,
+      "triage": "yes",
+      "wall_s": 83.78
+     },
+     {
+      "cost_usd": 0.06566730000000001,
+      "gold_stale": true,
+      "id": "vc-27",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff refactors `materialise_domain_roots` into pure functions but doesn't modify any of the functions documented in the topic's diagrams (run_post_sync_reasoning, select_inferred_edges_for_sync, WhelkInferenceEngine::infer, store_inference_results, etc.); the statements and flow descriptions in VC-20.3 and VC-20.4 remain accurate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 15611,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 6764
+      },
+      "total_tokens": 28547,
+      "triage": "no",
+      "wall_s": 71.09
+     },
+     {
+      "cost_usd": 0.0336013,
+      "gold_stale": false,
+      "id": "vc-28",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Cloudflared profile change is unrelated to voice infrastructure; only docker-compose.unified.yml citation in VC-35 (line 329, xinference) remains unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13188,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1320
+      },
+      "total_tokens": 20680,
+      "triage": "no",
+      "wall_s": 16.96
+     },
+     {
+      "cost_usd": 0.0547603,
+      "gold_stale": false,
+      "id": "vc-29",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff modifies cloudflare tunnel profile configuration and its deploy comment, but the topic contains no statements about tunnel profiles, cloudflare ingress settings, or ADR-2119. The topic's only docker-compose.unified.yml citations (lines 83-90 for VISIONCLAW_DEV_MODE) are unaffected.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22150,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1967
+      },
+      "total_tokens": 30289,
+      "triage": "no",
+      "wall_s": 22.58
+     },
+     {
+      "cost_usd": 0.0217923,
+      "gold_stale": true,
+      "id": "vc-30",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff refactors domain membership edge creation and changes edge_type semantics, but VC-21 does not discuss domain edges, their types, or this implementation detail\u2014it focuses on corpus sync flow and the frontmatter inclusion gate.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 6241,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1737
+      },
+      "total_tokens": 14150,
+      "triage": "no",
+      "wall_s": 20.6
+     },
+     {
+      "cost_usd": 0.0287093,
+      "gold_stale": true,
+      "id": "vc-31",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The topic makes no claims about domain edge types or their labeling; the diff refactors edge creation and changes edge_type from hardcoded \"hierarchical\" to DOMAIN_MEMBER_EDGE_TYPE, which is unmentioned in VC-22 and does not contradict any documented statements.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10087,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1582
+      },
+      "total_tokens": 17841,
+      "triage": "no",
+      "wall_s": 18.11
+     },
+     {
+      "cost_usd": 0.0595383,
+      "gold_stale": false,
+      "id": "vc-32",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The ADR-2108 amendment clarifies the Trust box deployment uses LAN-only prod profile with NIP-98 signing\u2014consistent with VC-36's architecture (presence at :3001, NIP-98 in VC-36.3/11, dev-mode-off branch in VC-36.15) and adds no contradictions.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22459,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2799
+      },
+      "total_tokens": 31430,
+      "triage": "no",
+      "wall_s": 32.3
+     },
+     {
+      "cost_usd": 0.07707729999999999,
+      "gold_stale": false,
+      "id": "vc-33",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The amendment clarifies that dev mode is dev-only (owner's rig), but the topic's VC-36.15 already describes it as \"DEV SERVICE ONLY\" with \"the default never reaches a release deploy\"; the topic documents the owner's rig scenario consistently with the amendment's decision.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22711,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 6206
+      },
+      "total_tokens": 35089,
+      "triage": "no",
+      "wall_s": 64.8
+     },
+     {
+      "cost_usd": 0.0592453,
+      "gold_stale": true,
+      "id": "vc-34",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Refactoring removes 24 lines from auth_extractor.rs (lines 146-175), shifting all subsequent line citations down by 24; VC-03.3 cites `:174`, `:185`, `:200`, `:211`, `:252` which are now at wrong line numbers.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 16230,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 5232
+      },
+      "total_tokens": 27634,
+      "triage": "yes",
+      "wall_s": 54.86
+     },
+     {
+      "cost_usd": 0.0383623,
+      "gold_stale": true,
+      "id": "vc-35",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Line citations to speech_socket_handler.rs:998 and socket_flow_handler/http_handler.rs are now inaccurate; the connection_url derivation logic has been extracted to crate::utils::auth::nip98_request_url(&req), moving the implementation out of the cited locations.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13491,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2151
+      },
+      "total_tokens": 21814,
+      "triage": "yes",
+      "wall_s": 24.08
+     },
+     {
+      "cost_usd": 0.0680243,
+      "gold_stale": true,
+      "id": "vc-36",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff refactors NIP-98 URL reconstruction and adds proxy configuration tests without contradicting the topic's statements about NIP-98 being the sole credential, the dev bearer being refused for non-loopback peers, or VISIONCLAW_DEV_MODE being dev-only\u2014all already documented in VC-36.11 and VC-36.15.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 26937,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2705
+      },
+      "total_tokens": 35814,
+      "triage": "no",
+      "wall_s": 32.34
+     },
+     {
+      "cost_usd": 0.0886223,
+      "gold_stale": true,
+      "id": "vc-37",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: oxigraph_graph_repository.rs:1226 citation shifted; +7 lines inserted before it at line 234 \u2192 now line 1233.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10686,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 13325
+      },
+      "total_tokens": 30183,
+      "triage": "yes",
+      "wall_s": 127.84
+     },
+     {
+      "cost_usd": 0.042707300000000004,
+      "gold_stale": true,
+      "id": "vc-38",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: diff changes SPARQL query semantics (CLEAR \u2192 CLEAR SILENT) and adds RDF metadata field handling for source_domain/maturity/group, but does not modify URN minting, parsing, did:nostr format, sha256-12, federation crossing, or wire node-id logic documented in the topic.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 9501,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 4616
+      },
+      "total_tokens": 20289,
+      "triage": "no",
+      "wall_s": 47.23
+     },
+     {
+      "cost_usd": 0.0286513,
+      "gold_stale": true,
+      "id": "vc-39",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: Diff adds error handling and optional reporting to sync_corpus.rs and refactors hardcoded domain roots to a constant in github_sync_service.rs; neither change affects the corpus ingest flow, CorpusSource port interactions, or frontmatter inclusion gate logic documented in the topic diagrams.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 6683,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 2932
+      },
+      "total_tokens": 15787,
+      "triage": "no",
+      "wall_s": 31.86
+     },
+     {
+      "cost_usd": 0.0268153,
+      "gold_stale": false,
+      "id": "vc-40",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff refactors getDomainColor to a utility module without changing InstancedLabels.tsx's functionality or role in the graph render path described in VC-37.7; the constant-false vrMode deletion and metadata rendering behavior remain unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8780,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1726
+      },
+      "total_tokens": 16678,
+      "triage": "no",
+      "wall_s": 21.15
+     },
+     {
+      "cost_usd": 0.0307223,
+      "gold_stale": false,
+      "id": "vc-41",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The DIFF confirms ADR-2111 remains \"proposed / none / inactive,\" which matches the TOPIC's statement in Note4 that ADR-2111 is \"PROPOSED, not live (decision_status proposed, implementation_status none).\"",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 11111,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1575
+      },
+      "total_tokens": 18858,
+      "triage": "no",
+      "wall_s": 18.21
+     },
+     {
+      "cost_usd": 0.048598300000000004,
+      "gold_stale": true,
+      "id": "vc-42",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff documents payment infrastructure (sidestr, FsPaymentStore) in BASELINE-architecture.md, but VC-36 describes only the XR client architecture and makes no statements about payment systems.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22019,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 787
+      },
+      "total_tokens": 28978,
+      "triage": "no",
+      "wall_s": 10.53
+     },
+     {
+      "cost_usd": 0.0485183,
+      "gold_stale": false,
+      "id": "vc-43",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff modifies image generation workflow selection (adding MiniMax H3 support, removing Salad wrapper) but doesn't alter the get_global_storage call that VC-26.1 Note1 references as the only image_gen_handler.rs concern.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 20049,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1559
+      },
+      "total_tokens": 27780,
+      "triage": "no",
+      "wall_s": 19.22
+     },
+     {
+      "cost_usd": 0.0500133,
+      "gold_stale": false,
+      "id": "vc-44",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff changes ComfyUI image generation configuration in docker-compose.yml (lines unrelated to VisionClaw_DEV_MODE), which is not addressed anywhere in VC-36's documentation of the Godot XR client architecture, transport, rendering, HUD, or agent systems.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 21949,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1098
+      },
+      "total_tokens": 29219,
+      "triage": "no",
+      "wall_s": 13.89
+     },
+     {
+      "cost_usd": 0.023787300000000004,
+      "gold_stale": false,
+      "id": "vc-45",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: GPU performance figures in configuration.md are orthogonal to the external-service integrations (RAGFlow, Perplexity, ComfyUI, GitHub, speech) documented in VC-28; the topic does not reference or depend on GPU benchmarks.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8521,
+       "cache_read_input_tokens": 6163,
+       "input_tokens": 9,
+       "output_tokens": 1224
+      },
+      "total_tokens": 15917,
+      "triage": "no",
+      "wall_s": 13.12
+     }
+    ],
+    "precision": 1.0,
+    "precision_wilson95": [
+     0.7412,
+     1.0
+    ],
+    "projection": {
+     "agentbox": {
+      "expected_reauthors": 12.3,
+      "per_commit_baseline": 1224,
+      "sensitivity_stratum_rate": 8.9,
+      "weekly_rechecks": 67
+     },
+     "pooled": {
+      "expected_reauthors": 42.0,
+      "per_commit_baseline": 1943,
+      "saving_vs_per_commit": 0.9784,
+      "saving_vs_weekly_batching": 0.8166,
+      "sensitivity_stratum_rate": 41.3,
+      "weekly_rechecks": 229
+     },
+     "visionclaw": {
+      "expected_reauthors": 29.7,
+      "per_commit_baseline": 719,
+      "sensitivity_stratum_rate": 32.4,
+      "weekly_rechecks": 162
+     }
+    },
+    "qualifies": false,
+    "recall": 0.3793,
+    "recall_k": 11,
+    "recall_wilson95": [
+     0.2269,
+     0.56
+    ],
+    "rejected": 49,
+    "rejection_per_1k_tokens": 0.03438,
+    "rejection_rate": 0.8167,
+    "rejection_wilson95": [
+     0.7008,
+     0.8944
+    ],
+    "stale": 29,
+    "unparsable": []
+   },
+   "sonnet-5.5": {
+    "by_stratum": {
+     "agentbox": {
+      "flagged": 4,
+      "missed_stale": [],
+      "n": 15,
+      "precision": 1.0,
+      "precision_wilson95": [
+       0.5101,
+       1.0
+      ],
+      "recall": 1.0,
+      "recall_k": 4,
+      "recall_wilson95": [
+       0.5101,
+       1.0
+      ],
+      "rejected": 11,
+      "rejection_rate": 0.7333,
+      "rejection_wilson95": [
+       0.4805,
+       0.891
+      ],
+      "stale": 4
+     },
+     "visionclaw": {
+      "flagged": 27,
+      "missed_stale": [
+       "vc-09",
+       "vc-14"
+      ],
+      "n": 45,
+      "precision": 0.8519,
+      "precision_wilson95": [
+       0.6752,
+       0.9408
+      ],
+      "recall": 0.92,
+      "recall_k": 23,
+      "recall_wilson95": [
+       0.7503,
+       0.9778
+      ],
+      "rejected": 18,
+      "rejection_rate": 0.4,
+      "rejection_wilson95": [
+       0.2702,
+       0.5455
+      ],
+      "stale": 25
+     }
+    },
+    "cost": {
+     "max_wall_s": 10.31,
+     "mean_cost_usd_claude_code_reported": 0.08139,
+     "mean_input_side_tokens": 21769.4,
+     "mean_output_tokens": 239.6,
+     "mean_total_tokens": 22009,
+     "mean_wall_s": 4.85,
+     "median_total_tokens": 20260.5,
+     "median_wall_s": 4.44,
+     "sum_cost_usd_claude_code_reported": 4.8837
+    },
+    "flagged": 31,
+    "infra_failed": [],
+    "infra_retries": 0,
+    "missed_stale": [
+     "vc-09",
+     "vc-14"
+    ],
+    "n": 60,
+    "pairs": [
+     {
+      "cost_usd": 0.132193,
+      "gold_stale": true,
+      "id": "ab-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The relay consumer now opens an extra forum-relay connection for kind 31403 (AB-13.1 topology, AB-13.7 sequence and AB-13.15 ACSP consumer notes omit it), and the topic's cited line numbers in relay-consumer.js, nostr-bridge.js and flake.nix have shifted.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 32641,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 120
+      },
+      "total_tokens": 34888,
+      "triage": "yes",
+      "wall_s": 3.57
+     },
+     {
+      "cost_usd": 0.079581,
+      "gold_stale": true,
+      "id": "ab-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff shifts agentbox.toml and flake.nix line numbers that the topic cites (e.g. `flake.nix:1793`, `agentbox.toml:998/1005/1234`, `flake.nix:2308`), and it adds a `[sovereign_mesh.forum_governance]` block and a `nostr-bridge.js` `subscribe()` signature change that the topic's AB-28.8 fleet description does not reflect.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 19403,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 154
+      },
+      "total_tokens": 21684,
+      "triage": "yes",
+      "wall_s": 3.82
+     },
+     {
+      "cost_usd": 0.062244999999999995,
+      "gold_stale": false,
+      "id": "ab-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the pinned vaultSrc VisionClaw commit hash in flake.nix at line 42, which no diagram or statement in the media/GPU topic mentions, and no cited line numbers shift because the change replaces one line with one line.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 15229,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 90
+      },
+      "total_tokens": 17446,
+      "triage": "no",
+      "wall_s": 5.02
+     },
+     {
+      "cost_usd": 0.062261,
+      "gold_stale": false,
+      "id": "ab-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only swaps the vaultSrc pin hash on one line of flake.nix, with no line shifts, so every flake.nix citation (183-186, 1784-1793, 2308) stays valid and the topic never mentions the vault pin.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 15028,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 172
+      },
+      "total_tokens": 17327,
+      "triage": "no",
+      "wall_s": 3.96
+     },
+     {
+      "cost_usd": 0.080569,
+      "gold_stale": false,
+      "id": "ab-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the pinned VisionClaw vaultSrc input commit in flake.nix; the topic cites flake.nix only for deepsecPkg, the 2.3.10 pin, and model-router bake lines, and states nothing about vaultSrc or its pin.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 19785,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 100
+      },
+      "total_tokens": 22012,
+      "triage": "no",
+      "wall_s": 4.05
+     },
+     {
+      "cost_usd": 0.055955,
+      "gold_stale": false,
+      "id": "ab-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only swaps the `vaultSrc` VisionClaw pin hash on a single line of `flake.nix`, so no line numbers shift and nothing the topic says about the producer, mirror, faucet, or role isolation is affected.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 13394,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 195
+      },
+      "total_tokens": 15716,
+      "triage": "no",
+      "wall_s": 4.6
+     },
+     {
+      "cost_usd": 0.054549,
+      "gold_stale": false,
+      "id": "ab-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff swaps one pinned `vaultSrc` URL for another on line 42 of `flake.nix`. That is a one-line replacement, so no line numbers shift, and the topic never mentions `vaultSrc`.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 13070,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 184
+      },
+      "total_tokens": 15381,
+      "triage": "no",
+      "wall_s": 4.08
+     },
+     {
+      "cost_usd": 0.027534999999999997,
+      "gold_stale": false,
+      "id": "ab-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff removes only the `ruflo_console` feature flag line from agentbox.toml, which the topic never mentions; the cited agentbox.toml lines (864-878) are the Loom/condense settings, not this flag, and no diagram statement becomes wrong.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 6539,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 95
+      },
+      "total_tokens": 8761,
+      "triage": "no",
+      "wall_s": 3.66
+     },
+     {
+      "cost_usd": 0.139665,
+      "gold_stale": true,
+      "id": "ab-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts 15 lines into agentbox.toml before line 1638 and about 18 lines into flake.nix before line 2590. That shifts the topic's line citations (agentbox.toml:2129-2213, flake.nix:2590-2599), so they now point at the wrong lines.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 33819,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 396
+      },
+      "total_tokens": 36342,
+      "triage": "yes",
+      "wall_s": 5.52
+     },
+     {
+      "cost_usd": 0.08598299999999999,
+      "gold_stale": false,
+      "id": "ab-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the sidestr-producer-dreamlab-txbt4 `interval` value (600 \u2192 60) in agentbox.toml; the topic cites agentbox.toml only for the faucet treasury key path at line 1578, and no statement or diagram mentions this interval.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 21136,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 101
+      },
+      "total_tokens": 23364,
+      "triage": "no",
+      "wall_s": 3.72
+     },
+     {
+      "cost_usd": 0.056067,
+      "gold_stale": false,
+      "id": "ab-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes a producer polling interval (600 to 60) on one line in agentbox.toml, so no line numbers shift (the cited `agentbox.toml:2129` still holds), and the topic says nothing about that interval.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 13432,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 191
+      },
+      "total_tokens": 15750,
+      "triage": "no",
+      "wall_s": 4.2
+     },
+     {
+      "cost_usd": 0.058175000000000004,
+      "gold_stale": false,
+      "id": "ab-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the `[sidechain.dreamlab-txbt4]` enabled flag (~line 1589) and adds `ruflo_console` in a later section (~line 1869). Both are unrelated to the learning loop and sit after every `agentbox.toml` line the topic cites (438-472), so no citation or statement shifts.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 13889,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 219
+      },
+      "total_tokens": 16235,
+      "triage": "no",
+      "wall_s": 4.62
+     },
+     {
+      "cost_usd": 0.133677,
+      "gold_stale": true,
+      "id": "ab-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds 2 lines to agentbox.toml at ~1576 and 2 lines to flake.nix at ~255, so the topic's `agentbox.toml:2175-2213` and `flake.nix:2590-2599` line citations all shift by 2 and are now wrong.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 32607,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 282
+      },
+      "total_tokens": 35016,
+      "triage": "yes",
+      "wall_s": 7.5
+     },
+     {
+      "cost_usd": 0.08063300000000001,
+      "gold_stale": false,
+      "id": "ab-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes `verified_commit` front-matter lines in three ADR files, with no change to behavior, line anchors, or content that the topic's diagrams or statements describe.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 19886,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 66
+      },
+      "total_tokens": 22079,
+      "triage": "no",
+      "wall_s": 4.38
+     },
+     {
+      "cost_usd": 0.069529,
+      "gold_stale": false,
+      "id": "ab-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only bumps the pinned VisionClaw commit hash for `vaultSrc` in flake.nix; the topic makes no statement about that pin, and its flake.nix source is not cited for anything this change affects.",
+      "stratum": "agentbox",
+      "tokens": {
+       "cache_creation_input_tokens": 17075,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 80
+      },
+      "total_tokens": 19282,
+      "triage": "no",
+      "wall_s": 3.55
+     },
+     {
+      "cost_usd": 0.139585,
+      "gold_stale": true,
+      "id": "vc-01",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts about 100 lines into elevation_actor.rs, shifting every line citation after ~574 (e.g. the `RunCycle` handler at `:990` and the `decision_record`, `record_decision` and `decision_event_id` cites at `:1227`-`:1534`). It also changes the actor's behavior, which VC-05.17 documents.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 34469,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 128
+      },
+      "total_tokens": 36724,
+      "triage": "yes",
+      "wall_s": 4.45
+     },
+     {
+      "cost_usd": 0.057298999999999996,
+      "gold_stale": false,
+      "id": "vc-02",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts ~20 lines into oxigraph_ontology_repository.rs, shifting every later line number the topic cites (append_derived_quads:730, DERIVED_FENCE 744-747, 782-791, 818-824, clear_inferred_graph:693 and others), so those citations are now wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13935,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 113
+      },
+      "total_tokens": 16175,
+      "triage": "yes",
+      "wall_s": 3.88
+     },
+     {
+      "cost_usd": 0.102717,
+      "gold_stale": true,
+      "id": "vc-03",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds roughly 100+ lines (`class_ref_iri`, `BaseClassIndex`) to `elevation_actor.rs` before the test module, so the VC-23.9 citation of the frontmatter-only test assertion at `elevation_actor.rs:1800-1806` now points at the wrong lines.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 24412,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 464
+      },
+      "total_tokens": 27003,
+      "triage": "yes",
+      "wall_s": 7.18
+     },
+     {
+      "cost_usd": 0.073867,
+      "gold_stale": true,
+      "id": "vc-04",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds lines to `solid_proxy_handler.rs`, which shifts the cited line numbers (`init_pod_nip98` at :1312, `:1352`, `:1655`, route registration `:1786`) in VC-03.15; the WAC ACL inheritance change itself doesn't touch the topic's auth flow.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 18062,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 119
+      },
+      "total_tokens": 20308,
+      "triage": "yes",
+      "wall_s": 3.53
+     },
+     {
+      "cost_usd": 0.072889,
+      "gold_stale": false,
+      "id": "vc-05",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only removes a `[patch.crates-io]` block at about line 294, after the topic's one Cargo.toml citation (`default` features at :254), so that line number and the feature list are unchanged.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17620,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 198
+      },
+      "total_tokens": 19945,
+      "triage": "no",
+      "wall_s": 4.23
+     },
+     {
+      "cost_usd": 0.045477,
+      "gold_stale": false,
+      "id": "vc-06",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only removes a `[patch.crates-io]` block for `nostr-bbs-core` near line 291 of `Cargo.toml`. The topic never mentions that patch, and its `Cargo.toml` citations (workspace members at lines 2-4, the `solid-pod-rs` version pin, the absence of `visionclaw-contracts` under `[dependencies]`) are unaffected.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10502,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 304
+      },
+      "total_tokens": 12933,
+      "triage": "no",
+      "wall_s": 4.64
+     },
+     {
+      "cost_usd": 0.062641,
+      "gold_stale": false,
+      "id": "vc-07",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only deletes a `[patch.crates-io]` block after line 291 of Cargo.toml, so the topic's cited lines (222, 254, 283-285) don't move and the topic never mentions that patch.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 14743,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 324
+      },
+      "total_tokens": 17194,
+      "triage": "no",
+      "wall_s": 5.64
+     },
+     {
+      "cost_usd": 0.123645,
+      "gold_stale": false,
+      "id": "vc-08",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends a new section at line ~208 of ADR-2111, so the topic's citations (:38, :83, :95-96) keep their line numbers, and the new section leaves the record `proposed / none / inactive`, which matches the topic's claims.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 30174,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 252
+      },
+      "total_tokens": 32553,
+      "triage": "no",
+      "wall_s": 6.21
+     },
+     {
+      "cost_usd": 0.091881,
+      "gold_stale": true,
+      "id": "vc-09",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only edits prose about pay_handler/ritual.rs/ADR-2111 in docs/BASELINE-architecture.md; the topic cites that file only for the ADR-2006 closeout (l.297) and the BrokerActor/LOC notes (l.246-247), which are untouched, and no cited line numbers or diagrams change.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22558,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 122
+      },
+      "total_tokens": 24807,
+      "triage": "no",
+      "wall_s": 4.14
+     },
+     {
+      "cost_usd": 0.078737,
+      "gold_stale": false,
+      "id": "vc-10",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds two lines to BASELINE-architecture.md near line 237, which shifts any later content. The topic's `BASELINE-architecture.md:239` citation for the \"Known divergence\" entry (VC-32.1) may therefore point at the wrong text, so I can't rule it stale.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17092,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 994
+      },
+      "total_tokens": 20213,
+      "triage": "yes",
+      "wall_s": 10.16
+     },
+     {
+      "cost_usd": 0.052836999999999995,
+      "gold_stale": false,
+      "id": "vc-11",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only edits the payment/sidestr bullet at BASELINE-architecture.md:233+, which the topic doesn't discuss. Its citations to that file (:218-228, :222) sit above the edit and don't shift.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 12492,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 244
+      },
+      "total_tokens": 14863,
+      "triage": "no",
+      "wall_s": 4.61
+     },
+     {
+      "cost_usd": 0.126827,
+      "gold_stale": false,
+      "id": "vc-12",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff edits `docs/BASELINE-architecture.md` around lines 233-240 and adds two net lines. The topic cites `BASELINE-architecture.md:237` for the \"Known divergences\" bullet on the `?token=` fallback, and that citation now falls inside or is shifted by this changed region. The diagrams' own content (wire, auth, rendering) is unaffected.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 29287,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 925
+      },
+      "total_tokens": 32339,
+      "triage": "yes",
+      "wall_s": 10.31
+     },
+     {
+      "cost_usd": 0.045659,
+      "gold_stale": true,
+      "id": "vc-13",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds two comment lines near Cargo.toml:221, which shifts later lines by 2, so the topic's `Cargo.toml:301` citation for the `dev-runtime` profile (VC-08.9) now points at the wrong line.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10695,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 245
+      },
+      "total_tokens": 13067,
+      "triage": "yes",
+      "wall_s": 4.43
+     },
+     {
+      "cost_usd": 0.128789,
+      "gold_stale": true,
+      "id": "vc-14",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes FsPaymentStore internals (removes `credit`, `debit` now calls `ledger.charge`, storage doc, tests); the VC-04.27 diagram uses only `store.get_balance`/`store.debit` with the same signatures and behaviour, and never mentions `credit` or the on-disk file layout.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 31795,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 118
+      },
+      "total_tokens": 34040,
+      "triage": "no",
+      "wall_s": 3.55
+     },
+     {
+      "cost_usd": 0.092445,
+      "gold_stale": true,
+      "id": "vc-15",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts two lines at solid_proxy_handler.rs:1126, so every later citation in VC-05.15 (e.g. :1130, :1168, :1226, :1267, :1313, :1752) is now off by two.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 22279,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 290
+      },
+      "total_tokens": 24696,
+      "triage": "yes",
+      "wall_s": 4.72
+     },
+     {
+      "cost_usd": 0.048133,
+      "gold_stale": false,
+      "id": "vc-16",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Note N3 in VC-07.1 says solid-pod-rs is a crates.io version pin, not a git rev; the diff re-pins it to an exact `=0.5.0-alpha.12` and adds a `[patch.crates-io]` git override (nostr-bbs-core at rev b73ec8c), which the topic's workspace/dependency statement doesn't reflect.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 11591,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 134
+      },
+      "total_tokens": 13852,
+      "triage": "yes",
+      "wall_s": 3.71
+     },
+     {
+      "cost_usd": 0.050561,
+      "gold_stale": true,
+      "id": "vc-17",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds 10 net lines to Cargo.toml above the `[profile.dev-runtime]` section (a 1-line comment growth plus a new 9-line `[patch.crates-io]` block), so the topic's `Cargo.toml:301` citation in VC-08.9 now points at the wrong line.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 11528,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 402
+      },
+      "total_tokens": 14057,
+      "triage": "yes",
+      "wall_s": 5.78
+     },
+     {
+      "cost_usd": 0.066579,
+      "gold_stale": true,
+      "id": "vc-18",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: Cargo.toml's solid-pod-rs pin moved from 0.4.0-alpha.15 to =0.5.0-alpha.12, so Note4 in VC-26.1 is now wrong, and the line numbers it cites (Cargo.toml:222, :254, :283-285) have shifted.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 16260,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 111
+      },
+      "total_tokens": 18498,
+      "triage": "yes",
+      "wall_s": 3.66
+     },
+     {
+      "cost_usd": 0.081899,
+      "gold_stale": true,
+      "id": "vc-19",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds a new `UpdateChainPayments` handler to GraphServiceSupervisor, shifting the cited line numbers (e.g. 1983 UpdateNodePositions) and leaving the VC-02.3 routing table without this new route. It also adds lines to agent_monitor_actor.rs (shifting the cited :574 MOCK_AGENTS line) and changes AgentMonitorActor's surface (a concurrent /v1/chain/payments poll, new message",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 19905,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 185
+      },
+      "total_tokens": 22217,
+      "triage": "yes",
+      "wall_s": 4.2
+     },
+     {
+      "cost_usd": 0.093883,
+      "gold_stale": false,
+      "id": "vc-20",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only adds a `did_nostr` field to `TaskInfo` and a new `get_chain_payments` method in `management_api_client.rs`. The topic cites that file only as a participant in the briefing diagram (VC-05.9), which uses `create_brief`, `execute_brief` and `create_debrief`, so no statement or diagram there changes.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 23051,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 125
+      },
+      "total_tokens": 25303,
+      "triage": "no",
+      "wall_s": 3.84
+     },
+     {
+      "cost_usd": 0.10036900000000001,
+      "gold_stale": true,
+      "id": "vc-21",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts lines near the top of `agent_monitor_actor.rs` and at about line 215 of `bots_handler.rs`, so the topic's `path:line` citations for those files (e.g. `MANAGEMENT_API_HOST` :253, credential panic :287-290, `MOCK_AGENTS` :574, `PRIMARY_PROVIDER` :301/:408/:541/:724) now point at the wrong lines.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 24015,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 388
+      },
+      "total_tokens": 26530,
+      "triage": "yes",
+      "wall_s": 5.39
+     },
+     {
+      "cost_usd": 0.071003,
+      "gold_stale": true,
+      "id": "vc-22",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts a 13-line `UpdateChainPayments` handler into `graph_service_supervisor.rs` above the `UpdateNodePositions` handler, so the topic's citations at `:1989`, `:2000` and `:2013` now point at the wrong lines. The 4 lines added near the top of `graph_state_actor.rs` also shift the `:858` and `:861` citations.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 16361,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 513
+      },
+      "total_tokens": 19001,
+      "triage": "yes",
+      "wall_s": 6.08
+     },
+     {
+      "cost_usd": 0.043113,
+      "gold_stale": true,
+      "id": "vc-23",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts about 10 lines into `edge.rs` above `asserts_subsumption`, so the topic's citations `edge.rs:234`, `237-238` and `234-243` now point at the wrong lines. The `:12` citation for `DOMAIN_MEMBER_EDGE_TYPE` is unaffected, since the new constant is added after it.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 9706,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 386
+      },
+      "total_tokens": 12219,
+      "triage": "yes",
+      "wall_s": 6.33
+     },
+     {
+      "cost_usd": 0.086925,
+      "gold_stale": true,
+      "id": "vc-24",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-27.7 is now wrong in several places. The poll loop is a three-way join, not `join!(list_tasks(), get_system_status())` at :333-334, and `ProcessAgentStatuses` now carries `dids`. The handler also sets `did_nostr` from the task instead of `None`. The AgentMonitorActor also gained a `ProcessChainPayments` handler and `chain_view`, so the diagram's line numbers are shifted too.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 21224,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 160
+      },
+      "total_tokens": 23511,
+      "triage": "yes",
+      "wall_s": 4.77
+     },
+     {
+      "cost_usd": 0.117353,
+      "gold_stale": false,
+      "id": "vc-25",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only adds one more rejected label (\"chain_payment\") to a test's negative-case list in force_compute_actor.rs; it doesn't change the predicate, the accepted labels, or the line numbers the topic cites (test at :4562 and :4576-4580 sit before the edit at ~:4662).",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 28961,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 108
+      },
+      "total_tokens": 31196,
+      "triage": "no",
+      "wall_s": 4.17
+     },
+     {
+      "cost_usd": 0.071873,
+      "gold_stale": true,
+      "id": "vc-26",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-16.8 cites github_sync_service.rs line numbers (materialise_domain_roots at :853, `domain_membership_edge` built at :2238, with `ensure_source_domain` at :2380) that the diff shifts. It also describes materialise_domain_roots as producing \"one root per populated domain\" with counter-minted ids, whereas it now reconciles roots at slug-derived ids via `plan_domain_roots`.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17481,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 152
+      },
+      "total_tokens": 19760,
+      "triage": "yes",
+      "wall_s": 5.41
+     },
+     {
+      "cost_usd": 0.08312699999999999,
+      "gold_stale": true,
+      "id": "vc-27",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff adds ~185 lines and removes ~35 in github_sync_service.rs, shifting every later line number the topic cites (e.g. run_post_sync_reasoning:1235, select_inferred_edges_for_sync:1156, batch_add_edges:1339, and the `maybe_refresh_after_sync` call at :642). VC-20.3 and VC-20.4 therefore carry wrong citations.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 20307,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 147
+      },
+      "total_tokens": 22581,
+      "triage": "yes",
+      "wall_s": 3.74
+     },
+     {
+      "cost_usd": 0.073567,
+      "gold_stale": false,
+      "id": "vc-28",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the cloudflared service's comment and compose profile (production/prod to tunnel) in docker-compose.unified.yml; the topic cites that file only for the xinference consumer at line 329, and no voice-path statement or diagram depends on cloudflared. Line numbers shift by about 1 (the diff adds 3 comment lines and removes 2 profile lines), so the xinference cit",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 17862,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 169
+      },
+      "total_tokens": 20158,
+      "triage": "no",
+      "wall_s": 4.86
+     },
+     {
+      "cost_usd": 0.118555,
+      "gold_stale": false,
+      "id": "vc-29",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes the cloudflared service's profile and comment in docker-compose.unified.yml; the topic cites that file only for the dev service's VISIONCLAW_DEV_MODE default (line 90, lines 83-89), which is unaffected, and never mentions cloudflared. The edit sits at line 267 and later, so those line citations don't move.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 29219,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 125
+      },
+      "total_tokens": 31471,
+      "triage": "no",
+      "wall_s": 4.1
+     },
+     {
+      "cost_usd": 0.036153000000000005,
+      "gold_stale": true,
+      "id": "vc-30",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff collapses a 10-line inline `Edge` block near line 916 into one call, shifting every later line in `github_sync_service.rs` up by 9. Citations such as `filter_changed_files` :1979, `process_batch_incremental` :1505, `process_fetched_file` :1687 and `page_is_kg_included` :2159 therefore no longer land on those functions.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 7971,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 384
+      },
+      "total_tokens": 10482,
+      "triage": "yes",
+      "wall_s": 5.38
+     },
+     {
+      "cost_usd": 0.058465,
+      "gold_stale": true,
+      "id": "vc-31",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff shrinks the loop at ~line 916 of github_sync_service.rs by 9 lines, so the topic's later citations (rebuild_assert_graph:999, :1056, :1072, :1095, :1135, ingest:1611) now point 9 lines off.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 13594,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 366
+      },
+      "total_tokens": 16087,
+      "triage": "yes",
+      "wall_s": 5.2
+     },
+     {
+      "cost_usd": 0.12021299999999999,
+      "gold_stale": false,
+      "id": "vc-32",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends amendments to ADR-2108 (Trust box is LAN-only, a known launch.sh prod defect). The topic's ADR-2108 statements (dev-mode default flipped to :-1 on 2026-09-08, HUD flash_notice) are unaffected, and no code or cited line numbers changed.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 29656,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 116
+      },
+      "total_tokens": 31899,
+      "triage": "no",
+      "wall_s": 4.29
+     },
+     {
+      "cost_usd": 0.121519,
+      "gold_stale": false,
+      "id": "vc-33",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only edits the ADR-2108 disposition text and adds an amendment; it doesn't change the facts the topic states (`${VISIONCLAW_DEV_MODE:-1}`, the dev-only default, prod refusal, the HUD notice), so nothing in the topic becomes wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 30000,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 109
+      },
+      "total_tokens": 32236,
+      "triage": "no",
+      "wall_s": 4.77
+     },
+     {
+      "cost_usd": 0.08778699999999999,
+      "gold_stale": true,
+      "id": "vc-34",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff centralizes NIP-98 URL reconstruction into `utils::auth::nip98_request_url` (empty X-Forwarded-* now ignored). The WS `/wss` handler now uses it, so VC-03.4's \"reconstruct url from X-Forwarded-Proto/-Host\" step and VC-03.3/VC-03.5 inline-flow citations (auth.rs:142, auth_extractor.rs:132) are outdated. Line numbers in `http_handler.rs`, `auth_extractor.rs`, and `auth.rs",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 21337,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 201
+      },
+      "total_tokens": 23665,
+      "triage": "yes",
+      "wall_s": 3.85
+     },
+     {
+      "cost_usd": 0.074665,
+      "gold_stale": true,
+      "id": "vc-35",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The topic cites line numbers (speech_socket_handler.rs:998, :1000, :1005; http_handler.rs:364) and says the URL is derived inline from scheme, host and path_and_query; the diff replaces that with a call to `crate::utils::auth::nip98_request_url`, which shifts the line numbers and makes the \"same derivation\" description wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 18234,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 130
+      },
+      "total_tokens": 20491,
+      "triage": "yes",
+      "wall_s": 4.91
+     },
+     {
+      "cost_usd": 0.147331,
+      "gold_stale": true,
+      "id": "vc-36",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff shifts cited line numbers. In `src/utils/auth.rs` it inserts about 32 lines before the `auth.rs:154-169` bypass resolve, and in `graph_scene.gd` the longer comment pushes `_describe_write_failure:1153` and later cites (1193, 1211, 1223) down by one. It also rewrites the 401/403 remedy text and the prod-profile guidance for dev mode.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 35113,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 645
+      },
+      "total_tokens": 37885,
+      "triage": "yes",
+      "wall_s": 7.66
+     },
+     {
+      "cost_usd": 0.063839,
+      "gold_stale": true,
+      "id": "vc-37",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The new `vc:group` block (+7 lines) near line 234 of `oxigraph_graph_repository.rs` pushes `clear_graph` below the topic's `oxigraph_graph_repository.rs:1226` citation (VC-22.1 and VC-22.10). The assert-graph write is also now `CLEAR SILENT GRAPH`, not the `CLEAR GRAPH` shown in VC-22.8 and VC-22.10.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 14545,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 523
+      },
+      "total_tokens": 17195,
+      "triage": "yes",
+      "wall_s": 7.64
+     },
+     {
+      "cost_usd": 0.054299,
+      "gold_stale": true,
+      "id": "vc-38",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: VC-23.9 cites `oxigraph_ontology_repository.rs:1598` and `:1619` as class IRI mint sites. The diff adds 2 comment lines before 1598 and 8 more lines before 1619, so both citations now point at the wrong lines.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 12585,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 353
+      },
+      "total_tokens": 15065,
+      "triage": "yes",
+      "wall_s": 5.48
+     },
+     {
+      "cost_usd": 0.036864999999999995,
+      "gold_stale": true,
+      "id": "vc-39",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff shifts line numbers cited in the topic (e.g. `sync_corpus.rs:56-64`, `github_sync_service.rs` anchors past line ~850 such as :1505, :1687, :2159), and `sync_corpus.rs` now writes a graph report and returns an error when stats.errors is non-empty, so VC-21.1's description of that binary is no longer complete.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 8764,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 138
+      },
+      "total_tokens": 11029,
+      "triage": "yes",
+      "wall_s": 3.87
+     },
+     {
+      "cost_usd": 0.049727,
+      "gold_stale": false,
+      "id": "vc-40",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only moves the DOMAIN_COLORS/getDomainColor helper from InstancedLabels.tsx into a shared utils module; the topic never mentions these helpers, and its InstancedLabels citations are file-level only (no line numbers), so nothing stated becomes wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 12062,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 105
+      },
+      "total_tokens": 14294,
+      "triage": "no",
+      "wall_s": 3.4
+     },
+     {
+      "cost_usd": 0.061403,
+      "gold_stale": false,
+      "id": "vc-41",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only appends a \"Source qualification\" section to ADR-2111, which stays proposed/none/inactive; the topic's Note4 only cites the ADR's proposed status at line 4, so no statement or diagram is invalidated.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 15031,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 85
+      },
+      "total_tokens": 17243,
+      "triage": "no",
+      "wall_s": 3.63
+     },
+     {
+      "cost_usd": 0.120563,
+      "gold_stale": true,
+      "id": "vc-42",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: yes\nreason: The diff inserts 7 lines into BASELINE-architecture.md's \"Known divergences\" section at line 234, so VC-36.3's citation of the still-open ?token= bullet at `BASELINE-architecture.md:237` now points at the wrong line.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 29061,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 389
+      },
+      "total_tokens": 31577,
+      "triage": "yes",
+      "wall_s": 5.66
+     },
+     {
+      "cost_usd": 0.106045,
+      "gold_stale": false,
+      "id": "vc-43",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only changes image-generation internals in image_gen_handler.rs (model selection, ComfyUI job runner, Salad removal). The topic cites that file only for the feature-off `get_global_storage` twin being called unconditionally, and nothing in the diff touches that.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 26159,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 98
+      },
+      "total_tokens": 28384,
+      "triage": "no",
+      "wall_s": 3.34
+     },
+     {
+      "cost_usd": 0.11958099999999999,
+      "gold_stale": false,
+      "id": "vc-44",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff swaps one environment line (COMFYUI_SALAD_URL for IMAGE_GEN_MODEL) at about line 228 of docker-compose.unified.yml. It adds and removes one line each, so the cited lines :83-90 do not shift, and the topic only covers the VISIONCLAW_DEV_MODE default.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 29153,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 254
+      },
+      "total_tokens": 31534,
+      "triage": "no",
+      "wall_s": 4.5
+     },
+     {
+      "cost_usd": 0.044369,
+      "gold_stale": false,
+      "id": "vc-45",
+      "infra_retries": 0,
+      "parsed": true,
+      "raw": "stale: no\nreason: The diff only rewords a GPU-vs-CPU speedup paragraph in configuration.md, which is unrelated to any external-service statement (Perplexity config at configuration.md:220 is not touched), so no diagram claim becomes wrong.",
+      "stratum": "visionclaw",
+      "tokens": {
+       "cache_creation_input_tokens": 10760,
+       "cache_read_input_tokens": 2125,
+       "input_tokens": 2,
+       "output_tokens": 90
+      },
+      "total_tokens": 12977,
+      "triage": "no",
+      "wall_s": 3.59
+     }
+    ],
+    "precision": 0.871,
+    "precision_wilson95": [
+     0.7115,
+     0.9487
+    ],
+    "projection": {
+     "agentbox": {
+      "expected_reauthors": 34.6,
+      "per_commit_baseline": 1224,
+      "sensitivity_stratum_rate": 17.9,
+      "weekly_rechecks": 67
+     },
+     "pooled": {
+      "expected_reauthors": 118.3,
+      "per_commit_baseline": 1943,
+      "saving_vs_per_commit": 0.9391,
+      "saving_vs_weekly_batching": 0.4834,
+      "sensitivity_stratum_rate": 115.1,
+      "weekly_rechecks": 229
+     },
+     "visionclaw": {
+      "expected_reauthors": 83.7,
+      "per_commit_baseline": 719,
+      "sensitivity_stratum_rate": 97.2,
+      "weekly_rechecks": 162
+     }
+    },
+    "qualifies": true,
+    "recall": 0.931,
+    "recall_k": 27,
+    "recall_wilson95": [
+     0.7804,
+     0.9809
+    ],
+    "rejected": 29,
+    "rejection_per_1k_tokens": 0.02196,
+    "rejection_rate": 0.4833,
+    "rejection_wilson95": [
+     0.3617,
+     0.6069
+    ],
+    "stale": 29,
+    "unparsable": []
+   }
+  },
+  "qualifying": [
+   "sonnet-5.5"
+  ],
+  "recommended": "sonnet-5.5"
+ },
+ "prereg": "docs/evidence/EH/PREREG.md",
+ "prereg_commit": "03a588e",
+ "qualifying": [
+  "sonnet-5.5"
+ ],
+ "recommended": "sonnet-5.5",
+ "run": {
+  "claude_code": "2.1.289",
+  "concurrency": 6,
+  "end_utc": "2026-10-06T10:54:33Z",
+  "gold_labeller_model": "`claude -p --model sonnet` (E0d #L1); on this Claude Code the alias resolves to claude-sonnet-5-5",
+  "model_ids": {
+   "glm-5.3-flash": "glm-5.3-flash (Z.AI, https://api.z.ai/api/anthropic)",
+   "haiku-4.5": "claude-haiku-4-5",
+   "sonnet-5.5": "claude-sonnet-5-5"
+  },
+  "start_utc": "2026-10-06T10:35:27Z",
+  "temperature": "not settable via Claude Code CLI (endpoint default)",
+  "triage_inputs_sha256_16": "1556696fb4e4aa49"
+ }
+}

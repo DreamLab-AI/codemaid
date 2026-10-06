@@ -1,0 +1,65 @@
+{
+ "pair": "vc-29",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.1,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only changes the cloudflared service's profile and comment in docker-compose.unified.yml; the topic cites that file only for the dev service's VISIONCLAW_DEV_MODE default (line 90, lines 83-89), which is unaffected, and never mentions cloudflared. The edit sits at line 267 and later, so those line citations don't move.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 29219,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 125,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 29219,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 125,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 29219,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 29219
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 125,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 29219,
+   "webSearchRequests": 0,
+   "costUSD": 0.118555,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.118555,
+ "duration_api_ms": 2378,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

@@ -1,0 +1,65 @@
+{
+ "pair": "vc-35",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.91,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The topic cites line numbers (speech_socket_handler.rs:998, :1000, :1005; http_handler.rs:364) and says the URL is derived inline from scheme, host and path_and_query; the diff replaces that with a call to `crate::utils::auth::nip98_request_url`, which shifts the line numbers and makes the \"same derivation\" description wrong.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 18234,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 130,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 18234,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 130,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 18234,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 18234
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 130,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 18234,
+   "webSearchRequests": 0,
+   "costUSD": 0.074665,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.074665,
+ "duration_api_ms": 3200,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

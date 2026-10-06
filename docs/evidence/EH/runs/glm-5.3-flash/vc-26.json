@@ -1,0 +1,53 @@
+{
+ "pair": "vc-26",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 99.13,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff rewrites materialise_domain_roots into a plan/reconcile flow (derived root IDs, stale-root/spoke purges) and inserts ~370 lines, so VC-16.8's citations no longer resolve \u2014 DOMAIN_ROOTS at :854 and the domain_membership_edge call at :919 are gone, and its definition (:2238) plus ensure_source_domain (:2372/:2380) have moved.",
+ "usage": {
+  "input_tokens": 10751,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 4850,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 10751,
+   "outputTokens": 4850,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.14026000000000002,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.14026000000000002,
+ "duration_api_ms": 98087,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

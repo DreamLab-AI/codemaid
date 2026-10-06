@@ -1,0 +1,65 @@
+{
+ "pair": "ab-15",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 21.39,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff updates a VisionClaw commit pin for reproducibility, but the topic makes no claims about VisionClaw's specific content at any commit\u2014it documents agentbox skills infrastructure mechanisms (routing, discovery, MCP servers) that remain accurate regardless of which VisionClaw commit is pinned.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 12802,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 1827,
+  "output_tokens_details": {
+   "thinking_tokens": 1750
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 12802,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 1827,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 12802,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 12802
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 1827,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 12802,
+   "webSearchRequests": 0,
+   "costUSD": 0.0353643,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 1750,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0353643,
+ "duration_api_ms": 20047,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

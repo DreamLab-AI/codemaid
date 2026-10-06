@@ -1,0 +1,53 @@
+{
+ "pair": "vc-22",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 87.82,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: Purely additive chain-payments code, but it inserts 13 lines into graph_service_supervisor.rs before the cited UpdateNodePositions forwarding lines (1989/2000/2013) and 4 lines into graph_state_actor.rs before cited lines 858/861, so those path:line citations in VC-13.3/VC-13.6 no longer point at the described code.",
+ "usage": {
+  "input_tokens": 10761,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 4068,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 10761,
+   "outputTokens": 4068,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.12440399999999999,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.12440399999999999,
+ "duration_api_ms": 86856,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

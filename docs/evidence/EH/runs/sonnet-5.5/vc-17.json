@@ -1,0 +1,65 @@
+{
+ "pair": "vc-17",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.78,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff adds 10 net lines to Cargo.toml above the `[profile.dev-runtime]` section (a 1-line comment growth plus a new 9-line `[patch.crates-io]` block), so the topic's `Cargo.toml:301` citation in VC-08.9 now points at the wrong line.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 11528,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 402,
+  "output_tokens_details": {
+   "thinking_tokens": 290
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 11528,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 402,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 11528,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 11528
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 402,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 11528,
+   "webSearchRequests": 0,
+   "costUSD": 0.050561,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 290,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.050561,
+ "duration_api_ms": 4148,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

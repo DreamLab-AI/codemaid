@@ -1,0 +1,65 @@
+{
+ "pair": "ab-06",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.6,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only swaps the `vaultSrc` VisionClaw pin hash on a single line of `flake.nix`, so no line numbers shift and nothing the topic says about the producer, mirror, faucet, or role isolation is affected.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 13394,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 195,
+  "output_tokens_details": {
+   "thinking_tokens": 108
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13394,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 195,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 13394,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13394
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 195,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 13394,
+   "webSearchRequests": 0,
+   "costUSD": 0.055955,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 108,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.055955,
+ "duration_api_ms": 2775,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

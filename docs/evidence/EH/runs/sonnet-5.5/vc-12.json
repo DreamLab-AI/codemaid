@@ -1,0 +1,65 @@
+{
+ "pair": "vc-12",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 10.31,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff edits `docs/BASELINE-architecture.md` around lines 233-240 and adds two net lines. The topic cites `BASELINE-architecture.md:237` for the \"Known divergences\" bullet on the `?token=` fallback, and that citation now falls inside or is shifted by this changed region. The diagrams' own content (wire, auth, rendering) is unaffected.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 29287,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 925,
+  "output_tokens_details": {
+   "thinking_tokens": 789
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 29287,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 925,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 29287,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 29287
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 925,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 29287,
+   "webSearchRequests": 0,
+   "costUSD": 0.126827,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 789,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.126827,
+ "duration_api_ms": 8579,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

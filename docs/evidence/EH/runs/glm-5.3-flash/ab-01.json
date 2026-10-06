@@ -1,0 +1,53 @@
+{
+ "pair": "ab-01",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 132.1,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The commit adds a new forum-governance ingress path absent from the topic \u2014 `[sovereign_mesh.forum_governance]` in agentbox.toml, flake.nix env projection (AGENTBOX_FORUM_GOVERNANCE_RELAY/_SIGNERS), a second relay connection/31403 subscription plus cursor state inside RelayConsumer.start() that AB-13.1's topology and AB-13.7's boot diagram don't draw \u2014 and it shifts many cited line numbers (relay-consumer.js:78-79\u2192~91, agentbox.toml:253-262/257/312-313, flake.nix:1591/2058/2373-2403, nostr-bridge.js:641/676).",
+ "usage": {
+  "input_tokens": 21627,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 7294,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 21627,
+   "outputTokens": 7294,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.232388,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.232388,
+ "duration_api_ms": 131080,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

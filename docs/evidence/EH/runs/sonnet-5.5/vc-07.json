@@ -1,0 +1,65 @@
+{
+ "pair": "vc-07",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 5.64,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only deletes a `[patch.crates-io]` block after line 291 of Cargo.toml, so the topic's cited lines (222, 254, 283-285) don't move and the topic never mentions that patch.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 14743,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 324,
+  "output_tokens_details": {
+   "thinking_tokens": 245
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 14743,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 324,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 14743,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 14743
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 324,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 14743,
+   "webSearchRequests": 0,
+   "costUSD": 0.062641,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 245,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.062641,
+ "duration_api_ms": 3692,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

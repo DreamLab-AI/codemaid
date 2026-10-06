@@ -1,0 +1,65 @@
+{
+ "pair": "vc-41",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 3.63,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only appends a \"Source qualification\" section to ADR-2111, which stays proposed/none/inactive; the topic's Note4 only cites the ADR's proposed status at line 4, so no statement or diagram is invalidated.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 15031,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 85,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 15031,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 85,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 15031,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 15031
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 85,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 15031,
+   "webSearchRequests": 0,
+   "costUSD": 0.061403,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.061403,
+ "duration_api_ms": 1748,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

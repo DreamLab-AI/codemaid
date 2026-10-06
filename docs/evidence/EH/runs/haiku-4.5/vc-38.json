@@ -1,0 +1,65 @@
+{
+ "pair": "vc-38",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 47.23,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: diff changes SPARQL query semantics (CLEAR \u2192 CLEAR SILENT) and adds RDF metadata field handling for source_domain/maturity/group, but does not modify URN minting, parsing, did:nostr format, sha256-12, federation crossing, or wire node-id logic documented in the topic.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 9501,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 4616,
+  "output_tokens_details": {
+   "thinking_tokens": 4533
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 9501,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 4616,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 9501,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 9501
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 4616,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 9501,
+   "webSearchRequests": 0,
+   "costUSD": 0.042707300000000004,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 4533,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.042707300000000004,
+ "duration_api_ms": 45812,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

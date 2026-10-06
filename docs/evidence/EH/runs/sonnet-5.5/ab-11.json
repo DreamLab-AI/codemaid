@@ -1,0 +1,65 @@
+{
+ "pair": "ab-11",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.2,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only changes a producer polling interval (600 to 60) on one line in agentbox.toml, so no line numbers shift (the cited `agentbox.toml:2129` still holds), and the topic says nothing about that interval.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 13432,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 191,
+  "output_tokens_details": {
+   "thinking_tokens": 108
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13432,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 191,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 13432,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13432
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 191,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 13432,
+   "webSearchRequests": 0,
+   "costUSD": 0.056067,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 108,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.056067,
+ "duration_api_ms": 2276,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

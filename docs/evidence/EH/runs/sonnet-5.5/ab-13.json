@@ -1,0 +1,65 @@
+{
+ "pair": "ab-13",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 7.5,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff adds 2 lines to agentbox.toml at ~1576 and 2 lines to flake.nix at ~255, so the topic's `agentbox.toml:2175-2213` and `flake.nix:2590-2599` line citations all shift by 2 and are now wrong.",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 32607,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 282,
+  "output_tokens_details": {
+   "thinking_tokens": 179
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 32607,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 282,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 32607,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 32607
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 282,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 32607,
+   "webSearchRequests": 0,
+   "costUSD": 0.133677,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 179,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.133677,
+ "duration_api_ms": 5905,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

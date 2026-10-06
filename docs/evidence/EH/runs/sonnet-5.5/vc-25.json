@@ -1,0 +1,65 @@
+{
+ "pair": "vc-25",
+ "model": "sonnet-5.5",
+ "model_id": "claude-sonnet-5-5",
+ "attempt": 1,
+ "wall_s": 4.17,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only adds one more rejected label (\"chain_payment\") to a test's negative-case list in force_compute_actor.rs; it doesn't change the predicate, the accepted labels, or the line numbers the topic cites (test at :4562 and :4576-4580 sit before the edit at ~:4662).",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 28961,
+  "cache_read_input_tokens": 2125,
+  "output_tokens": 108,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 28961,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 108,
+    "cache_read_input_tokens": 2125,
+    "cache_creation_input_tokens": 28961,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 28961
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 108,
+   "cacheReadInputTokens": 2125,
+   "cacheCreationInputTokens": 28961,
+   "webSearchRequests": 0,
+   "costUSD": 0.117353,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.117353,
+ "duration_api_ms": 2487,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

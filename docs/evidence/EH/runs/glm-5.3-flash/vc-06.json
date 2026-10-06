@@ -1,0 +1,53 @@
+{
+ "pair": "vc-06",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 18.9,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff only removes the `[patch.crates-io]` nostr-bbs-core git pin from Cargo.toml (~line 291); the topic's Cargo.toml claims (workspace members at lines 2-4, orphan graph-cognition-extract, solid-pod-rs being a crates.io version pin rather than a git rev) are unaffected and remain accurate.",
+ "usage": {
+  "input_tokens": 6012,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 993,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 6012,
+   "outputTokens": 993,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.044164,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.044164,
+ "duration_api_ms": 17875,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

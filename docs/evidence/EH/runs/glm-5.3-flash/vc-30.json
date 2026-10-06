@@ -1,0 +1,53 @@
+{
+ "pair": "vc-30",
+ "model": "glm-5.3-flash",
+ "model_id": "glm-5.3-flash",
+ "attempt": 1,
+ "wall_s": 85.34,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: yes\nreason: The diff nets -9 lines at github_sync_service.rs:916, shifting every later line citation in VC-21.1/21.2 (process_batch_incremental :1505, process_fetched_file :1687, filter_changed_files :1979, page_is_kg_included :2159, enrich_node_from_frontmatter :2206, etc.) off the cited functions, though the domain-membership edge-type change itself is not covered by the topic.",
+ "usage": {
+  "input_tokens": 4860,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 1280,
+  "output_tokens": 4228,
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "glm-5.3-flash": {
+   "inputTokens": 4860,
+   "outputTokens": 4228,
+   "cacheReadInputTokens": 1280,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.104256,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "glm-5.3-flash",
+   "provider": "firstParty",
+   "costBasis": "unknown"
+  }
+ },
+ "total_cost_usd": 0.104256,
+ "duration_api_ms": 84359,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

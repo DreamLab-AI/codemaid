@@ -1,0 +1,65 @@
+{
+ "pair": "vc-03",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 69.27,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: The diff adds ADR-2125 implementation (draft wikilink resolution against base classes, sibling-only disjointness validation) which extends elevation_actor.rs but doesn't contradict any statements or diagrams in VC-23 \u2014 the core descriptions of mint sites and class IRI schema still hold, though line number citations become stale due to ~211 added lines.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 18876,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 6152,
+  "output_tokens_details": {
+   "thinking_tokens": 6056
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 18876,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 6152,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 18876,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 18876
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 6152,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 18876,
+   "webSearchRequests": 0,
+   "costUSD": 0.0691373,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 6056,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0691373,
+ "duration_api_ms": 68020,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}

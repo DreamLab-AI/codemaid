@@ -1,0 +1,65 @@
+{
+ "pair": "ab-12",
+ "model": "haiku-4.5",
+ "model_id": "claude-haiku-4-5",
+ "attempt": 1,
+ "wall_s": 12.6,
+ "returncode": 0,
+ "infra_ok": true,
+ "result": "stale: no\nreason: Changes affect sidechain.dreamlab-txbt4 and ruflo_console gates, not memory_learning configuration or learning loop sources.",
+ "usage": {
+  "input_tokens": 9,
+  "cache_creation_input_tokens": 10165,
+  "cache_read_input_tokens": 6163,
+  "output_tokens": 989,
+  "output_tokens_details": {
+   "thinking_tokens": 946
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 10165,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 9,
+    "output_tokens": 989,
+    "cache_read_input_tokens": 6163,
+    "cache_creation_input_tokens": 10165,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 10165
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "modelUsage": {
+  "claude-haiku-4-5": {
+   "inputTokens": 9,
+   "outputTokens": 989,
+   "cacheReadInputTokens": 6163,
+   "cacheCreationInputTokens": 10165,
+   "webSearchRequests": 0,
+   "costUSD": 0.0259003,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 946,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "total_cost_usd": 0.0259003,
+ "duration_api_ms": 11008,
+ "stderr_tail": "",
+ "stdout_head": "",
+ "failed_infra_attempts": []
+}
