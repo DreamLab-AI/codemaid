@@ -147,3 +147,12 @@ drawn sample size. The drawn size is reported beside it. If the population is
 under 20, endpoint 4 is reported as UNDERPOWERED (not passed), and E0c does not
 hold, because it needs endpoint 4 to succeed. This verdict is written whether
 or not any pair is judged.
+
+### 2026-10-06 #3: a per-commit driver table (written after the first run, endpoint numbers seen)
+
+The first run showed 134 of VisionClaw's 309 symbol-change events were
+`one_sided`. To show where those come from, the exploratory driver section
+gained a table of the commits with the most symbol-change events, with their
+subjects. The table is post hoc and exploratory. It changes no count, endpoint
+or verdict, and it was added after R_flow = 1.53 (CI 1.32–1.87) and
+R_flow(.rs) = 2.05 (CI 1.59–2.94) had been seen.

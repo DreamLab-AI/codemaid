@@ -56,3 +56,13 @@ into this harness unchanged through a `#[path]` module. T_region is counted in
 `src/rcount.rs` and reported by `src/report_b.rs`. Endpoint 4 draws only pairs on
 commits after the topic's stamp. Score it with `e0 score --out docs/evidence/E0b` once
 verdicts exist. A run takes about two minutes.
+
+## E0c
+
+`e0 e0c` (same arguments, `--out docs/evidence/E0c`) runs the experiment in
+[`docs/evidence/E0c/PREREG.md`](../../docs/evidence/E0c/PREREG.md). It reuses E0's
+window and citation mapping unchanged, keeps only citations in `sequenceDiagram`
+blocks, and compares T_file^seq with T_flow. T_flow is a BLAKE3-16 hash over a
+symbol's `sig_hash` and its ordered calls as sealmap's Rust adapter resolves them
+(`src/flow.rs`). The rest of the experiment lives in `src/e0c.rs`. Once verdicts
+exist, `e0 e0c-score --out docs/evidence/E0c` scores endpoint 4.

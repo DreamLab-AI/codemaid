@@ -31,6 +31,8 @@ pub struct Model {
     pub syms: BTreeMap<String, Sym>,
     pub calls: BTreeMap<String, BTreeSet<String>>,
     pub parse_errors: BTreeSet<String>,
+    /// E0c: every symbol's flow (signature hash and ordered calls).
+    pub flows: BTreeMap<String, crate::flow::FlowRec>,
 }
 
 impl Model {
@@ -61,6 +63,7 @@ impl Model {
                 m.calls.entry(r.from.to_string()).or_default().insert(r.to.to_string());
             }
         }
+        m.flows = crate::flow::project(cb);
         m
     }
 

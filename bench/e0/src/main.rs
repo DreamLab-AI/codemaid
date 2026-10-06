@@ -12,6 +12,7 @@
 //! e0 score --out docs/evidence/E0      # endpoint 4, once judge verdicts exist
 //! e0 run-b <same inputs> --out docs/evidence/E0b --scratch <dir>   # E0b: region anchoring
 //! e0 score --out docs/evidence/E0b
+//! e0 e0c ... --out docs/evidence/E0c    # E0c (docs/evidence/E0c/PREREG.md), same arguments
 //! ```
 //!
 //! `run-b` repeats E0's walk over the same pins and window and adds T_region
@@ -29,6 +30,8 @@
 #[path = "../../../crates/sealmap-rust/src/fingerprint.rs"]
 mod canon;
 mod counting;
+mod e0c;
+mod flow;
 mod git;
 mod judge;
 mod kinds;
@@ -174,11 +177,19 @@ fn main() {
             };
             run_b(&a)
         })(),
+        Some("e0c") => (|| {
+            let a = Args {
+                corpus: arg(&argv, "--corpus")?,
+                visionclaw: arg(&argv, "--visionclaw")?,
+                agentbox: arg(&argv, "--agentbox")?,
+                out: arg(&argv, "--out")?,
+                scratch: arg(&argv, "--scratch")?,
+            };
+            e0c::run(&a)
+        })(),
+        Some("e0c-score") => arg(&argv, "--out").and_then(|out| e0c::score(&out)),
         Some("score") => arg(&argv, "--out").and_then(|out| judge::score(&out)),
-        _ => {
-            Err("usage: e0 run|run-b --corpus D --visionclaw D --agentbox D --out D --scratch D | e0 score --out D"
-                .into())
-        }
+        _ => Err("usage: e0 run|run-b|e0c --corpus D --visionclaw D --agentbox D --out D --scratch D | e0 score|e0c-score --out D".into()),
     };
     if let Err(e) = result {
         eprintln!("e0: {e}");
