@@ -138,6 +138,35 @@ impl Repo {
         Ok(String::from_utf8_lossy(&self.run(&refs)?).into_owned())
     }
 
+    /// Zero-context diff between two blobs, with every option that moves a hunk
+    /// pinned on the command line (E0d amendment #1), so no user or repository
+    /// configuration can change the result.
+    pub fn diff_blobs_u0(&self, from: &str, to: &str) -> Result<String, String> {
+        let out = self.run(&[
+            "diff",
+            "-U0",
+            "--no-color",
+            "--no-ext-diff",
+            "--no-textconv",
+            "--no-renames",
+            "--diff-algorithm=myers",
+            "--indent-heuristic",
+            from,
+            to,
+        ])?;
+        Ok(String::from_utf8_lossy(&out).into_owned())
+    }
+
+    /// `git --version`, trimmed.
+    pub fn git_version() -> String {
+        Command::new("git")
+            .arg("--version")
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+            .unwrap_or_default()
+    }
+
     /// Read many blobs by object id through one `git cat-file --batch`.
     pub fn read_blobs(&self, oids: &[String]) -> Result<Vec<Vec<u8>>, String> {
         let mut child = self

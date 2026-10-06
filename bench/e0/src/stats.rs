@@ -93,6 +93,21 @@ pub fn wilson_upper(k: usize, n: usize) -> Option<f64> {
     Some((centre + margin) / (1.0 + z2 / n))
 }
 
+/// Wilson score interval at 95% (z = 1.959964): `(lower, upper)`.
+pub fn wilson(k: usize, n: usize) -> Option<(f64, f64)> {
+    if n == 0 {
+        return None;
+    }
+    let z = 1.959_963_984_540_054_f64;
+    let (k, n) = (k as f64, n as f64);
+    let p = k / n;
+    let z2 = z * z;
+    let centre = p + z2 / (2.0 * n);
+    let margin = z * (p * (1.0 - p) / n + z2 / (4.0 * n * n)).sqrt();
+    let d = 1.0 + z2 / n;
+    Some((((centre - margin) / d).max(0.0), ((centre + margin) / d).min(1.0)))
+}
+
 /// Draw `k` of `items` (or all, if fewer) without replacement by a partial
 /// Fisher–Yates shuffle on `rng`; the drawn items come back in input order.
 pub fn draw<T: Clone>(items: &[T], k: usize, rng: &mut ChaCha8Rng) -> Vec<T> {
@@ -144,6 +159,11 @@ mod tests {
         assert!((wilson_upper(0, 40).unwrap() - 0.08762).abs() < 1e-4);
         // 4 of 40: upper bound 0.2306.
         assert!((wilson_upper(4, 40).unwrap() - 0.2306).abs() < 1e-3);
+        // Both bounds: 4 of 40 → 0.0396–0.2306; 40 of 40 → lower 0.9124.
+        let (lo, hi) = wilson(4, 40).unwrap();
+        assert!((lo - 0.0396).abs() < 1e-3 && (hi - wilson_upper(4, 40).unwrap()).abs() < 1e-12);
+        assert!((wilson(40, 40).unwrap().0 - 0.9124).abs() < 1e-3);
+        assert_eq!(wilson(0, 0), None);
     }
 
     #[test]

@@ -13,6 +13,8 @@
 //! e0 run-b <same inputs> --out docs/evidence/E0b --scratch <dir>   # E0b: region anchoring
 //! e0 score --out docs/evidence/E0b
 //! e0 e0c ... --out docs/evidence/E0c    # E0c (docs/evidence/E0c/PREREG.md), same arguments
+//! e0 e0d ... --out docs/evidence/E0d    # E0d (docs/evidence/E0d/PREREG.md): hunk overlap, every detector
+//! e0 e0d-score --out docs/evidence/E0d  # E0d endpoint 4, once blind labels exist
 //! ```
 //!
 //! `run-b` repeats E0's walk over the same pins and window and adds T_region
@@ -31,8 +33,10 @@
 mod canon;
 mod counting;
 mod e0c;
+mod e0d;
 mod flow;
 mod git;
+mod hunk;
 mod judge;
 mod kinds;
 mod mapping;
@@ -187,9 +191,20 @@ fn main() {
             };
             e0c::run(&a)
         })(),
+        Some("e0d") => (|| {
+            let a = Args {
+                corpus: arg(&argv, "--corpus")?,
+                visionclaw: arg(&argv, "--visionclaw")?,
+                agentbox: arg(&argv, "--agentbox")?,
+                out: arg(&argv, "--out")?,
+                scratch: arg(&argv, "--scratch")?,
+            };
+            e0d::run(&a)
+        })(),
+        Some("e0d-score") => arg(&argv, "--out").and_then(|out| e0d::score(&out)),
         Some("e0c-score") => arg(&argv, "--out").and_then(|out| e0c::score(&out)),
         Some("score") => arg(&argv, "--out").and_then(|out| judge::score(&out)),
-        _ => Err("usage: e0 run|run-b|e0c --corpus D --visionclaw D --agentbox D --out D --scratch D | e0 score|e0c-score --out D".into()),
+        _ => Err("usage: e0 run|run-b|e0c|e0d --corpus D --visionclaw D --agentbox D --out D --scratch D | e0 score|e0c-score|e0d-score --out D".into()),
     };
     if let Err(e) = result {
         eprintln!("e0: {e}");

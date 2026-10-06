@@ -88,6 +88,7 @@ mod tests {
             kind: kind.into(),
             cited: file.into(),
             line: 1,
+            end: None,
             resolved: Resolved::Source(file.into()),
         };
         (c, file.into(), m)

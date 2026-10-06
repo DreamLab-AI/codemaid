@@ -59,6 +59,8 @@ pub struct Citation {
     pub kind: String,
     pub cited: String,
     pub line: u32,
+    /// A range's end line as written (`path:a-b` gives `Some(b)`); E0 reads only `line`.
+    pub end: Option<u32>,
     pub resolved: Resolved,
 }
 
@@ -203,7 +205,7 @@ fn resolve(sources: &[String], cited: &str) -> Resolved {
 pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bool) -> (Vec<Citation>, usize) {
     let mut cites = Vec::new();
     let mut unbound = 0;
-    let mut check = |cited: &str, a: &str| {
+    let mut check = |cited: &str, a: &str, b: Option<&str>| {
         if HOST_PORT_RE.is_match(cited).unwrap_or(false) {
             return;
         }
@@ -214,6 +216,7 @@ pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bo
             kind: String::new(),
             cited: cited.into(),
             line,
+            end: b.and_then(|b| b.parse::<u32>().ok()),
             resolved: resolve(sources, cited),
         });
     };
@@ -265,7 +268,7 @@ pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bo
             let cited = c[1].to_string();
             paths.push((cited.clone(), m.start()));
             last_path = Some(cited.clone());
-            check(&cited, &c[2]);
+            check(&cited, &c[2], c.get(3).map(|m| m.as_str()));
         }
         stripped.push_str(&line[at..]);
         for bm in BARE_RE.captures_iter(&stripped).flatten() {
@@ -282,7 +285,7 @@ pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bo
                 (None, Ctx::None) => last_path.clone(),
             };
             match ctx {
-                Some(p) => check(&p, &bm[2]),
+                Some(p) => check(&p, &bm[2], bm.get(3).map(|m| m.as_str())),
                 None => unbound += 1,
             }
         }
@@ -443,6 +446,7 @@ mod tests {
                 ("src/main.rs".into(), 9),
             ]
         );
+        assert_eq!(c.iter().map(|c| c.end).collect::<Vec<_>>(), [Some(1218), None, Some(41), None, None, None]);
         assert_eq!(unbound, 0);
         assert_eq!(c[2].resolved, Resolved::Source("../project/src/a/timeout.rs".into()));
     }
