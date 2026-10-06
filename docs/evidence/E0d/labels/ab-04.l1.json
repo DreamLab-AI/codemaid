@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only changes the pinned vaultSrc VisionClaw commit hash on line 42 of flake.nix. The topic never mentions vaultSrc, and the change adds or removes no lines, so none of the cited flake.nix anchors (183-186, 1784-1793, 2308) move."}

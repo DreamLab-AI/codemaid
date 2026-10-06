@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff adds a new `class_iris` method and a test in `oxigraph_ontology_repository.rs` at line 2152 and later. Every line the topic cites in that file is 824 or lower, so no anchor moves, and nothing the topic states about the graphs, the derived-write fence or provenance is affected."}

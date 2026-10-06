@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only edits the Disposition section of ADR-2108 and adds an amendment. The topic's ADR-2108 claims (compose default :-1, write-denied notice, flash_notice, armed dev backend) remain accurate, and the amendment only restricts the dev profile to the owner's rig."}

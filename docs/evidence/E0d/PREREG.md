@@ -179,3 +179,12 @@ except labels. `git --version` is recorded in `results.json`, because hunk
 placement depends on git's diff implementation. Range-end reading is added to
 the shared citation parser without changing E0, E0b or E0c output; their
 re-runs are checked byte for byte against the committed files.
+
+### 2026-10-06 #L1 (team lead): labelling mechanism (after labels existed, before any scoring)
+Labellers ran as fresh `claude -p --model sonnet` processes, one per prompt, with the prompt
+file on stdin and nothing added, from an empty working directory with `--tools ""`,
+`--setting-sources ""`, `--strict-mcp-config`, `--no-session-persistence` and
+`--disable-slash-commands`. That satisfies PROTOCOL.md's "fresh subagent per prompt with no
+repository access" more strictly than a tool-holding subagent would. The prompt set hashed
+`0ba3cf6b0b749b79` before and after labelling. Outcome: 60 pairs, 29 first-round yes, 29
+confirmed by an independent second labeller, 0 invalid. Helper: `labels/run-label.sh`.

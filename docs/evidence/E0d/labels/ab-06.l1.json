@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only changes the pinned VisionClaw commit for the vaultSrc flake input at line 42, which is unrelated to the sidechain producer, mirror, faucet, or role isolation. It is above all the cited flake.nix line ranges (line 241 and later), and no line count changed, so no anchors move."}

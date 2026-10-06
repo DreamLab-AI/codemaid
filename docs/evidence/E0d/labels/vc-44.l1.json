@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff swaps a ComfyUI/image-gen env var at line ~228 of docker-compose.unified.yml, in a different service than the dev service the topic cites (VISIONCLAW_DEV_MODE at line 90). The change is after line 90, so the cited anchors do not move, and nothing the topic states is affected."}

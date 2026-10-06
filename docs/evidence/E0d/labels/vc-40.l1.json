@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The change only moves the domain-colour helper from InstancedLabels.tsx into a shared utils module. The topic cites no line numbers in InstancedLabels.tsx and says nothing about domain colours, so nothing it states becomes wrong."}

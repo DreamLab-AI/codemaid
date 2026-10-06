@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only removes a [patch.crates-io] override for nostr-bbs-core near line 291 of Cargo.toml. The topic never mentions that patch, and its Cargo.toml claims (workspace members at lines 2-4, solid-pod-rs as a crates.io version pin, contracts crate not in dependencies) are unaffected."}

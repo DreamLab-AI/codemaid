@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff changes only a sidechain enable flag (~line 1589) and adds one line at ~1869 in agentbox.toml. Both sit after every line the topic cites (438-472), and neither touches the [memory_learning] keys the topic describes."}

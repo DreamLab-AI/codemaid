@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only appends an R2 amendment to ADR-2108 (Trust box is LAN-only, prod profile authenticates every write, a known launch.sh prod defect). The topic's ADR-2108 claims (dev default :-1, opt-out, release refusal, visible write denial) stay accurate and nothing in the topic is contradicted."}

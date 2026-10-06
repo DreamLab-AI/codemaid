@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only changes a pinned vaultSrc commit hash at flake.nix line 42 with no line count change, so it doesn't shift any cited flake.nix line anchors or affect any statement in the topic about role isolation or the identity port."}

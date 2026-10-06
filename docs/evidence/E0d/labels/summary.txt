@@ -1,0 +1,4 @@
+pairs: 60
+l1 yes: 29
+confirmed stale (l1 yes and l2 yes): 29
+invalid: 0

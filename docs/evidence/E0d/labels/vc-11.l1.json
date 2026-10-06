@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only edits the payment-host paragraph near line 233 of BASELINE-architecture.md. The topic cites that file only at lines 218-228, which come before the edit, so those anchors stay valid, and the topic makes no claims about payment or ritual code."}

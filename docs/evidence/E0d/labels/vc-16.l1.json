@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only bumps solid-pod-rs to an exact crates.io version pin (=0.5.0-alpha.12) and adds a [patch.crates-io] git entry for nostr-bbs-core. The topic's claim that solid-pod-rs is a crates.io version pin rather than a git rev stays true, and the cited Cargo.toml:2-4 workspace members are untouched."}

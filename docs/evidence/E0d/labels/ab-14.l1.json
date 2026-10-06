@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only updates verified_commit front-matter fields in three ADR files; no code, behavior, or line positions the topic cites changed."}

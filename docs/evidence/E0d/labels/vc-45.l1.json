@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only rewords a GPU-versus-CPU speedup paragraph in configuration.md. The topic cites that file solely for the Perplexity env-var correction near line 220, and it makes no claims about GPU performance. Nothing the topic states is affected."}

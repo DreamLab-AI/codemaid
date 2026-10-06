@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only appends a 'Source qualification' section to ADR-2111 that confirms it remains proposed/none/inactive, which matches Note4 in VC-26.1. The cited line 4 sits above the insertion, so it is unchanged."}

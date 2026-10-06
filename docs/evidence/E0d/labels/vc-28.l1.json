@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only changes the cloudflared service's profile and a comment in docker-compose.unified.yml. The topic cites that file solely for xinference at line 329, and says nothing about cloudflared or profiles. The cited line may have shifted by about 1 line, but that is not a stated-wrong claim."}

@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only removes the `ruflo_console` feature flag at about line 1895 of agentbox.toml. The topic cites agentbox.toml:864-867 and :877-878, which come earlier in the file, so those anchors are unaffected. The removed flag is unrelated to anything the topic states."}

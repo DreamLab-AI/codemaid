@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only removes a `[patch.crates-io]` block after the `solid-pod-embed` feature definition. All Cargo.toml line citations in the topic (222, 254, 283-285) come before the removed lines, and the topic makes no claim about the patch block."}

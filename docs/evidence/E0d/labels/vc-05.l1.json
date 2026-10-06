@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only removes the [patch.crates-io] block for nostr-bbs-core, which sits after the cited Cargo.toml:254 default feature line. So no line anchor shifts, and the topic makes no claim about that patch."}

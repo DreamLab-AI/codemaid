@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only appends a new section after line 208 of ADR-2111. The topic's anchors (:38, :83, :95-96) sit above that point and are unmoved. The new section states the record stays proposed/none, so the topic's claims about ADR-2111 remain accurate."}

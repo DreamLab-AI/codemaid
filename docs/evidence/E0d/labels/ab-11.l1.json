@@ -1,0 +1,1 @@
+{"verdict":"no","statements":[],"line_anchors_only":false,"reason":"The diff only changes the sidestr-producer-dreamlab-txbt4 `interval` value (600 to 60) in agentbox.toml, replacing one line with one line. The topic never states that interval, and its `agentbox.toml:2129` anchor for `role_isolation` does not move."}

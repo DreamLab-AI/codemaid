@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only changes the pinned VisionClaw commit URL for vaultSrc in flake.nix, on a single line with no line shift. The topic makes no claim about that pin, and its flake.nix line references (136, 138, 542, 1893-1899) are not affected."}

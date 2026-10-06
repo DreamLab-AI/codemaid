@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only changes the pinned VisionClaw vaultSrc commit URL at flake.nix:39-42, which does not shift any cited line numbers (same line count) and is not discussed in the topic's media/GPU dispatch diagrams."}
