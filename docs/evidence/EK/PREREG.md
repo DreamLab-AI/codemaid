@@ -67,4 +67,57 @@ result is published as found.
 
 ## Amendments
 
-None.
+### 2026-10-06: execution clarifications (no arm, k, endpoint, threshold or seed changed)
+
+This copy lives in the EK output directory. The repository copy at `fdd8207` is unchanged
+because another engineer is working in that tree.
+
+1. **Removal unit, literal reading.** In S, M and P, each removed diagram takes exactly four
+   things: its `## <ID>.<n>` heading line, its mermaid block, its `**What it shows**`
+   paragraph and its `**Why it is this way**` paragraph. A paragraph here is a run of
+   non-blank lines, and each removed span takes one following blank line with it. Other
+   paragraphs inside a diagram section are **kept**. Most of these are `**Invariant:**`
+   paragraphs (49 in sealmap, about 860 in campaignbuilder); a few are extra prose or tables.
+   They are kept because the PREREG names only the heading, the block and the two
+   paragraphs, and because `--register strip` keeps Invariants too. Once the heading is
+   gone, they sit under the preceding heading.
+2. **Arms are built on the pack, not on the corpus.** Arm A's pack was produced by
+   `external-review.cjs <corpus> --register strip --lens critical --dry-run`, and
+   `build-arms.cjs` derived S, M and P from that pack. The script only accepts a corpus
+   directory, so `run.cjs` sent every review instead. It imports the script's own
+   `loadLens` and `parseFindings` and sends the identical request: contents [pack, critical
+   lens with COUNT=15], `thinkingLevel: high`, `temperature: 0`, `gemini-3.8-flash`, and
+   the same retry policy.
+3. **How M selects diagrams.** All diagram units go through a Fisher–Yates shuffle with
+   mulberry32(20261006). Units are taken in shuffled order until the removed bytes reach
+   S's removed bytes, and the last unit is dropped if that lands closer. M−S is +327 bytes
+   for sealmap and −1,844 bytes for campaignbuilder, each less than one unit.
+4. **The gold list is the REGISTER.md table rows** under `## Tensions`, `## Debt` and
+   `## Drifts` at the pinned sha. Counts are Tension/Debt/Drift: campaignbuilder 427
+   (30/285/112) and sealmap 45 (4/40/1). Their sha256 hashes are in `gold-hashes.txt`,
+   written at 07:06Z, before the first review was sent at 07:08Z. They were not committed
+   to the repository (see the note at the top of this section).
+5. **How the "paired bootstrap" is run.** Runs are independent, so pairs are formed by
+   (corpus, replicate slot). Each of the 10,000 resamples (mulberry32(20261006)) draws 3
+   replicate slots with replacement per corpus and applies the same slots to every arm. The
+   statistic is the pooled mean over the 6 drawn runs. Corpus is a fixed stratum, so the CI
+   reflects run-to-run variation only.
+6. **Temperature 0 and n = 3.** The baked lens call fixes temperature 0. Runs still varied
+   (thinking ran from 8.5k to 29k tokens, and findings differed), but a 3-replicate
+   bootstrap understates the uncertainty.
+7. **Scoring returns non-MISS issues only.** Each scorer lists every issue it scores FULL or
+   PARTIAL, and every unlisted issue is a MISS. Each run had its own Sonnet subagent. Every
+   scorer was blind: it saw only an opaque run id and the parsed findings fields, and the
+   run order was shuffled independently of arm. Of the 24 scorers, 22 were launched
+   together and 2 after the harness's 20-concurrent-agent limit freed up.
+8. **Cost is reported as tokens** (prompt, cached, thinking, output) plus wall-clock time.
+   No price is applied.
+9. **Scorer audit (exploratory, added after scoring).** The sealmap scorers finished in
+   about 30 s with 4–7 tool calls each, so their code checks were shallow. A second blind
+   Sonnet agent re-checked all 12 WRONG verdicts against the code. The results are reported
+   beside endpoint 5 and do not replace it.
+10. **The exploratory E0 analysis was not run** (VisionClaw citation fallback and staleness
+    by kind). It is out of scope for this run.
+11. **Gemini's implicit prefix cache** served part of the prompt for some M and P runs
+    (1.26M cached tokens in total). The service does this on its own. It affects cost, not
+    the request, so runs stay independent in content.

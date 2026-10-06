@@ -1,0 +1,33 @@
+{"run_id":"rc3ccb5",
+"issues":[
+{"id":"DB-136","score":"PARTIAL","findings":[1],"why":"one agent uid owns every tenant's surface so the other tenant's agent can write into this preview"},
+{"id":"DB-250","score":"FULL","findings":[2],"why":"npm ci runs as runtime account before the egress fence, executing dependency scripts unfenced"},
+{"id":"T-21","score":"FULL","findings":[3],"why":"every tenant shares one flat pod-net"},
+{"id":"DB-161","score":"FULL","findings":[5],"why":"verify failure after migration rewinds whole DB with pg_restore --clean"},
+{"id":"DB-29","score":"FULL","findings":[6],"why":"queued audit records lost at restart or evicted past 10,000, nothing replays"},
+{"id":"DB-33","score":"FULL","findings":[6],"why":"copy carries no record of what it missed"},
+{"id":"T-01","score":"FULL","findings":[6],"why":"off-box copy claimed to close rewrite gap but ship.ts can lose records"},
+{"id":"DB-143","score":"FULL","findings":[7],"why":"state archive excludes restore-points/"},
+{"id":"T-09","score":"PARTIAL","findings":[9],"why":"host hard-codes default tenant's data model and surface write targets"},
+{"id":"DR-26","score":"PARTIAL","findings":[12],"why":"running ingress keeps old routing until restart (Caddyfile:469)"},
+{"id":"DB-66","score":"PARTIAL","findings":[13],"why":"shared engine process serialises chat across sessions"},
+{"id":"DR-35","score":"FULL","findings":[14],"why":"deploy grants read from env, need control-plane restart despite header saying none"},
+{"id":"T-03","score":"FULL","findings":[15],"why":"unauthenticated health names a check per registered tenant"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-136"],"verdict":null,"code":null,"why":"shared agent uid across tenants"},
+{"n":2,"class":"REG","matches":["DB-250"],"verdict":null,"code":null,"why":"npm ci before fence"},
+{"n":3,"class":"REG","matches":["T-21"],"verdict":null,"code":null,"why":"flat pod-net"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/index.ts:3178, control-plane/src/project/registry.ts:316","why":"any vault ref is accepted and resolved with no project binding, but registration is an admin action and the open question is known, so the tenant-B attacker framing is overstated"},
+{"n":5,"class":"REG","matches":["DB-161"],"verdict":null,"code":null,"why":"pg_restore --clean on verify failure"},
+{"n":6,"class":"REG","matches":["DB-29","DB-33","T-01"],"verdict":null,"code":null,"why":"in-memory audit queue loses events"},
+{"n":7,"class":"REG","matches":["DB-143"],"verdict":null,"code":null,"why":"restore points not backed up"},
+{"n":8,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/tools/provisioner/provisioner.mjs:113, enclosure/tools/provisioner/provisioner.mjs:144, enclosure/tools/provisioner/provisioner.mjs:180","why":"over-cap status file does read back as offset 0, but pruneAcks keeps every write under the cap by design, so overflow is mitigated"},
+{"n":9,"class":"REG","matches":["T-09"],"verdict":null,"code":null,"why":"second tenant cannot use fast lane, default-tenant hardcoding"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/surface/gate.ts:227-241, control-plane/src/surface/gate.ts:488","why":"failed rollback write leaves page live and unverified as claimed, but it is a deliberate loud outcome documented as needing operator action"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/bracket.ts:155-172, control-plane/src/scr/transition.ts:220-242","why":"failed restore holds the lane and no TTL frees it, but this is the deliberate uncertain-tree rule; an operator close or retry is the stated way out"},
+{"n":12,"class":"REG","matches":["DR-26"],"verdict":null,"code":null,"why":"caddy tenants read only at boot"},
+{"n":13,"class":"REG","matches":["DB-66"],"verdict":null,"code":null,"why":"single shared pi process serialises chat"},
+{"n":14,"class":"REG","matches":["DR-35"],"verdict":null,"code":null,"why":"deploy grants need restart"},
+{"n":15,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"health leaks project ids"}
+]}

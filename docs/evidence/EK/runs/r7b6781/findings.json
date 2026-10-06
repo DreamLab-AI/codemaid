@@ -1,0 +1,167 @@
+[
+  {
+    "id": "critical:F-01",
+    "kind": "finding",
+    "title": "Unsanitized git revision execution and missing multi-repo diffing",
+    "topics": "COR-05.2, COR-06.4, COR-03.5",
+    "evidence": "In `main.rs:608-622`, `stale --since REV` and `pack --diff REV` export revisions using `archive REV:prefix piped into tar -x, temp dir`. The `REV` argument comes directly from CLI input. Furthermore, `main.rs:461-462` explicitly specifies: `ST->>ST: refuse with --repo`, while `main.rs:76-86` advertises `--repo` as a shared flag across all commands.",
+    "failure": "Passing untrusted revision strings (such as in automated CI bot triggers) risks argument injection into `git archive`. Additionally, unpacking unchecked archives with `tar -x` into temporary directories risks path traversal via malicious symlinks. In multi-repo workspaces (a primary documented feature), running `sealmap stale --since` or `sealmap pack --diff` immediately crashes/refuses execution.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-02",
+    "kind": "finding",
+    "title": "Destructive file and directory deletion during corpus generation",
+    "topics": "COR-01.2, COR-03.3, COR-03.4",
+    "evidence": "`crates/sealmap-corpus/src/document.rs:10-12` and `contract.rs:99, 138-141` state that `write` deletes any Markdown file whose YAML front matter opens with `---` and `sealmap:`, and subsequently deletes empty parent directories (`write deletes it and empty parents`).",
+    "failure": "If `sealmap generate -o <DIR>` is pointed at an existing directory containing non-generated documentation or design notes that use `sealmap:` metadata, or if an orphaned file is cleaned up inside a directory tree, `write` purges those files and recursively removes their parent directories from disk without confirmation.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-03",
+    "kind": "finding",
+    "title": "Deadlock on topic file renaming with no deletion mechanism",
+    "topics": "COR-04.4, COR-04.6, COR-05.1, COR-05.3",
+    "evidence": "COR-04.6 claims: \"Replacing by file as well as by id means a renumbered topic moves its seal rather than leaving the old entry orphaned (`tests/seal.rs:543`)\". However, the signing pipeline in `sign.rs:117-118` enforces: `SG->>LK: id already sealed for another file? refuse`. Meanwhile, `check.rs:259-260` halts on any file missing from disk: `topic file missing, Orphan, stop`.",
+    "failure": "If an engineer renames a topic file (e.g., `01-architecture.md` to `02-architecture.md`) without changing its topic ID, `verify` immediately fails because `01-architecture.md` is an `Orphan`. Running `sealmap seal sign 02-architecture.md` is refused because the ID is already sealed under the old filename. Because the CLI lacks any command to remove or unseal entries (`COR-05.1`), and hand-editing `seals.lock` is rejected by `parse_canonical` (`lock.rs:234`), the workspace is permanently locked in a failing gate.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-04",
+    "kind": "finding",
+    "title": "Prose mentions of symbol IDs break CI verification with no escape hatch",
+    "topics": "COR-04.3, COR-04.4, DEL-02.6",
+    "evidence": "COR-04.3 states that any Markdown code span starting with `sym:`, a manager, and a space is treated as a code citation (`topic.rs:331`). DEL-02.6 documents that running `sealmap verify` on sealmap's own codebase fails because `MER-02 writes an example id from a fixture crate (shop) as an inline code span, which reads as a citation of a symbol nobody sealed`, forcing the project to disable `verify` in CI (`ci.yml:9-84`).",
+    "failure": "Any topic that documents example IDs, external IDs, or fixture symbols in backticks is classified as an `UnsealedCitation`, causing `sealmap verify` to exit 1. Because CommonMark backtick spans have no escaping mechanism, documentation cannot reference example IDs without breaking the CI seal gate.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Marked in DEL-02.6)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-05",
+    "kind": "finding",
+    "title": "Ambient checkout directory leakage corrupts symbol IDs and determinism",
+    "topics": "DEL-01.3, EXT-01.2, MOD-01.2, COR-05",
+    "evidence": "DEL-01.3 notes that codebase name resolution (`main.rs:393, 419-424`) falls back to the checkout directory name. In EXT-01.2, fallback crates without an explicit package manifest take this name (`layout.rs:143`), which forms the package root in global symbol IDs (`MOD-01.2`). COR-05 notes that checking seals with different settings makes symbols appear `Absent`.",
+    "failure": "When `--name` is omitted, cloning a repository into differently named directories (standard in CI runners, Docker containers, and developer workstations) produces divergent symbol IDs. `sealmap verify` reports sealed symbols as `Absent`, failing builds on identical Git commits.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-06",
+    "kind": "finding",
+    "title": "Review pack source windows silently truncate code while guaranteeing completeness",
+    "topics": "COR-06, COR-06.2, DEN-01",
+    "evidence": "COR-06 claims: \"Nothing is truncated... It never quietly drops content.\" DEN-01 claims: \"It never receives a silently shortened excerpt that looks complete.\" However, COR-06.2 reveals: `WI-->>SE: at most N lines from the first, label says when clipped (src/pack.rs:508-517)` via `--source-window` (`main.rs:206-232`).",
+    "failure": "When generating review packs for audits or LLM ingestion, functions exceeding the line window are cut off at N lines. An auditor or model reviews an incomplete function body under the premise that sealmap review packs never truncate content.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-07",
+    "kind": "finding",
+    "title": "Closure parameter shadowing binds calls to outer variable types",
+    "topics": "EXT-05.6, EXT-03.7",
+    "evidence": "EXT-05.6 documents that \"a parameter that shadows an outer typed name keeps the outer type (`collect.rs:1348-1351`)\". In addition, any unshadowed parameter is `Untyped`, and method calls on it fall back to workspace-wide `by_name_only` guessing (`tests/extract.rs:351`).",
+    "failure": "In common Rust patterns where a closure parameter shadows an outer variable name (`let file = ...; items.iter().map(|file| file.read())`), the resolver binds `file.read()` to the outer variable's type rather than the inner parameter's type. For unshadowed parameters, method calls match unrelated single-instance methods across reachable crates (e.g. matching `u8` calls to `Database::vacuum`). This fabricates false call edges and misdirects review seals.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Marked as debt in EXT-05.6)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-08",
+    "kind": "finding",
+    "title": "Refactoring foreign trait implementations invalidates seals",
+    "topics": "EXT-02, EXT-02.1",
+    "evidence": "EXT-02 promises: \"Reorganising methods across impl blocks or files, the most common refactor in a growing Rust codebase, changes no name and therefore invalidates no reviewed diagram.\" However, EXT-02.1 defines IDs for foreign implementations (`impl Trait for ForeignType`) as `module/impl#[SelfTy][Trait]m().` (`ids.rs:105`), which are anchored in the specific module containing the `impl`.",
+    "failure": "Moving a foreign trait implementation or extension trait from one file to another changes its symbol ID. Existing seals citing that method are reported as `Absent`, failing CI builds despite the design promise that file reorganizations preserve IDs.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-09",
+    "kind": "finding",
+    "title": "Silent omission of local closures and macro invocations from call flows",
+    "topics": "EXT-03.4, EXT-03.6",
+    "evidence": "EXT-03.4 states that calling a local closure or function pointer (`let g = ...; g(1)`) is \"dropped as a local closure (`resolve.rs:840`)\". EXT-03.6 states that a macro invocation is \"never a call step (`flow.rs:160`)\", and macros whose arguments do not parse as expression lists contribute nothing.",
+    "failure": "Core application logic relying on callbacks, dispatch tables, handler closures, or routing macros (e.g. HTTP routing, custom logging, telemetry) is silently omitted from generated sequence diagrams and dense projections, producing false representations of system flow.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Marked as debt in EXT-03)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-10",
+    "kind": "finding",
+    "title": "Hardcoded path depth limit silently reclassifies internal calls as external dependencies",
+    "topics": "EXT-05.2",
+    "evidence": "EXT-05.2 specifies that if path segments exceed 8: `depth over 8? (resolve.rs:642) -> yes -> None: becomes a path id, External (resolve.rs:601)`.",
+    "failure": "Code organized in module trees deeper than 8 segments (e.g., `crate::subsystem::subdomain::module::component::layer::handler::call()`) is silently aborted by `resolve.rs:642` and classified as an external dependency (`sym:extern ...`). This falsifies architecture boundaries and creates incorrect external lanes in sequence diagrams.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-11",
+    "kind": "finding",
+    "title": "Trait map silently truncates relationships beyond budget without notice",
+    "topics": "COR-02.5",
+    "evidence": "COR-02.5 specifies that while crate graphs, module graphs, and data models emit comments indicating the count of omitted entities when caps are exceeded, the trait map (`overview.rs:230`) outputs the `first max_edges relations in key order, no omitted count (`overview.rs:236`)`.",
+    "failure": "In large codebases exceeding 300 trait relationships, the overview diagram drops the remainder in alphabetical key order without any comment or indicator. Engineers and agents reviewing `_overview.md` make architectural decisions on an incomplete trait map assuming it is exhaustive.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-12",
+    "kind": "finding",
+    "title": "Substring matching on \"spawn\" misclassifies synchronous calls as parallel execution",
+    "topics": "EXT-03.3",
+    "evidence": "EXT-03.3 specifies deferred closure classification via: `callee name contains spawn? (labels.rs:140) -> yes -> Parallel arm: spawned task (labels.rs:153)`.",
+    "failure": "Calling methods such as `entity.despawn(|| ...)`, `worker.check_spawn(|| ...)`, or synchronous factory helpers matches `contains(\"spawn\")` and renders the call inside a Mermaid `par` block. This misrepresents single-threaded synchronous code as multi-threaded concurrency in review diagrams.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-13",
+    "kind": "finding",
+    "title": "Non-atomic two-phase signing leaves repository in unverified LockFault state",
+    "topics": "COR-05.3, COR-04.4",
+    "evidence": "In COR-05.3, `seal sign` writes the topic Markdown file first (`main.rs:679-680`) and `seals.lock` second (`main.rs:682`). In COR-04.4, `check.rs:383` checks: `pointer without entry, LockFault`.",
+    "failure": "A process interruption (SIGINT, crash, or disk full) between the topic write and the lock write leaves the topic pointing to a nonexistent lock entry. Subsequent runs of `sealmap verify` report a fatal `LockFault`. There is no rollback, atomic directory transaction, or recovery mechanism provided.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-14",
+    "kind": "finding",
+    "title": "Workspace manifest maintains unpinned dependency breaking downstream MSRV",
+    "topics": "DEL-01.2, Cargo.toml",
+    "evidence": "DEL-01.2 notes that `ignore 0.4.30` broke Rust 1.85 MSRV compliance. While `Cargo.lock` pins `0.4.29` internally, the published manifest `Cargo.toml:35` leaves the requirement at `ignore = \"0.4.23\"`.",
+    "failure": "Downstream crates on Rust 1.85 importing published `sealmap` crates without using sealmap's lockfile will resolve `ignore 0.4.30` during standard dependency resolution, causing immediate compilation failure on the documented MSRV toolchain.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Marked in DEL-01.2)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-15",
+    "kind": "finding",
+    "title": "TOML parse errors suppress all code drift and security classification",
+    "topics": "COR-04.4",
+    "evidence": "COR-04.4 specifies: `VF->>LK: parse (check.rs:360); alt the lock does not parse -> VF-->>CL: one LockFault and nothing else (check.rs:363-367)`.",
+    "failure": "While non-canonical formatting is inspected in full, any syntax error in `seals.lock` (such as Git merge conflict markers or corrupted TOML) causes `verify` to halt immediately and return only a single `LockFault`. All subsequent checks for broken contracts, absent symbols, unsealed citations, and code drift are suppressed.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  }
+]

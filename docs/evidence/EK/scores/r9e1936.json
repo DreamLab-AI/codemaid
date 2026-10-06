@@ -1,0 +1,31 @@
+{"run_id":"r9e1936",
+"issues":[
+{"id":"DB-19","score":"FULL","findings":[4],"why":"closure param shadowing outer typed local resolved with outer type"},
+{"id":"DB-18","score":"PARTIAL","findings":[4],"why":"closure-param calls matched by outer binding; same code, name-matching of untyped params not stated"},
+{"id":"DB-07","score":"FULL","findings":[9],"why":"stack overflow aborts the process, isolate.rs"},
+{"id":"T-03","score":"FULL","findings":[11],"why":"checkout directory name used as codebase name"},
+{"id":"DB-28","score":"FULL","findings":[14],"why":"trait map truncates with no omitted count"},
+{"id":"T-02","score":"FULL","findings":[15],"why":"ignore 0.4.30 needs newer Rust than MSRV, lockfile masks"},
+{"id":"DB-38","score":"FULL","findings":[15],"why":"ignore 0.4.30 MSRV problem at Cargo.toml"},
+{"id":"DB-40","score":"FULL","findings":[6],"why":"MER-02 example sym id blocks verify in CI"},
+{"id":"DB-12","score":"PARTIAL","findings":[8],"why":"macro invocations produce no call steps; no Macro CallKind emitted"},
+{"id":"DB-26","score":"PARTIAL","findings":[5],"why":"unknown-receiver calls dropped under default policy"},
+{"id":"DB-05","score":"PARTIAL","findings":[7],"why":"files silently skipped without diagnostic, different trigger (size/dir names)"}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:608-622","why":"rev is passed unguarded (no --) into git archive arg and tar runs, but a leading-dash rev is local CLI input; traversal claim unsupported"},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/contract.rs:98-100,147-148; crates/sealmap-corpus/src/document.rs:153-155","why":"orphan removal real but limited to md files with sealmap marker, a documented contract"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:679-682","why":"two sequential writes real, failure is detected as lock fault and documented"},
+{"n":4,"class":"REG","matches":["DB-19","DB-18"],"verdict":null,"code":null,"why":"closure param shadowing"},
+{"n":5,"class":"REG","matches":["DB-26"],"verdict":null,"code":null,"why":"unknown receiver calls dropped by default policy"},
+{"n":6,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"example id fails verify"},
+{"n":7,"class":"REG","matches":["DB-05"],"verdict":null,"code":null,"why":"silent file skipping"},
+{"n":8,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macros yield no calls"},
+{"n":9,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow abort"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/seal/lock.rs:226-234","why":"CRLF lock rejected as NonCanonical is real and documented in the doc comment; autocrlf impact plausible"},
+{"n":11,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"directory name leaks"},
+{"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:314-318","why":"TopicOverBudget error real but a deliberate no-silent-truncation refusal"},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:459-462","why":"--repo combination rejected by design with explicit error"},
+{"n":14,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"trait map no omitted count"},
+{"n":15,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore MSRV"}
+]}

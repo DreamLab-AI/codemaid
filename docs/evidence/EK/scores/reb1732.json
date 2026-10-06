@@ -1,0 +1,28 @@
+{"run_id":"reb1732",
+"issues":[
+{"id":"DB-07","score":"FULL","findings":[2],"why":"stack overflow aborts the process, bypassing isolate.rs panic isolation"},
+{"id":"T-02","score":"FULL","findings":[12],"why":"ignore 0.4.30 needs newer Rust than declared MSRV 1.85; only lockfile avoids it"},
+{"id":"DB-38","score":"FULL","findings":[12],"why":"same ignore 0.4.30 MSRV defect"},
+{"id":"DB-33","score":"FULL","findings":[13],"why":"seal checked with different flags (--tests) makes sealed symbols look absent"},
+{"id":"DB-11","score":"FULL","findings":[10],"why":"closure stored in a variable is drawn at definition, not call site"},
+{"id":"DB-12","score":"PARTIAL","findings":[8],"why":"macro invocations never drawn as calls; does not name unused CallKind::Macro"},
+{"id":"DB-23","score":"PARTIAL","findings":[9],"why":"lossy Ident::new still minting ids; does not name overview crate graph"},
+{"id":"DB-40","score":"PARTIAL","findings":[11],"why":"repo does not run seal gate in CI (step 6); cause not given"}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:614-619","why":"rev is formatted into a git archive argument without a -- guard, but it is a local CLI argument and git archive runs no hooks; exec injection overstated"},
+{"n":2,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow abort"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/document.rs:153-155","why":"is_generated is real, but deletion of files bearing the marker is the designed behaviour of write"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:677-690","why":"two separate fs::write calls are real and non-atomic, but the failure is detected and recoverable by re-signing"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-model/src/symbol.rs:209-212","why":"only sig_hash and body_hash exist so retargeted imports leave hashes unchanged; documented as not built"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-extract/src/ids.rs:57-63","why":"invalid names collapse to _ so collisions are possible, but only for names a manifest cannot hold"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-extract/src/lower.rs:46-48","why":"ambiguous and external calls are dropped by default and yield flow None; documented design"},
+{"n":8,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macros never drawn as calls"},
+{"n":9,"class":"REG","matches":["DB-23"],"verdict":null,"code":null,"why":"lossy Ident::new"},
+{"n":10,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"closure drawn at definition"},
+{"n":11,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"seal gate not in CI"},
+{"n":12,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore MSRV"},
+{"n":13,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"seal settings mismatch"},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-dense/src/lib.rs:366-372","why":"over-budget slice is refused rather than truncated; real but a deliberate documented choice"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"README.md:353-367","why":"README and DESIGN consistently say 0.2.0 is released; the quoted DEL-01 sentence is not in this tree"}
+]}

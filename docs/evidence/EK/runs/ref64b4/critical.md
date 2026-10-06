@@ -1,0 +1,112 @@
+### F-01 — Process crash via uncontrolled stack overflow on deeply nested code
+- Topics: EXT-01, EXT-03
+- Evidence: EXT-01 asserts that extraction "never fails a whole run because of one bad file: a file that does not parse, or that trips a bug, becomes a warning and a placeholder entry" (`crates/sealmap-rust/src/resolve.rs:218`-`222`). However, EXT-01 also admits: "The residual risk is a file nested deeply enough to exhaust even the large stack: that still ends the process, because a stack overflow cannot be caught" (`crates/sealmap-extract/src/isolate.rs:34`-`37`).
+- Failure: Ingesting an auto-generated, deeply recursive, or maliciously crafted Rust file exhausts the execution thread's stack. Because stack overflow triggers an immediate uncatchable abort/SIGSEGV, the entire `sealmap` process dies, halting CI pipelines and background indexing workers.
+- Confidence: high
+- Marked by authors: no
+
+### F-02 — Indiscriminate file deletion in target directories matching front matter marker
+- Topics: COR-01, COR-03
+- Evidence: COR-03 states as an invariant that "`write` deletes only Markdown files whose YAML front matter opens on the first line (`---`) and whose first key is the `sealmap: ` marker" (`crates/sealmap-corpus/src/contract.rs:99`, `crates/sealmap-corpus/src/document.rs:153`-`155`). But COR-03 also notes that `write` "brings the directory into compliance" by classifying any difference from a freshly generated corpus as missing, orphaned, stale, or modified (`crates/sealmap-corpus/src/contract.rs:1`-`2`).
+- Failure: If `sealmap generate` is run with its output path targeting a directory containing hand-written documentation, notes, or third-party Markdown files that happen to begin with `---` and `sealmap:`, `write` deletes those files as "orphaned" without checking any repository manifest or version control provenance.
+- Confidence: high
+- Marked by authors: no
+
+### F-03 — Proprietary source code exposure in review packs due to missing diagram-only filtering
+- Topics: COR-06, DEL-02
+- Evidence: COR-06 and `docs/DESIGN.md:42` describe review packs as enabling review outside the team without providing repository access. However, DEL-02 reveals: "The designed variant that holds diagrams alone, for an outside reviewer who should not see code, is still to come." Meanwhile, COR-06 shows that `sealmap pack` unconditionally embeds a dense slice and "a window of each cited symbol's current source" (`crates/sealmap-corpus/src/pack.rs:477`-`495`).
+- Failure: An operator sends a review pack to an external third-party auditor or model expecting only diagrams to be transmitted. The pack bundles verbatim slices of the cited implementation code, leaking proprietary source code outside authorization boundaries.
+- Confidence: high
+- Marked by authors: yes (Open / gap catalogue in DEL-02)
+
+### F-04 — Non-atomic seal signing leaves lockfile in corrupted state on process interruption
+- Topics: COR-05
+- Evidence: COR-05 highlights the invariant: "a failure between the two writes leaves a pointer with no entry, which `verify` reports as a lock fault, so an interrupted sign can never pass the gate (`crates/sealmap/src/main.rs:680`-`682`, `crates/sealmap-corpus/src/seal/check.rs:383`)."
+- Failure: If `sealmap seal sign` is interrupted (e.g. SIGINT, SIGTERM, power failure, or disk exhaustion) between writing the pointer and writing the entry, the lockfile is permanently corrupted into an invalid state. Subsequent CI runs calling `sealmap verify` fail immediately with lock faults, requiring manual lockfile surgery to unblock deployment pipelines.
+- Confidence: high
+- Marked by authors: no
+
+### F-05 — Inconsistent CLI configuration silently invalidates symbol IDs and breaks verification
+- Topics: COR-05, DEN-01
+- Evidence: COR-05 documents: "A seal remembers functions by id, and the ids depend on how the code was read (whether tests were included, what the codebase is called when no manifest names it). Checking a seal with different settings from the ones it was signed with makes sealed functions look absent."
+- Failure: A developer signs a review topic locally using non-default flags (e.g. `--tests` or in an uncommitted checkout where repo name inference diverges). When CI runs `sealmap verify` under default options, all sealed functions fail to match and appear absent, rejecting valid merges without explanation.
+- Confidence: high
+- Marked by authors: no
+
+### F-06 — Macro-generated items and invocations bypass verification and drift detection
+- Topics: EXT-02, EXT-03, EXT-06
+- Evidence: EXT-02 notes: "Items that a macro generates are not seen, so they get no name and cannot be cited or sealed (`README.md:342`)." EXT-03 states: "A macro invocation is never drawn as a call of its own, only the calls inside its arguments, and only when those arguments look like ordinary expressions."
+- Failure: Substantial business logic and API contracts implemented via macros (e.g. derive macros, declarative routing macros, RPC endpoints) are invisible to extraction. Breaking changes to macro-generated logic pass `sealmap verify` without triggering seal invalidations or fingerprint changes, giving false verification guarantees in CI.
+- Confidence: high
+- Marked by authors: yes (Debt in EXT-03; documented limitation in EXT-02)
+
+### F-07 — Hardcoded AST nesting cap silently truncates call graphs without diagnostic warnings
+- Topics: EXT-01, EXT-03
+- Evidence: EXT-01 claims extraction "never fails a whole run because of one bad file" and emits diagnostics per failed file (`crates/sealmap-rust/src/resolve.rs:218`-`222`). Conflictingly, EXT-03 documents: "Invariant: walking stops below 1,024 levels of expression nesting, so generated code cannot overflow the collector's stack; deeper calls are omitted (`crates/sealmap-rust/src/collect.rs:1113`)."
+- Failure: In complex expressions or builder chains exceeding 1,024 AST levels, calls are silently discarded from the raw flow IR. No diagnostic or error is raised, and the resulting diagrams and index files present an incomplete call sequence as though it were exhaustive.
+- Confidence: high
+- Marked by authors: no
+
+### F-08 — Aggregated call relations mask inferred guesses behind single exact calls
+- Topics: EXT-04
+- Evidence: EXT-04 asserts: "Nothing is guessed silently (`README.md:318`-`320`), and the generated sequence diagrams mark inferred calls with a `~` so a reviewer can see which arrows to doubt". However, EXT-04 also states: "Invariant: one call relation exists per distinct caller and target, with the strongest confidence of the call sites behind it (`crates/sealmap-extract/src/confidence.rs:66`-`78`)."
+- Failure: If a function calls a target across 10 locations, where 9 calls are speculative name guesses (`inferred`) and 1 is resolved (`exact`), the aggregated relation in the model is marked `exact`. Downstream tooling querying codebase relations treats all interactions between the caller and target as proven facts, concealing the speculative nature of the other calls.
+- Confidence: high
+- Marked by authors: no
+
+### F-09 — Multi-candidate method resolution drops call edges instead of reporting ambiguity
+- Topics: EXT-05, DEN-01
+- Evidence: EXT-05 states: "Two or more reachable candidates are a genuine ambiguity, and no edge is guessed; the call stays `sym:? name` (`crates/sealmap-rust/src/resolve.rs:954`-`968`)." EXT-04 states: "By default calls into the standard library and calls on values of unknown type are left out".
+- Failure: When a method is invoked on a receiver whose type could match two reachable structs/traits in workspace dependencies, sealmap drops the edge entirely rather than emitting an inferred or ambiguous call. The sequence diagram and dense projection depict the caller as having no interaction, hiding actual dependencies from reviewers.
+- Confidence: high
+- Marked by authors: no
+
+### F-10 — Deferred placement of closure bodies distorts runtime execution order in diagrams
+- Topics: EXT-03
+- Evidence: EXT-03 asserts: "Sequence diagrams are the densest review material sealmap produces, and they are only useful if their order matches what the code does." In contrast, EXT-03 details: "closure bodies passed as arguments are placed *after* the call, because they run during it" and "A closure saved in a variable is drawn where it is written, not where it is called."
+- Failure: In code utilizing callbacks, synchronization wrappers (e.g. `with_lock(|| ...)`), or deferred closures stored in variables, sequence diagrams render the execution order backwards or disconnected from call sites. Reviewers checking concurrency safety or lifecycle ordering verify an execution order that does not match runtime behavior.
+- Confidence: high
+- Marked by authors: yes (Debt in EXT-03)
+
+### F-11 — Package name repair fallback silently causes symbol ID collisions
+- Topics: EXT-02, MOD-01
+- Evidence: MOD-01 specifies: "Invariant: two distinct ids never print the same text... two ids are equal exactly when their texts are... parse refuses anything that does not print back unchanged (`crates/sealmap-model/src/sym.rs:440`)." However, EXT-02 states: "Invariant: building an id never fails: a package name the grammar cannot hold is repaired to `_`, and an invalid manager falls back to `unknown _ .` (`crates/sealmap-extract/src/ids.rs:57`-`63`)."
+- Failure: When extracting packages whose names cannot be represented by the ID grammar, both packages have their package IDs coerced to `_`. Identically named modules and functions across these packages produce identical `SymbolId`s, causing hash collisions, symbol merging in models, and invalid seal verification.
+- Confidence: high (inferred)
+- Marked by authors: no
+
+### F-12 — Incomplete migration to injective IDs retains collision risk via lossy minting
+- Topics: MER-01, MER-02
+- Evidence: MER-02 asserts that `Ident::from_symbol` is "injective by construction: two different `SymbolId`s never produce the same diagram id, with no hash suffix and no collision handling (`crates/sealmap-mermaid/src/symbol.rs:10`-`12`)." Yet MER-02 also notes that the topic covers "where ids are still minted the lossy way," and MER-01 warns: "`Ident::new` is documented as lossy; only `Ident::from_symbol` is injective (`crates/sealmap-mermaid/src/escape.rs:43`-`48`)."
+- Failure: Projections or components still utilizing `Ident::new` instead of `Ident::from_symbol` produce identical Mermaid diagram node IDs for distinct symbols, causing Mermaid to combine separate functions into a single node and draw misleading connection edges.
+- Confidence: medium
+- Marked by authors: no
+
+### F-13 — Undeclared MSRV elevation in transitive dependency breaks downstream builds on Rust 1.85
+- Topics: DEL-01
+- Evidence: DEL-01 promises: "It builds on a stated, tested minimum Rust (1.85), so a harness image does not have to chase the newest toolchain." Conflictingly, DEL-01 concedes: "A dependency (`ignore` 0.4.30) needs a newer Rust than it declares; inside this repository the lockfile avoids it, but a project that depends on the published crates without that lock can still pull it in on Rust 1.85 and fail to build."
+- Failure: Downstream adopters adding published `sealmap` 0.2 crates to a project with a Rust 1.85 toolchain will experience build failures during `cargo build` because Cargo's resolver pulls in `ignore` 0.4.30 in the absence of `sealmap`'s internal lockfile.
+- Confidence: high
+- Marked by authors: yes (caveat documented in DEL-01)
+
+### F-14 — Reassignment of `sealmap verify` subcommand silently breaks legacy CI workflows
+- Topics: COR-03, COR-05
+- Evidence: COR-03 notes: "For an adopter migrating from 0.1, the one change to plan for is the name: a pipeline that ran `sealmap verify` against a committed corpus now wants `sealmap generate --check`, and `sealmap verify` means the seal gate (`crates/sealmap/src/main.rs:311`-`322`)."
+- Failure: Adopters upgrading to 0.2 who retain existing CI scripts executing `sealmap verify` will run the seal gate instead of verifying disk corpus drift. In the absence of review topics, the command passes or fails for reasons completely unrelated to corpus freshness, leaving corpus drift unmonitored.
+- Confidence: high
+- Marked by authors: no
+
+### F-15 — Repository does not dogfood its own seal verification gate in CI
+- Topics: DEL-02
+- Evidence: DEL-02 announces the completion of the seal surface: "An adopter can now use what the project is *for*... one command in CI says whether every seal still holds". However, DEL-02 admits: "And this repository has not sealed its own diagrams yet, so its CI does not run the seal gate (step 6)."
+- Failure: The core verification gate (`sealmap verify`) is unexercised in the project's own CI workflows. Latent regressions in topic citation parsing, lockfile checking, or exit code handling can be released to adopters without being detected by the authors' automated builds.
+- Confidence: high
+- Marked by authors: yes (Open / Roadmap gap in DEL-02)
+
+## Not judgeable from this material
+
+1. **Subprocess and Argument Injection in Git Execution**: `stale --since` and `pack --diff` spawn external `git` processes with revision strings (`crates/sealmap/src/main.rs`). The material does not show whether user-supplied git revisions undergo shell escaping or argument validation before execution.
+2. **Atomic Write Semantics on Disk**: `sealmap-corpus` (`contract.rs`) and `sealmap-dense` write generated files to disk, but the material does not reveal whether files are written atomically via temporary files and renames or written directly, risking empty or truncated files on crash.
+3. **Memory Consumption and Heap Allocation Limits**: While stack isolation is documented for thread execution (`crates/sealmap-extract/src/isolate.rs`), memory usage bounds during the sequential whole-workspace resolution pass (`crates/sealmap-rust/src/resolve.rs`) cannot be determined for large codebases.
+4. **Symlink and Filesystem Traversal Handling**: `SourcePath` ensures paths cannot escape root via `..` (`crates/sealmap-model/src/path.rs:57`-`58`), but the material does not disclose whether filesystem symlinks pointing outside the repository root are resolved, ignored, or followed.
+5. **Lossy ID Usage Scope**: While MER-01 and MER-02 state that `Ident::new` remains lossy and is still used in parts of the codebase, the exact locations and whether they process user-controlled inputs cannot be identified from the text.

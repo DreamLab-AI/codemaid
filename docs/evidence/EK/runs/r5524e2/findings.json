@@ -1,0 +1,167 @@
+[
+  {
+    "id": "critical:F-01",
+    "kind": "finding",
+    "title": "Shared agent operating-system user permits cross-tenant code tampering",
+    "topics": "BL-06, ES-03, CP-05, EN-04",
+    "evidence": "BL-06 states: \"the agent uid is shared across tenants, per-project uids being unbuilt, so the contract separates agent from custodian and tenant runtime from host files, never one tenant's agent from another's (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:694`, `docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:705-708`)\". ES-03 confirms: \"while a second site is switched on, the automated editor working for either site can change the other's code.\" In `enclosure/docker/workspace-seed.sh:115-120`, the granted writable directories across all mounted workspace volumes are assigned to the identical agent UID (1004).",
+    "failure": "During an engineering run on Tenant A, the agent process runs as UID 1004. Because Tenant B's workspace directories (`/workspaces/tenant-b/components`, `/workspaces/tenant-b/lib`, etc.) are mounted in the same container and owned by UID 1004, the agent can alter Tenant B's code, plant backdoors, or read Tenant B's proprietary source code across workspace paths without restriction.",
+    "confidence": "high",
+    "marked_by_authors": "yes (ADR-019 addendum, BL-06, ES-03)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-02",
+    "kind": "finding",
+    "title": "Agent bash shell tool completely bypasses contract-scope allowlist at execution time",
+    "topics": "CP-17, ES-03",
+    "evidence": "CP-17 states: \"The per-request list is checked when the assistant uses its file-writing tools; a shell command is not checked when it runs. What catches it is after the fact: after every turn, and again after the checks, everything that differs from the restore point is compared with the list, and anything outside it fails the whole request and undoes it (`control-plane/src/scr/executor.ts:817-818`, `control-plane/src/scr/contract-scope.ts:99`).\" CP-17 explicitly notes: \"A file a shell command writes is live in the preview until the turn ends, and a write into another site's workspace is not part of the comparison at all.\"",
+    "failure": "When given a shell execution tool, the agent executes bash commands (`cp`, `rm`, `sed`, `cat`) targeting paths outside its granted contract scope or inside another tenant's workspace directory (`/workspaces/other-tenant`). Because the post-turn diff check only inspects git changes within the current project's workspace against its local bracket tag, changes made to other workspaces or outside the git tree are never detected, never rolled back, and pass through without failing the request.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-03",
+    "kind": "finding",
+    "title": "Development server executes unverified agent code with full database credentials bypassing RLS",
+    "topics": "ES-03, EN-04, WS-01",
+    "evidence": "ES-03 states: \"an allowed source write is hot-compiled by `next dev` in a process that holds the tenant's credentials in its environment\". `enclosure/docker/web-surface-entrypoint.sh:342, :374` provisions the database runtime connection role with `BYPASSRLS`. `enclosure/docker/compose.pod.yaml:182-185` and `web-surface-entrypoint.sh:537` show that `next dev` binds `0.0.0.0` and hot-reloads directly from the workspace volume the agent edits.",
+    "failure": "The agent writes arbitrary backend code (such as server actions or API handlers) during an attempt. The live `next dev` process immediately compiles and executes this code. The code executes in an environment carrying the production database credentials with `BYPASSRLS`, enabling hallucinated or malicious code to query, mutate, or exfiltrate any row in the tenant database before checks run or human review occurs.",
+    "confidence": "high",
+    "marked_by_authors": "yes (ES-03 threat model)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-04",
+    "kind": "finding",
+    "title": "Global secret resolution permits cross-tenant credential theft at registration",
+    "topics": "CP-08, CP-09, BL-06",
+    "evidence": "CP-08.1 notes: \"nothing binds a token reference to the project that names it: registration admits any reference the vault holds (`control-plane/src/index.ts:3178-3179`) and the registry resolves it as given (`control-plane/src/project/registry.ts:316-317`)\". CP-09 confirms that the secret store resolves slot and secret keys globally by string reference. `control-plane/src/vault/inject.ts:53` writes the resolved secrets directly into the target project's container environment directory.",
+    "failure": "An administrator registering a tenant references an existing credential key belonging to another tenant (for example, `supabaseSlot: \"client-a-slot\"` or `deployTokenRef: \"client-a-pat\"`). The registry resolves the secret without verifying project ownership, and writes Client A's database credentials and GitHub PAT directly into Client B's private `/env` directory, handing Client B full access to Client A's database and repository.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Open question in CP-08.1)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-05",
+    "kind": "finding",
+    "title": "Shared bridge network allows internal tenant-to-tenant and tenant-to-database traffic",
+    "topics": "BL-06, EN-02, ES-03",
+    "evidence": "BL-06 states: \"whatever a tenant's application is handed, that tenant's code can use, and tenants share one network and have unrestricted outbound access (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:403-408`)\". EN-02.2 confirms that all tenant containers, the control plane, the database, and the overlay communicate across a shared bridge network (`pod-net`). ES-03.1 notes: \"every container on the pod network can reach a tenant directly, past the ingress strip\".",
+    "failure": "A compromised container or untrusted script inside Tenant A can open direct network connections across `pod-net` to Tenant B's internal port 3000 or the pod PostgreSQL instance (`campaignbuilder-db:5432`). This completely bypasses Caddy ingress path controls, authentication validation, forward-auth headers, and session cookie stripping.",
+    "confidence": "high",
+    "marked_by_authors": "yes (ADR-019 addendum, ES-03)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-06",
+    "kind": "finding",
+    "title": "Universal `'unsafe-inline'` Content Security Policy disables script injection protection",
+    "topics": "EN-03, ES-03",
+    "evidence": "EN-03.2 and EN-03.7 document that `(tenant_prelude)` enforces a global Content Security Policy containing `script-src 'self' 'unsafe-inline'` across all public and tenant endpoints (`enclosure/docker/Caddyfile:56`). EN-03.7 explains that `'unsafe-inline'` is required because the front-page identity script and the editing bubble rely on un-hashed inline JavaScript.",
+    "failure": "Because `'unsafe-inline'` is set globally on every response, an attacker who identifies an XSS vector in any tenant site, template, or markdown renderer can execute arbitrary inline JavaScript in the visitor's browser. The CSP provides no protection against cookie theft, DOM hijacking, or cross-origin data exfiltration.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Open in EN-03.2 citing `tenant-csp-nonce-hook.md`)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-07",
+    "kind": "finding",
+    "title": "Data pushlive pushes entire page row, silently deploying broken states from failed rollbacks",
+    "topics": "CP-12, CP-15",
+    "evidence": "CP-12.4 notes that when a proposal's render check fails and its rollback also fails, the proposal remains `applied` with `isLiveUnverified = true` (`control-plane/src/surface/gate.ts:267-269, :488`). CP-15.7 and CP-15 \"For the business\" document: \"The substrate pushes the page's current row (`control-plane/src/scr/substrate.ts:113-125`)... publishing an earlier change to the same page sends the page as it stands, including that failed change.\"",
+    "failure": "Proposal 1 on a page is approved and verified. Proposal 2 on the same page fails render checks and encounters an unrecoverable database rollback failure, leaving broken or invalid configuration in the active database row. When an operator subsequently publishes Proposal 1 to production, the data substrate reads and transfers the *entire current page row* from the editing database, copying Proposal 2's unverified and broken markup directly into the live production database.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-08",
+    "kind": "finding",
+    "title": "Failed database migration rollback destroys live customer data written during execution",
+    "topics": "CP-18, BL-03",
+    "evidence": "CP-18.5 states: \"A named `pg_dump` restore point is taken before anything is applied (`control-plane/src/scr/migration-runner.ts:233`), the SQL is applied, a verifier runs, and a failure restores the dump... Every step against the live database has a limit too, fifteen minutes by default... Putting the copy back also discards anything the site wrote in the meantime, and the result now says so.\"",
+    "failure": "An admin approves a migration, creating a pre-migration database snapshot. The migration applies, but the post-migration verification fails or times out (which can take up to 15 minutes under `CAMPAIGNBUILDER_MIGRATION_TIMEOUT_MS`). The system invokes `pg_restore` to restore the pre-migration snapshot. Any new customer records, leads, form submissions, or database modifications that occurred during that 15-minute window are permanently overwritten and erased.",
+    "confidence": "high",
+    "marked_by_authors": "yes (CP-18.5)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-09",
+    "kind": "finding",
+    "title": "Secondary audit sidecar runs on same host and silently drops events during outages or restarts",
+    "topics": "CP-03, BL-05",
+    "evidence": "CP-03 states: \"The copy is handed to an in-memory queue (`control-plane/src/audit/emit.ts:151`, `control-plane/src/audit/ship.ts:148`) for the audit sidecar... it is lost for whatever is still queued at a restart or evicted past the queue bound (`control-plane/src/audit/ship.ts:13-14`, `control-plane/src/audit/ship.ts:205-207`).\" The queue is capped at 10,000 items and has no backfill mechanism. Furthermore, `enclosure/docker/compose.pod.yaml:943` places the sidecar on the exact same Docker daemon and host as the control plane, contradicting the code's claim of an \"off-box\" audit copy (`control-plane/src/audit/chain.ts:31`).",
+    "failure": "If the control plane process restarts or is killed while the audit sidecar is down or processing a backlog, up to 10,000 audit events are silently dropped from the secondary audit container with no re-send or recovery. Furthermore, an attacker gaining host-level execution compromises both the primary spool and the sidecar copy at once.",
+    "confidence": "high",
+    "marked_by_authors": "yes (CP-03 Tension / Debt)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-10",
+    "kind": "finding",
+    "title": "Fast content lane and live publishing are hardcoded to default tenant only",
+    "topics": "BL-06, CP-07, CP-15",
+    "evidence": "BL-06 confirms: \"The host's editing source is the default project's alone, so a tenant's validator has no page write to guard yet: a tenant has no fast lane and its content push is refused, named, before anything is read (`control-plane/src/project/registry.ts:654-655`, `control-plane/src/index.ts:1327-1333`)\". CP-15.7 states: \"The route refuses a target other than `SURFACE_SOURCE_PROJECT_ID` before the proposal is read... without it a push naming another project would copy the default project's page into that project's production database (`control-plane/src/index.ts:1320-1326`).\"",
+    "failure": "Secondary tenants cannot use conversational page editing, proposals, or live content publishing. Any attempt by a secondary tenant to publish page changes via `/pushlive` or the API returns a 409 refusal. If the check were bypassed, the host would push the default project's page content into the secondary tenant's database.",
+    "confidence": "high",
+    "marked_by_authors": "yes (ADR-019 second-tenant backlog, BL-06)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-11",
+    "kind": "finding",
+    "title": "Single-lane serialization and persistent parks block all project engineering changes for up to 72 hours",
+    "topics": "BL-03, CP-13, CP-14",
+    "evidence": "CP-13.1 and CP-14.2 establish that each project has a concurrency limit of exactly one active engineering request. BL-03 states: \"While a park waits it holds the project's one lane for built work. A plan or built park is closed after 24 hours when the project's next request arrives, and on the first read after 72 hours.\"",
+    "failure": "When an engineering request produces a Tier 1 or Tier 2 park, the project's workspace is locked. If the operator does not promptly log into Foreman to review the escalation, all subsequent engineering requests from marketing team members fail with `503 SCR_BUSY`. A single unreviewed request halts all site development across the organization for up to 3 days.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-12",
+    "kind": "finding",
+    "title": "Single tenant syntax error or duplicate host crashes Caddy ingress for entire platform",
+    "topics": "BL-06, CP-07, CP-08, EN-03",
+    "evidence": "BL-06 and CP-07 state: \"no two projects share a public hostname... because the ingress refuses its whole configuration when two site blocks name one host\". EN-03.1 and CP-08.5 show that Caddy imports all generated tenant configs dynamically via a single wildcard directive: `import /etc/caddy/tenants/*.caddy` (`enclosure/docker/Caddyfile:474`).",
+    "failure": "If an administrator introduces a duplicate `publicHost` across projects (via manual file edits, case mismatch, or registration races) or if the generator outputs a malformed block, Caddy validation fails on reload/restart. Because all ingress traffic is routed through this single Caddy process, the entire web server fails to start, knocking offline all tenant preview sites, the control plane API, and Foreman.",
+    "confidence": "high",
+    "marked_by_authors": "yes (BL-06, CP-07)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-13",
+    "kind": "finding",
+    "title": "Failed git restore deadlocks engineering lane permanently with no automated expiry",
+    "topics": "BL-03, CP-13, CP-15",
+    "evidence": "BL-03 states: \"a failed row whose restore failed holds the lane until an operator closes or retries it, because nobody can vouch for the tree (`control-plane/src/scr/bracket.ts:162-170`, `control-plane/src/scr/gate.ts:861-865`); the request clock does not free it, since such a row is held and a held row never expires (`control-plane/src/scr/transition.ts:225-226`, `control-plane/src/scr/transition.ts:239`, `control-plane/src/scr/transition.ts:262`)\".",
+    "failure": "If an automated git restore encounters an error (such as a file lock, permissions error, or git index corruption during `git read-tree --reset -u`), the request lands in `FAILED` with `active: true`. The automated 24-hour and 72-hour TTL sweeps refuse to touch held rows. The project's engineering lane becomes permanently deadlocked, rejecting all future requests until an operator discovers the failure and manually forces a close or retry.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-14",
+    "kind": "finding",
+    "title": "Null model spending calculations completely bypass per-request spending ceilings",
+    "topics": "CP-05, CP-14",
+    "evidence": "CP-05.7 states: \"one unknown message makes the engine's total null for good (`control-plane/src/engine/pi.ts:665`), the check requires a known total (`control-plane/src/engine/pi.ts:666`), and spend reports null while a compaction runs or once pi has said it does not know the model\". CP-14.7 confirms: \"a null spend never trips the ceiling (`control-plane/src/scr/executor.ts:1313-1315`), and it stops escalation instead\".",
+    "failure": "If a model provider (or custom proxy/OpenRouter instance) fails to report pricing metadata, or during context window compactions where cost tracking is interrupted, `spend` becomes `null`. Because the executor explicitly requires a non-null number to evaluate whether the spending limit was breached, the $2.00 per-request limit is bypassed. A looping prompt can generate unlimited tokens and rack up uncontrolled API costs.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-15",
+    "kind": "finding",
+    "title": "Foreman configuration management is simulated in browser with no backend persistence",
+    "topics": "CP-01, FM-06",
+    "evidence": "CP-01.8 notes: \"the API never writes the configuration file: `/api/config` has a `GET` handler and nothing else (`control-plane/src/index.ts:2591`), and an admin `PUT` with valid TOML answers 404... The console's Configuration tab is read-only on a live build and stages edits in browser state only in the demo world\". FM-06 states: \"The rebuild plan is the demo world's four 950 ms timers, each step marked simulated... There is no server half of saving a configuration\".",
+    "failure": "The console provides an interface displaying configurable options, apply classes, and simulated rebuild workflows. In a production environment, this entire surface is read-only or simulated in React component state. Operators attempting to adjust system settings, timeouts, or policy via Foreman cannot do so; all configuration adjustments require manual host SSH access, editing TOML files, and restarting Docker containers.",
+    "confidence": "high",
+    "marked_by_authors": "yes (ADR-004 addendum, FM-06)",
+    "status": "unverified"
+  }
+]

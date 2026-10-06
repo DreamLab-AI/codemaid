@@ -1,0 +1,26 @@
+{"run_id":"r7540ca",
+"issues":[
+{"id":"DB-07","score":"FULL","findings":[5],"why":"Stack overflow aborts the process, uncatchable (isolate.rs)."},
+{"id":"DB-11","score":"FULL","findings":[8],"why":"Closure stored in a variable is drawn where defined, not where called."},
+{"id":"T-02","score":"FULL","findings":[12],"why":"ignore 0.4.30 breaks MSRV 1.85 without the lockfile pin."},
+{"id":"DB-38","score":"FULL","findings":[12],"why":"ignore 0.4.30 needs newer Rust than the declared MSRV."},
+{"id":"DB-33","score":"FULL","findings":[15],"why":"Seal signed with --tests, checked without, reports symbols absent."},
+{"id":"T-03","score":"PARTIAL","findings":[15],"why":"Names the default codebase name from the directory as an id-shaping ambient input."}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:608-622","why":"Args are passed without a shell; REV is the caller's own CLI argument, so option injection is possible but there is no trust boundary and no command execution."},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"tools/validate-mermaid.mjs:13-20","why":"--no-sandbox is real, but the script only parses the project's own generated diagrams (mermaid.parse); the exploit path is speculative."},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/contract.rs:138-160, crates/sealmap-corpus/src/document.rs:10-12","why":"Deletion is limited to orphaned files carrying the sealmap marker and is documented; the non-atomic write claim is true but minor."},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/seal/sign.rs:133-140","why":"Pointer and lock are written separately, but the gap is documented and verify reports it as a lock fault."},
+{"n":5,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"Same uncatchable stack overflow."},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:950-968","why":"Guess is dropped when a second reachable candidate appears; it is deliberate ambiguity handling, but the doc comment's claim of stability is overstated across reachable crates."},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/fingerprint.rs:1-60","why":"Hash is token based and a local rename changes it; the canonicalisation promises only formatting, comment and attribute neutrality, so this is a limit rather than a bug."},
+{"n":8,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"Closure drawn at its definition."},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap-rust/src/resolve.rs:555-560","why":"Inherent-before-trait is Rust's own method resolution priority, so it is correct, not misattribution."},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:555-560","why":"Macro-generated items are indeed not extracted, but this is a documented limit that the tool states openly (marked by the authors)."},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:270-285","why":"Pack's no-truncation guarantee covers its own text; diagram caps are documented and the full call lists stay in the index, so it is not a real contradiction."},
+{"n":12,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore 0.4.30 vs MSRV 1.85."},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap-corpus/src/pack.rs:290-295, crates/sealmap-dense/src/lib.rs:366-376","why":"Refusal over budget is deliberate and a shard function exists to split into packs that fit; OverBudget also reports per-seed sizes."},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:458-462, crates/sealmap/src/main.rs:608-634","why":"Refusal with --repo is real and explicit, and git archive of an absent revision errors; both are plain limitations rather than defects."},
+{"n":15,"class":"REG","matches":["DB-33","T-03"],"verdict":null,"code":null,"why":"Ids depend on the --tests flag and the default codebase name."}
+]}

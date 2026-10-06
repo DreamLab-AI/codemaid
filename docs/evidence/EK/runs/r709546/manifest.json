@@ -1,0 +1,12 @@
+{
+  "model": "gemini-3.8-flash",
+  "pack": "sealmap/arms/pack-M.txt",
+  "started": "2026-10-06T07:12:15.647Z",
+  "seconds": 148.8,
+  "findings": 15,
+  "finish": "STOP",
+  "prompt_tokens": 32615,
+  "cached_tokens": 0,
+  "thinking_tokens": 14889,
+  "output_tokens": 3174
+}

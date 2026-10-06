@@ -1,0 +1,30 @@
+{"run_id":"r9019b9",
+"issues":[
+{"id":"DB-136","score":"FULL","findings":[3,1],"why":"planted file refused but left in served tree; shared agent uid"},
+{"id":"DB-154","score":"PARTIAL","findings":[1],"why":"shell tools bypass the tool-call scope check; finding omits the post-turn diff check catching it in-tenant"},
+{"id":"DB-161","score":"FULL","findings":[4],"why":"verify failure triggers pg_restore --clean discarding concurrent writes"},
+{"id":"DB-130","score":"FULL","findings":[13],"why":"debris sweep (reset/clean) runs before SCR_BRACKET_OPENED audit record"},
+{"id":"DR-06","score":"PARTIAL","findings":[13],"why":"same snapshot-before-record ordering at bracket.ts:94,102"},
+{"id":"DB-29","score":"FULL","findings":[8],"why":"in-memory shipper queue lost at restart, nothing replays"},
+{"id":"DB-33","score":"PARTIAL","findings":[8],"why":"sidecar cannot learn what it missed; finding frames as hash chain break"},
+{"id":"DB-276","score":"PARTIAL","findings":[2],"why":"env values exported to agent/tenant code usable by it; finding covers model key and preview exfil"},
+{"id":"T-25","score":"PARTIAL","findings":[2],"why":"deny-list covers files not env reads; credential reachable by agent code"},
+{"id":"DB-02","score":"PARTIAL","findings":[15],"why":"bubble status poll lives in page memory and ends on reload"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-154","DB-136"],"verdict":null,"code":null,"why":"shell bypass of scope check plus shared uid 1004 across tenants"},
+{"n":2,"class":"REG","matches":["DB-276","T-25"],"verdict":null,"code":null,"why":"agent can read exported env keys and write them into served code"},
+{"n":3,"class":"REG","matches":["DB-136"],"verdict":null,"code":null,"why":"refused promote leaves planted file in served tree"},
+{"n":4,"class":"REG","matches":["DB-161"],"verdict":null,"code":null,"why":"pg_restore --clean discards concurrent tenant writes"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/surface/gate.ts:231-243","why":"rollback failure leaves broken page live, but this is a documented, loudly audited, operator-actionable decision with the proposal marked applied-with-error"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/surface/gate.ts:482-499, control-plane/src/scr/substrate.ts:113-125","why":"push reads the current row, but isPageLiveUnverified guards it and a later apply re-runs the render check over the whole page"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/bracket.ts:162-178, control-plane/src/scr/transition.ts:225-262","why":"held lane after failed restore is real but deliberate (uncertain tree); an operator close or retry releases it"},
+{"n":8,"class":"REG","matches":["DB-29","DB-33"],"verdict":null,"code":null,"why":"audit shipper queue lost on restart, no replay"},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/project/validate.ts:473-492","why":"Caddy does refuse the whole config on duplicate hosts, but assertPublicHostUnique rejects duplicates at register and boot; only hand-added files escape it"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/project/provision-intent.ts:149-165","why":"delete is refused until stop is acknowledged ok and not running; deliberate fail-safe, and a later down intent can clear it, so not permanent"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/tools/ws-verify/ws-render.mjs:155-160, web-surface/components/landing-page.tsx:326","why":"the hydrated-attribute readiness gate exists and only the landing page sets it; reach to /admin or other tenants is overstated, and the tool is not run on arbitrary routes"},
+{"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/index.ts:768-773, control-plane/src/engine/turn-queue.ts:78-82","why":"waiting turns are aborted on timeout as the code comment states; bounded by queue max of 4, deliberate"},
+{"n":13,"class":"REG","matches":["DB-130","DR-06"],"verdict":null,"code":null,"why":"debris sweep before audit record"},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/transition.ts:442-478","why":"replay returns the first recorded outcome per key by design; cross-route key reuse is client misuse, and the cited test file is not evidence of a defect"},
+{"n":15,"class":"REG","matches":["DB-02"],"verdict":null,"code":null,"why":"status polling held in browser memory; lane lock conflict adds"}
+]}

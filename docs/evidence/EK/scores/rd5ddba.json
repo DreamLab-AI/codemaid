@@ -1,0 +1,28 @@
+{"run_id":"rd5ddba",
+"issues":[
+{"id":"DB-07","score":"FULL","findings":[1],"why":"stack overflow aborts the process, not catchable"},
+{"id":"T-02","score":"FULL","findings":[12],"why":"ignore 0.4.30 needs newer Rust than MSRV 1.85, lock pin only mitigation"},
+{"id":"DB-38","score":"FULL","findings":[12],"why":"ignore 0.4.30 needs Rust 1.88, undeclared"},
+{"id":"DB-33","score":"FULL","findings":[11],"why":"seal does not record extraction options like --tests"},
+{"id":"DB-12","score":"PARTIAL","findings":[9],"why":"macro invocations never drawn as calls; no CallKind::Macro emitted"},
+{"id":"DB-25","score":"PARTIAL","findings":[10],"why":"sequence capped at max_messages drops later calls"},
+{"id":"DB-23","score":"PARTIAL","findings":[7],"why":"overview nodes minted via lossy Ident::new can collide"},
+{"id":"DB-40","score":"PARTIAL","findings":[13],"why":"repo's own CI does not run seal gate (step 6)"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow ends process"},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:614-617","why":"rev is embedded in 'rev:prefix' arg to git archive so a leading-dash rev could parse as option; only matters with untrusted input, rev-parse args fixed"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/document.rs:12,153-155","why":"is_generated matches a first front-matter key 'sealmap: ' prefix so a human file could be deleted, but contrived"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:680-682","why":"two-write sign is non-atomic by documented design; re-signing repairs it, 'permanent' overstated"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap-corpus/src/pack.rs:479-481, crates/sealmap-dense/src/lib.rs:218","why":"budget is an optional SliceOptions field; pack not setting one is no contradiction"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-extract/src/ids.rs:57-63","why":"invalid names are repaired to _ so collisions are possible, but manifests cannot hold such names"},
+{"n":7,"class":"REG","matches":["DB-23"],"verdict":null,"code":null,"why":"lossy Ident::new for non-symbol nodes"},
+{"n":8,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:954-968","why":"ambiguous candidates deliberately left unresolved and then dropped by default policy; documented design with real visibility cost"},
+{"n":9,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macro calls not drawn"},
+{"n":10,"class":"REG","matches":["DB-25"],"verdict":null,"code":null,"why":"diagram caps drop content"},
+{"n":11,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"seal ignores extraction flags"},
+{"n":12,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore MSRV caveat"},
+{"n":13,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"seal gate not run in own CI"},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:614-622,651","why":"git is required only for --since/--diff and pack revision line, documented; not a general breakage"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"README.md:242,353,364-367","why":"README and DESIGN consistently say 0.2.0 is published; the contradicting DEL-01 sentence is not in the pinned code tree"}
+]}

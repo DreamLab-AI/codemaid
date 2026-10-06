@@ -1,0 +1,1109 @@
+{
+  "generated": "2026-10-06T07:32:59.610Z",
+  "seed": 20261006,
+  "resamples": 10000,
+  "bootstrap": "paired, corpus-stratified: each resample draws 3 replicate slots with replacement per corpus and applies the same slots to every arm; the statistic is the pooled mean over the 6 drawn runs",
+  "gold_sizes": {
+    "campaignbuilder": 427,
+    "sealmap": 45
+  },
+  "endpoints": {
+    "1_S_minus_A": {
+      "estimate": -0.04434469598404028,
+      "ci95": [
+        -0.053603955243299514,
+        -0.03157689305230289
+      ],
+      "margin": -0.05,
+      "non_inferior": true,
+      "ci_lower_above_margin": false
+    },
+    "2_S_minus_M": {
+      "estimate": -0.037032700147454245,
+      "ci95": [
+        -0.05681759042414779,
+        -0.019099661722612557
+      ],
+      "S_ge_M": false
+    },
+    "3_A_minus_P": {
+      "estimate": 0.027292046144505186,
+      "ci95": [
+        0.0025370804059328678,
+        0.0458105646630237
+      ]
+    },
+    "4_cost": {
+      "A": {
+        "pack_tokens": {
+          "campaignbuilder": 549008,
+          "sealmap": 64708
+        },
+        "recall_per_100k_pack_tokens": 0.16543657868552183
+      },
+      "S": {
+        "pack_tokens": {
+          "campaignbuilder": 348995,
+          "sealmap": 32138
+        },
+        "recall_per_100k_pack_tokens": 0.18858404686161562
+      },
+      "M": {
+        "pack_tokens": {
+          "campaignbuilder": 350778,
+          "sealmap": 32150
+        },
+        "recall_per_100k_pack_tokens": 0.3141576255570838
+      },
+      "P": {
+        "pack_tokens": {
+          "campaignbuilder": 275479,
+          "sealmap": 18969
+        },
+        "recall_per_100k_pack_tokens": 0.4238971769218745
+      }
+    },
+    "5_precision_wrong_per_run": {
+      "A": 0.3333333333333333,
+      "S": 0.8333333333333334,
+      "M": 0.3333333333333333,
+      "P": 0.5
+    }
+  },
+  "per_corpus_differences": {
+    "campaignbuilder": {
+      "S-A": 0.003903200624512101,
+      "S-M": 0.007416081186572991,
+      "A-P": 0.0027322404371584695
+    },
+    "sealmap": {
+      "S-A": -0.0925925925925926,
+      "S-M": -0.08148148148148147,
+      "A-P": 0.05185185185185187
+    }
+  },
+  "per_corpus_ci95": {
+    "campaignbuilder": {
+      "S-A": [
+        -0.0011709601873536278,
+        0.007025761124121777
+      ],
+      "S-M": [
+        -0.002341920374707259,
+        0.014051522248243558
+      ],
+      "A-P": [
+        -0.008196721311475412,
+        0.011709601873536299
+      ]
+    },
+    "sealmap": {
+      "S-A": [
+        -0.11111111111111109,
+        -0.06666666666666671
+      ],
+      "S-M": [
+        -0.12222222222222219,
+        -0.04444444444444445
+      ],
+      "A-P": [
+        0,
+        0.08888888888888888
+      ]
+    }
+  },
+  "decision": {
+    "S_non_inferior_to_A": true,
+    "S_ge_M": false,
+    "adopt_sequence_first": false,
+    "text": "Decision rule not met: the mixed corpus stays and the result is published as found."
+  },
+  "per_arm": {
+    "A": {
+      "pooled_recall": 0.11824095758521991,
+      "pooled_recall_ci95": [
+        0.1115144418423107,
+        0.1291569086651054
+      ],
+      "pooled_sd": 0.10248733608596787,
+      "per_corpus": {
+        "campaignbuilder": {
+          "recalls": [
+            0.02810304449648712,
+            0.02107728337236534,
+            0.026932084309133488
+          ],
+          "mean": 0.02537080405932865,
+          "sd": 0.0037641103672884295,
+          "recall_per_100k_tokens": 0.004621208444927697
+        },
+        "sealmap": {
+          "recalls": [
+            0.2,
+            0.23333333333333334,
+            0.2
+          ],
+          "mean": 0.2111111111111111,
+          "sd": 0.01924500897298752,
+          "recall_per_100k_tokens": 0.326251948926116
+        }
+      },
+      "pack_tokens": {
+        "campaignbuilder": 549008,
+        "sealmap": 64708
+      },
+      "recall_per_100k_pack_tokens_pooled": 0.16543657868552183,
+      "wrong_per_run": 0.3333333333333333,
+      "novel_per_run": 6,
+      "real_per_run": 0.16666666666666666,
+      "partly_per_run": 5.5,
+      "vague_per_run": 0,
+      "reg_per_run": 9,
+      "findings_per_run": 15,
+      "wrong_rate_of_findings": 0.022222222222222223,
+      "mean_seconds": 176.48333333333332,
+      "total_prompt_tokens": 1843938,
+      "total_cached_tokens": 0,
+      "total_thinking_tokens": 96891,
+      "total_output_tokens": 25029
+    },
+    "S": {
+      "pooled_recall": 0.07389626160117962,
+      "pooled_recall_ci95": [
+        0.06483216237314599,
+        0.08130366900858704
+      ],
+      "pooled_sd": 0.05014999536693646,
+      "per_corpus": {
+        "campaignbuilder": {
+          "recalls": [
+            0.0351288056206089,
+            0.026932084309133488,
+            0.02576112412177986
+          ],
+          "mean": 0.02927400468384075,
+          "sd": 0.005104097123583925,
+          "recall_per_100k_tokens": 0.00838808713128863
+        },
+        "sealmap": {
+          "recalls": [
+            0.1,
+            0.12222222222222222,
+            0.13333333333333333
+          ],
+          "mean": 0.11851851851851851,
+          "sd": 0.016972502573910513,
+          "recall_per_100k_tokens": 0.3687800065919426
+        }
+      },
+      "pack_tokens": {
+        "campaignbuilder": 348995,
+        "sealmap": 32138
+      },
+      "recall_per_100k_pack_tokens_pooled": 0.18858404686161562,
+      "wrong_per_run": 0.8333333333333334,
+      "novel_per_run": 7.5,
+      "real_per_run": 0.16666666666666666,
+      "partly_per_run": 6.5,
+      "vague_per_run": 0,
+      "reg_per_run": 7.5,
+      "findings_per_run": 15,
+      "wrong_rate_of_findings": 0.05555555555555555,
+      "mean_seconds": 189.6833333333333,
+      "total_prompt_tokens": 1146189,
+      "total_cached_tokens": 0,
+      "total_thinking_tokens": 107829,
+      "total_output_tokens": 25393
+    },
+    "M": {
+      "pooled_recall": 0.11092896174863387,
+      "pooled_recall_ci95": [
+        0.1005984907624252,
+        0.12145892965565096
+      ],
+      "pooled_sd": 0.09864991124027521,
+      "per_corpus": {
+        "campaignbuilder": {
+          "recalls": [
+            0.02107728337236534,
+            0.01639344262295082,
+            0.02810304449648712
+          ],
+          "mean": 0.02185792349726776,
+          "sd": 0.00589370369654235,
+          "recall_per_100k_tokens": 0.006231269776687181
+        },
+        "sealmap": {
+          "recalls": [
+            0.2222222222222222,
+            0.2,
+            0.17777777777777778
+          ],
+          "mean": 0.19999999999999998,
+          "sd": 0.022222222222222213,
+          "recall_per_100k_tokens": 0.6220839813374804
+        }
+      },
+      "pack_tokens": {
+        "campaignbuilder": 350778,
+        "sealmap": 32150
+      },
+      "recall_per_100k_pack_tokens_pooled": 0.3141576255570838,
+      "wrong_per_run": 0.3333333333333333,
+      "novel_per_run": 6.333333333333333,
+      "real_per_run": 0.3333333333333333,
+      "partly_per_run": 5.666666666666667,
+      "vague_per_run": 0,
+      "reg_per_run": 8.666666666666666,
+      "findings_per_run": 15,
+      "wrong_rate_of_findings": 0.022222222222222223,
+      "mean_seconds": 139.98333333333335,
+      "total_prompt_tokens": 1151574,
+      "total_cached_tokens": 696258,
+      "total_thinking_tokens": 85975,
+      "total_output_tokens": 23739
+    },
+    "P": {
+      "pooled_recall": 0.09094891144071472,
+      "pooled_recall_ci95": [
+        0.07769103998612194,
+        0.11034348165495707
+      ],
+      "pooled_sd": 0.07827189151654666,
+      "per_corpus": {
+        "campaignbuilder": {
+          "recalls": [
+            0.01639344262295082,
+            0.02927400468384075,
+            0.02224824355971897
+          ],
+          "mean": 0.02263856362217018,
+          "sd": 0.0064491458399134685,
+          "recall_per_100k_tokens": 0.008217890881762379
+        },
+        "sealmap": {
+          "recalls": [
+            0.2,
+            0.14444444444444443,
+            0.13333333333333333
+          ],
+          "mean": 0.15925925925925924,
+          "sd": 0.03571722504071466,
+          "recall_per_100k_tokens": 0.8395764629619866
+        }
+      },
+      "pack_tokens": {
+        "campaignbuilder": 275479,
+        "sealmap": 18969
+      },
+      "recall_per_100k_pack_tokens_pooled": 0.4238971769218745,
+      "wrong_per_run": 0.5,
+      "novel_per_run": 7.166666666666667,
+      "real_per_run": 0.6666666666666666,
+      "partly_per_run": 6,
+      "vague_per_run": 0,
+      "reg_per_run": 7.833333333333333,
+      "findings_per_run": 15,
+      "wrong_rate_of_findings": 0.03333333333333333,
+      "mean_seconds": 140.68333333333334,
+      "total_prompt_tokens": 886134,
+      "total_cached_tokens": 561087,
+      "total_thinking_tokens": 88106,
+      "total_output_tokens": 26233
+    }
+  },
+  "per_run": [
+    {
+      "run_id": "rcab574",
+      "corpus": "campaignbuilder",
+      "arm": "A",
+      "k": 1,
+      "order": 3,
+      "gold_n": 427,
+      "full": 9,
+      "partial": 6,
+      "recall": 0.02810304449648712,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 8,
+        "Drift": 2
+      },
+      "findings": 15,
+      "reg": 10,
+      "novel": 5,
+      "vague": 0,
+      "real": 1,
+      "partly": 3,
+      "wrong": 1,
+      "pack_tokens": 549008,
+      "seconds": 216.4,
+      "prompt_tokens": 549473,
+      "cached_tokens": 0,
+      "thinking_tokens": 18249,
+      "output_tokens": 4540
+    },
+    {
+      "run_id": "r465b09",
+      "corpus": "campaignbuilder",
+      "arm": "A",
+      "k": 2,
+      "order": 15,
+      "gold_n": 427,
+      "full": 8,
+      "partial": 2,
+      "recall": 0.02107728337236534,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 7.5,
+        "Drift": 0.5
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 0,
+      "partly": 5,
+      "wrong": 1,
+      "pack_tokens": 549008,
+      "seconds": 225.9,
+      "prompt_tokens": 549473,
+      "cached_tokens": 0,
+      "thinking_tokens": 21731,
+      "output_tokens": 5150
+    },
+    {
+      "run_id": "r5e9a07",
+      "corpus": "campaignbuilder",
+      "arm": "A",
+      "k": 3,
+      "order": 2,
+      "gold_n": 427,
+      "full": 9,
+      "partial": 5,
+      "recall": 0.026932084309133488,
+      "recall_by_kind": {
+        "Tension": 2.5,
+        "Debt": 6.5,
+        "Drift": 2.5
+      },
+      "findings": 15,
+      "reg": 10,
+      "novel": 5,
+      "vague": 0,
+      "real": 0,
+      "partly": 5,
+      "wrong": 0,
+      "pack_tokens": 549008,
+      "seconds": 210.9,
+      "prompt_tokens": 549473,
+      "cached_tokens": 0,
+      "thinking_tokens": 17781,
+      "output_tokens": 4812
+    },
+    {
+      "run_id": "rf3bbef",
+      "corpus": "campaignbuilder",
+      "arm": "M",
+      "k": 1,
+      "order": 9,
+      "gold_n": 427,
+      "full": 7,
+      "partial": 4,
+      "recall": 0.02107728337236534,
+      "recall_by_kind": {
+        "Tension": 0.5,
+        "Debt": 5.5,
+        "Drift": 3
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 0,
+      "partly": 6,
+      "wrong": 0,
+      "pack_tokens": 350778,
+      "seconds": 153,
+      "prompt_tokens": 351243,
+      "cached_tokens": 348129,
+      "thinking_tokens": 15783,
+      "output_tokens": 4704
+    },
+    {
+      "run_id": "r9019b9",
+      "corpus": "campaignbuilder",
+      "arm": "M",
+      "k": 2,
+      "order": 12,
+      "gold_n": 427,
+      "full": 4,
+      "partial": 6,
+      "recall": 0.01639344262295082,
+      "recall_by_kind": {
+        "Tension": 0.5,
+        "Debt": 6,
+        "Drift": 0.5
+      },
+      "findings": 15,
+      "reg": 7,
+      "novel": 8,
+      "vague": 0,
+      "real": 0,
+      "partly": 8,
+      "wrong": 0,
+      "pack_tokens": 350778,
+      "seconds": 129.2,
+      "prompt_tokens": 351243,
+      "cached_tokens": 348129,
+      "thinking_tokens": 15924,
+      "output_tokens": 4279
+    },
+    {
+      "run_id": "r452899",
+      "corpus": "campaignbuilder",
+      "arm": "M",
+      "k": 3,
+      "order": 5,
+      "gold_n": 427,
+      "full": 11,
+      "partial": 2,
+      "recall": 0.02810304449648712,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 7.5,
+        "Drift": 2.5
+      },
+      "findings": 15,
+      "reg": 11,
+      "novel": 4,
+      "vague": 0,
+      "real": 0,
+      "partly": 4,
+      "wrong": 0,
+      "pack_tokens": 350778,
+      "seconds": 115.9,
+      "prompt_tokens": 351243,
+      "cached_tokens": 0,
+      "thinking_tokens": 10882,
+      "output_tokens": 4056
+    },
+    {
+      "run_id": "r18fbfc",
+      "corpus": "campaignbuilder",
+      "arm": "P",
+      "k": 1,
+      "order": 18,
+      "gold_n": 427,
+      "full": 4,
+      "partial": 6,
+      "recall": 0.01639344262295082,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 6
+      },
+      "findings": 15,
+      "reg": 7,
+      "novel": 8,
+      "vague": 0,
+      "real": 2,
+      "partly": 6,
+      "wrong": 0,
+      "pack_tokens": 275479,
+      "seconds": 158.6,
+      "prompt_tokens": 275944,
+      "cached_tokens": 270305,
+      "thinking_tokens": 18050,
+      "output_tokens": 4890
+    },
+    {
+      "run_id": "r5524e2",
+      "corpus": "campaignbuilder",
+      "arm": "P",
+      "k": 2,
+      "order": 20,
+      "gold_n": 427,
+      "full": 9,
+      "partial": 7,
+      "recall": 0.02927400468384075,
+      "recall_by_kind": {
+        "Tension": 2.5,
+        "Debt": 7.5,
+        "Drift": 2.5
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 0,
+      "partly": 6,
+      "wrong": 0,
+      "pack_tokens": 275479,
+      "seconds": 170.4,
+      "prompt_tokens": 275944,
+      "cached_tokens": 270305,
+      "thinking_tokens": 15515,
+      "output_tokens": 4664
+    },
+    {
+      "run_id": "r49b0fd",
+      "corpus": "campaignbuilder",
+      "arm": "P",
+      "k": 3,
+      "order": 13,
+      "gold_n": 427,
+      "full": 5,
+      "partial": 9,
+      "recall": 0.02224824355971897,
+      "recall_by_kind": {
+        "Tension": 2.5,
+        "Debt": 4.5,
+        "Drift": 2.5
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 1,
+      "partly": 5,
+      "wrong": 0,
+      "pack_tokens": 275479,
+      "seconds": 114,
+      "prompt_tokens": 275944,
+      "cached_tokens": 20477,
+      "thinking_tokens": 12665,
+      "output_tokens": 5453
+    },
+    {
+      "run_id": "r5f9e0c",
+      "corpus": "campaignbuilder",
+      "arm": "S",
+      "k": 1,
+      "order": 1,
+      "gold_n": 427,
+      "full": 10,
+      "partial": 10,
+      "recall": 0.0351288056206089,
+      "recall_by_kind": {
+        "Tension": 1.5,
+        "Debt": 11.5,
+        "Drift": 2
+      },
+      "findings": 15,
+      "reg": 11,
+      "novel": 4,
+      "vague": 0,
+      "real": 0,
+      "partly": 4,
+      "wrong": 0,
+      "pack_tokens": 348995,
+      "seconds": 200.1,
+      "prompt_tokens": 349460,
+      "cached_tokens": 0,
+      "thinking_tokens": 17527,
+      "output_tokens": 5242
+    },
+    {
+      "run_id": "r754cf2",
+      "corpus": "campaignbuilder",
+      "arm": "S",
+      "k": 2,
+      "order": 24,
+      "gold_n": 427,
+      "full": 7,
+      "partial": 9,
+      "recall": 0.026932084309133488,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 8,
+        "Drift": 1.5
+      },
+      "findings": 15,
+      "reg": 10,
+      "novel": 5,
+      "vague": 0,
+      "real": 0,
+      "partly": 5,
+      "wrong": 0,
+      "pack_tokens": 348995,
+      "seconds": 243.5,
+      "prompt_tokens": 349460,
+      "cached_tokens": 0,
+      "thinking_tokens": 24007,
+      "output_tokens": 5153
+    },
+    {
+      "run_id": "rc3ccb5",
+      "corpus": "campaignbuilder",
+      "arm": "S",
+      "k": 3,
+      "order": 6,
+      "gold_n": 427,
+      "full": 9,
+      "partial": 4,
+      "recall": 0.02576112412177986,
+      "recall_by_kind": {
+        "Tension": 3.5,
+        "Debt": 6,
+        "Drift": 1.5
+      },
+      "findings": 15,
+      "reg": 11,
+      "novel": 4,
+      "vague": 0,
+      "real": 0,
+      "partly": 4,
+      "wrong": 0,
+      "pack_tokens": 348995,
+      "seconds": 173.9,
+      "prompt_tokens": 349460,
+      "cached_tokens": 0,
+      "thinking_tokens": 16166,
+      "output_tokens": 4459
+    },
+    {
+      "run_id": "r9e1936",
+      "corpus": "sealmap",
+      "arm": "A",
+      "k": 1,
+      "order": 11,
+      "gold_n": 45,
+      "full": 7,
+      "partial": 4,
+      "recall": 0.2,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 7
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 0,
+      "partly": 6,
+      "wrong": 0,
+      "pack_tokens": 64708,
+      "seconds": 127.1,
+      "prompt_tokens": 65173,
+      "cached_tokens": 0,
+      "thinking_tokens": 13550,
+      "output_tokens": 3361
+    },
+    {
+      "run_id": "r7b6781",
+      "corpus": "sealmap",
+      "arm": "A",
+      "k": 2,
+      "order": 7,
+      "gold_n": 45,
+      "full": 10,
+      "partial": 1,
+      "recall": 0.23333333333333334,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 8.5
+      },
+      "findings": 15,
+      "reg": 8,
+      "novel": 7,
+      "vague": 0,
+      "real": 0,
+      "partly": 7,
+      "wrong": 0,
+      "pack_tokens": 64708,
+      "seconds": 183.5,
+      "prompt_tokens": 65173,
+      "cached_tokens": 0,
+      "thinking_tokens": 17064,
+      "output_tokens": 3433
+    },
+    {
+      "run_id": "r1b9f4d",
+      "corpus": "sealmap",
+      "arm": "A",
+      "k": 3,
+      "order": 23,
+      "gold_n": 45,
+      "full": 8,
+      "partial": 2,
+      "recall": 0.2,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 7
+      },
+      "findings": 15,
+      "reg": 8,
+      "novel": 7,
+      "vague": 0,
+      "real": 0,
+      "partly": 7,
+      "wrong": 0,
+      "pack_tokens": 64708,
+      "seconds": 95.1,
+      "prompt_tokens": 65173,
+      "cached_tokens": 0,
+      "thinking_tokens": 8516,
+      "output_tokens": 3733
+    },
+    {
+      "run_id": "r83bcda",
+      "corpus": "sealmap",
+      "arm": "M",
+      "k": 1,
+      "order": 22,
+      "gold_n": 45,
+      "full": 8,
+      "partial": 4,
+      "recall": 0.2222222222222222,
+      "recall_by_kind": {
+        "Tension": 2,
+        "Debt": 8
+      },
+      "findings": 15,
+      "reg": 9,
+      "novel": 6,
+      "vague": 0,
+      "real": 0,
+      "partly": 6,
+      "wrong": 0,
+      "pack_tokens": 32150,
+      "seconds": 115.7,
+      "prompt_tokens": 32615,
+      "cached_tokens": 0,
+      "thinking_tokens": 9983,
+      "output_tokens": 3388
+    },
+    {
+      "run_id": "r709546",
+      "corpus": "sealmap",
+      "arm": "M",
+      "k": 2,
+      "order": 8,
+      "gold_n": 45,
+      "full": 8,
+      "partial": 2,
+      "recall": 0.2,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 8
+      },
+      "findings": 15,
+      "reg": 8,
+      "novel": 7,
+      "vague": 0,
+      "real": 2,
+      "partly": 5,
+      "wrong": 0,
+      "pack_tokens": 32150,
+      "seconds": 148.8,
+      "prompt_tokens": 32615,
+      "cached_tokens": 0,
+      "thinking_tokens": 14889,
+      "output_tokens": 3174
+    },
+    {
+      "run_id": "r08c2ba",
+      "corpus": "sealmap",
+      "arm": "M",
+      "k": 3,
+      "order": 17,
+      "gold_n": 45,
+      "full": 6,
+      "partial": 4,
+      "recall": 0.17777777777777778,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 7
+      },
+      "findings": 15,
+      "reg": 8,
+      "novel": 7,
+      "vague": 0,
+      "real": 0,
+      "partly": 5,
+      "wrong": 2,
+      "pack_tokens": 32150,
+      "seconds": 177.3,
+      "prompt_tokens": 32615,
+      "cached_tokens": 0,
+      "thinking_tokens": 18514,
+      "output_tokens": 4138
+    },
+    {
+      "run_id": "ref64b4",
+      "corpus": "sealmap",
+      "arm": "P",
+      "k": 1,
+      "order": 4,
+      "gold_n": 45,
+      "full": 7,
+      "partial": 4,
+      "recall": 0.2,
+      "recall_by_kind": {
+        "Tension": 1.5,
+        "Debt": 7.5
+      },
+      "findings": 15,
+      "reg": 8,
+      "novel": 7,
+      "vague": 0,
+      "real": 1,
+      "partly": 5,
+      "wrong": 1,
+      "pack_tokens": 18969,
+      "seconds": 118.2,
+      "prompt_tokens": 19434,
+      "cached_tokens": 0,
+      "thinking_tokens": 12475,
+      "output_tokens": 3514
+    },
+    {
+      "run_id": "reb1732",
+      "corpus": "sealmap",
+      "arm": "P",
+      "k": 2,
+      "order": 10,
+      "gold_n": 45,
+      "full": 5,
+      "partial": 3,
+      "recall": 0.14444444444444443,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 5.5
+      },
+      "findings": 15,
+      "reg": 7,
+      "novel": 8,
+      "vague": 0,
+      "real": 0,
+      "partly": 7,
+      "wrong": 1,
+      "pack_tokens": 18969,
+      "seconds": 153,
+      "prompt_tokens": 19434,
+      "cached_tokens": 0,
+      "thinking_tokens": 16060,
+      "output_tokens": 3701
+    },
+    {
+      "run_id": "rd5ddba",
+      "corpus": "sealmap",
+      "arm": "P",
+      "k": 3,
+      "order": 19,
+      "gold_n": 45,
+      "full": 4,
+      "partial": 4,
+      "recall": 0.13333333333333333,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 5
+      },
+      "findings": 15,
+      "reg": 7,
+      "novel": 8,
+      "vague": 0,
+      "real": 0,
+      "partly": 7,
+      "wrong": 1,
+      "pack_tokens": 18969,
+      "seconds": 129.9,
+      "prompt_tokens": 19434,
+      "cached_tokens": 0,
+      "thinking_tokens": 13341,
+      "output_tokens": 4011
+    },
+    {
+      "run_id": "rd94f8f",
+      "corpus": "sealmap",
+      "arm": "S",
+      "k": 1,
+      "order": 16,
+      "gold_n": 45,
+      "full": 4,
+      "partial": 1,
+      "recall": 0.1,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 3.5
+      },
+      "findings": 15,
+      "reg": 4,
+      "novel": 11,
+      "vague": 0,
+      "real": 1,
+      "partly": 7,
+      "wrong": 3,
+      "pack_tokens": 32138,
+      "seconds": 242.7,
+      "prompt_tokens": 32603,
+      "cached_tokens": 0,
+      "thinking_tokens": 29321,
+      "output_tokens": 3487
+    },
+    {
+      "run_id": "r7540ca",
+      "corpus": "sealmap",
+      "arm": "S",
+      "k": 2,
+      "order": 21,
+      "gold_n": 45,
+      "full": 5,
+      "partial": 1,
+      "recall": 0.12222222222222222,
+      "recall_by_kind": {
+        "Tension": 1.5,
+        "Debt": 4
+      },
+      "findings": 15,
+      "reg": 4,
+      "novel": 11,
+      "vague": 0,
+      "real": 0,
+      "partly": 9,
+      "wrong": 2,
+      "pack_tokens": 32138,
+      "seconds": 155,
+      "prompt_tokens": 32603,
+      "cached_tokens": 0,
+      "thinking_tokens": 10970,
+      "output_tokens": 3203
+    },
+    {
+      "run_id": "rdfb546",
+      "corpus": "sealmap",
+      "arm": "S",
+      "k": 3,
+      "order": 14,
+      "gold_n": 45,
+      "full": 5,
+      "partial": 2,
+      "recall": 0.13333333333333333,
+      "recall_by_kind": {
+        "Tension": 1,
+        "Debt": 5
+      },
+      "findings": 15,
+      "reg": 5,
+      "novel": 10,
+      "vague": 0,
+      "real": 0,
+      "partly": 10,
+      "wrong": 0,
+      "pack_tokens": 32138,
+      "seconds": 122.9,
+      "prompt_tokens": 32603,
+      "cached_tokens": 0,
+      "thinking_tokens": 9838,
+      "output_tokens": 3849
+    }
+  ],
+  "exploratory_wrong_audit": {
+    "note": "second blind Sonnet re-check of all scorer WRONG verdicts; does not replace endpoint 5",
+    "agreed": 10,
+    "of": 12,
+    "wrong_per_run_after_audit": {
+      "A": 0.3333333333333333,
+      "S": 0.8333333333333334,
+      "M": 0.16666666666666666,
+      "P": 0.3333333333333333
+    },
+    "rows": [
+      {
+        "audit_id": "w1",
+        "run_id": "rcab574",
+        "n": 10,
+        "arm": "A",
+        "corpus": "campaignbuilder",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w2",
+        "run_id": "ref64b4",
+        "n": 2,
+        "arm": "P",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w3",
+        "run_id": "reb1732",
+        "n": 15,
+        "arm": "P",
+        "corpus": "sealmap",
+        "audit_verdict": "REAL"
+      },
+      {
+        "audit_id": "w4",
+        "run_id": "r465b09",
+        "n": 15,
+        "arm": "A",
+        "corpus": "campaignbuilder",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w5",
+        "run_id": "rd94f8f",
+        "n": 1,
+        "arm": "S",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w6",
+        "run_id": "rd94f8f",
+        "n": 7,
+        "arm": "S",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w7",
+        "run_id": "rd94f8f",
+        "n": 13,
+        "arm": "S",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w8",
+        "run_id": "r08c2ba",
+        "n": 1,
+        "arm": "M",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w9",
+        "run_id": "r08c2ba",
+        "n": 9,
+        "arm": "M",
+        "corpus": "sealmap",
+        "audit_verdict": "REAL"
+      },
+      {
+        "audit_id": "w10",
+        "run_id": "rd5ddba",
+        "n": 5,
+        "arm": "P",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w11",
+        "run_id": "r7540ca",
+        "n": 9,
+        "arm": "S",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      },
+      {
+        "audit_id": "w12",
+        "run_id": "r7540ca",
+        "n": 13,
+        "arm": "S",
+        "corpus": "sealmap",
+        "audit_verdict": "WRONG"
+      }
+    ]
+  }
+}

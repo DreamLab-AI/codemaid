@@ -1,0 +1,30 @@
+{"run_id":"r465b09",
+"issues":[
+{"id":"DB-154","score":"FULL","findings":[1],"why":"shell write by shared agent uid into other tenant's workspace passes write-tool-only scope check"},
+{"id":"DB-136","score":"FULL","findings":[14],"why":"planted file left in tree served by dev server after CHANGED_SINCE_REVIEW refusal"},
+{"id":"DB-161","score":"FULL","findings":[3],"why":"verify failure triggers pg_restore --clean discarding tenant writes"},
+{"id":"DB-250","score":"FULL","findings":[4],"why":"npm ci runs before the fence on first boot"},
+{"id":"DB-39","score":"FULL","findings":[7],"why":"compensating events appended unchecked, trail can record change whose correction is missing"},
+{"id":"T-01","score":"FULL","findings":[8],"why":"in-memory ship queue drops oldest past bound, so off-box copy does not close rewrite gap"},
+{"id":"DB-29","score":"FULL","findings":[8],"why":"records lost from the copy via eviction past maxQueue 10,000"},
+{"id":"DB-02","score":"FULL","findings":[10],"why":"bubble polling lives in page memory; reload ends follow"},
+{"id":"DR-106","score":"PARTIAL","findings":[5],"why":"admin session cookie reachable by tenant code on same origin; finding focuses on tenant_intake exception"},
+{"id":"DB-177","score":"PARTIAL","findings":[12],"why":"simulated rebuild plan / config paths in the console"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-154"],"verdict":null,"code":null,"why":"shared agent uid cross-tenant shell write"},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/tools/backup/backup.mjs:56-64, 770-782","why":"restore does require host-held HMAC key and exits on mismatch, but limitation is documented and operator can copy the key"},
+{"n":3,"class":"REG","matches":["DB-161"],"verdict":null,"code":null,"why":"pg_restore --clean discards live writes"},
+{"n":4,"class":"REG","matches":["DB-250"],"verdict":null,"code":null,"why":"npm ci before fence"},
+{"n":5,"class":"REG","matches":["DR-106"],"verdict":null,"code":null,"why":"tenant code reaching admin session cookie"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/index.ts:338-341, 1568, 1812-1818","why":"only legacy rows lacking requestedBy skip self-approval check; new rows always set it, and the behaviour is documented"},
+{"n":7,"class":"REG","matches":["DB-39"],"verdict":null,"code":null,"why":"unchecked compensating events"},
+{"n":8,"class":"REG","matches":["T-01","DB-29"],"verdict":null,"code":null,"why":"ship queue eviction"},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/bracket.ts:155-175, control-plane/src/scr/transition.ts:220-227","why":"held FAILED row never expires as claimed, but operator close or retry is the stated exit, not DB surgery"},
+{"n":10,"class":"REG","matches":["DB-02"],"verdict":null,"code":null,"why":"bubble follow lost on reload"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/project/runtime-store.ts:101-109, control-plane/src/index.ts:4393-4396","why":"malformed state file refuses boot with exit 1 as claimed, but it is a deliberate fail-closed posture"},
+{"n":12,"class":"REG","matches":["DB-177"],"verdict":null,"code":null,"why":"simulated rebuild plan and read-only config tab"},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/index.ts:1320-1333","why":"non-default tenants get 409 CROSS_PROJECT_PUSH as claimed, but it is a documented containment ruling, not a bug"},
+{"n":14,"class":"REG","matches":["DB-136"],"verdict":null,"code":null,"why":"planted file stays after refusal"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"enclosure/docker/web-surface-entrypoint.sh:130-131, 244-249","why":"fence re-installs every 10s for up to 600s while a peer fails to resolve, so the 5-10 minute outage does not occur"}
+]}

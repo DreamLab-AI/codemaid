@@ -1,0 +1,112 @@
+### F-01 — Command injection and path traversal vulnerability in git archive extraction
+- Topics: COR-05.2, COR-06.4
+- Evidence: In `crates/sealmap/src/main.rs:608`–`622`, `stale --since` and `pack --diff` export a tree by invoking `git rev-parse --show-prefix` and piping `git archive REV:prefix` into `tar -x` inside a temporary directory (`crates/sealmap/src/main.rs:614`–`622`). The topic states git stays out of the libraries (`docs/DESIGN.md:166`–`169`), but the CLI shells out to external `git` and `tar` utilities directly.
+- Failure: If `REV` or prefix arguments are derived from user-controlled inputs or git branch references containing command flags (such as `--output`), or if `REV` contains malicious symlinks or path traversal payloads in its tree, unpacking via `tar -x` without path sanitization can overwrite arbitrary files on the host or execute unauthorized commands.
+- Confidence: high (inferred from subprocess piping pattern)
+- Marked by authors: no
+
+### F-02 — Unsandboxed headless browser execution over untrusted Mermaid syntax in CI
+- Topics: DEL-01.5
+- Evidence: `tools/validate-mermaid.mjs:14`–`28` launches a headless Chromium instance, injects `mermaid.min.js`, raises text and edge limits (`tools/validate-mermaid.mjs:19`), and evaluates every Markdown file under `.sealmap` (`.github/workflows/ci.yml:65`).
+- Failure: Diagram generation encodes source code identifiers, path names, and labels into Mermaid blocks (`crates/sealmap-mermaid/src/escape.rs:112`–`118`). If an untrusted codebase or external dependency introduces malicious payloads into type or function names that evade Mermaid escaping, layout evaluation in headless Chromium exposes the CI runner to cross-site scripting or browser sandbox escapes.
+- Confidence: medium (inferred)
+- Marked by authors: no
+
+### F-03 — Non-atomic directory purge deletes Markdown documentation during generation
+- Topics: COR-03.1, COR-01.1
+- Evidence: `crates/sealmap-corpus/src/contract.rs:99` and `crates/sealmap-corpus/src/document.rs:10`–`12`, `153`–`155` state that `write` brings the target directory into compliance by deleting any Markdown file whose front matter opens with `---` and whose first key is `sealmap: `.
+- Failure: If an operator points `sealmap generate -o DIR` at an existing directory containing project documentation or third-party Markdown files that happen to use front matter matching that key pattern, those files are permanently deleted. Because writes and deletions are performed directly on disk without an atomic directory swap, an interrupted run leaves the directory stripped of documentation with partial output.
+- Confidence: high
+- Marked by authors: no
+
+### F-04 — Non-atomic two-phase write in seal signing corrupts lock verification
+- Topics: COR-04.6, COR-05.1
+- Evidence: `crates/sealmap-corpus/src/seal/sign.rs:133`–`140` places a `sealed:` pointer into the topic file and then inserts the entry into `seals.lock`. `crates/sealmap/src/main.rs:680`–`682` and `crates/sealmap-corpus/src/seal/check.rs:383` confirm that "a failure between the two writes leaves a pointer with no entry, which `verify` reports as a lock fault".
+- Failure: A process crash, out-of-space error, or SIGINT after the topic Markdown file is written but before `seals.lock` is flushed leaves an orphaned pointer. Subsequent runs of `sealmap verify` report a fatal `LockFault`, permanently breaking CI gates across the repository until manual file repair is performed.
+- Confidence: high
+- Marked by authors: no
+
+### F-05 — Uncatchable stack overflow aborts extraction process
+- Topics: EXT-01.1, EXT-01.3
+- Evidence: `crates/sealmap-rust/src/lib.rs:153`–`155` claims "Extraction never fails: unparsable files surface in `Extraction::diagnostics`... and it never fails a whole run because of one bad file". However, `docs/DESIGN.md:232` and `crates/sealmap-extract/src/isolate.rs:3`–`7` concede: "The residual risk is a file nested deeply enough to exhaust even the large stack: that still ends the process, because a stack overflow cannot be caught."
+- Failure: Processing heavily nested generics, macros, or deeply recursive types exhausts the 64 MiB Rayon thread stack. The process terminates immediately via an uncatchable SIGSEGV/SIGBUS, halting CI or batch analysis without diagnostic output.
+- Confidence: high
+- Marked by authors: no
+
+### F-06 — Method additions in reachable crates silently erase inferred call graph edges
+- Topics: EXT-05.5, DEN-01.6
+- Evidence: `crates/sealmap-rust/src/resolve.rs:954`–`968` specifies that a method call on an untyped receiver resolves by guess if and only if the method name exists *exactly once* among all reachable crates. `DEN-01.6` notes that adding two `root` methods in `sealmap-dense` previously removed a correct guess in `sealmap-rust`.
+- Failure: Adding an unrelated method with a duplicate name to any reachable crate increases the candidate count from 1 to 2. The existing inferred edge is silently dropped to `sym:? name` (`crates/sealmap-rust/src/resolve.rs:968`). Sequence diagrams and call graphs silently lose call edges despite no changes occurring in the caller's code.
+- Confidence: high
+- Marked by authors: no
+
+### F-07 — Local variable renames alter token streams and break valid seals
+- Topics: EXT-06.1, EXT-06.2, MOD-02.1
+- Evidence: `README.md:198`–`199` and `crates/sealmap-extract/src/fingerprint.rs:4`–`24` claim that "tidying code costs nothing... reformatting, editing comments or moving an item changes neither value". However, `crates/sealmap-rust/src/fingerprint.rs:50` and `crates/sealmap-rust/src/collect.rs:542` feed the function body token stream into the hasher without alpha-renaming variable identifiers.
+- Failure: Renaming an internal local variable during refactoring modifies the token stream passed to BLAKE3. The `body_hash` changes, causing `sealmap verify` to report a break (`ProseEdited` or behaviour change) and fail the CI seal gate on code whose semantics did not change.
+- Confidence: high
+- Marked by authors: no
+
+### F-08 — Flow walker draws deferred closures in incorrect execution order
+- Topics: EXT-03.2, EXT-03.1
+- Evidence: `crates/sealmap-extract/src/raw.rs:160` and `crates/sealmap-rust/src/collect.rs:1164` place closure argument bodies immediately after the call that received them. In contrast, `EXT-03` acknowledges: "A closure saved in a variable is drawn where it is written, not where it is called."
+- Failure: When a closure is passed as a lazy callback, stored in a struct field, or scheduled on an event loop, the flow walker renders its execution as happening immediately and synchronously after the receiving call. The generated sequence diagram displays an execution order that contradicts the runtime behavior of the software.
+- Confidence: high
+- Marked by authors: yes (Debt)
+
+### F-09 — Inherent method priority unconditionally shadows trait implementations
+- Topics: EXT-02.3, EXT-05.1
+- Evidence: `crates/sealmap-rust/src/resolve.rs:557`–`559` registers inherent impls before trait impls "so that an inherent method wins a name lookup over a trait method of the same name".
+- Failure: In codebases where a type defines an inherent method that shares a name with a method from an implemented trait, call resolution unconditionally binds to the inherent method. Qualified or trait-scoped calls are misattributed, resulting in incorrect symbol IDs, erroneous dependency graphs, and corrupted sequence diagrams.
+- Confidence: high
+- Marked by authors: no
+
+### F-10 — Complete invisibility of macro-generated items in extraction and seals
+- Topics: EXT-02.1, EXT-06.1
+- Evidence: `README.md:342` documents that "items that a macro generates are not seen, so they get no name and cannot be cited or sealed".
+- Failure: Codebases relying on declarative or procedural macros for interface definition (e.g. web route macros, RPC handlers, serialization derives) produce no symbol IDs for those generated items. They cannot be resolved, cited, tracked, or sealed, leaving substantial portions of the codebase unmonitored by the seal gate.
+- Confidence: high
+- Marked by authors: yes (Limit)
+
+### F-11 — Contradiction between truncation guarantees and diagram edge caps
+- Topics: COR-06.1, COR-02.1
+- Evidence: `crates/sealmap-corpus/src/pack.rs:278`–`282` asserts: "Nothing is truncated... It never quietly drops content." In direct contrast, `crates/sealmap-corpus/src/sequence.rs:40` and `crates/sealmap-corpus/src/overview.rs:14` state: "The caps are a deliberate trade: a diagram over its message or edge budget is cut... Long functions and hub crates are therefore always summarised in the diagrams; the complete call lists stay in the index."
+- Failure: Downstream consumers and reviewers operating under the guarantee that output is never truncated review diagrams where hub crate dependencies and large function calls have been silently omitted, masking critical architectural couplings during visual inspection.
+- Confidence: high
+- Marked by authors: no
+
+### F-12 — Unpinned workspace dependency breaks downstream compilation on MSRV 1.85
+- Topics: DEL-01.1, DEL-01.2
+- Evidence: `Cargo.toml:8` establishes `rust-version = "1.85"`, but `Cargo.toml:35` permits `ignore = "0.4.23"`. `crates/sealmap-model/Cargo.toml:21` pulls in `ignore`. `DEL-01.2` documents that `ignore 0.4.30` declares no `rust-version` and fails on Rust 1.85.
+- Failure: Downstream crates pulling published `sealmap` libraries without Cargo.lock resolve `ignore 0.4.30`. The build fails immediately on the declared minimum toolchain (Rust 1.85), breaking external CI pipelines.
+- Confidence: high
+- Marked by authors: yes (Problem)
+
+### F-13 — Zero-tolerance budget limits cause hard failures in automated pipelines
+- Topics: COR-06.1, DEN-01.5
+- Evidence: `crates/sealmap-dense/src/lib.rs:368`–`373` and `crates/sealmap-corpus/src/pack.rs:278`–`282` enforce that exceeding the byte budget by a single byte triggers immediate refusal (`OverBudget`).
+- Failure: Automated agent pipelines passing byte limits for LLM context windows fail with hard aborts whenever a codebase grows slightly. The system provides no option for priority-based degradation or partial payload returns, terminating automated review tasks unexpectedly.
+- Confidence: high
+- Marked by authors: no
+
+### F-14 — `stale --since` fails on shallow clones and rejects multi-repository workspaces
+- Topics: COR-05.2
+- Evidence: `crates/sealmap/src/main.rs:608`–`634` depends on `git archive REV:prefix`. `crates/sealmap/src/main.rs:461`–`462` mandates: "refuse with `--repo`".
+- Failure: Standard CI workflows utilizing shallow checkouts (`git clone --depth 1`) fail when executing `sealmap stale --since REV` because historical revisions do not exist in the object database. Furthermore, teams operating multi-repository workspaces cannot use change detection, as the command aborts if multiple repositories are specified.
+- Confidence: high
+- Marked by authors: no
+
+### F-15 — Context-dependent symbol IDs cause false seal verification failures
+- Topics: COR-05.1, MOD-01.1
+- Evidence: `crates/sealmap/src/main.rs:393`, `439`–`448` documents: "ids depend on how the code was read (whether tests were included, what the codebase is called when no manifest names it). Checking a seal with different settings from the ones it was signed with makes sealed functions look absent."
+- Failure: If an engineer seals a topic locally where directory naming defaults the codebase name or where `--tests` was active, running `sealmap verify` in CI under different directory roots or flags marks every sealed symbol as absent. Valid seals are classified as broken, failing the deployment gate.
+- Confidence: high
+- Marked by authors: no
+
+## Not judgeable from this material
+
+1. Implementation of subprocess execution in `crates/sealmap/src/main.rs:608`–`634` (whether `REV` and `prefix` arguments are passed as discrete argv elements or evaluated through a shell).
+2. Atomic filesystem semantics and directory locking during `sealmap generate` and `seal sign` operations.
+3. Memory consumption, page execution limits, and process lifecycle handling in `tools/validate-mermaid.mjs`.
+4. Tokenizer normalisation logic in `crates/sealmap-extract/src/fingerprint.rs` regarding variable identifier handling.
+5. Behavior of `Resolver` when handling circular glob imports across multiple workspace crates.

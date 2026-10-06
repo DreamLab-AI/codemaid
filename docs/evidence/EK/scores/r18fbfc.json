@@ -1,0 +1,30 @@
+{"run_id":"r18fbfc",
+"issues":[
+{"id":"DB-29","score":"FULL","findings":[3],"why":"in-memory shipper queue loses records at restart or past 10,000 eviction, nothing replays"},
+{"id":"DB-33","score":"PARTIAL","findings":[3],"why":"names that the copy cannot tell what it is missing"},
+{"id":"DB-161","score":"FULL","findings":[4],"why":"pg_restore rewinds whole DB discarding concurrent tenant writes"},
+{"id":"DB-250","score":"FULL","findings":[13],"why":"first-boot npm ci runs as runtime account before the fence"},
+{"id":"DB-278","score":"FULL","findings":[2],"why":"agent-written code runs under next dev before any post-turn check"},
+{"id":"DB-276","score":"PARTIAL","findings":[2],"why":"tenant code can use exported runtime DATABASE_URL; finding stresses BYPASSRLS"},
+{"id":"T-25","score":"PARTIAL","findings":[2],"why":"credentials reachable by agent-edited code in next dev"},
+{"id":"DB-61","score":"PARTIAL","findings":[1],"why":"one agent uid shared across tenants, per-project uids unbuilt; gold is the chat agent read reach"},
+{"id":"T-09","score":"PARTIAL","findings":[7],"why":"tenant's data push refused, page store is default project's"},
+{"id":"DB-177","score":"PARTIAL","findings":[15],"why":"RebuildPlan is a simulated demo walkthrough not mounted live"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-61"],"verdict":null,"code":null,"why":"shared agent uid across tenants"},
+{"n":2,"class":"REG","matches":["DB-278","DB-276","T-25"],"verdict":null,"code":null,"why":"agent code executed by next dev with runtime credentials"},
+{"n":3,"class":"REG","matches":["DB-29","DB-33"],"verdict":null,"code":null,"why":"audit shipper queue loss"},
+{"n":4,"class":"REG","matches":["DB-161"],"verdict":null,"code":null,"why":"pg_restore discards concurrent writes"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/bracket.ts:162-172, control-plane/src/scr/transition.ts:220-226","why":"held lane after failed restore is real but a deliberate documented uncertain-tree rule with an operator close/retry exit"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/scr/gate.ts:281-286, control-plane/src/index.ts:4340-4372","why":"one corrupt ledger refuses boot for all tenants, by design (fail closed, names the file)"},
+{"n":7,"class":"REG","matches":["T-09"],"verdict":null,"code":null,"why":"tenant has no fast lane or data push"},
+{"n":8,"class":"NOVEL","matches":[],"verdict":"REAL","code":"control-plane/src/index.ts:3170-3182, control-plane/src/project/registry.ts:314-317","why":"registration only checks vault.hasSecret; no binding of ref to project (admin-only action)"},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/tools/ws-verify/ws-render.mjs:148-186","why":"hydration attribute required and failure exits 2, but it is a stated default-tenant contract"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"REAL","code":"control-plane/src/scr/substrate.ts:113-130, control-plane/src/surface/gate.ts:262-272","why":"push sends whole row; unrolled-back applied proposal stays live in the row"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/docker/Caddyfile:465-474, control-plane/src/index.ts:2990-2998","why":"ingress restart is required and manual, but deliberate and surfaced to the operator as a command"},
+{"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"control-plane/src/index.ts:765-778","why":"queued turns refused busy after a timeout, as a documented deliberate choice"},
+{"n":13,"class":"REG","matches":["DB-250"],"verdict":null,"code":null,"why":"unfenced npm ci at first boot"},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"enclosure/extension/src/controlPlane.ts:7-13, enclosure/access/access-proxy.Caddyfile:88-96","why":"extension sends no credential, a documented deployment property; only the operator access route supplies identity"},
+{"n":15,"class":"REG","matches":["DB-177"],"verdict":null,"code":null,"why":"rebuild plan simulated, config tab read-only live"}
+]}

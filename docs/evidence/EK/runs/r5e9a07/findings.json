@@ -1,0 +1,167 @@
+[
+  {
+    "id": "critical:F-01",
+    "kind": "finding",
+    "title": "Same-origin preview and control-plane API collocation enables full administrative takeover via XSS",
+    "topics": "EN-03.1, EN-03.2, ES-03.1, CP-02.7",
+    "evidence": "The public ingress hosts both the campaign preview (`/@campaignbuilder_preview`, `enclosure/docker/Caddyfile:147-151`) and the control plane API (`/@control`, `enclosure/docker/Caddyfile:261-266`) on the exact same origin (`enclosure/docker/Caddyfile:131`). The ingress security policy explicitly retains `script-src 'self' 'unsafe-inline'` (`enclosure/docker/Caddyfile:56`). The preview serves hot-reloaded code that the AI agent actively edits (`enclosure/docker/compose.pod.yaml:182-184`, `enclosure/docker/web-surface-entrypoint.sh:530-537`). The control plane relies on the browser's `cb_session` cookie on that same origin (`control-plane/src/auth/verify.ts:287`, `control-plane/src/auth/login.ts:313-314`).",
+    "failure": "An agent editing a campaign page introduces an inline script or DOM sink into a previewed component. An administrative operator inspects the preview at `/v/<shortcode>`. The injected script runs under the operator's origin, issues `fetch('/api/...', { credentials: 'same-origin' })`, and takes any administrative action (approving database migrations, creating projects, changing dials, or reading system metadata) using the administrator's active session.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-02",
+    "kind": "finding",
+    "title": "Shared agent UID across tenants allows cross-tenant arbitrary code execution",
+    "topics": "BL-06.1, ES-03.1, EN-01.1, EN-04.2, CP-17.5",
+    "evidence": "The control plane mounts all tenant workspaces simultaneously into its container (`enclosure/docker/compose.pod.yaml:531-535`). The agent process runs under a single system UID (1004) across all tenants (`enclosure/docker/Dockerfile.control-plane:180-186`, `enclosure/docker/workspace-seed.sh:119`). Shell tool calls (`bash`) are only evaluated by the no-install gate for package manager verbs and git commands (`control-plane/pi-extensions/no-install-gate.ts:280-323`); they are never checked against filesystem contract scope (`control-plane/src/scr/contract-scope.ts:273`). Post-turn git diff inspection only verifies the requesting tenant's repository (`control-plane/src/scr/executor.ts:1181-1191`).",
+    "failure": "While servicing a prompt on Tenant A, the agent executes a shell command writing to `/workspaces/tenant-b/app/page.tsx`. Because the agent owns the surface directories across all workspaces under UID 1004, the write succeeds. Tenant A's scope checker never inspects Tenant B's repository. Tenant B's running `next dev` server immediately compiles and executes the modified file with Tenant B's database and Supabase credentials in its runtime environment.",
+    "confidence": "high",
+    "marked_by_authors": "yes (partially acknowledged in BL-06.1 Mermaid diagram and ES-03.1 note `XT`)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-03",
+    "kind": "finding",
+    "title": "Global vault references permit cross-tenant credential theft at registration",
+    "topics": "BL-06.1, CP-07.4, CP-08.1, CP-09.2, CP-10.5",
+    "evidence": "Credential references in the vault (`supabaseConnRef`, `githubPatRef`, `modelKeyRef`) are stored in a single flat namespace in `VaultStore` without tenant ownership tags (`control-plane/src/vault/store.ts:110-120`). `POST /api/projects` accepts any reference present in the vault (`control-plane/src/index.ts:3178-3179`). During tenant provisioning, `resolveSurfaceEnv` resolves the given reference against the global store without verifying project ownership (`control-plane/src/vault/resolve.ts:51-56`).",
+    "failure": "An administrator registers Tenant B and supplies `supabaseConnRef: \"tenant-a\"`. The control plane resolves Tenant A's database connection and writes it into `/run/campaignbuilder/surface-env/env` inside Tenant B's isolated volume. Tenant B's runtime container boots with full read/write access to Tenant A's database.",
+    "confidence": "high",
+    "marked_by_authors": "yes (marked as \"Open question\" in BL-06.1 and CP-08.1)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-04",
+    "kind": "finding",
+    "title": "Unauthenticated `/api/health` endpoint leaks all tenant project IDs",
+    "topics": "BL-01, CP-01.4, CP-01.6, EN-03.1",
+    "evidence": "`GET /api/health` requires no authentication (`control-plane/src/index.ts:613`, `control-plane/src/index.auth.test.ts:77`). The public ingress forwards all `/api/*` requests directly to the control plane without authentication or forward-auth (`enclosure/docker/Caddyfile:261-266`). The health checker inspects every registered project in the system and emits an explicit check object named `tenant:<id>` for each one (`control-plane/src/health/checks.ts:187-192`).",
+    "failure": "An unauthenticated external attacker requests `https://<domain>/api/health` and obtains a complete enumeration of all tenant project identifiers hosted on the cluster.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-05",
+    "kind": "finding",
+    "title": "Database rollback via `pg_restore --clean` destroys concurrent tenant writes",
+    "topics": "CP-18.5, CP-15.8, BL-05.2",
+    "evidence": "The migration system claims tenant writes are not paused during execution (`control-plane/src/scr/migration.ts:143-147`). If an applied migration fails post-apply verification or fails execution outside of `psql` exit code 3, the runner triggers a full restore using `pg_restore --clean` against the pre-migration snapshot (`control-plane/src/scr/migration-runner.ts:284`, `:358-364`).",
+    "failure": "While a migration is running and being verified (bounded by a 15-minute timeout), public visitors submit leads or update campaign records. When the migration fails post-apply verification, `pg_restore --clean` drops and replaces database objects back to the pre-migration dump, irrevocably wiping out all visitor data written during the migration window.",
+    "confidence": "high",
+    "marked_by_authors": "yes (partially acknowledged in CP-18.5 notes stating \"writes since the restore point were discarded\")",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-06",
+    "kind": "finding",
+    "title": "Failed rollback writes leave unverified page changes that are subsequently published",
+    "topics": "CP-12.3, CP-12.6, CP-15.7",
+    "evidence": "When an applied page proposal fails render verification in `enforce` mode, the previous configuration is written back. If that rollback write fails, the proposal remains marked as `applied` with an error message (`control-plane/src/surface/gate.ts:267-271`). When `pushlive` is called, it pushes the current database row directly from the database (`control-plane/src/scr/substrate.ts:113-125`). While `isLiveUnverified` blocks publishing that specific unverified proposal, once a subsequent proposal on the same page is applied and verified, the page is deemed clean, and publishing pushes the entire current row.",
+    "failure": "Proposal 1 modifies a page, fails render verification, and its rollback write fails. The invalid content remains in the preview database. Proposal 2 modifies a different section of the same page and passes render verification. A user initiates `/pushlive`; the database row containing the corrupted changes from Proposal 1 is published live to production.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-07",
+    "kind": "finding",
+    "title": "Unkeyed audit hash chain and co-located sidecar allow undetectable history tampering",
+    "topics": "BL-05.2, CP-03.2, CP-03.7",
+    "evidence": "The audit hash chain uses unkeyed SHA-256 (`control-plane/src/audit/chain.ts:79`). Daily checkpoint files stored on the local disk are unkeyed and unsigned (`control-plane/src/audit/spool.ts:17-22`, `:489-497`). The audit sidecar is co-located on the same physical Docker daemon (`enclosure/docker/compose.pod.yaml:943`). The shipping queue is in-memory and drops all queued events on restart or when queue size exceeds 10,000 (`control-plane/src/audit/ship.ts:13-14`, `:205-207`).",
+    "failure": "A compromised process running as `app` rewrites historical audit logs on disk, recomputes the SHA-256 hashes from genesis, and updates the local checkpoints file without tripping verification. If the host restarts during heavy traffic, in-flight audit events are permanently dropped from the sidecar without resend or alert.",
+    "confidence": "high",
+    "marked_by_authors": "yes (marked as Tension in CP-03.2 and \"WHAT IT DOES NOT PROMISE\" in BL-05.2)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-08",
+    "kind": "finding",
+    "title": "Restore failures permanently deadlock the project's single engineering lane",
+    "topics": "CP-13.1, CP-13.2, CP-13.8, CP-13.9",
+    "evidence": "Each project maintains a single in-flight engineering lock (`control-plane/src/scr/types.ts:118`, `control-plane/src/scr/transition.ts:184`). If a bracket restore throws during a rollback, close, or restart recovery, the row enters `FAILED`, but the lock is explicitly re-claimed (`control-plane/src/scr/bracket.ts:162-170`, `control-plane/src/scr/gate.ts:858-866`). Rows in `FAILED` with an active lock never expire (`control-plane/src/scr/transition.ts:225-226`, `:239`). Subsequent calls to `closeRequest` re-attempt `restore`, fail again, and re-assert the lock (`control-plane/src/scr/gate.ts:850-865`).",
+    "failure": "A corrupt git object or file permission issue causes `git read-tree` to fail during a rollback. The row enters `FAILED` and holds `active`. The operator cannot close it, the background sweeper cannot expire it, and server restarts re-assert the lock on recovery. The project's engineering lane is permanently deadlocked until an operator manually mutates `scr-ledger.<id>.json` on disk.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-09",
+    "kind": "finding",
+    "title": "Shared engine timeout cascades into mass denial-of-service for all queued users",
+    "topics": "CP-05.4, CP-05.8",
+    "evidence": "All chat and prompt requests share a single `pi` engine subprocess governed by `turnQueue` (`control-plane/src/index.ts:739`). The queue is bounded to 4 waiting requests (`control-plane/src/engine/turn-queue.ts:34-40`). Each turn is allowed up to 10 minutes (`control-plane/src/index.ts:673`, `:762`). If a running turn times out, `abortWaiting` aborts all waiting requests, kills the engine, and returns 503 `AGENT_BUSY` (`control-plane/src/index.ts:772-776`, `control-plane/src/engine/turn-queue.ts:78-82`).",
+    "failure": "A user triggers a prompt that hangs for 10 minutes. While it runs, 4 subsequent users enter the queue; any further users receive an immediate 503. When the 10-minute timeout expires, the running prompt fails, and all 4 queued requests are aborted with 503 errors. A single hung prompt denies service to the entire user base for 10 minutes and discards all pending work.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-10",
+    "kind": "finding",
+    "title": "Non-transactional backup restore leaves partially overwritten targets on failure",
+    "topics": "EN-10.1, EN-10.3",
+    "evidence": "`restore` performs three sequential extractions without a transaction: Write 1 restores state, Write 2 restores world data, and Write 3 writes the database dump (`enclosure/tools/backup/backup.mjs:957-959`). There is no rollback mechanism if a later step fails (`enclosure/tools/backup/backup.mjs:973-974`). Targets must be completely empty prior to extraction (`enclosure/tools/backup/backup.mjs:952-956`).",
+    "failure": "During disaster recovery, Write 1 extracts the state directory. Write 2 throws an unhandled error (e.g. out of disk space). The process exits; the state directory remains partially populated, while world data is missing. Because the target directory is no longer empty, re-running `restore` immediately exits with code 8, leaving the system in an unrecoverable, inconsistent state.",
+    "confidence": "high",
+    "marked_by_authors": "yes (acknowledged in EN-10.3 as \"FAILURE BOUNDARY: a throw in write 2 or 3 leaves the earlier targets populated\")",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-11",
+    "kind": "finding",
+    "title": "Port and triple modifications go live unrecorded upon audit failures",
+    "topics": "CP-03.6, CP-07.3, BL-01.1",
+    "evidence": "The system commits to \"record first, act second\" for all state changes (`control-plane/src/index.ts:230`). However, port and triple updates register with the in-memory registry *before* appending to the audit log (`control-plane/src/index.ts:3649`, `:3651`, `:3772`, `:3778`). If audit appending fails, `putBackUnrecorded` attempts to revert the change. If the revert fails, the change remains \"live but unrecorded until restart\" (`control-plane/src/index.ts:3581-3585`).",
+    "failure": "An administrator updates a project triple or port while the audit spool is degraded. The in-memory registry updates immediately. The subsequent audit append fails, and the reversion step encounters an error. The live registry continues running with the modified configuration, routing traffic or applying new compiler rules, without any record on the audit trail.",
+    "confidence": "high",
+    "marked_by_authors": "yes (acknowledged in CP-03.6 and CP-07.3 as an accepted exception)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-12",
+    "kind": "finding",
+    "title": "Keys exceeding 200 characters silently bypass idempotency enforcement",
+    "topics": "CP-13.4",
+    "evidence": "When processing requests with an `Idempotency-Key` header, the server scopes the key by route, but drops any key longer than 200 characters, returning `undefined` (`control-plane/src/index.ts:381`). When the key is `undefined`, the server falls back to non-idempotent execution (`control-plane/src/scr/transition.ts:463`).",
+    "failure": "A client sends a standard structured or cryptographically signed idempotency token that exceeds 200 characters. Instead of returning a 400 validation error, the server silently ignores the key. When network timeouts trigger automatic client retries, the server executes duplicate operations (such as approving, declining, or closing requests multiple times).",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-13",
+    "kind": "finding",
+    "title": "`POST /auth/logout` lacks CSRF protection, enabling forced session termination",
+    "topics": "CP-02.7, EN-03.1, EN-03.7",
+    "evidence": "`POST /auth/logout` validates no origin, no referer, and requires no CSRF token (`control-plane/src/auth/login.ts:322-327`). The public ingress routes `/auth/*` directly without authentication (`enclosure/docker/Caddyfile:261-266`). The handler immediately deletes the `cb_session` cookie across both the marketer preview and operator console (`control-plane/src/auth/login.ts:325`).",
+    "failure": "An attacker embeds an unauthenticated cross-origin POST request (`<form action=\"https://<pod>/auth/logout\" method=\"POST\">`) on an external website. An operator or marketer visiting the attacker's page has their active session terminated across both workspaces without warning or consent.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-14",
+    "kind": "finding",
+    "title": "Hardcoded single-tenant dependencies prevent second-tenant operation",
+    "topics": "BL-06.2, CP-08.6, CP-12.4, CP-15.5, CP-15.7",
+    "evidence": "Despite architectural claims of single-pod multi-tenancy, critical paths are hardcoded to the default tenant:",
+    "failure": "An operator provisions a second tenant (`civic-quest`). The tenant cannot use conversational page editing, cannot publish content live, cannot use the visual overlay, and is forced to conform to the default tenant's specific internal route structure.",
+    "confidence": "high",
+    "marked_by_authors": "yes (partially acknowledged in BL-06.2 and CP-08.6 as a second-tenant backlog)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-15",
+    "kind": "finding",
+    "title": "Approval binding fails to hash the working tree files",
+    "topics": "CP-13.3, CP-15.3",
+    "evidence": "An engineering approval is bound to `ApprovalBinding` (`control-plane/src/scr/transition.ts:302`). `diffHash` is calculated strictly over `row.structuralDelta`, `row.plan`, and `row.blessedPlan` (`control-plane/src/scr/transition.ts:365-369`). In live engineering requests, these fields start empty (`control-plane/src/index.ts:1574`). The actual files in the workspace tree are explicitly omitted from `diffHash` (`control-plane/src/scr/transition.ts:345-354`).",
+    "failure": "An operator reviews and approves a change. If files in the workspace are modified out-of-band (e.g. by a secondary process or script) while keeping `baseRevision` and `configVersion` unchanged, `staleApprovalFields` reports that the approval is still valid. While `runPromote` later halts deployment if the change set does not match `reviewedChangeSet`, the system remains in a misleading state where an invalid approval is displayed as current.",
+    "confidence": "high",
+    "marked_by_authors": "yes (acknowledged as \"THE HONEST LIMIT\" in CP-13.3)",
+    "status": "unverified"
+  }
+]

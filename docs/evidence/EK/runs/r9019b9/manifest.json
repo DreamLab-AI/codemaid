@@ -1,0 +1,12 @@
+{
+  "model": "gemini-3.8-flash",
+  "pack": "campaignbuilder/arms/pack-M.txt",
+  "started": "2026-10-06T07:15:06.715Z",
+  "seconds": 129.2,
+  "findings": 15,
+  "finish": "STOP",
+  "prompt_tokens": 351243,
+  "cached_tokens": 348129,
+  "thinking_tokens": 15924,
+  "output_tokens": 4279
+}

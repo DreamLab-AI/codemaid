@@ -1,0 +1,32 @@
+{"run_id":"r83bcda",
+"issues":[
+{"id":"DB-36","score":"FULL","findings":[1],"why":"diagrams-only review pack in design but not built"},
+{"id":"DB-39","score":"FULL","findings":[1],"why":"same --review not built"},
+{"id":"DB-07","score":"FULL","findings":[2],"why":"stack overflow aborts the process, uncatchable"},
+{"id":"T-03","score":"FULL","findings":[6],"why":"codebase name from checkout dir changes ids/seals"},
+{"id":"T-02","score":"FULL","findings":[15],"why":"ignore 0.4.30 vs MSRV, lock-only protection"},
+{"id":"DB-38","score":"FULL","findings":[15],"why":"ignore 0.4.30 needs newer Rust than declared"},
+{"id":"DB-11","score":"FULL","findings":[10],"why":"stored closure drawn at definition not call"},
+{"id":"DB-12","score":"PARTIAL","findings":[9],"why":"notes macro invocation is never a call step; no CallKind::Macro detail"},
+{"id":"DB-17","score":"PARTIAL","findings":[8],"why":"untyped receiver bound by unique name"},
+{"id":"DB-18","score":"PARTIAL","findings":[8],"why":"name-only guess on untyped receivers, not closure params specifically"},
+{"id":"DB-25","score":"FULL","findings":[12],"why":"sequence over message budget cut, later calls dropped"},
+{"id":"DB-40","score":"PARTIAL","findings":[14],"why":"repo does not run seal gate in CI yet; omits the MER-02 blocker"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-36","DB-39"],"verdict":null,"code":null,"why":"unbuilt review pack"},
+{"n":2,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/contract.rs:98-101","why":"orphan deletion of generated-marked md is real but only with the generated marker and a misdirected -o; documented design"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:677-682","why":"topic then lock written non-atomically as claimed, but a half-state fails verify safely and is documented"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:661-663","why":"sign rewrites a non-canonical lock canonically as stated; verify refuses it, so tamper evidence is not defeated"},
+{"n":6,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"dir-derived codebase name"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:555-557","why":"inherent-first is real but a deliberate heuristic; no type checking is a documented limit"},
+{"n":8,"class":"REG","matches":["DB-17","DB-18"],"verdict":null,"code":null,"why":"name-only inferred binding on untyped receivers"},
+{"n":9,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macro invocations not call steps"},
+{"n":10,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"stored closures"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:874-876","why":"std and unknown-receiver calls omitted by default policy, documented design not defect"},
+{"n":12,"class":"REG","matches":["DB-25"],"verdict":null,"code":null,"why":"sequence budget truncation"},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-dense/src/lib.rs:366-375, crates/sealmap-corpus/src/pack.rs:278-282","why":"over-budget refusal is real but only when an optional budget is set; deliberate"},
+{"n":14,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"seal gate not yet run in own CI"},
+{"n":15,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore 0.4.30 MSRV"}
+]}

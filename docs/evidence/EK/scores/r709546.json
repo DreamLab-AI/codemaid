@@ -1,0 +1,30 @@
+{"run_id":"r709546",
+"issues":[
+{"id":"DB-36","score":"FULL","findings":[1],"why":"diagrams-only --review pack designed but not built"},
+{"id":"DB-39","score":"FULL","findings":[1],"why":"same unbuilt --review mode"},
+{"id":"DB-07","score":"FULL","findings":[2],"why":"stack overflow is an uncatchable abort ending the process"},
+{"id":"DB-11","score":"FULL","findings":[8],"why":"let-bound closure drawn at definition not call site"},
+{"id":"DB-33","score":"FULL","findings":[13],"why":"seal ids depend on extraction options, mismatch makes symbols absent"},
+{"id":"T-02","score":"FULL","findings":[14],"why":"ignore 0.4.30 needs newer Rust than MSRV 1.85; lock only protects in-repo"},
+{"id":"DB-38","score":"FULL","findings":[14],"why":"ignore 0.4.30 needs Rust 1.88"},
+{"id":"DB-25","score":"FULL","findings":[11],"why":"sequence capped at message budget, later calls dropped, only in index"},
+{"id":"DB-40","score":"PARTIAL","findings":[15],"why":"CI does not run seal verify gate (step 6), without the id-in-prose cause"},
+{"id":"DB-12","score":"PARTIAL","findings":[6],"why":"macro invocation never drawn as a call of its own"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-36","DB-39"],"verdict":null,"code":null,"why":"unbuilt --review pack"},
+{"n":2,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow abort"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/contract.rs:99-101","why":"orphan deletion is real but limited to md files carrying the generated sealmap marker (is_generated), a deliberate ownership rule"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:679-682","why":"two non-atomic fs::write calls are real, but verify reports a lock fault and re-signing repairs it; authors document it"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap/src/main.rs:662-682","why":"lock is read, modified and rewritten whole with fs::write and no locking, so concurrent signs can clobber"},
+{"n":6,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macros never drawn as calls"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:954-968","why":"ambiguity drops the guessed edge as described, but only for dependencies reachable from the caller; documented heuristic"},
+{"n":8,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"closure drawn at definition"},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-rust/src/collect.rs:1112-1114","why":"expr returns silently at MAX_EXPR_DEPTH with no diagnostic"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:921-923","why":"hardcoded DEREF list is real and omits third-party guards, but consequence is exaggerated; the wrapper becomes the receiver"},
+{"n":11,"class":"REG","matches":["DB-25"],"verdict":null,"code":null,"why":"diagram budget truncation"},
+{"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:274-282","why":"over-budget pack returns OverBudget error as claimed, but refusal is the documented intent"},
+{"n":13,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"extraction options not recorded in seal"},
+{"n":14,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore MSRV mismatch"},
+{"n":15,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"CI lacks seal gate"}
+]}

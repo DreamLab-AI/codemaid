@@ -1,0 +1,142 @@
+### F-01 — Shared agent UID permits cross-tenant source mutation and execution
+- Topics: BL-06.1, ES-03.1, CP-15.3, EN-01.1
+- Evidence: BL-06.1 claims tenant isolation guarantees "Tenant B cannot do to, or take from, Tenant A: change A's source" while simultaneously stating: "CAN, today, with a second tenant switched on: change A's source. Every tenant's agent runs as one uid and the control plane mounts every workspace · workspace-seed.sh:60, workspace-seed.sh:119, compose.pod.yaml:531, compose.pod.yaml:535 and A's server runs that code holding A's keys". ES-03.1 confirms: "one uid for every tenant, civic-quest on: a request on either tenant can shell-write the other's tree, live in its preview at once."
+- Failure: In a multi-tenant deployment with a second tenant enabled, Tenant B's agent (uid 1004) invokes a bash tool call writing directly into Tenant A's workspace (`/workspace` or `/workspaces/<id>`). Tenant A's `next dev` server hot-compiles and executes this code immediately in a process holding Tenant A's database credentials and session secrets, completely bypassing approval before execution.
+- Confidence: High
+- Marked by authors: Yes (warn node in BL-06.1, ES-03.1)
+
+---
+
+### F-02 — Unreviewed agent code executes with live database credentials bypassing RLS
+- Topics: ES-03.1, EN-04.3, BL-01.1
+- Evidence: BL-01.1 and BL-01.3 promise safety through strict boundaries and pre-change validation, yet ES-03.1 establishes the controlling threat model: "an allowed source write is hot-compiled by next dev in a process that holds the tenant's credentials in its environment". EN-04.3 confirms that the database connection handed to `next dev` (`web-surface-entrypoint.sh:342`, `:374`) uses a database role granted `BYPASSRLS`.
+- Failure: An agent submits changes within its permitted path grant (`components/`, `app/`, etc.) that query the database or alter server-side rendering logic. `next dev` reloads and executes the modified files without human approval. Because the server process runs with `BYPASSRLS`, the unvetted code accesses and can exfiltrate or alter any record across all tables, rendering database-level Row Level Security inert.
+- Confidence: High
+- Marked by authors: Yes (marked as "controlling threat model" in ES-03.1)
+
+---
+
+### F-03 — Control-plane agent container permits arbitrary DNS data exfiltration
+- Topics: EN-08.4, EN-08.5, EN-08.2
+- Evidence: EN-08.5 establishes that permitting a non-root UID to query Docker's internal DNS resolver is a critical exfiltration channel: "The resolver exists because a uid allowed to query Docker's resolver can spell a secret into a lookup of a domain its author controls (web-surface-entrypoint.sh:86-93, init-firewall.sh:54-60)". To mitigate this, tenant containers deploy a local `dnsmasq` instance that returns `NXDOMAIN` for unauthorized lookups. However, in the control-plane container (EN-08.4), the agent firewall explicitly permits direct queries to Docker's resolver: "lo to Docker's resolver 127.0.0.11: ACCEPT for the worker (init-firewall.sh:219-223)".
+- Failure: While direct TCP egress from the agent UID is restricted to allowlisted model providers, the agent process (uid 1004) can encode arbitrary workspace data, configuration details, or the pod model key into DNS queries sent to `127.0.0.11:53`. The Docker daemon forwards these queries to external upstream DNS servers, bypassing the outbound IP firewall.
+- Confidence: High
+- Marked by authors: No (direct contradiction between EN-08.4 and EN-08.5)
+
+---
+
+### F-04 — Real-time contract-scope enforcement is bypassed by shell commands
+- Topics: CP-17.1, CP-17.5, ES-03.1
+- Evidence: CP-17.1 states that `enforceContractScope` checks paths only for write tools: "LAYER 2: is this a WRITE tool? WRITE_TOOLS, contract-scope.ts:273. Allowed. Shell and read tools never reach the scope check contract-scope.ts:253-254". CP-17.5 confirms: "everything else allowed, including any shell write to any path: the tool-call scope check never sees a shell command (control-plane/src/scr/contract-scope.ts:273)".
+- Failure: When the agent uses `bash` tool calls (e.g., shell redirection or scripts), the real-time path grant and deny-list checks are never invoked. The agent can write to any file permitted by operating-system file permissions. These writes are only evaluated retroactively by git diff inspections after the turn concludes, leaving intermediate code active and running inside the live server during the turn.
+- Confidence: High
+- Marked by authors: Yes (CP-17.5)
+
+---
+
+### F-05 — Shared `pod-net` bridge allows tenant containers to bypass ingress header stripping
+- Topics: EN-02.2, EN-03.1, EN-03.2, ES-03.1
+- Evidence: EN-03.1 and EN-03.2 state that client identity headers (`X-Auth-Request-*`, `X-Dev-User`, `X-Break-Glass`) are stripped by the Caddy ingress (`Caddyfile:67-78`). However, EN-02.2 shows that all containers (ingress, control plane, and all tenants) share a flat bridge network: `pod-net` (`compose.pod.yaml:1066`). ES-03.1 acknowledges: "tenants still share pod-net, and other containers reach port 3000 past the ingress strip".
+- Failure: A compromised tenant container or malicious script running inside `next dev` connects directly over `pod-net` to peer tenant containers on port 3000 or internal control-plane endpoints, bypassing Caddy. The connecting container can inject forged forward-auth headers directly into target HTTP requests.
+- Confidence: High
+- Marked by authors: Yes (noted in ES-03.1 and BL-06.1)
+
+---
+
+### F-06 — Unrestricted vault references permit cross-tenant credential theft
+- Topics: BL-06.1, CP-08.1, CP-07.2
+- Evidence: BL-06.1 claims a tenant cannot "deploy with the pod's own token (project/registry.ts:332)". However, BL-06.1 and CP-08.1 reveal: "nothing binds a token reference to the project that names it: registration admits any reference the vault holds (control-plane/src/index.ts:3178-3179) and the registry resolves it as given (control-plane/src/project/registry.ts:316-317)".
+- Failure: An operator registering or updating Tenant B specifies Tenant A's existing `githubPatRef` or `supabaseConnRef`. The control plane resolves the reference without validating project ownership, allowing Tenant B to use Tenant A's repository deploy token to push code or access Tenant A's external database.
+- Confidence: High
+- Marked by authors: Yes (marked as "Open question" in BL-06.1 and CP-08.1)
+
+---
+
+### F-07 — In-memory audit shipper silently drops events on restart or backlog
+- Topics: BL-05.2, CP-03.2, CP-03.7
+- Evidence: BL-05 and CP-03 promise an audit trail that is "never lost" and protected by an off-box copy. However, BL-05.2 and CP-03.2 state: "a copy OFFERED, not sent: handed to a queue in the control plane's memory... whatever is still queued at a restart, and the oldest once 10,000 are waiting. Nothing re-sends them (control-plane/src/audit/ship.ts:13-14, 205-207)". Furthermore, the local spool uses an unkeyed hash chain (`spool.ts:27-32`), which BL-05.2 notes allows "the whole kept record could be rewritten by the system's own identity; its authors lean on the copy to close that".
+- Failure: A control-plane crash or network partition between the control plane and the audit sidecar causes queued audit records to be permanently lost from the secondary copy. Because local records on disk are unkeyed SHA-256 hashes without HMAC or digital signatures, an attacker with control-plane access can rewrite the local disk spool, recalculate hashes, and leave no verifiable record in the sidecar.
+- Confidence: High
+- Marked by authors: Yes (noted as limits in BL-05.2 and CP-03.7)
+
+---
+
+### F-08 — Pre-migration database dumps are excluded from backup archives
+- Topics: BL-05.2, CP-15.8, EN-10.1
+- Evidence: CP-15.8 asserts that pre-migration dumps are safe because "the backup archives the state directory whole and so copies every dump". However, CP-15.8 immediately admits this is stale, and EN-10.1 confirms: "The state archive leaves out its top-level restore-points/, the migration lane's pre-migration dumps of a client's database, and the manifest says so (backup.mjs:68-73, 134, 626)".
+- Failure: An administrator relies on scheduled pod backups (`campaignbuilder-backup`) to recover state. Following a server failure after a corrupted database migration, the administrator restores from the backup archive. The pre-migration restore points (`restore-points/`) are completely missing, preventing rollback of the schema change.
+- Confidence: High
+- Marked by authors: Yes (author notes the code rationale is "stale" in CP-15.8)
+
+---
+
+### F-09 — Failed migration rollback wipes all concurrent production database writes
+- Topics: CP-18.5, CP-15.8, EN-10.1
+- Evidence: CP-18.5 describes the post-failure migration rollback: "the full restore: pg_restore --clean the point, migration-runner.ts:284... and the detail says every write since the restore point was discarded (migration-runner.ts:302-304)".
+- Failure: A migration is approved and applied to the database, but post-migration verification fails (or the process times out up to the 15-minute `CAMPAIGNBUILDER_MIGRATION_TIMEOUT_MS` limit). The runner executes `pg_restore --clean` using the snapshot taken prior to migration. Any customer data created during the migration window (user registrations, form submissions, lead captures) is destroyed.
+- Confidence: High
+- Marked by authors: Yes (CP-18.5)
+
+---
+
+### F-10 — Concurrent policy changes corrupt `runtime-projects.json` via uncoordinated file writes
+- Topics: CP-10.3, CP-07.3, CP-01.7
+- Evidence: CP-10.3 explains that `changeProjectPolicy` serializes updates per project: "Why one lock per project rather than one per field... What is serialised is the read-modify-write of a project's configuration (control-plane/src/index.ts:2078)". However, the underlying persistence function `persistRuntimeProject` (`runtime-store.ts:139-141`) reads the entire `runtime-projects.json` file, updates the target project entry, and atomically overwrites the file via rename.
+- Failure: Two administrators update settings (such as autonomy dials or spending limits) on two different projects (Project A and Project B) simultaneously. Both operations acquire their respective project-level locks, read the same initial file, and write back whole-file snapshots. The second write completely overwrites the changes made by the first, permanently losing one project's configuration on disk.
+- Confidence: High
+- Marked by authors: No (authors designed a per-project lock to solve intra-project field races, failing to synchronize the multi-project file rewrite)
+
+---
+
+### F-11 — Unrecoverable git bracket restore deadlocks project lane permanently
+- Topics: CP-13.1, CP-13.2, CP-15.2, CP-13.8
+- Evidence: CP-15.2 specifies that if a bracket restore fails: "the restore threw, any step: both failures appended, FAILED, the lane RE-CLAIMED, SCR_ROLLBACK_FAILED, return false (bracket.ts:158-175)". CP-13.2 confirms: "A FAILED row that still holds the lane... never expires... so only an operator's close or a retry frees it". CP-13.8 shows that when an operator calls `close`: "CR -- the restore threw --> CBAD: a close failure at stage CLOSING, transition fail, active RE-CLAIMED... gate.ts:858-866".
+- Failure: An underlying disk or permission issue causes `git read-tree` or `workspace-reassert` to fail during rollback. The row enters `FAILED` while retaining `active: true` (holding the lane lock). Because the row is active, background sweeps never expire it. When the operator attempts to force-close the row via `POST /api/scr/:id/close`, the close operation attempts the same restore, fails, and re-claims the lane. The project lane is permanently deadlocked against all future requests.
+- Confidence: High
+- Marked by authors: Yes (documented behavior across CP-13.2, CP-13.8, and CP-15.2)
+
+---
+
+### F-12 — Unbounded Docker command execution in provisioner creates host-wide hang
+- Topics: EN-06.1, EN-06.2
+- Evidence: EN-06.1 lists provisioner denials: "no timeout on the command call, provisioner.mjs:271". EN-06.2 confirms: `runRealDocker` synchronously invokes Docker via `execFileSync` (`provisioner.mjs:270`) without specifying a timeout parameter.
+- Failure: A `docker compose stop` or `docker compose up` command stalls due to a hung container process, Docker daemon deadlock, or NFS/volume I/O freeze. Because there is no execution timeout, the single-threaded provisioner polling loop blocks indefinitely. The heartbeat file stops updating, the control plane detects the provisioner as detached, and all container lifecycle operations across the entire host stop processing.
+- Confidence: High
+- Marked by authors: Yes (noted in EN-06.1 diagram)
+
+---
+
+### F-13 — Ingress does not reload tenant host blocks without manual container restart
+- Topics: EN-03.1, CP-08.4, ES-07.1
+- Evidence: EN-03.1 and CP-08.4 state that Caddy loads tenant configurations once at boot via a wildcard import: `import /etc/caddy/tenants/*.caddy` (`Caddyfile:474`). Caddy's admin API is disabled (`Caddyfile:20`). When tenant hosts are created, modified, or deleted, files are written to disk, but: "generated host changes reach the public only after an ingress restart... Nothing runs the restart (CP-08.4)".
+- Failure: An operator provisions a new tenant or tears down an existing one via the UI or API. The control plane returns success, but the ingress continues using its in-memory configuration. A new tenant remains completely unreachable with connection errors, while a deleted or stopped tenant continues to route traffic to dead upstreams, returning 502 Bad Gateway to public visitors until an operator manually restarts the ingress container via host CLI.
+- Confidence: High
+- Marked by authors: Yes (acknowledged across EN-03.1, CP-08.4, and ES-07.1)
+
+---
+
+### F-14 — Failed fast-lane render rollback leaves unverified content live and blocks subsequent deploys
+- Topics: CP-12.3, CP-12.6, CP-15.7
+- Evidence: CP-12.3 states: "A rollback that failed leaves it HERE [applied] with an error, so it is never approved again (surface/gate.ts:268, 346)... and neither push door pushes THAT PAGE by any proposal (surface/gate.ts:497-503)". CP-12.6 confirms: "the proposal stays applied, surface/gate.ts:268".
+- Failure: In the fast lane (`enforce` mode), a page modification fails browser verification, triggering an automatic rollback write. If the database write for the rollback fails, the proposal remains marked `applied` with an error flag, leaving broken content live on the preview site. Because the page now contains an unverified applied proposal, all future `/pushlive` operations for *any* proposal on that entire page are rejected with 409 `PAGE_LIVE_UNVERIFIED`, requiring manual direct database intervention to recover.
+- Confidence: High
+- Marked by authors: Yes (CP-12.3, CP-12.6)
+
+---
+
+### F-15 — Content publishing and editing are architecturally blocked for all non-default tenants
+- Topics: BL-06.1, BL-06.2, CP-15.7, CP-15.5
+- Evidence: BL-06 claims multi-tenant support, but BL-06.1, BL-06.2, and CP-15.7 state: "the host's editing source is the default project's alone, so a tenant's validator has no page write to guard yet: a tenant has no fast lane and its content push is refused, named, before anything is read (registry.ts:654-655, index.ts:1327-1333)... 409 CROSS_PROJECT_PUSH".
+- Failure: A customer attempts to deploy a multi-tenant site using the platform's multi-project tenancy. The second tenant cannot use the `/admin` visual editor, cannot run fast-lane conversational proposals, and calling `/pushlive` fails with HTTP 409. The platform only supports live content publishing for the single built-in default tenant.
+- Confidence: High
+- Marked by authors: Yes (documented as an architectural backlog limitation in BL-06 and CP-15.7)
+
+---
+
+## Not judgeable from this material
+
+1. **Kernel Network Namespace Isolation and Bridge Filtering**: Whether Linux network namespaces on `pod-net` prevent cross-container ARP spoofing, promiscuous packet capture, or raw IP communication between peer tenant containers when bypassing Caddy.
+2. **PostgreSQL Concurrent Transaction Behavior During Snapshot Recovery**: The exact locking behavior, connection termination, and data consistency of `pg_restore --clean` against production PostgreSQL when transactions are actively writing to unrelated tables in the same database.
+3. **Control-Plane Memory Exhaustion under Large Git Diffs**: The behavior and memory footprint of `createGitComplexityClassifier` and `runBounded` when analyzing massive binary assets or heavily nested repositories staged inside `/tmp`.
+4. **Tenant Application Code Dependencies Outside Vendored Boundary**: The security posture and secret-handling behavior of external customer repositories (such as the uninspected `civic-quest` repository) when mounted into container runtimes.
+5. **Real-World Behavior of Subprocess Termination in `run-as-agent.sh`**: Whether `SIGKILL` signals propagated by the process supervisor reliably terminate deeply nested process trees spawned by `sudo` inside the container environment.

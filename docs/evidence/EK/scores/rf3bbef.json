@@ -1,0 +1,235 @@
+{
+ "run_id": "rf3bbef",
+ "issues": [
+  {
+   "id": "DB-161",
+   "score": "FULL",
+   "findings": [
+    3
+   ],
+   "why": "post-apply verify failure rewinds with pg_restore --clean"
+  },
+  {
+   "id": "DB-278",
+   "score": "FULL",
+   "findings": [
+    2
+   ],
+   "why": "agent writes run under next dev before any check"
+  },
+  {
+   "id": "DB-61",
+   "score": "PARTIAL",
+   "findings": [
+    1
+   ],
+   "why": "shared agent uid reaches other tenant workspaces"
+  },
+  {
+   "id": "DB-29",
+   "score": "FULL",
+   "findings": [
+    7
+   ],
+   "why": "in-memory ship queue lost at restart, no replay"
+  },
+  {
+   "id": "DB-02",
+   "score": "FULL",
+   "findings": [
+    10
+   ],
+   "why": "bubble polls from page memory, lost on reload"
+  },
+  {
+   "id": "DB-130",
+   "score": "FULL",
+   "findings": [
+    15
+   ],
+   "why": "debris sweep runs before SCR_BRACKET_OPENED record"
+  },
+  {
+   "id": "DR-35",
+   "score": "FULL",
+   "findings": [
+    12
+   ],
+   "why": "deploy grants read from env, header claims no restart"
+  },
+  {
+   "id": "DR-63",
+   "score": "PARTIAL",
+   "findings": [
+    12
+   ],
+   "why": "deploy grants only from env, no writer"
+  },
+  {
+   "id": "DR-26",
+   "score": "FULL",
+   "findings": [
+    14
+   ],
+   "why": "Caddy keeps routing to removed tenant until restart"
+  },
+  {
+   "id": "DR-47",
+   "score": "PARTIAL",
+   "findings": [
+    5
+   ],
+   "why": "non-default projects get fail-closed data substrate"
+  },
+  {
+   "id": "T-30",
+   "score": "PARTIAL",
+   "findings": [
+    5
+   ],
+   "why": "second tenant not configuration-only"
+  }
+ ],
+ "findings": [
+  {
+   "n": 1,
+   "class": "REG",
+   "matches": [
+    "DB-61"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "shared uid"
+  },
+  {
+   "n": 2,
+   "class": "REG",
+   "matches": [
+    "DB-278"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "hot-run edits"
+  },
+  {
+   "n": 3,
+   "class": "REG",
+   "matches": [
+    "DB-161"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "pg_restore"
+  },
+  {
+   "n": 4,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "control-plane/src/surface/gate.ts:225-247, control-plane/src/index.ts:1341",
+   "why": "stuck-applied is real but the code comments it as the one outcome needing manual action"
+  },
+  {
+   "n": 5,
+   "class": "REG",
+   "matches": [
+    "DR-47",
+    "T-30"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "second tenant"
+  },
+  {
+   "n": 6,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "control-plane/src/auth/tenant-fence.ts:1-25,58-67",
+   "why": "non-tenant passes by design; unresolvable peer is refused 503, contradicting the claim"
+  },
+  {
+   "n": 7,
+   "class": "REG",
+   "matches": [
+    "DB-29"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "audit queue"
+  },
+  {
+   "n": 8,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "control-plane/src/scr/transition.ts:364-440",
+   "why": "staleness on configVersion is real but a deliberate approval binding"
+  },
+  {
+   "n": 9,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "control-plane/src/index.ts:673,762-772",
+   "why": "abortWaiting on timeout is real but deliberate and commented"
+  },
+  {
+   "n": 10,
+   "class": "REG",
+   "matches": [
+    "DB-02"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "bubble"
+  },
+  {
+   "n": 11,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "control-plane/src/project/provision-intent.ts:149-170, control-plane/src/index.ts:3421",
+   "why": "refusal real when stop unacknowledged, a deliberate guard; never-started tenants pass"
+  },
+  {
+   "n": 12,
+   "class": "REG",
+   "matches": [
+    "DR-35",
+    "DR-63"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "deploy env"
+  },
+  {
+   "n": 13,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "enclosure/tools/ws-verify/ws-render.mjs:148-186",
+   "why": "hydration selector is default-tenant contract, commented; scope of pages checked is overstated"
+  },
+  {
+   "n": 14,
+   "class": "REG",
+   "matches": [
+    "DR-26"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "caddy"
+  },
+  {
+   "n": 15,
+   "class": "REG",
+   "matches": [
+    "DB-130"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "debris"
+  }
+ ]
+}

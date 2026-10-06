@@ -1,0 +1,167 @@
+[
+  {
+    "id": "critical:F-01",
+    "kind": "finding",
+    "title": "Cross-tenant workspace compromise via shared agent operating system account",
+    "topics": "BL-06, CP-05.3, ES-03.1, EN-04.1",
+    "evidence": "ADR-019 specifies single-pod multi-project tenancy where workspace isolation prevents one tenant from reaching another's work (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:231-232`). However, per-project agent accounts were never built; all agent processes execute under the shared UID 1004 (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:694`, `docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:705-708`). The control plane mounts all tenant workspaces into its own container (`enclosure/docker/compose.pod.yaml:524-531`), and each workspace seeds writable directories to UID 1004 (`enclosure/docker/workspace-seed.sh:115-120`).",
+    "failure": "An agent fulfilling a prompt for Tenant A uses a tool or shell command to read or write files under `/workspaces/<tenant-b>/app/...`. Because UID 1004 owns the surface directories in all tenant workspaces, the agent modifies Tenant B's source tree. The executor scope check for Tenant A inspects only `/workspaces/<tenant-a>` against its restore point (`control-plane/src/scr/executor.ts:817-818`), so Tenant A's change passes verification while Tenant B's source is modified without an audit trail or approval.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Open in BL-06 and ADR-019 addendum)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-02",
+    "kind": "finding",
+    "title": "Immediate unreviewed execution of agent code inside the secret-bearing preview runtime",
+    "topics": "BL-01, ES-03.1, EN-04.3",
+    "evidence": "The product design promises that the agent is bound by guardrails and that structural code changes are reviewed before they can affect live systems (`README.md:13-17`, `README.md:134-137`). However, the preview server runs `next dev` directly on the workspace volume the agent edits (`enclosure/docker/compose.pod.yaml:182-184`, `enclosure/docker/web-surface-entrypoint.sh:537`). The tenant container runs as `surface` (UID 1005) with `DATABASE_URL` set to the `campaignbuilder_app` user holding `BYPASSRLS` privileges on the database (`enclosure/docker/web-surface-entrypoint.sh:342`, `:374`).",
+    "failure": "An agent modifying a React Server Component, API route, or layout file writes code that reads `process.env.DATABASE_URL` or queries customer tables. `next dev` hot-reloads and executes this unreviewed code immediately in the preview container. The code can query production-equivalent database tables, send records out through the tenant's permitted egress routes, or render credentials directly into the preview DOM before any complexity classifier, check suite, or operator review runs.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-03",
+    "kind": "finding",
+    "title": "Unauthenticated administrative access to tenant preview via internal verification listener",
+    "topics": "CP-02.1, EN-03.1, EN-05.2, WS-01.2",
+    "evidence": "Public preview and editing routes enforce `tenant_preview_auth`, requiring Google OIDC authentication and verified project roles (`enclosure/docker/Caddyfile:121-125`, `control-plane/src/auth/login.ts:345-360`). Conversely, the internal verification site on port 8443 omits `tenant_preview_auth` by design (`enclosure/docker/Caddyfile:407-446`). The agent container's egress firewall explicitly allowlists `ingress:8443` (`enclosure/docker/compose.pod.yaml:259`, `enclosure/scripts/init-firewall.sh:233-235`), and the default tenant runs `next dev` without `ADMIN_SHARED_PASSWORD`, causing `/admin` to admit all requests (`web-surface/lib/admin-access.ts:17-20`).",
+    "failure": "Any process inside the control-plane container (including the agent or check runner) issues an HTTP request to `https://ingress:8443/admin`. Because port 8443 performs no forward-auth and `next dev` admits all admin requests when no password is set, the caller accesses the tenant's administrative workspace and controls without presenting credentials or having an assigned project role.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-04",
+    "kind": "finding",
+    "title": "Shared pod network bypasses ingress security headers and identity stripping",
+    "topics": "CP-02.1, EN-02.2, EN-03.2, ES-03.1",
+    "evidence": "The ingress proxy enforces `(tenant_prelude)` to strip client-supplied identity headers (`X-Auth-Request-*`, `X-Dev-User`, `X-Break-Glass`) (`enclosure/docker/Caddyfile:67-78`), and `(tenant_session_strip)` to remove the control plane's `cb_session` cookie (`enclosure/docker/Caddyfile:114-116`). However, all tenant containers, the database, and the control plane share a single flat bridge network `pod-net` (`enclosure/docker/compose.pod.yaml:1066`), and tenant services bind `0.0.0.0:3000` (`enclosure/docker/web-surface-entrypoint.sh:537`).",
+    "failure": "A compromised container, hostile dependency, or agent shell tool on `pod-net` communicates directly with `http://campaignbuilder:3000` or `http://civic-quest:3000`. By bypassing Caddy, the connection avoids Caddy's identity header stripping, relative redirect rewrites, and cookie stripping, allowing a caller to assert forged headers directly against tenant application handlers.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Open in ES-03 / ADR-019 addendum)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-05",
+    "kind": "finding",
+    "title": "Cross-tenant credential hijacking via unbound vault references",
+    "topics": "BL-06, CP-07.4, CP-08.1, CP-09.3",
+    "evidence": "ADR-019 requires tenant credential isolation (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:425-432`). However, project registration accepts arbitrary reference strings for database slots (`supabaseConnRef`) and GitHub tokens (`tokenRef`) without verifying whether the caller or project owns them (`control-plane/src/index.ts:3178-3179`). The registry resolves references directly from the global vault store (`control-plane/src/project/registry.ts:316-317`, `control-plane/src/vault/resolve.ts:51`).",
+    "failure": "An administrator registering Tenant B supplies Tenant A's existing credential reference (e.g., `supabaseConnRef: \"tenant-a\"`). `materialiseSurfaceEnv` extracts Tenant A's database credentials from the vault and writes them into Tenant B's private `/env` directory (`control-plane/src/vault/inject.ts:53`). Tenant B's application starts with full access to Tenant A's database.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Open question in BL-06 / CP-08.1)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-06",
+    "kind": "finding",
+    "title": "Production data loss during schema migration rollback via `pg_restore --clean`",
+    "topics": "CP-13.4, CP-15.8, CP-18.5",
+    "evidence": "ADR-028 §9.2 states that migrations have safe transactional rollbacks backed by a pre-migration snapshot (`docs/reference/adr/ADR-028-the-simplification.md:21-23`). When an approved migration fails during execution (due to exit codes other than 3, presence of transaction control words, or timeout) or fails the post-migration verification step (`ws-schema-check`), the runner restores the snapshot using `pg_restore --clean` (`control-plane/src/scr/migration-runner.ts:284`, `:340-352`).",
+    "failure": "A pre-migration dump is taken via `pg_dump` prior to apply (`control-plane/src/scr/migration-runner.ts:233`). The migration executes and commits, but the post-migration verification fails or times out (up to 15 minutes under `CAMPAIGNBUILDER_MIGRATION_TIMEOUT_MS`). The runner executes `pg_restore --clean`, restoring the database to the pre-apply snapshot. All concurrent live production records (user leads, campaign form submissions, analytics) inserted by visitors while the migration was processing are permanently erased.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-07",
+    "kind": "finding",
+    "title": "Backup service omits credential values, workspaces, and WORM logs, and cannot restore databases",
+    "topics": "BL-05, EN-01.2, EN-10.1",
+    "evidence": "ADR-028 §7.4 specifies that backup and restore must be fully exercised and capable of recovering the system (`docs/reference/expectations/EXP-028-backup.md:31-33`). However, `backup.mjs` archives only credential references and fingerprints while omitting actual credential values (`enclosure/tools/backup/backup.mjs:68-71`). It excludes agent workspaces, excludes migration restore points (`:134`), and excludes the audit sidecar's WORM log (`enclosure/docker/compose.pod.yaml:996`). Furthermore, `restore` only writes the database dump file to disk without restoring it to PostgreSQL (`enclosure/tools/backup/backup.mjs:959`).",
+    "failure": "Following host failure or disk corruption, an operator runs `restore` from an archive. The restored system has no database credentials (preventing projects from resolving at boot), an unpopulated PostgreSQL database, missing agent workspaces, and an empty audit sidecar. The system cannot start or serve traffic without manual database restoration, manual credential re-entry, and manual workspace reconstruction.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-08",
+    "kind": "finding",
+    "title": "Asynchronous audit shipping queue drops events on overflow and loses records on restart",
+    "topics": "BL-05, CP-03.1, CP-03.7",
+    "evidence": "ADR-006 and ADR-028 §2.2 promise an audit trail that is \"never lost\", hash-chained, and shipped off the box (`control-plane/src/audit/chain.ts:31`, `control-plane/src/audit/spool.ts:31`). However, events are delivered to the audit sidecar via an unpersisted in-memory queue (`control-plane/src/audit/emit.ts:151`, `control-plane/src/audit/ship.ts:148`). The sidecar is deployed on the same Docker daemon (`enclosure/docker/compose.pod.yaml:943`).",
+    "failure": "If the audit sidecar container stops or becomes unreachable, the in-memory queue buffers up to 10,000 events; subsequent events are permanently dropped from the shipping queue (`control-plane/src/audit/ship.ts:205-207`). If the control plane restarts, the entire queue is lost (`control-plane/src/audit/ship.ts:13-14`). The sidecar cannot detect missing sequence gaps or request re-transmission, breaking secondary audit replica integrity.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Tension in CP-03.1 / CP-03.7)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-09",
+    "kind": "finding",
+    "title": "Conversational chat, fast lane, and content publishing are hardcoded to the default project",
+    "topics": "BL-06, CP-06.1, CP-12.1, CP-15.7",
+    "evidence": "ADR-019 establishes single-pod multi-project tenancy where secondary tenants can be brought on via configuration (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:53-55`). However, `POST /api/chat` rejects any project other than `default` with 400 (`control-plane/src/index.ts:1009-1011`). The fast lane validator resolves only the default project's configuration (`control-plane/src/surface/gate.ts:537`), and `/pushlive` rejects any target other than `SURFACE_SOURCE_PROJECT_ID` with 409 (`control-plane/src/index.ts:1327-1333`, `control-plane/src/project/registry.ts:654-655`).",
+    "failure": "An operator provisions a secondary tenant (`civic-quest`). Marketers cannot use the conversational chat interface or the fast content-editing lane for that tenant. Attempting to publish content via chat or API is rejected with 409. The primary marketing capability of the product is restricted to the default project.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Backlog/Open in BL-06 / ADR-019)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-10",
+    "kind": "finding",
+    "title": "Failed fast-lane render rollback leaves broken content live in preview",
+    "topics": "CP-12.6, CP-15.7",
+    "evidence": "ADR-028 §4.3 specifies that in `enforce` mode, a fast-lane proposal that fails browser render verification must be rolled back to the prior configuration before refusing approval (`control-plane/src/surface/gate.ts:227`). However, if writing back the prior configuration throws an error, the proposal remains in the `applied` state (`control-plane/src/surface/gate.ts:267-271`).",
+    "failure": "A fast-lane patch is written to `PageTestVariant`. Browser render check fails, but the rollback write fails due to a database exception. The unverified, broken page remains live in the preview database. The proposal is locked in `applied` with an error, preventing re-approval (409) and blocking future `/pushlive` operations on that page (`control-plane/src/surface/gate.ts:497-503`), leaving the preview site broken until an operator manually edits the database.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-11",
+    "kind": "finding",
+    "title": "All-auto autonomy dial bypasses Tier-2 planning and omits complexity signals from the audit trail",
+    "topics": "BL-03, CP-16.2, CP-16.6",
+    "evidence": "The README and documentation promise that setting the autonomy dial to `auto` removes human approval delays while keeping complexity classification, planning, and audit recording intact (`README.md:156-158`, `control-plane/src/policy/autonomy.ts:26`). In contrast, when plan signals are dialed to `auto`, the executor completely skips the Tier-2 planning pass to conserve tokens (`control-plane/src/scr/executor.ts:512`). Furthermore, any signals evaluated as `auto` during Tier-1 classification are excluded from the recorded audit event (`control-plane/src/scr/executor.ts:988-991`, `foreman/src/features/work/EscalationsSection.tsx:284`).",
+    "failure": "An organization configures autonomy signals to `auto` expecting automated governance with complete audit visibility. Large structural changes bypass Tier-2 planning checks entirely. Changes proceed without logging which signals were triggered, leaving the audit trail devoid of the risk classifications that occurred.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Tension in BL-03 / CP-16)",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-12",
+    "kind": "finding",
+    "title": "Single broken tenant secret triggers total boot failure for the entire control plane",
+    "topics": "CP-01.1, CP-07.4, CP-09.3",
+    "evidence": "ADR-019 specifies that tenants are isolated failure domains (`docs/reference/adr/ADR-019-single-pod-multi-project-tenancy.md:231-232`). However, `bootServer` initializes gates and handles for every registered project sequentially before opening the HTTP listener (`control-plane/src/index.ts:4345-4367`). If any project references a Supabase connection or model key that cannot be resolved in the vault, `resolveSurfaceEnv` throws (`control-plane/src/vault/resolve.ts:51`, `:86`).",
+    "failure": "An operator uses the CLI (`vault rm` or `secret-rm`) to delete a stale credential reference belonging to a decommissioned or misconfigured tenant. Upon the next pod restart, `bootServer` encounters the unresolvable reference during `recoverEveryGate`. The server aborts startup (`control-plane/src/index.ts:4365`), taking down the control plane, the default tenant, and all other hosted client sites.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-13",
+    "kind": "finding",
+    "title": "Permanent project engineering lane deadlock upon failed workspace rollback",
+    "topics": "BL-03, CP-13.1, CP-13.9, CP-15.2",
+    "evidence": "The engineering lane enforces a strict one-in-flight request limit per project (`control-plane/src/scr/executor.ts:334-338`). When a request fails, the bracket store attempts to restore the git workspace snapshot. If git restore fails, the row transitions to `FAILED` but re-claims the lane lock (`control-plane/src/scr/gate.ts:861-865`).",
+    "failure": "A workspace restore throws an error. The request status transitions to `FAILED`, but `active` remains held. Because held rows are explicitly exempt from the 24-hour and 72-hour TTL expiration sweeps (`control-plane/src/scr/transition.ts:225-226`, `:239`), the project's engineering lane remains locked forever. All subsequent intake and execution requests for that project are rejected with 503 / 409 until an operator manually intervenes.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-14",
+    "kind": "finding",
+    "title": "Head-of-line timeout in shared turn queue triggers cascading abort of queued requests",
+    "topics": "CP-05.4, CP-05.8",
+    "evidence": "The control plane routes all chat requests and prompt turns through a single shared engine subprocess (`control-plane/src/engine/pi.ts:813-817`), managed by a FIFO queue with a 10-minute timeout (`control-plane/src/index.ts:673`, `control-plane/src/engine/turn-queue.ts:54`).",
+    "failure": "A prompt from User A stalls or hangs the LLM subprocess. Users B, C, and D submit requests and wait in the queue. After 10 minutes, User A's turn times out. `runBoundedTurn` calls `turnQueue.abortWaiting()` (`control-plane/src/index.ts:772`), which forcibly rejects all waiting requests in the queue with `TurnBusyError` (`control-plane/src/engine/turn-queue.ts:78-82`). Rather than executing on the respawned engine, all waiting users receive immediate 503 `AGENT_BUSY` errors after waiting up to 10 minutes.",
+    "confidence": "high",
+    "marked_by_authors": "no",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-15",
+    "kind": "finding",
+    "title": "Foreman configuration UI presents simulated edits and rebuilds while server API is read-only",
+    "topics": "CP-01.8, FM-06.1, FM-06.3",
+    "evidence": "PRD-001 and ADR-002 describe an operator interface for managing configuration options, viewing apply classes, staging changes, and calculating rebuild plans (`docs/reference/prd/PRD-001-control-plane.md:188`, `foreman/src/features/config/ConfigTab.tsx:127`). In reality, `control-plane/src/index.ts:2579-2581` defines only a `GET /api/config` endpoint with no PUT or POST handler (`ACTIONS` lacks `config:write`). In live builds, `ConfigTab.tsx` forces `readOnly = true` (`foreman/src/features/config/ConfigTab.tsx:37`), rendering settings as un-editable plain text and hiding the pending drawer and rebuild plan entirely.",
+    "failure": "An operator attempting to adjust system configuration via Foreman finds the interface completely non-functional for modifications in production. In demo mode, changes only run client-side simulations with 950 ms timers (`foreman/src/features/config/RebuildPlan.tsx:62`). Modifying system configuration requires manual out-of-band edits to TOML files on the host filesystem and manual container restarts.",
+    "confidence": "high",
+    "marked_by_authors": "yes (Acknowledged in ADR-004 addendum and FM-06)",
+    "status": "unverified"
+  }
+]

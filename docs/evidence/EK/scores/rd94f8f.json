@@ -1,0 +1,25 @@
+{"run_id":"rd94f8f",
+"issues":[
+{"id":"DB-07","score":"FULL","findings":[2],"why":"stack overflow aborts the process, uncatchable"},
+{"id":"T-02","score":"FULL","findings":[12],"why":"ignore 0.4.30 breaks MSRV 1.85, only lockfile pin saves it"},
+{"id":"DB-38","score":"FULL","findings":[12],"why":"same ignore 0.4.30 MSRV issue"},
+{"id":"DB-33","score":"FULL","findings":[14],"why":"seal does not record --tests/name options so sealed symbols read Absent"},
+{"id":"DB-40","score":"PARTIAL","findings":[10],"why":"CI does not run the seal gate, but cause (example id in prose) not named"}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap/src/main.rs:615-632","why":"git/tar spawned with argv, no shell, so no injection; traversal claim speculative"},
+{"n":2,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"matches stack overflow abort"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:677-683","why":"topic written before lock is real but documented, caught by verify and a re-run of sign repairs it; not permanent"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-corpus/src/seal/sign.rs:117-118","why":"IdTaken refuses a renamed file and the CLI has no unseal command"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:508-517","why":"window clips to source_window lines but labels the clip; the no-truncation claim is about sections"},
+{"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-extract/src/ids.rs:100-110","why":"foreign-type impl methods anchor in the module by documented design, so moving the impl changes the id"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap-corpus/src/contract.rs:97-100","why":"orphans are only reported for .md files, so stale JSON is never flagged and cannot fail --check"},
+{"n":8,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-model/src/hash.rs:138-144","why":"pairwise merge is order-sensitive for 3+ twins, but add order is deterministic so instability needs a change of order"},
+{"n":9,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:953-968","why":"a second reachable candidate drops the inferred edge as documented; the silent loss is real but deliberate"},
+{"n":10,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"CI lacks the seal gate"},
+{"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:460-463","why":"--since/--diff refuse --repo, an explicit limit rather than a defect"},
+{"n":12,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore MSRV issue"},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"WRONG","code":"crates/sealmap-model/src/sym.rs:372-385,575-585","why":"Descriptor::write escapes names, so child() output stays canonical"},
+{"n":14,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"seal omits extraction options"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"README.md:363-366, docs/diagrams/delivery/01-ci-msrv-and-determinism.md:38","why":"README says 0.2.0 is published while the DEL-01 topic says unpublished; stale corpus text, but the stated failure is overblown"}
+]}
