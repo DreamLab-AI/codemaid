@@ -14,7 +14,7 @@ sources:
   - .github/workflows/ci.yml
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -92,17 +92,17 @@ width (`crates/sealmap/src/main.rs:314`,
 
 ```mermaid
 flowchart TB
-    E["each expected file<br/>src/contract.rs:80"]
-    A{"present in the directory?<br/>src/contract.rs:81"}
-    MIS["Missing<br/>src/contract.rs:82"]
-    EQ{"byte-identical?<br/>src/contract.rs:83"}
+    E["each expected file<br/>src/contract.rs:81"]
+    A{"present in the directory?<br/>src/contract.rs:82"}
+    MIS["Missing<br/>src/contract.rs:83"]
+    EQ{"byte-identical?<br/>src/contract.rs:84"}
     OK["clean"]
-    RS{"reserved underscore file?<br/>src/contract.rs:85"}
-    MOD1["Modified<br/>src/contract.rs:86"]
-    FH{"same source_hash in<br/>the front matter?<br/>src/contract.rs:89"}
-    MOD2["Modified: hand edit or new<br/>generator or options<br/>src/contract.rs:90"]
-    STA["Stale: the source changed<br/>src/contract.rs:91"]
-    ORP["each md on disk not expected<br/>and carrying the header: Orphaned<br/>src/contract.rs:99-100"]
+    RS{"reserved underscore file?<br/>src/contract.rs:86"}
+    MOD1["Modified<br/>src/contract.rs:87"]
+    FH{"same source_hash in<br/>the front matter?<br/>src/contract.rs:90"}
+    MOD2["Modified: hand edit or new<br/>generator or options<br/>src/contract.rs:91"]
+    STA["Stale: the source changed<br/>src/contract.rs:92"]
+    ORP["each md on disk not expected and<br/>carrying the header, or a sealmap<br/>_model.json left out: Orphaned<br/>src/contract.rs:100-102"]
     E --> A
     A -->|no| MIS
     A -->|yes| EQ
@@ -117,7 +117,11 @@ flowchart TB
 
 **What it shows.** The front-matter source hash is what separates "the code
 changed" from "the document was touched"; anything in the directory that is
-not a generated document is ignored.
+not a generated document is ignored. The one reserved file a generation can
+leave out, `_model.json` under `emit_model: false`, is orphaned when it is a
+serialised model, so `--no-model` cannot leave a stale model beside a clean
+corpus (`crates/sealmap-corpus/src/contract.rs:112`-`115`,
+`crates/sealmap-corpus/tests/contract.rs:333`).
 
 **Why it is this way.** Recording the source hash in each document makes drift
 detectable without re-parsing the old state (`crates/sealmap-corpus/src/lib.rs:16`-`17`);
@@ -125,7 +129,7 @@ detectable without re-parsing the old state (`crates/sealmap-corpus/src/lib.rs:1
 (`crates/sealmap-corpus/tests/contract.rs:106`).
 
 **Debt:** a reserved file is always `Modified` when it differs
-(`crates/sealmap-corpus/src/contract.rs:85`-`86`), even when the difference is
+(`crates/sealmap-corpus/src/contract.rs:86`-`87`), even when the difference is
 that the code changed, so `_index.json` and `_model.json` never report stale.
 
 ## COR-03.3 A corpus file's drift states
@@ -149,25 +153,34 @@ modified and missing files are written, orphaned generated documents are
 deleted, and unchanged files are not touched.
 
 **Why it is this way.** Untouched files keep their mtimes, so a re-run is cheap
-for anything watching the directory (`crates/sealmap-corpus/src/contract.rs:138`-`141`);
+for anything watching the directory (`crates/sealmap-corpus/src/contract.rs:148`-`152`);
 `write_converges_and_is_idempotent` pins that a second `write` changes
 nothing (`crates/sealmap-corpus/tests/contract.rs:138`).
 
 **Invariant:** `write` deletes only Markdown files whose YAML front matter
 opens on the first line (`---`) and whose first key is the `sealmap: `
-marker; a file that merely mentions the marker anywhere else is never touched
-(`crates/sealmap-corpus/src/contract.rs:99`, `crates/sealmap-corpus/src/document.rs:153`-`155`).
+marker, and a `_model.json` whose first key is `schema_version`; a file that
+merely mentions the marker anywhere else is never touched
+(`crates/sealmap-corpus/src/contract.rs:100`, `crates/sealmap-corpus/src/document.rs:153`-`155`).
+
+**Invariant:** `write` never follows a symbolic link below the directory. It
+checks every path it would write or delete, component by component, and
+refuses the whole run before changing anything if one runs through a link
+(`crates/sealmap-corpus/src/contract.rs:160`-`162`,
+`crates/sealmap-corpus/src/contract.rs:182`-`199`); a linked file and a linked
+directory are both pinned by `write_never_writes_through_a_symlink`
+(`crates/sealmap-corpus/tests/contract.rs:295`).
 
 ## COR-03.4 Reading a directory
 
 ```mermaid
 flowchart TB
     D["corpus directory"]
-    EX{"exists?<br/>src/contract.rs:111"}
+    EX{"exists?<br/>src/contract.rs:121"}
     EMP["empty map: every file Missing"]
-    RR["recursive read, entries sorted by name<br/>src/contract.rs:119"]
-    UT{"readable as UTF-8 and<br/>relative to the root?<br/>src/contract.rs:125"}
-    IN["path to text<br/>src/contract.rs:126"]
+    RR["recursive read, entries sorted by name<br/>src/contract.rs:129"]
+    UT{"readable as UTF-8 and<br/>relative to the root?<br/>src/contract.rs:135"}
+    IN["path to text<br/>src/contract.rs:136"]
     SK["skipped"]
     D --> EX
     EX -->|no| EMP
@@ -180,9 +193,9 @@ flowchart TB
 generator produces, in sorted order, so the comparison is a map diff.
 
 **Why it is this way.** Sorting entries keeps the report order independent of
-the file system (`crates/sealmap-corpus/src/contract.rs:119`); the whole corpus
+the file system (`crates/sealmap-corpus/src/contract.rs:129`); the whole corpus
 can also be summarised as one hash for cheap cross-machine equality
-(`crates/sealmap-corpus/src/contract.rs:174`-`183`).
+(`crates/sealmap-corpus/src/contract.rs:213`-`222`).
 
 ## COR-03.5 Commands, flags and the facade
 
@@ -197,7 +210,7 @@ flowchart TB
     PCK["pack only: topics, --diff, --budget,<br/>--depth, --source-window, -o, --shard<br/>main.rs:206-232, COR-06"]
     OP["Options: rust and corpus halves<br/>sealmap/src/lib.rs:98"]
     ONE["one directory: load_dir<br/>main.rs:394"]
-    MANY["several repos, each prefixed NAME/<br/>load_repos, sealmap/src/lib.rs:125"]
+    MANY["several repos, each prefixed NAME/<br/>load_repos, sealmap/src/lib.rs:129"]
     CMD --> SRC
     CMD --> GEN
     CMD --> MOD

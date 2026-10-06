@@ -12,7 +12,7 @@ sources:
   - crates/sealmap-dense/src/lib.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -234,4 +234,4 @@ need review after a change, and this repository's corpus has no seals yet.
 The CLI test commits a base, edits one function and sees only the topic
 citing it chosen, with the current code in its source window. It then
 commits the edit and sees nothing chosen against `HEAD`
-(`crates/sealmap/tests/cli.rs:240`).
+(`crates/sealmap/tests/cli.rs:250`).

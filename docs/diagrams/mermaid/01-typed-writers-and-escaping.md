@@ -15,7 +15,7 @@ sources:
   - crates/sealmap-mermaid/Cargo.toml
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -34,7 +34,7 @@ with generics and `#` starts an entity code
 (`crates/sealmap-mermaid/src/lib.rs:17`-`21`). This topic draws the writer
 contract, the escaping rules and how each builder renders. It is the reason a
 whole generated corpus parses: the README counts 4,680 diagrams from five
-codebases and 6,142 from a VisionClaw corpus (`README.md:321`-`324`).
+codebases and 6,142 from a VisionClaw corpus (`README.md:324`-`327`).
 
 ## For the business
 

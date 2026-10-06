@@ -10,8 +10,9 @@ sources:
   - crates/sealmap-rust/src/resolve.rs
   - crates/sealmap-rust/src/lib.rs
   - crates/sealmap-model/src/symbol.rs
+  - crates/sealmap-rust/tests/resolver_er.rs
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -39,7 +40,7 @@ no reviewed diagram. A real rename, or moving a function to another module,
 does change the name, which is what a reviewer would expect to look at again.
 
 One limit for adopters to know: items that a macro generates are not seen,
-so they get no name and cannot be cited or sealed (`README.md:342`).
+so they get no name and cannot be cited or sealed (`README.md:345`).
 
 ## EXT-02.1 The id table
 
@@ -89,7 +90,7 @@ flowchart TB
     MDEF["macro symbol, public if macro_export<br/>collect.rs:411"]
     MINV["item-level invocation: folded into<br/>the module body hash only<br/>collect.rs:428"]
     IMPL["impl block: methods kept as RawImpl<br/>collect.rs:431"]
-    REST["use, extern crate, foreign blocks:<br/>module body only<br/>collect.rs:483"]
+    REST["use, extern crate, foreign blocks:<br/>module body only<br/>collect.rs:484"]
     IT --> MOD
     IT --> DATA
     IT --> TR
@@ -125,31 +126,36 @@ is modelled even when tests are excluded.
 sequenceDiagram
     autonumber
     participant BU as build<br/>resolve.rs:213
-    participant RS as Resolver.resolve<br/>resolve.rs:588
-    participant IM as impl_method<br/>resolve.rs:336
+    participant RS as Resolver.resolve<br/>resolve.rs:605
+    participant IM as impl_method<br/>resolve.rs:335
     participant ID as impl_method_id<br/>ids.rs:95
-    participant MS as method_symbol<br/>resolve.rs:789
-    BU->>RS: self type of the impl as written (resolve.rs:300)
-    RS-->>BU: owner id, global if internal
-    BU->>IM: module, owner, impl, method name (resolve.rs:309)
-    IM->>ID: self type text, trait display text (resolve.rs:339)
+    participant MS as method_symbol<br/>resolve.rs:810
+    BU->>RS: self type of the impl as written (resolve.rs:299)
+    RS-->>BU: owner id, global if internal, or for a type<br/>that is not a path its own text (resolve.rs:597)
+    BU->>IM: module, owner, impl, method name (resolve.rs:308)
+    IM->>ID: self type text, trait display text (resolve.rs:338)
     alt owner is a global id
         ID-->>IM: method under the owner type (ids.rs:103)
     else owner outside the code
         ID-->>IM: module/impl anchor (ids.rs:110)
     end
-    BU->>MS: id, parent is the owner (resolve.rs:310)
-    MS-->>BU: Symbol with parent set to the owner (resolve.rs:800)
-    BU->>BU: trait impls tag the method impl Trait (resolve.rs:312)
+    BU->>MS: id, parent is the owner (resolve.rs:309)
+    MS-->>BU: Symbol with parent set to the owner (resolve.rs:821)
+    BU->>BU: trait impls tag the method impl Trait (resolve.rs:311)
 ```
 
 **What it shows.** The impl's self type is resolved through imports and
 modules first; only then is the method id built, so several inherent impls
-of one type, in any files, produce methods under one owner.
+of one type, in any files, produce methods under one owner. A self type that
+is not a path (a tuple, slice, array, function pointer or trait object) has
+nothing to resolve: it becomes the path id of the type as written, and its
+methods are anchored under ``impl#[`(u8, u8)`]`` in the impl's module, so
+`[u8]` and `&[u8]` stay apart (`crates/sealmap-rust/src/resolve.rs:594`-`598`,
+`crates/sealmap-rust/tests/resolver_er.rs:130`).
 
 **Why it is this way.** Inherent impls are registered before trait impls so
 that an inherent method wins a name lookup over a trait method of the same
-name (`crates/sealmap-rust/src/resolve.rs:557`-`559`).
+name (`crates/sealmap-rust/src/resolve.rs:556`-`558`).
 
 **Invariant:** a trait-impl method is recorded as public whatever its
 written visibility, because trait methods are as visible as the trait
@@ -160,10 +166,10 @@ written visibility, because trait methods are as visible as the trait
 ```mermaid
 flowchart TB
     W["impl Handler of Msg with a trailing comma<br/>as rustfmt writes a broken list"]
-    TT["trait_text<br/>collect.rs:493"]
-    TK["tokens printed and squeezed<br/>collect.rs:494"]
-    TC["trailing comma before a closing<br/>angle or square bracket dropped<br/>collect.rs:495"]
-    KEEP["comma before a closing paren kept:<br/>a one-tuple is a different type<br/>collect.rs:492"]
+    TT["trait_text<br/>collect.rs:494"]
+    TK["tokens printed and squeezed<br/>collect.rs:495"]
+    TC["trailing comma before a closing<br/>angle or square bracket dropped<br/>collect.rs:496"]
+    KEEP["comma before a closing paren kept:<br/>a one-tuple is a different type<br/>collect.rs:493"]
     ID["the same Trait descriptor text<br/>either way"]
     W --> TT --> TK --> TC --> ID
     TC -.-> KEEP
@@ -174,23 +180,23 @@ the trailing commas rustfmt adds to a broken generic list removed.
 
 **Why it is this way.** Ids must not change when rustfmt reflows a line; the
 README's claim that reflowing tokio, VisionClaw and sealmap at
-`max_width = 50` changes no id (`README.md:198`-`199`) depends on this rule
-(`crates/sealmap-rust/src/collect.rs:488`-`492`).
+`max_width = 50` changes no id (`README.md:200`-`201`) depends on this rule
+(`crates/sealmap-rust/src/collect.rs:489`-`493`).
 
 **Invariant:** `(T,)` and `(T)` stay distinct in a trait's text, because only
-commas before `>` and `]` are dropped (`crates/sealmap-rust/src/collect.rs:495`).
+commas before `>` and `]` are dropped (`crates/sealmap-rust/src/collect.rs:496`).
 
 ## EXT-02.5 A member the code does not define stays with its type
 
 ```mermaid
 flowchart TB
     P["path Fp::default as written"]
-    WK["walk the path segment by segment<br/>Resolver.walk, resolve.rs:633"]
-    KN{"segment defined on the<br/>current type or module?<br/>resolve.rs:688"}
-    LAST{"last segment, current is an<br/>internal type?<br/>resolve.rs:695"}
-    VAL["value position: Type method id<br/>resolve.rs:705"]
-    TY["type position: Type member id<br/>resolve.rs:706"]
-    EP["otherwise: extend as a path id<br/>resolve.rs:709"]
+    WK["walk the path segment by segment<br/>Resolver.walk, resolve.rs:650"]
+    KN{"segment defined on the<br/>current type or module?<br/>resolve.rs:709"}
+    LAST{"last segment, current is an<br/>internal type?<br/>resolve.rs:716"}
+    VAL["value position: Type method id<br/>resolve.rs:726"]
+    TY["type position: Type member id<br/>resolve.rs:727"]
+    EP["otherwise: extend as a path id<br/>resolve.rs:730"]
     NEXT["continue from the definition"]
     P --> WK --> KN
     KN -->|yes| NEXT
@@ -206,9 +212,9 @@ in the code, but it still belongs to `Fingerprint`, so it becomes
 
 **Why it is this way.** Before `6c8a9b0` such calls were cut loose from their
 type and drawn on an external lane in the self-corpus; the fix keeps them on
-the type's lane (`crates/sealmap-rust/src/resolve.rs:699`-`703`).
+the type's lane (`crates/sealmap-rust/src/resolve.rs:720`-`724`).
 
 **Debt:** such an id names a symbol the model does not contain, so it is not
 internal and resolves with `Inferred` confidence inside the workspace or
-`External` outside it (`crates/sealmap-rust/src/resolve.rs:597`-`599`); a seal
+`External` outside it (`crates/sealmap-rust/src/resolve.rs:614`-`616`); a seal
 could cite an id that `Codebase::symbol` never returns.

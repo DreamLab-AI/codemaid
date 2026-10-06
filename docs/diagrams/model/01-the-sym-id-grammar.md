@@ -10,7 +10,7 @@ sources:
   - crates/sealmap-extract/src/ids.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -271,7 +271,7 @@ strict prefix of the child's (`crates/sealmap-model/tests/sym_props.rs:92`).
 ```mermaid
 flowchart TB
     D1["DESIGN.md section 4<br/>sym grammar, kind-explicit, no file path<br/>docs/DESIGN.md:130"]
-    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:180"]
+    D2["README ids section<br/>printing injective, canonical-only parse<br/>README.md:182"]
     C1["grammar in rustdoc<br/>crates/sealmap-model/src/sym.rs:17"]
     C2["property tests<br/>crates/sealmap-model/tests/sym_props.rs:75"]
     C3["id builder, one per adapter<br/>crates/sealmap-extract/src/ids.rs:3"]
@@ -286,6 +286,6 @@ grammar as the authority, and the property tests and the shared id builder
 are the two things that hold the code to it.
 
 **Why it is this way.** The README says the grammar "is documented in
-`sealmap_model::sym`" (`README.md:181`) rather than restating it, so there is
+`sealmap_model::sym`" (`README.md:183`) rather than restating it, so there is
 one source; the README's example table (`README.md:169`-`175`) is
 illustrative.

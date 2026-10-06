@@ -14,7 +14,7 @@ sources:
   - crates/sealmap-extract/src/isolate.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
 ---
 ## For developers
 
@@ -43,7 +43,7 @@ runs on any checkout, including one that does not build, and needs no
 toolchain at run time. It never fails a whole run because of one bad file:
 a file that does not parse, or that trips a bug, becomes a warning and a
 placeholder entry. And it is fast enough to sit in CI: the README records
-1.13 s for a 934-file workspace (`README.md:332`).
+1.13 s for a 934-file workspace (`README.md:335`).
 
 The residual risk is a file nested deeply enough to exhaust even the large
 stack: that still ends the process, because a stack overflow cannot be
@@ -55,26 +55,26 @@ caught.
 sequenceDiagram
     autonumber
     participant CL as caller
-    participant EX as extract<br/>sealmap-rust/src/lib.rs:156
-    participant LY as plan<br/>layout.rs:89
-    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant EX as extract<br/>sealmap-rust/src/lib.rs:162
+    participant LY as plan<br/>layout.rs:152
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:182
     participant MI as map_isolated<br/>isolate.rs:38
     participant RB as build<br/>resolve.rs:213
     CL->>EX: SourceSet and RustOptions
-    EX->>LY: map every .rs file to a crate and module (sealmap-rust/src/lib.rs:157)
+    EX->>LY: map every .rs file to a crate and module (sealmap-rust/src/lib.rs:163)
     LY-->>EX: Plan, each path's FileRole and each crate's reach
-    EX->>EX: drop test, example and bench targets unless asked (sealmap-rust/src/lib.rs:161)
-    EX->>CA: jobs in path order (sealmap-rust/src/lib.rs:165)
-    CA->>MI: collect_file per job, failed_file on panic (sealmap-rust/src/lib.rs:180)
+    EX->>EX: drop test, example and bench targets unless asked (sealmap-rust/src/lib.rs:167)
+    EX->>CA: jobs in path order (sealmap-rust/src/lib.rs:171)
+    CA->>MI: collect_file per job, failed_file on panic (sealmap-rust/src/lib.rs:186)
     MI-->>CA: RawFile per job, input order
     CA-->>EX: raw files
-    EX->>RB: name, raw files, the plan, options (sealmap-rust/src/lib.rs:167)
+    EX->>RB: name, raw files, the plan, options (sealmap-rust/src/lib.rs:173)
     RB-->>EX: Codebase and diagnostics
-    EX-->>CL: Extraction (sealmap-rust/src/lib.rs:168)
+    EX-->>CL: Extraction (sealmap-rust/src/lib.rs:174)
 ```
 
 **What it shows.** Extraction never fails: unparsable files surface in
-`Extraction::diagnostics` (`crates/sealmap-rust/src/lib.rs:153`-`155`), and
+`Extraction::diagnostics` (`crates/sealmap-rust/src/lib.rs:159`-`161`), and
 everything between collection and resolution is owned data, so the parallel
 and the sequential halves meet only in a `Vec<RawFile>`.
 
@@ -84,26 +84,27 @@ parsed in parallel and resolved afterwards in one deterministic pass
 
 **Invariant:** parallel collection returns results in input order, so the
 model is identical with or without the `parallel` feature
-(`crates/sealmap-rust/src/lib.rs:72`-`75`).
+(`crates/sealmap-rust/src/lib.rs:78`-`81`).
 
 ## EXT-01.2 Where a file sits in the workspace
 
 ```mermaid
 flowchart TB
     F["a .rs file"]
-    PK{"inside a directory with a<br/>Cargo.toml holding package?<br/>layout.rs:130"}
-    FB["fallback crate named after the codebase<br/>layout.rs:143"]
-    LIB{"the lib path from the manifest?<br/>layout.rs:157"}
-    SB{"under src/bin?<br/>layout.rs:166"}
-    MAIN{"src/main.rs?<br/>layout.rs:169"}
-    SRC["other src files: the library crate<br/>layout.rs:175"]
-    TEB{"under tests, examples or benches?<br/>layout.rs:181"}
-    NONE["build.rs and stray files:<br/>no target, never extracted<br/>layout.rs:186"]
-    OWN["own crate, prefixed test_, example_, bench_<br/>layout.rs:194"]
-    BIN["binary crate; pkg_main when a lib exists<br/>layout.rs:170"]
+    PK{"inside a directory with a<br/>Cargo.toml holding package?<br/>layout.rs:203"}
+    FB["fallback crate named after the codebase<br/>layout.rs:213"]
+    LIB{"the lib path from the manifest?<br/>layout.rs:267"}
+    SB{"under src/bin?<br/>layout.rs:276"}
+    MAIN{"src/main.rs?<br/>layout.rs:279"}
+    SRC["other src files: the library crate<br/>layout.rs:285"]
+    TEB{"under tests, examples or benches?<br/>layout.rs:291"}
+    NONE["build.rs and stray files:<br/>no target, never extracted<br/>layout.rs:296"]
+    OWN["own crate, prefixed test_, example_, bench_<br/>layout.rs:304"]
+    BIN["binary crate; pkg_main when a lib exists<br/>layout.rs:280"]
+    KEY["crate key: the name, or dir/name when<br/>another directory holds that name<br/>layout.rs:242"]
     F --> PK
     PK -->|no| FB
-    PK -->|yes, longest dir wins, layout.rs:118| LIB
+    PK -->|yes, longest dir wins, layout.rs:194| LIB
     LIB -->|yes| SRC
     LIB -->|no| SB
     SB -->|yes| OWN
@@ -113,6 +114,9 @@ flowchart TB
     SRC --> TEB
     TEB -->|tests etc| OWN
     TEB -->|neither| NONE
+    FB --> KEY
+    OWN --> KEY
+    BIN --> KEY
 ```
 
 **What it shows.** Packages are discovered from every `Cargo.toml` that has a
@@ -123,14 +127,21 @@ crate of its own.
 **Why it is this way.** Separate crates per target mean a binary and the
 library never share an id (`crates/sealmap-rust/src/lib.rs:36`-`38`); the
 `_main` suffix applies only when a library exists to collide with
-(`crates/sealmap-rust/src/layout.rs:170`). Crate names replace `-` with `_`,
-as Rust paths do (`crates/sealmap-rust/src/layout.rs:110`). The plan also
+(`crates/sealmap-rust/src/layout.rs:280`). Crate names replace `-` with `_`,
+as Rust paths do (`crates/sealmap-rust/src/layout.rs:186`). The plan also
 records, per crate, the workspace crates its manifest lets it name, which
-bounds the resolver's name-only guesses (`crates/sealmap-rust/src/layout.rs:135`, EXT-05).
+bounds the resolver's name-only guesses (`crates/sealmap-rust/src/layout.rs:247`, EXT-05).
+A crate name that more than one directory holds (two packages called `core`,
+or `tests/it.rs` in two packages) is qualified with its package directory,
+`./` at the root, so same-named crates never merge
+(`crates/sealmap-rust/src/layout.rs:140`-`146`,
+`crates/sealmap-rust/src/lib.rs:38`-`44`).
 
 **Open:** packages come from any manifest with a `[package]` table
-(`crates/sealmap-rust/src/layout.rs:91`-`97`); `[workspace]` membership and
-`exclude` are never read, so is a package the workspace excludes meant to
+(`crates/sealmap-rust/src/layout.rs:171`-`192`); of `[workspace]` only the
+`dependencies` table is read, for `path` dependencies
+(`crates/sealmap-rust/src/layout.rs:161`-`170`), and membership and `exclude`
+are never read, so is a package the workspace excludes meant to
 appear in the model?
 
 ## EXT-01.3 Big stacks and a panic guard
@@ -138,7 +149,7 @@ appear in the model?
 ```mermaid
 sequenceDiagram
     autonumber
-    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:182
     participant MI as map_isolated<br/>isolate.rs:38
     participant RP as rayon pool, 64 MiB stacks<br/>isolate.rs:52
     participant CF as collect_file<br/>collect.rs:33
@@ -217,7 +228,7 @@ flowchart TB
         IM["impl blocks: implements relation,<br/>method symbols<br/>resolve.rs:297"]
         FI --> MO --> IT --> IM
     end
-    AG["one calls relation per caller and target<br/>aggregate_calls, resolve.rs:319"]
+    AG["one calls relation per caller and target<br/>aggregate_calls, resolve.rs:318"]
     T --> D --> PERFILE --> AG
 ```
 
