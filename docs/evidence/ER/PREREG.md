@@ -91,3 +91,9 @@ an additional, pre-specified reviewer factor, not a replacement:
   findings that need a second opinion go to a **second independent Claude
   subagent** instead.
 - Also reported per reviewer: wall-clock and tokens per review.
+
+### 2026-10-06 #T2 (team lead): Luna at extra-high reasoning (written before any review output existed)
+
+At the owner's request, amendment #T1's reviewer runs at **extra-high
+reasoning** (`model_reasoning_effort = "xhigh"`, accepted by gpt-6-luna in a
+probe) instead of high. Nothing else in #T1 changes.
