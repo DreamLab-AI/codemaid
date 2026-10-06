@@ -277,6 +277,7 @@ fn repo_json(all: &[Topic], r: &RepoRun) -> Value {
         "t_sym_reasons": reasons(r),
         "sensitivity_mermaid_only": mermaid,
         "exploratory_rust_only": rust,
+        "exploratory_ek_by_kind": ek_block(r),
         "coverage": coverage(all, r),
         "conservative_absent_at_both": {
             "t_sym_flags": sym_flags, "flags_set_only_by_absent_at_both": only_absent,
@@ -287,6 +288,76 @@ fn repo_json(all: &[Topic], r: &RepoRun) -> Value {
             "t_file_flags_on_commits_preceding_the_topic_stamp": precedes, "t_file_flags": file_flags,
         },
         "commits": commits,
+    })
+}
+
+/// Display order of the kinds; any other kind follows, then `uncited`.
+const KIND_ORDER: [&str; 6] = ["sequenceDiagram", "flowchart", "classDiagram", "stateDiagram-v2", "erDiagram", "prose"];
+
+fn kind_rank(k: &str) -> (usize, String) {
+    let i = KIND_ORDER.iter().position(|x| *x == k).unwrap_or(if k == crate::kinds::UNCITED { 99 } else { 50 });
+    (i, k.to_string())
+}
+
+/// Exploratory (EK): citations and flags per diagram kind for one repository.
+fn ek_block(r: &RepoRun) -> Value {
+    let mut cites: BTreeMap<String, (usize, usize, usize)> = BTreeMap::new();
+    let mut topics_with: BTreeMap<String, usize> = BTreeMap::new();
+    for t in &r.tracked {
+        let mut seen = std::collections::BTreeSet::new();
+        for (c, _, m) in &t.cites {
+            let e = cites.entry(c.kind.clone()).or_default();
+            e.0 += 1;
+            e.1 += usize::from(crate::is_fallback(m));
+            e.2 += usize::from(matches!(m, Mapped::Symbol { module: true, .. }));
+            seen.insert(c.kind.clone());
+        }
+        for k in seen {
+            *topics_with.entry(k).or_default() += 1;
+        }
+    }
+    // Per kind, per commit: topics flagged only through that kind.
+    let mut kinds: Vec<String> = cites.keys().cloned().chain([crate::kinds::UNCITED.to_string()]).collect();
+    kinds.sort_by_key(|k| kind_rank(k));
+    let n = r.rows.len();
+    let mut only_file: BTreeMap<String, Vec<u32>> = kinds.iter().map(|k| (k.clone(), vec![0; n])).collect();
+    let mut only_sym = only_file.clone();
+    let (mut mixed_file, mut mixed_sym) = (0usize, 0usize);
+    for (i, row) in r.rows.iter().enumerate() {
+        for (_, a) in &row.kind_attr {
+            if a.file.len() == 1 {
+                only_file.get_mut(a.file.iter().next().unwrap()).unwrap()[i] += 1;
+            } else if a.file.len() > 1 {
+                mixed_file += 1;
+            }
+            if a.sym.len() == 1 {
+                only_sym.get_mut(a.sym.iter().next().unwrap()).unwrap()[i] += 1;
+            } else if a.sym.len() > 1 {
+                mixed_sym += 1;
+            }
+        }
+    }
+    let sum = |v: &[u32]| v.iter().map(|&x| u64::from(x)).sum::<u64>();
+    let per_kind: Vec<Value> = kinds
+        .iter()
+        .map(|k| {
+            let (c, fb, md) = cites.get(k).copied().unwrap_or_default();
+            let (f, s) = (&only_file[k], &only_sym[k]);
+            json!({
+                "kind": k, "topics_citing": topics_with.get(k).copied().unwrap_or(0),
+                "citations": c, "fallback": fb, "fallback_share": share(fb, c), "symbol_module": md,
+                "flagged_only_through_kind": {
+                    "t_file": {"sum": sum(f), "median": round(stats::median(f)), "p90": stats::p90(f)},
+                    "t_sym": {"sum": sum(s), "median": round(stats::median(s)), "p90": stats::p90(s)},
+                    "r": opt(stats::ratio(f, s)),
+                },
+            })
+        })
+        .collect();
+    json!({
+        "label": "Exploratory (EK): not an E0 endpoint; registered in docs/evidence/EK/PREREG.md (fdd8207)",
+        "per_kind": per_kind,
+        "flagged_through_several_kinds": {"t_file": mixed_file, "t_sym": mixed_sym},
     })
 }
 
@@ -586,6 +657,39 @@ pub fn results_md(v: &Value, prereg: &str) -> String {
             s["topic"].as_str().unwrap_or(""),
             s["commit_precedes_stamp"],
             num(&s["diff_lines"]),
+        ));
+    }
+
+    o.push_str("\n## Exploratory (EK): by diagram kind\n\n");
+    o.push_str("Not an E0 endpoint, and no E0 number above depends on it. It was registered as exploratory in `docs/evidence/EK/PREREG.md` (commit `fdd8207`). Each citation takes the kind of the mermaid block it sits in (the generator's rule: the first token of the block; `graph` counts as `flowchart`), or `prose` outside every block. ");
+    o.push_str("A topic's flag is attributed to the kinds of the citations behind the units that set it. **T_file:** each changed source counts under the kinds of every citation of that file, or under `uncited` if no citation names it. **T_sym:** a changed cited symbol counts under the kinds of the citations that mapped to it, a changed fallback file under the kinds of its fallback citations, and a changed uncited source under `uncited`. ");
+    o.push_str("*Only through K* counts (commit, topic) flags whose units all trace to K alone; flags that trace to several kinds are counted apart. Per-commit medians and p90s are over the 100 commits.\n");
+    for k in ["visionclaw", "agentbox"] {
+        let e = &v["repos"][k]["exploratory_ek_by_kind"];
+        o.push_str(&format!("\n### {k}\n\n| kind | topics citing | citations | fallback | fallback share | module | only through kind: ΣT_file | ΣT_sym | R | median T_file / T_sym | p90 T_file / T_sym |\n|---|---|---|---|---|---|---|---|---|---|---|\n"));
+        for x in e["per_kind"].as_array().cloned().unwrap_or_default() {
+            let f = &x["flagged_only_through_kind"];
+            o.push_str(&format!(
+                "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} / {} | {} / {} |\n",
+                x["kind"].as_str().unwrap_or(""),
+                num(&x["topics_citing"]),
+                num(&x["citations"]),
+                num(&x["fallback"]),
+                num(&x["fallback_share"]),
+                num(&x["symbol_module"]),
+                num(&f["t_file"]["sum"]),
+                num(&f["t_sym"]["sum"]),
+                num(&f["r"]),
+                num(&f["t_file"]["median"]),
+                num(&f["t_sym"]["median"]),
+                num(&f["t_file"]["p90"]),
+                num(&f["t_sym"]["p90"]),
+            ));
+        }
+        o.push_str(&format!(
+            "\nFlags that trace to several kinds: T_file {}, T_sym {}.\n",
+            num(&e["flagged_through_several_kinds"]["t_file"]),
+            num(&e["flagged_through_several_kinds"]["t_sym"]),
         ));
     }
 

@@ -127,6 +127,37 @@ Population: (commit, topic) pairs flagged by T_file and not by T_sym. Draw: ChaC
 | ab-09 | agentbox | `750ae651ea` | AB-22 | true | 13 |
 | ab-10 | agentbox | `750ae651ea` | AB-27 | true | 24 |
 
+## Exploratory (EK): by diagram kind
+
+Not an E0 endpoint, and no E0 number above depends on it. It was registered as exploratory in `docs/evidence/EK/PREREG.md` (commit `fdd8207`). Each citation takes the kind of the mermaid block it sits in (the generator's rule: the first token of the block; `graph` counts as `flowchart`), or `prose` outside every block. A topic's flag is attributed to the kinds of the citations behind the units that set it. **T_file:** each changed source counts under the kinds of every citation of that file, or under `uncited` if no citation names it. **T_sym:** a changed cited symbol counts under the kinds of the citations that mapped to it, a changed fallback file under the kinds of its fallback citations, and a changed uncited source under `uncited`. *Only through K* counts (commit, topic) flags whose units all trace to K alone; flags that trace to several kinds are counted apart. Per-commit medians and p90s are over the 100 commits.
+
+### visionclaw
+
+| kind | topics citing | citations | fallback | fallback share | module | only through kind: ΣT_file | ΣT_sym | R | median T_file / T_sym | p90 T_file / T_sym |
+|---|---|---|---|---|---|---|---|---|---|---|
+| sequenceDiagram | 36 | 4525 | 1294 | 0.29 | 274 | 248 | 209 | 1.19 | 1 / 1 | 6 / 5 |
+| flowchart | 31 | 1039 | 268 | 0.26 | 97 | 86 | 82 | 1.05 | 0.50 / 0 | 3 / 3 |
+| classDiagram | 13 | 266 | 177 | 0.67 | 24 | 11 | 8 | 1.38 | 0 / 0 | 0 / 0 |
+| stateDiagram-v2 | 9 | 109 | 38 | 0.35 | 6 | 0 | 0 | n/a | 0 / 0 | 0 / 0 |
+| erDiagram | 2 | 11 | 0 | 0 | 3 | 1 | 1 | 1 | 0 / 0 | 0 / 0 |
+| prose | 1 | 10 | 3 | 0.30 | 0 | 8 | 8 | 1 | 0 / 0 | 0 / 0 |
+| uncited | 0 | 0 | 0 | n/a | 0 | 44 | 64 | 0.69 | 0 / 0 | 1 / 2 |
+
+Flags that trace to several kinds: T_file 321, T_sym 232.
+
+### agentbox
+
+| kind | topics citing | citations | fallback | fallback share | module | only through kind: ΣT_file | ΣT_sym | R | median T_file / T_sym | p90 T_file / T_sym |
+|---|---|---|---|---|---|---|---|---|---|---|
+| sequenceDiagram | 36 | 3552 | 3032 | 0.85 | 29 | 209 | 205 | 1.02 | 1 / 1 | 5 / 5 |
+| flowchart | 33 | 1835 | 1602 | 0.87 | 15 | 71 | 68 | 1.04 | 0 / 0 | 2 / 2 |
+| classDiagram | 10 | 142 | 127 | 0.89 | 2 | 0 | 0 | n/a | 0 / 0 | 0 / 0 |
+| stateDiagram-v2 | 16 | 181 | 147 | 0.81 | 5 | 29 | 29 | 1 | 0 / 0 | 1 / 1 |
+| prose | 19 | 329 | 299 | 0.91 | 7 | 82 | 82 | 1 | 0 / 0 | 2 / 2 |
+| uncited | 0 | 0 | 0 | n/a | 0 | 120 | 120 | 1 | 1 / 1 | 3 / 3 |
+
+Flags that trace to several kinds: T_file 713, T_sym 710.
+
 ## Amendments (copied from PREREG.md)
 
 None.
@@ -243,3 +274,15 @@ To show what symbol gating does on the code sealmap-rust can read, the report
 adds an **exploratory, post-hoc** row: T_file and T_sym recomputed over the same
 100 commits with each topic restricted to its `.rs` sources and citations. It is
 not an endpoint, does not enter the verdict and carries no threshold.
+
+### 2026-10-06 #11: endpoint 4 is not judged (written after endpoint 1 failed)
+
+Endpoint 1 failed (R = 1.19, CI 1.12–1.28, against 2.0), so E0 does not hold
+whatever endpoint 4 shows. The drawn sample also has a defect the registration
+did not foresee: 29 of the 40 pairs are on commits older than the topic's
+`verified_commit`, so the topic text was written after the change and a judge
+would mostly answer "no" for that reason alone. Spending ~50 judge runs on a
+moot and biased endpoint is not justified. The sample, prompts and protocol stay
+in `judge/` unjudged, and endpoint 4 is reported as **not run**, not as passed.
+A future E0 that needs endpoint 4 should draw only from commits after each
+topic's stamp.

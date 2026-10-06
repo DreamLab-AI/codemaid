@@ -18,6 +18,7 @@
 mod counting;
 mod git;
 mod judge;
+mod kinds;
 mod mapping;
 mod model;
 mod report;
@@ -53,6 +54,8 @@ pub(crate) struct TopicInRepo {
     pub tracking_mermaid: Tracking,
     /// The topic's `.rs` sources and citations only (exploratory, amendment #10).
     pub tracking_rust: Tracking,
+    /// Diagram kinds per tracked unit (exploratory EK breakdown).
+    pub kinds: kinds::KindIndex,
     pub stamp: Option<String>,
     pub cites: Vec<(topics::Citation, String, Mapped)>,
 }
@@ -66,6 +69,8 @@ pub(crate) struct CommitRow {
     pub flags: Vec<(usize, Flags)>,
     pub flags_mermaid: Vec<(usize, Flags)>,
     pub flags_rust: Vec<(usize, Flags)>,
+    /// Kinds each topic's flags came through (exploratory EK breakdown).
+    pub kind_attr: Vec<(usize, kinds::Attr)>,
 }
 
 /// Everything computed for one repository.
@@ -251,6 +256,7 @@ fn run_repo(key: RepoKey, repo: &Repo, head: &str, all: &[Topic], scratch: &Path
             tracking: tracking(&sources, &all_rc),
             tracking_mermaid: tracking(&sources, &mermaid_rc),
             tracking_rust: tracking(&rust_sources, &rust_rc),
+            kinds: kinds::index(&cites),
             stamp,
             cites,
         });
@@ -279,9 +285,17 @@ fn run_repo(key: RepoKey, repo: &Repo, head: &str, all: &[Topic], scratch: &Path
         }
         let p = models.at(parent)?;
         let c = models.at(&h.sha)?;
-        let flags = tracked.iter().map(|t| (t.topic, flag(&t.tracking, &changed, &p, &c))).collect();
+        let flags: Vec<(usize, Flags)> =
+            tracked.iter().map(|t| (t.topic, flag(&t.tracking, &changed, &p, &c))).collect();
         let flags_mermaid = tracked.iter().map(|t| (t.topic, flag(&t.tracking_mermaid, &changed, &p, &c))).collect();
         let flags_rust = tracked.iter().map(|t| (t.topic, flag(&t.tracking_rust, &changed, &p, &c))).collect();
+        let kind_attr = tracked
+            .iter()
+            .zip(&flags)
+            .map(|(t, (_, f)): (&TopicInRepo, &(usize, Flags))| {
+                (t.topic, kinds::attribute(&t.tracking, &t.kinds, &changed, f))
+            })
+            .collect();
         rows.push(CommitRow {
             sha: h.sha.clone(),
             parent: parent.clone(),
@@ -290,6 +304,7 @@ fn run_repo(key: RepoKey, repo: &Repo, head: &str, all: &[Topic], scratch: &Path
             flags,
             flags_mermaid,
             flags_rust,
+            kind_attr,
         });
     }
     if rows.len() < WINDOW {
