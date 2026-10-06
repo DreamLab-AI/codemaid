@@ -188,3 +188,12 @@ file on stdin and nothing added, from an empty working directory with `--tools "
 repository access" more strictly than a tool-holding subagent would. The prompt set hashed
 `0ba3cf6b0b749b79` before and after labelling. Outcome: 60 pairs, 29 first-round yes, 29
 confirmed by an independent second labeller, 0 invalid. Helper: `labels/run-label.sh`.
+
+### 2026-10-06 #L2 (team lead): correction to #L1 (after scoring; no label or score changed)
+#L1 says the labellers ran with "nothing added". That is wrong in one respect: each `claude -p`
+call also passed `--system-prompt "You are a careful labeller. Follow the user's instructions
+exactly."` (see the runner `run-label.sh`). The prompt files themselves were unchanged (hash
+`0ba3cf6b0b749b79`), and the system prompt is generic, naming no detector, label or outcome.
+Also recorded here: `--model sonnet` resolved to `claude-sonnet-5-5` on Claude Code 2.1.289, so
+the gold labels are Sonnet 5.5's. EH's Sonnet triage recall is therefore partly self-agreement;
+see EH amendment #A2.
