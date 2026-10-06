@@ -1,0 +1,10 @@
+{"id": "EXT-01.2", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [],
+ "changed": [
+  {"fact": "LY-->>RF: other src files, the library crate (layout.rs:175) followed by alt under tests, examples or benches (layout.rs:181) -> own crate ... / else -> no target, never extracted (in both the lib-path branch and the 'other src files' branch)",
+   "original": "SRC[\"other src files: the library crate\"] --> TEB{\"under tests, examples or benches?\"}",
+   "why": "Sequence draws two successive replies for one file (library crate, then also own test crate or no target); these outcomes are exclusive and layout.rs:157-175 returns the library role immediately, so the cited code contradicts the second reply"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

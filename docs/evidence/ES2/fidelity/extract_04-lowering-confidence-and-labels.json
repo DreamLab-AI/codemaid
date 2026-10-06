@@ -1,0 +1,11 @@
+{
+ "topic": "extract/04-lowering-confidence-and-labels.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 30,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "EXT-04.2 and EXT-04.3 preserve the original facts; EXT-04.5 remains an unchanged flowchart, so conversion is incomplete."
+}

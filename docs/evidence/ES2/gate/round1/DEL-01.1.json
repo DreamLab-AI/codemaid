@@ -1,0 +1,10 @@
+{"id": "DEL-01.1", "verdict": "fail", "facts_checked": 20,
+ "unsupported": [],
+ "changed": [
+  {"fact": "R->>M: next job", "original": "RUST --> MSRV (unlabelled subgraph edge)", "why": "Sequence arrow claims the rust job hands off to / is followed by the msrv job; ci.yml:9-47 has no `needs:`, the jobs are independent and run in parallel, so the cited code contradicts the message/ordering claim."},
+  {"fact": "M->>X: next job", "original": "MSRV --> MER (unlabelled subgraph edge)", "why": "Same: ci.yml:39-65 has no `needs:`; msrv does not trigger or precede the mermaid job."},
+  {"fact": "X->>D: next job", "original": "MER --> DIA (unlabelled subgraph edge)", "why": "Same: ci.yml:49-84 has no `needs:`; mermaid does not trigger or precede the diagrams job."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,1 @@
+{"id": "DEL-01.4", "verdict": "pass", "facts_checked": 22, "unsupported": [], "changed": [], "dropped": [{"fact": "LN --> DT (workspace lints leading to every crate's deny missing_docs/README doctests)"}], "citations_dropped": [], "citations_added": []}

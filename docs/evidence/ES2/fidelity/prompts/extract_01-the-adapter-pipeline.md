@@ -1,0 +1,502 @@
+You are a blind fidelity judge for a diagram rewrite. Work alone and read only the two files named below.
+
+- ORIGINAL topic: /home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/es2/fidelity/inputs/extract_01-the-adapter-pipeline/original.md
+- REWRITE of the same topic: /home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/es2/fidelity/inputs/extract_01-the-adapter-pipeline/rewrite.md
+
+Both are Markdown topic files from a diagrams-as-code corpus: prose sections plus ```mermaid diagrams that cite source code as `path:line`. The rewrite was supposed to turn every non-sequence diagram (flowchart, classDiagram, stateDiagram) into one or more `sequenceDiagram` blocks that carry the same facts and the same `path:line` citations, keep all prose verbatim, and add nothing that is not in the original topic. Extra diagram sections with new headings are allowed.
+
+Compare the DIAGRAMS. For every original diagram that the rewrite changed, list each fact it states: a component, a call or message, an order, a condition or branch, a value, cap or constant, a type, field or variant, a state or transition, an outcome, or a relationship. Then check whether the rewrite's diagrams still state it, in any form (a participant, message, note, alt/opt/loop/break block). Then list each fact the rewrite's diagrams state that appears nowhere in the ORIGINAL topic, in its diagrams or its prose.
+
+- facts_dropped: facts in an original diagram that no rewrite diagram states. Restated, merged or moved into a note does not count as dropped.
+- facts_invented: facts in a rewrite diagram that the original topic does not state anywhere. Sequence scaffolding, such as a "caller" participant or an activation, is not a fact. An explicit claim of a call, order, condition, value, outcome or relationship that the original does not make is invented. So is a change of meaning, such as a reversed order, a different condition or the wrong outcome.
+- citations_dropped: each `path:line` (or `path:a-b`, or a bare `file.rs:N`) present in an original diagram but absent from every rewrite diagram.
+- citations_added: each citation in a rewrite diagram that appears nowhere in the original topic.
+- prose_changed: true if any text outside the mermaid fences differs, apart from added headings and their new diagram sections.
+
+Be exact and conservative. Quote the original or rewrite text for each fact (short). Do not judge whether the facts are true of the code.
+
+Your answer is exactly one JSON object:
+{"topic": "extract/01-the-adapter-pipeline.md", "diagrams_rewritten": <n>, "facts_checked": <n>, "facts_dropped": [{"diagram": "<id>", "fact": "<short quote>"}], "facts_invented": [{"diagram": "<id>", "fact": "<short quote>", "why": "<one line>"}], "citations_dropped": ["<cite>"], "citations_added": ["<cite>"], "prose_changed": true|false, "notes": "<one line>"}
+Reply with exactly that JSON object as your whole final message, and nothing else.
+
+The shell is unavailable in this sandbox; the two files' contents follow.
+
+----- /home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/es2/fidelity/inputs/extract_01-the-adapter-pipeline/original.md -----
+````markdown
+---
+id: EXT-01
+title: The language-adapter pipeline
+area: extract
+governing: [docs/DESIGN.md, README.md]
+adrs: []
+sources:
+  - crates/sealmap-rust/src/lib.rs
+  - crates/sealmap-rust/src/layout.rs
+  - crates/sealmap-rust/src/collect.rs
+  - crates/sealmap-rust/src/raw.rs
+  - crates/sealmap-rust/src/resolve.rs
+  - crates/sealmap-extract/src/lib.rs
+  - crates/sealmap-extract/src/isolate.rs
+  - docs/DESIGN.md
+  - README.md
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+---
+## For developers
+
+A language adapter turns a `SourceSet` into a `Codebase` in three passes:
+**layout** maps each file to a crate and module path by Cargo's conventions,
+**collect** parses each file on its own into plain owned data, and
+**resolve** builds the model from all of it in one sequential pass
+(`crates/sealmap-rust/src/lib.rs:14`-`30`). `sealmap-rust` is the only adapter
+today; the language-neutral half it shares with any future adapter lives in
+`sealmap-extract`, split out in commit `a02b381` with byte-identical output
+before and after (`docs/DESIGN.md:131`).
+
+This topic is the skeleton those passes hang on: the `extract` entry point,
+the Cargo layout rules, the panic-isolated big-stack collection that came
+from the hardening work (`docs/DESIGN.md:232`), and the order in which
+`resolve::build` assembles the model. The passes' insides are their own
+topics: ids (EXT-02), the flow walker (EXT-03), lowering and confidence
+(EXT-04), resolution (EXT-05) and fingerprints (EXT-06).
+
+## For the business
+
+The adapter is the part that reads an adopter's code, so it decides what
+running sealmap costs and whether it can be trusted on a real repository.
+Three properties come from this skeleton. It never compiles anything, so it
+runs on any checkout, including one that does not build, and needs no
+toolchain at run time. It never fails a whole run because of one bad file:
+a file that does not parse, or that trips a bug, becomes a warning and a
+placeholder entry. And it is fast enough to sit in CI: the README records
+1.13 s for a 934-file workspace (`README.md:332`).
+
+The residual risk is a file nested deeply enough to exhaust even the large
+stack: that still ends the process, because a stack overflow cannot be
+caught.
+
+## EXT-01.1 One call from sources to model
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CL as caller
+    participant EX as extract<br/>sealmap-rust/src/lib.rs:156
+    participant LY as plan<br/>layout.rs:89
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant MI as map_isolated<br/>isolate.rs:38
+    participant RB as build<br/>resolve.rs:213
+    CL->>EX: SourceSet and RustOptions
+    EX->>LY: map every .rs file to a crate and module (sealmap-rust/src/lib.rs:157)
+    LY-->>EX: Plan, each path's FileRole and each crate's reach
+    EX->>EX: drop test, example and bench targets unless asked (sealmap-rust/src/lib.rs:161)
+    EX->>CA: jobs in path order (sealmap-rust/src/lib.rs:165)
+    CA->>MI: collect_file per job, failed_file on panic (sealmap-rust/src/lib.rs:180)
+    MI-->>CA: RawFile per job, input order
+    CA-->>EX: raw files
+    EX->>RB: name, raw files, the plan, options (sealmap-rust/src/lib.rs:167)
+    RB-->>EX: Codebase and diagnostics
+    EX-->>CL: Extraction (sealmap-rust/src/lib.rs:168)
+```
+
+**What it shows.** Extraction never fails: unparsable files surface in
+`Extraction::diagnostics` (`crates/sealmap-rust/src/lib.rs:153`-`155`), and
+everything between collection and resolution is owned data, so the parallel
+and the sequential halves meet only in a `Vec<RawFile>`.
+
+**Why it is this way.** Collecting to plain strings and vectors lets files be
+parsed in parallel and resolved afterwards in one deterministic pass
+(`crates/sealmap-rust/src/raw.rs:3`-`6`, drawn as the IR in EXT-3).
+
+**Invariant:** parallel collection returns results in input order, so the
+model is identical with or without the `parallel` feature
+(`crates/sealmap-rust/src/lib.rs:72`-`75`).
+
+## EXT-01.2 Where a file sits in the workspace
+
+```mermaid
+flowchart TB
+    F["a .rs file"]
+    PK{"inside a directory with a<br/>Cargo.toml holding package?<br/>layout.rs:130"}
+    FB["fallback crate named after the codebase<br/>layout.rs:143"]
+    LIB{"the lib path from the manifest?<br/>layout.rs:157"}
+    SB{"under src/bin?<br/>layout.rs:166"}
+    MAIN{"src/main.rs?<br/>layout.rs:169"}
+    SRC["other src files: the library crate<br/>layout.rs:175"]
+    TEB{"under tests, examples or benches?<br/>layout.rs:181"}
+    NONE["build.rs and stray files:<br/>no target, never extracted<br/>layout.rs:186"]
+    OWN["own crate, prefixed test_, example_, bench_<br/>layout.rs:194"]
+    BIN["binary crate; pkg_main when a lib exists<br/>layout.rs:170"]
+    F --> PK
+    PK -->|no| FB
+    PK -->|yes, longest dir wins, layout.rs:118| LIB
+    LIB -->|yes| SRC
+    LIB -->|no| SB
+    SB -->|yes| OWN
+    SB -->|no| MAIN
+    MAIN -->|yes| BIN
+    MAIN -->|no| SRC
+    SRC --> TEB
+    TEB -->|tests etc| OWN
+    TEB -->|neither| NONE
+```
+
+**What it shows.** Packages are discovered from every `Cargo.toml` that has a
+`[package]` table; the longest matching directory wins, so nested packages
+beat their parents; each binary, test, example and bench target becomes a
+crate of its own.
+
+**Why it is this way.** Separate crates per target mean a binary and the
+library never share an id (`crates/sealmap-rust/src/lib.rs:36`-`38`); the
+`_main` suffix applies only when a library exists to collide with
+(`crates/sealmap-rust/src/layout.rs:170`). Crate names replace `-` with `_`,
+as Rust paths do (`crates/sealmap-rust/src/layout.rs:110`). The plan also
+records, per crate, the workspace crates its manifest lets it name, which
+bounds the resolver's name-only guesses (`crates/sealmap-rust/src/layout.rs:135`, EXT-05).
+
+**Open:** packages come from any manifest with a `[package]` table
+(`crates/sealmap-rust/src/layout.rs:91`-`97`); `[workspace]` membership and
+`exclude` are never read, so is a package the workspace excludes meant to
+appear in the model?
+
+## EXT-01.3 Big stacks and a panic guard
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant MI as map_isolated<br/>isolate.rs:38
+    participant RP as rayon pool, 64 MiB stacks<br/>isolate.rs:52
+    participant CF as collect_file<br/>collect.rs:33
+    participant FF as failed_file<br/>collect.rs:60
+    CA->>MI: jobs, stack size, job, on_panic
+    MI->>RP: build pool with stack_size (isolate.rs:52)
+    alt pool built
+        RP->>CF: each job under catch_unwind (isolate.rs:46)
+    else pool refused
+        MI->>MI: one scoped thread with the same stack (isolate.rs:56)
+    end
+    CF-->>MI: RawFile, or a panic
+    MI->>FF: on panic, message as the error (isolate.rs:47)
+    FF-->>MI: module-only RawFile tagged parse_error (collect.rs:74)
+    MI-->>CA: results in input order (isolate.rs:53)
+    Note over RP: DEBT: a stack overflow is an abort,<br/>not a panic, and ends the run, isolate.rs:8
+```
+
+**What it shows.** Every file is collected on a thread with a 64 MiB stack;
+a panic in one file becomes a placeholder `RawFile` whose error becomes a
+diagnostic, and the run continues.
+
+**Why it is this way.** The VisionClaw stack overflow came from deeply nested
+generics on rayon's default 2 MiB stacks (`docs/DESIGN.md:232`); syn costs
+about 40 KiB per nesting level in a debug build
+(`crates/sealmap-extract/src/isolate.rs:3`-`7`). Address space is reserved,
+not memory, so the large stack is cheap (`crates/sealmap-extract/src/isolate.rs:27`-`29`).
+The flow walker's own depth cap is the second guard
+(`crates/sealmap-rust/src/collect.rs:30`).
+
+**Invariant:** behaviour does not depend on the `parallel` feature: without
+it, or if the pool cannot be built, the same stack size is used on one scoped
+thread (`crates/sealmap-extract/src/isolate.rs:34`-`37`).
+
+## EXT-01.4 What becomes of one file
+
+```mermaid
+stateDiagram-v2
+    [*] --> Planned: layout assigns a role
+    Planned --> Skipped: test, example or bench target and tests off
+    Planned --> Parsing: collect_file
+    Parsing --> Collected: syn parses
+    Parsing --> Failed: syn error with line and column
+    Parsing --> Failed: panic caught by the guard
+    Collected --> Modelled: resolve builds symbols and relations
+    Failed --> Placeholder: module symbol only, tag parse_error
+    Placeholder --> Modelled: plus a diagnostic
+    Skipped --> [*]
+    Modelled --> [*]
+```
+
+**What it shows.** A file either leaves the run because its target is
+excluded, or ends up in the model; a failed file is represented by its module
+alone, tagged `parse_error`, with its error reported.
+
+**Why it is this way.** Keeping a module symbol for a failed file keeps the
+1:1 corpus contract (one document per source) true even for broken code
+(`crates/sealmap-rust/src/collect.rs:57`-`59`). The placeholder's
+fingerprints hash the raw text, so any edit to a broken file still shows
+(`crates/sealmap-rust/src/collect.rs:62`).
+
+**Invariant:** a parse error's message carries the `line:col` of the error
+(`crates/sealmap-rust/src/collect.rs:47`), and `build` emits one diagnostic
+per failed file in file order (`crates/sealmap-rust/src/resolve.rs:218`-`222`).
+
+## EXT-01.5 The order resolve builds the model in
+
+```mermaid
+flowchart TB
+    T["Resolver tables from every raw file<br/>resolve.rs:214"]
+    D["diagnostics for failed files<br/>resolve.rs:218"]
+    subgraph PERFILE["for each file in path order, resolve.rs:225"]
+        FI["SourceFile entry<br/>resolve.rs:226"]
+        MO["module symbols and their imports<br/>resolve.rs:233"]
+        IT["items, members, field and uses<br/>relations, trait methods<br/>resolve.rs:257"]
+        IM["impl blocks: implements relation,<br/>method symbols<br/>resolve.rs:297"]
+        FI --> MO --> IT --> IM
+    end
+    AG["one calls relation per caller and target<br/>aggregate_calls, resolve.rs:319"]
+    T --> D --> PERFILE --> AG
+```
+
+**What it shows.** Lookup tables are built from all files first, then each
+file contributes its file entry, modules, items and impls in that order, and
+call edges are aggregated from the finished flows last.
+
+**Why it is this way.** Modules and items go first so field types are known
+before any flow is resolved (`crates/sealmap-rust/src/resolve.rs:224`); call
+relations come from flows rather than being recorded during the walk, so the
+edge confidence is the strongest of the calls behind it (EXT-4).
+````
+
+----- /home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/es2/fidelity/inputs/extract_01-the-adapter-pipeline/rewrite.md -----
+````markdown
+---
+id: EXT-01
+title: The language-adapter pipeline
+area: extract
+governing: [docs/DESIGN.md, README.md]
+adrs: []
+sources:
+  - crates/sealmap-rust/src/lib.rs
+  - crates/sealmap-rust/src/layout.rs
+  - crates/sealmap-rust/src/collect.rs
+  - crates/sealmap-rust/src/raw.rs
+  - crates/sealmap-rust/src/resolve.rs
+  - crates/sealmap-extract/src/lib.rs
+  - crates/sealmap-extract/src/isolate.rs
+  - docs/DESIGN.md
+  - README.md
+verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+---
+## For developers
+
+A language adapter turns a `SourceSet` into a `Codebase` in three passes:
+**layout** maps each file to a crate and module path by Cargo's conventions,
+**collect** parses each file on its own into plain owned data, and
+**resolve** builds the model from all of it in one sequential pass
+(`crates/sealmap-rust/src/lib.rs:14`-`30`). `sealmap-rust` is the only adapter
+today; the language-neutral half it shares with any future adapter lives in
+`sealmap-extract`, split out in commit `a02b381` with byte-identical output
+before and after (`docs/DESIGN.md:131`).
+
+This topic is the skeleton those passes hang on: the `extract` entry point,
+the Cargo layout rules, the panic-isolated big-stack collection that came
+from the hardening work (`docs/DESIGN.md:232`), and the order in which
+`resolve::build` assembles the model. The passes' insides are their own
+topics: ids (EXT-02), the flow walker (EXT-03), lowering and confidence
+(EXT-04), resolution (EXT-05) and fingerprints (EXT-06).
+
+## For the business
+
+The adapter is the part that reads an adopter's code, so it decides what
+running sealmap costs and whether it can be trusted on a real repository.
+Three properties come from this skeleton. It never compiles anything, so it
+runs on any checkout, including one that does not build, and needs no
+toolchain at run time. It never fails a whole run because of one bad file:
+a file that does not parse, or that trips a bug, becomes a warning and a
+placeholder entry. And it is fast enough to sit in CI: the README records
+1.13 s for a 934-file workspace (`README.md:332`).
+
+The residual risk is a file nested deeply enough to exhaust even the large
+stack: that still ends the process, because a stack overflow cannot be
+caught.
+
+## EXT-01.1 One call from sources to model
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CL as caller
+    participant EX as extract<br/>sealmap-rust/src/lib.rs:156
+    participant LY as plan<br/>layout.rs:89
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant MI as map_isolated<br/>isolate.rs:38
+    participant RB as build<br/>resolve.rs:213
+    CL->>EX: SourceSet and RustOptions
+    EX->>LY: map every .rs file to a crate and module (sealmap-rust/src/lib.rs:157)
+    LY-->>EX: Plan, each path's FileRole and each crate's reach
+    EX->>EX: drop test, example and bench targets unless asked (sealmap-rust/src/lib.rs:161)
+    EX->>CA: jobs in path order (sealmap-rust/src/lib.rs:165)
+    CA->>MI: collect_file per job, failed_file on panic (sealmap-rust/src/lib.rs:180)
+    MI-->>CA: RawFile per job, input order
+    CA-->>EX: raw files
+    EX->>RB: name, raw files, the plan, options (sealmap-rust/src/lib.rs:167)
+    RB-->>EX: Codebase and diagnostics
+    EX-->>CL: Extraction (sealmap-rust/src/lib.rs:168)
+```
+
+**What it shows.** Extraction never fails: unparsable files surface in
+`Extraction::diagnostics` (`crates/sealmap-rust/src/lib.rs:153`-`155`), and
+everything between collection and resolution is owned data, so the parallel
+and the sequential halves meet only in a `Vec<RawFile>`.
+
+**Why it is this way.** Collecting to plain strings and vectors lets files be
+parsed in parallel and resolved afterwards in one deterministic pass
+(`crates/sealmap-rust/src/raw.rs:3`-`6`, drawn as the IR in EXT-3).
+
+**Invariant:** parallel collection returns results in input order, so the
+model is identical with or without the `parallel` feature
+(`crates/sealmap-rust/src/lib.rs:72`-`75`).
+
+## EXT-01.2 Where a file sits in the workspace
+
+```mermaid
+flowchart TB
+    F["a .rs file"]
+    PK{"inside a directory with a<br/>Cargo.toml holding package?<br/>layout.rs:130"}
+    FB["fallback crate named after the codebase<br/>layout.rs:143"]
+    LIB{"the lib path from the manifest?<br/>layout.rs:157"}
+    SB{"under src/bin?<br/>layout.rs:166"}
+    MAIN{"src/main.rs?<br/>layout.rs:169"}
+    SRC["other src files: the library crate<br/>layout.rs:175"]
+    TEB{"under tests, examples or benches?<br/>layout.rs:181"}
+    NONE["build.rs and stray files:<br/>no target, never extracted<br/>layout.rs:186"]
+    OWN["own crate, prefixed test_, example_, bench_<br/>layout.rs:194"]
+    BIN["binary crate; pkg_main when a lib exists<br/>layout.rs:170"]
+    F --> PK
+    PK -->|no| FB
+    PK -->|yes, longest dir wins, layout.rs:118| LIB
+    LIB -->|yes| SRC
+    LIB -->|no| SB
+    SB -->|yes| OWN
+    SB -->|no| MAIN
+    MAIN -->|yes| BIN
+    MAIN -->|no| SRC
+    SRC --> TEB
+    TEB -->|tests etc| OWN
+    TEB -->|neither| NONE
+```
+
+**What it shows.** Packages are discovered from every `Cargo.toml` that has a
+`[package]` table; the longest matching directory wins, so nested packages
+beat their parents; each binary, test, example and bench target becomes a
+crate of its own.
+
+**Why it is this way.** Separate crates per target mean a binary and the
+library never share an id (`crates/sealmap-rust/src/lib.rs:36`-`38`); the
+`_main` suffix applies only when a library exists to collide with
+(`crates/sealmap-rust/src/layout.rs:170`). Crate names replace `-` with `_`,
+as Rust paths do (`crates/sealmap-rust/src/layout.rs:110`). The plan also
+records, per crate, the workspace crates its manifest lets it name, which
+bounds the resolver's name-only guesses (`crates/sealmap-rust/src/layout.rs:135`, EXT-05).
+
+**Open:** packages come from any manifest with a `[package]` table
+(`crates/sealmap-rust/src/layout.rs:91`-`97`); `[workspace]` membership and
+`exclude` are never read, so is a package the workspace excludes meant to
+appear in the model?
+
+## EXT-01.3 Big stacks and a panic guard
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CA as collect_all<br/>sealmap-rust/src/lib.rs:176
+    participant MI as map_isolated<br/>isolate.rs:38
+    participant RP as rayon pool, 64 MiB stacks<br/>isolate.rs:52
+    participant CF as collect_file<br/>collect.rs:33
+    participant FF as failed_file<br/>collect.rs:60
+    CA->>MI: jobs, stack size, job, on_panic
+    MI->>RP: build pool with stack_size (isolate.rs:52)
+    alt pool built
+        RP->>CF: each job under catch_unwind (isolate.rs:46)
+    else pool refused
+        MI->>MI: one scoped thread with the same stack (isolate.rs:56)
+    end
+    CF-->>MI: RawFile, or a panic
+    MI->>FF: on panic, message as the error (isolate.rs:47)
+    FF-->>MI: module-only RawFile tagged parse_error (collect.rs:74)
+    MI-->>CA: results in input order (isolate.rs:53)
+    Note over RP: DEBT: a stack overflow is an abort,<br/>not a panic, and ends the run, isolate.rs:8
+```
+
+**What it shows.** Every file is collected on a thread with a 64 MiB stack;
+a panic in one file becomes a placeholder `RawFile` whose error becomes a
+diagnostic, and the run continues.
+
+**Why it is this way.** The VisionClaw stack overflow came from deeply nested
+generics on rayon's default 2 MiB stacks (`docs/DESIGN.md:232`); syn costs
+about 40 KiB per nesting level in a debug build
+(`crates/sealmap-extract/src/isolate.rs:3`-`7`). Address space is reserved,
+not memory, so the large stack is cheap (`crates/sealmap-extract/src/isolate.rs:27`-`29`).
+The flow walker's own depth cap is the second guard
+(`crates/sealmap-rust/src/collect.rs:30`).
+
+**Invariant:** behaviour does not depend on the `parallel` feature: without
+it, or if the pool cannot be built, the same stack size is used on one scoped
+thread (`crates/sealmap-extract/src/isolate.rs:34`-`37`).
+
+## EXT-01.4 What becomes of one file
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PL as Planned<br/>layout assigns a role
+    participant PA as Parsing<br/>collect_file
+    participant MD as the model
+    alt test, example or bench target and tests off
+        PL-->>PL: skipped, out of the run
+    else kept
+        PL->>PA: collect_file
+        alt syn parses
+            PA-->>MD: collected, resolve builds symbols and relations
+        else syn error with line and column
+            PA->>PA: failed
+        else panic caught by the guard
+            PA->>PA: failed
+        end
+    end
+    opt the file failed
+        PA->>MD: placeholder, module symbol only, tag parse_error<br/>plus a diagnostic
+    end
+```
+
+**What it shows.** A file either leaves the run because its target is
+excluded, or ends up in the model; a failed file is represented by its module
+alone, tagged `parse_error`, with its error reported.
+
+**Why it is this way.** Keeping a module symbol for a failed file keeps the
+1:1 corpus contract (one document per source) true even for broken code
+(`crates/sealmap-rust/src/collect.rs:57`-`59`). The placeholder's
+fingerprints hash the raw text, so any edit to a broken file still shows
+(`crates/sealmap-rust/src/collect.rs:62`).
+
+**Invariant:** a parse error's message carries the `line:col` of the error
+(`crates/sealmap-rust/src/collect.rs:47`), and `build` emits one diagnostic
+per failed file in file order (`crates/sealmap-rust/src/resolve.rs:218`-`222`).
+
+## EXT-01.5 The order resolve builds the model in
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant RB as build<br/>resolve.rs:214
+    participant FL as one file<br/>resolve.rs:225
+    participant AG as aggregate_calls<br/>resolve.rs:319
+    RB->>RB: resolver tables from every raw file (resolve.rs:214)
+    RB->>RB: diagnostics for failed files (resolve.rs:218)
+    loop for each file in path order (resolve.rs:225)
+        RB->>FL: SourceFile entry (resolve.rs:226)
+        FL->>FL: module symbols and their imports (resolve.rs:233)
+        FL->>FL: items, members, field and uses<br/>relations, trait methods (resolve.rs:257)
+        FL->>FL: impl blocks, implements relation<br/>and method symbols (resolve.rs:297)
+    end
+    RB->>AG: one calls relation per caller and target (resolve.rs:319)
+```
+
+**What it shows.** Lookup tables are built from all files first, then each
+file contributes its file entry, modules, items and impls in that order, and
+call edges are aggregated from the finished flows last.
+
+**Why it is this way.** Modules and items go first so field types are known
+before any flow is resolved (`crates/sealmap-rust/src/resolve.rs:224`); call
+relations come from flows rather than being recorded during the walk, so the
+edge confidence is the strongest of the calls behind it (EXT-4).
+````

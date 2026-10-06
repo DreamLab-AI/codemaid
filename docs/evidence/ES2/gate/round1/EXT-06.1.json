@@ -1,0 +1,10 @@
+{"id": "EXT-06.1", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [
+  {"fact": "FP->>TK: token(token) ... FP->>FP: section(label) ... FP->>FP: fingerprint(nested)", "why": "The original classDiagram lists methods with no call order; the rewrite asserts token, then section, then fingerprint. The cited code (fingerprint.rs:235-238) says section marks the START of a part, so it comes before that part's tokens, not after them."}
+ ],
+ "changed": [
+  {"fact": "FP->>KD: the kind picks the key context (drawn after token(token))", "original": "Kind: Sig Body, distinct key contexts; +new(kind)", "why": "The key context is fixed in new(kind) by new_derive_key(kind.context()) (fingerprint.rs:163-164), before any token is fed. Drawing it after token(token) reverses that order."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

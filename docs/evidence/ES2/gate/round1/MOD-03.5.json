@@ -1,0 +1,8 @@
+{"id": "MOD-03.5", "verdict": "fail", "facts_checked": 20,
+ "unsupported": [],
+ "changed": [
+  {"fact": "FL->>RT: an interior node", "original": "Calls are leaves; branches, loops, optional blocks and parallel arms are interior nodes", "why": "Return is not listed as interior in the original; code has Step::Return(Exit) with no body and depth 0 (flow.rs:70, flow.rs:138), i.e. a leaf"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

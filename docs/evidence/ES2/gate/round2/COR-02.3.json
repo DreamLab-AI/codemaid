@@ -1,0 +1,1 @@
+{"id": "COR-02.3", "verdict": "pass", "facts_checked": 24, "unsupported": [], "changed": [], "dropped": [], "citations_dropped": [], "citations_added": ["structure.rs:178 (single-line restatement inside the SUB->STUB message; subset of the original structure.rs:178-190)", "structure.rs:172-176 (repeated in the ED->SUB message; same as the participant citation)"]}

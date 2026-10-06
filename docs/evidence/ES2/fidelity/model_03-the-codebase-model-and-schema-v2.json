@@ -1,0 +1,36 @@
+{
+ "topic": "model/03-the-codebase-model-and-schema-v2.md",
+ "diagrams_rewritten": 4,
+ "facts_checked": 132,
+ "facts_dropped": [
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Relation field: \"from\""
+  },
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Relation field: \"to\""
+  },
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Relation field: \"kind\""
+  },
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Confidence variant: \"Exact\""
+  },
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Confidence variant: \"Inferred\""
+  },
+  {
+   "diagram": "MOD-03.1",
+   "fact": "Confidence variant: \"External\""
+  }
+ ],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Counted fields, variants, conditions and relationships separately; descriptive mapping arrows were treated as sequence scaffolding, not additional runtime calls or ordering claims."
+}

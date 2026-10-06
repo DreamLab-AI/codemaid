@@ -1,0 +1,13 @@
+{"id": "COR-04.1", "verdict": "fail", "facts_checked": 37,
+ "unsupported": [
+  {"fact": "LK->>TS: topics, a BTreeMap of id to TopicSeal", "why": "Arrow claims a message from Lock to TopicSeal; the original states only a composition field (Lock *-- TopicSeal : topics), no call or message."},
+  {"fact": "TS->>SS: symbols, a BTreeMap of SymbolId to SymbolSeal", "why": "Arrow claims a message from TopicSeal to SymbolSeal; original states only composition (TopicSeal *-- SymbolSeal : symbols)."},
+  {"fact": "SR->>FD: findings, a Vec of Finding", "why": "Arrow claims a message from SealReport to Finding; original states only composition (SealReport *-- Finding : findings)."},
+  {"fact": "FD->>CL: one class per finding", "why": "Arrow claims a message from Finding to Class; original states only an association (Finding --> Class), and the arrows together imply a call order the original never claims."}
+ ],
+ "changed": [],
+ "dropped": [
+  {"fact": "Class <<enum>> Holds, Behaviour, Contract, Absent, Unparsable, UnsealedCitation, Orphan, ProseEdited, LockFault (the nine variants)"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

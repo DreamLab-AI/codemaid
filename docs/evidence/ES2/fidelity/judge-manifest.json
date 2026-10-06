@@ -1,0 +1,362 @@
+[
+ {
+  "topic": "corpus/01-generating-the-corpus-and-index.md",
+  "slug": "corpus_01-generating-the-corpus-and-index",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 48.432,
+  "usage": [
+   {
+    "input_tokens": 26012,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1110,
+    "reasoning_output_tokens": 952
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+  "slug": "corpus_02-structure-sequence-and-overview-projections",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 32.694,
+  "usage": [
+   {
+    "input_tokens": 26333,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 815,
+    "reasoning_output_tokens": 698
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "corpus/03-generate-check-write-and-the-cli.md",
+  "slug": "corpus_03-generate-check-write-and-the-cli",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 52.646,
+  "usage": [
+   {
+    "input_tokens": 26364,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1460,
+    "reasoning_output_tokens": 1325
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+  "slug": "corpus_04-seals-the-lock-and-the-checks",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 83.206,
+  "usage": [
+   {
+    "input_tokens": 28819,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2311,
+    "reasoning_output_tokens": 2054
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "corpus/05-the-seal-commands.md",
+  "slug": "corpus_05-the-seal-commands",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 18.891,
+  "usage": [
+   {
+    "input_tokens": 25194,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 434,
+    "reasoning_output_tokens": 338
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "corpus/06-review-packs.md",
+  "slug": "corpus_06-review-packs",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 31.257,
+  "usage": [
+   {
+    "input_tokens": 26060,
+    "cached_input_tokens": 8064,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 956,
+    "reasoning_output_tokens": 874
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "delivery/01-ci-msrv-and-determinism.md",
+  "slug": "delivery_01-ci-msrv-and-determinism",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 65.99,
+  "usage": [
+   {
+    "input_tokens": 26458,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1790,
+    "reasoning_output_tokens": 1639
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "delivery/02-design-versus-code.md",
+  "slug": "delivery_02-design-versus-code",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 89.839,
+  "usage": [
+   {
+    "input_tokens": 26641,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2498,
+    "reasoning_output_tokens": 2356
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "dense/01-the-dense-agent-projection.md",
+  "slug": "dense_01-the-dense-agent-projection",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 55.404,
+  "usage": [
+   {
+    "input_tokens": 28505,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2141,
+    "reasoning_output_tokens": 1869
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/01-the-adapter-pipeline.md",
+  "slug": "extract_01-the-adapter-pipeline",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 26.247,
+  "usage": [
+   {
+    "input_tokens": 25526,
+    "cached_input_tokens": 8064,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 671,
+    "reasoning_output_tokens": 582
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/02-minting-ids-for-definitions.md",
+  "slug": "extract_02-minting-ids-for-definitions",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 33.285,
+  "usage": [
+   {
+    "input_tokens": 25216,
+    "cached_input_tokens": 15232,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 823,
+    "reasoning_output_tokens": 715
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+  "slug": "extract_03-the-flow-walker-and-raw-ir",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 49.159,
+  "usage": [
+   {
+    "input_tokens": 26909,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1310,
+    "reasoning_output_tokens": 1207
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/04-lowering-confidence-and-labels.md",
+  "slug": "extract_04-lowering-confidence-and-labels",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 22.184,
+  "usage": [
+   {
+    "input_tokens": 25331,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 501,
+    "reasoning_output_tokens": 406
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/05-workspace-name-resolution.md",
+  "slug": "extract_05-workspace-name-resolution",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 56.854,
+  "usage": [
+   {
+    "input_tokens": 27997,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1514,
+    "reasoning_output_tokens": 1409
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "extract/06-signature-and-body-fingerprints.md",
+  "slug": "extract_06-signature-and-body-fingerprints",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 31.884,
+  "usage": [
+   {
+    "input_tokens": 26410,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 887,
+    "reasoning_output_tokens": 730
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "mermaid/01-typed-writers-and-escaping.md",
+  "slug": "mermaid_01-typed-writers-and-escaping",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 45.108,
+  "usage": [
+   {
+    "input_tokens": 25382,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1876,
+    "reasoning_output_tokens": 1552
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "mermaid/02-injective-diagram-ids.md",
+  "slug": "mermaid_02-injective-diagram-ids",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 37.458,
+  "usage": [
+   {
+    "input_tokens": 24621,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 896,
+    "reasoning_output_tokens": 806
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "model/01-the-sym-id-grammar.md",
+  "slug": "model_01-the-sym-id-grammar",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 32.37,
+  "usage": [
+   {
+    "input_tokens": 26595,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 847,
+    "reasoning_output_tokens": 738
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "model/02-content-hashes-and-fingerprints.md",
+  "slug": "model_02-content-hashes-and-fingerprints",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 60.35,
+  "usage": [
+   {
+    "input_tokens": 25198,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1753,
+    "reasoning_output_tokens": 1552
+   }
+  ],
+  "commands_attempted": 0
+ },
+ {
+  "topic": "model/03-the-codebase-model-and-schema-v2.md",
+  "slug": "model_03-the-codebase-model-and-schema-v2",
+  "ok": true,
+  "err": null,
+  "exit": 0,
+  "seconds": 45.59,
+  "usage": [
+   {
+    "input_tokens": 25465,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1661,
+    "reasoning_output_tokens": 1463
+   }
+  ],
+  "commands_attempted": 0
+ }
+]

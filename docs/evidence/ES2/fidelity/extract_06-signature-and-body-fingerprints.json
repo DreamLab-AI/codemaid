@@ -1,0 +1,28 @@
+{
+ "topic": "extract/06-signature-and-body-fingerprints.md",
+ "diagrams_rewritten": 4,
+ "facts_checked": 70,
+ "facts_dropped": [
+  {
+   "diagram": "EXT-06.3",
+   "fact": "CALL --> DATA"
+  },
+  {
+   "diagram": "EXT-06.3",
+   "fact": "DATA --> TRAIT"
+  },
+  {
+   "diagram": "EXT-06.3",
+   "fact": "TRAIT --> VALUE"
+  },
+  {
+   "diagram": "EXT-06.3",
+   "fact": "VALUE --> MODULE"
+  }
+ ],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Count uses labelled nodes/rules and directed edges as fact units; participant placement does not preserve the four dropped links. EXT-06.1 remains an unchanged classDiagram."
+}

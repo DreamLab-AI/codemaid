@@ -1,0 +1,6 @@
+{"id": "MOD-01.6", "verdict": "fail", "facts_checked": 9,
+ "unsupported": [],
+ "changed": [{"fact": "GR->>IB: the one id builder per adapter targets the same grammar", "original": "id builder, one per adapter ... the shared id builder", "why": "Message text reads as a separate builder for each adapter; the original prose says 'shared id builder' and ids.rs:3-4 says 'all language adapters share one sym: grammar' through one builder"}],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

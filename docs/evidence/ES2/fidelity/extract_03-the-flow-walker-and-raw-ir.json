@@ -1,0 +1,11 @@
+{
+ "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+ "diagrams_rewritten": 5,
+ "facts_checked": 82,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Counted declarations, field/variant groups, labelled nodes and relationships; EXT-03.7 remains an unchanged stateDiagram-v2, so conversion of every non-sequence diagram is incomplete."
+}

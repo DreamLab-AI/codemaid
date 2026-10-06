@@ -1,0 +1,11 @@
+{
+ "topic": "extract/05-workspace-name-resolution.md",
+ "diagrams_rewritten": 3,
+ "facts_checked": 80,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "EXT-05.1, EXT-05.2 and EXT-05.4 preserve their facts; the added provenance branch and citation are supported by original prose. EXT-05.6 remains an unchanged flowchart."
+}

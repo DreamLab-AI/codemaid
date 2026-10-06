@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f6-b1be-7883-b820-caee13fe0d1c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"corpus/05-the-seal-commands.md\",\"diagrams_rewritten\":2,\"facts_checked\":38,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[],\"prose_changed\":false,\"notes\":\"COR-05.3 and COR-05.4 preserve all checked facts, including branches, write order, conditions and exit codes; the other diagrams are unchanged.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":25194,"cached_input_tokens":12288,"cache_write_input_tokens":0,"output_tokens":434,"reasoning_output_tokens":338}}

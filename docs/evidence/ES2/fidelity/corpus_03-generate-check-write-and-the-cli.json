@@ -1,0 +1,22 @@
+{
+ "topic": "corpus/03-generate-check-write-and-the-cli.md",
+ "diagrams_rewritten": 3,
+ "facts_checked": 73,
+ "facts_dropped": [
+  {
+   "diagram": "COR-03.5",
+   "fact": "each prefixed NAME/"
+  }
+ ],
+ "facts_invented": [
+  {
+   "diagram": "COR-03.5",
+   "fact": "each prefixed NAME",
+   "why": "The original specifies NAME/ as the prefix, including the slash."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Command and flag lists were checked item by item. COR-03.4 remains an unchanged flowchart."
+}

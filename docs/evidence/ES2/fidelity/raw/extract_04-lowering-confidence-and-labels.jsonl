@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f8-3345-7c22-ba07-9765ea907bc5"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"extract/04-lowering-confidence-and-labels.md\",\"diagrams_rewritten\":2,\"facts_checked\":30,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[],\"prose_changed\":false,\"notes\":\"EXT-04.2 and EXT-04.3 preserve the original facts; EXT-04.5 remains an unchanged flowchart, so conversion is incomplete.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":25331,"cached_input_tokens":12288,"cache_write_input_tokens":0,"output_tokens":501,"reasoning_output_tokens":406}}

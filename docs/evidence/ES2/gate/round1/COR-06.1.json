@@ -1,0 +1,9 @@
+{"id": "COR-06.1", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [],
+ "changed": [
+  {"fact": "LIB-->>OUT: exit 1, total, header and per-topic sizes (main.rs:736-743)", "original": "REF[\"exit 1: total, header and per-topic sizes main.rs:736-743\"]; prose: \"Selection and IO live in the CLI\"", "why": "Arrow makes the library the sender of the exit-1 refusal report; the cited main.rs:731-744 shows the CLI prints the sizes and returns ExitCode 1 (shown twice, shard and pack branches)"},
+  {"fact": "LIB-->>OUT: the packs / LIB-->>OUT: the pack", "original": "OUT[\"stdout, -o FILE, or pack-01.txt ... main.rs:746-757\"]; prose: \"Selection and IO live in the CLI\"", "why": "Arrow claims the library writes the pack(s) to output; original prose and cited main.rs:746-757 place the writing in the CLI, the library only returns the packs"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

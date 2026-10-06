@@ -1,0 +1,10 @@
+{"id": "MOD-01.4", "verdict": "fail", "facts_checked": 12,
+ "unsupported": [
+  {"fact": "par a name to print ... and a package field to print", "why": "par claims the two flows run concurrently; the original draws two independent flowcharts and makes no concurrency claim"}
+ ],
+ "changed": [
+  {"fact": "participant WR as the writer ... alt empty, edge space, or control char (check_field, sym.rs:268) WR-->>ER: refused", "original": "F --> FC{check_field, sym.rs:268} -->|yes| REJ[IdError.Field]", "why": "the rewrite has the writer refuse the field at print time; the original names no writer for the check, and the code calls check_field from Package::new (sym.rs:224-231) while write_field (sym.rs:389) never checks or refuses"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

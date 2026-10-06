@@ -1,0 +1,36 @@
+{
+ "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+ "diagrams_rewritten": 4,
+ "facts_checked": 121,
+ "facts_dropped": [
+  {
+   "diagram": "COR-04.1",
+   "fact": "Behaviour"
+  },
+  {
+   "diagram": "COR-04.1",
+   "fact": "Contract"
+  }
+ ],
+ "facts_invented": [
+  {
+   "diagram": "COR-04.3",
+   "fact": "FM-->>TX: pointers, every sealed: value (topic.rs:72)",
+   "why": "The sequence places pointers after topic_hash; the original does not order these independent outputs."
+  },
+  {
+   "diagram": "COR-04.3",
+   "fact": "FM-->>TX: topic_id, the id: value (topic.rs:64)",
+   "why": "The sequence places topic_id after pointers; the original does not specify that order."
+  },
+  {
+   "diagram": "COR-04.3",
+   "fact": "FM->>BODY: scan the body",
+   "why": "The sequence places body scanning after all three front-matter outputs; the original does not specify that order."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Count includes components, typed fields, methods, variants, conditions and directed relationships; seven original class names remain in other rewrite diagrams."
+}

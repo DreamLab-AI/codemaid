@@ -1,0 +1,8 @@
+{"id": "COR-02.5", "verdict": "fail", "facts_checked": 17,
+ "unsupported": [
+  {"fact": "OV->>CG: the first view ... OV->>MG: the second view ... OV->>DM: the third view ... OV->>TM: the fourth view", "why": "The original flowchart fans out from _overview.md to four unordered branches and its prose only lists them; it never states an emission order. The code agrees with this order (overview.rs:25-39), but the original topic does not claim it."}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

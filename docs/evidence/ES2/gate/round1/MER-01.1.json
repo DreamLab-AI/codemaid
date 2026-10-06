@@ -1,0 +1,14 @@
+{"id": "MER-01.1", "verdict": "fail", "facts_checked": 21,
+ "unsupported": [
+  {"fact": "SD->>CW: render() ... CD->>CW: render() ... ER->>CW ... FC->>CW ... then SB->>ID / CD->>ID / ER->>ID / FC->>ID", "why": "Sequence arrows claim one ordered run (four independent builders render one after another, ids becoming Idents after rendering); the original classDiagram states only static relations and no order, and in the code Idents are supplied at build time, before render (e.g. sequence.rs:87 takes &Ident)."}
+ ],
+ "changed": [
+  {"fact": "SB->>ID: every id is an Ident (escape.rs:63)", "original": "class Ident { +new(raw) lossy  escape.rs:63 }; SeqBuilder ..> Ident", "why": "Drawn as a message from SeqBuilder to Ident citing Ident::new, implying SeqBuilder calls Ident::new; the original has only a type dependency, and sequence.rs never calls Ident::new (builders take &Ident from the caller)."}
+ ],
+ "dropped": [
+  {"fact": "Ident { String ... }"},
+  {"fact": "+new(raw) lossy  escape.rs:63"},
+  {"fact": "+render() as a method of each builder (now an arrow label to CodeWriter)"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,9 @@
+{"id": "COR-06.3", "verdict": "fail", "facts_checked": 15,
+ "unsupported": [],
+ "changed": [
+  {"fact": "pack alt block (P-->>T OverBudget / the pack) followed unconditionally by `loop each topic` on shard", "original": "T --> P and T --> S as two separate paths (COR-06.1: MODE{\"--shard?\"} -->|no| PK, -->|yes| SH)", "why": "pack and shard are exclusive modes; the sequence draws pack's budget check and then the shard loop as both happening in order"},
+  {"fact": "else no file could hold it: S-->>T: TopicOverBudget names the topic (src/pack.rs:318), inside `loop each topic` with no break", "original": "A -->|no| TO[\"TopicOverBudget names the topic\"] (terminal node)", "why": "original and pack.rs:318 (`return Err(...)`) end shard on TopicOverBudget; the rewrite's alt inside the loop lets iteration continue to the next topic"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": ["src/pack.rs:295"]}

@@ -1,0 +1,12 @@
+{"id": "COR-03.3", "verdict": "fail", "facts_checked": 13,
+"unsupported": [],
+"changed": [
+ {"fact": "NW->>ST: Clean ... then alt ... then opt a new source / NW->>ST: Missing", "original": "[*] --> Clean: generate then write ... [*] --> Missing: new source", "why": "Missing is an alternative initial state exclusive with Clean; the rewrite draws Clean as unconditional and Missing as an optional step after Clean and a drift, so two exclusive entries are shown as both happening, in sequence"},
+ {"fact": "participant NW as generate then write, or a new source; NW->>ST: Clean", "original": "[*] --> Missing: new source", "why": "the arrow attributes reaching Clean to 'a new source' as well; in the original a new source leads to Missing, not Clean"}
+],
+"dropped": [
+ {"fact": "Stale --> Clean: write rewrites it"},
+ {"fact": "Modified --> Clean: write rewrites it"},
+ {"fact": "Missing --> Clean: write creates it"}
+],
+"citations_dropped": [], "citations_added": []}

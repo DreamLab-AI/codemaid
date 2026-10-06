@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f8-ce19-7711-8aa0-993a0b4d53a9"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"model/01-the-sym-id-grammar.md\",\"diagrams_rewritten\":2,\"facts_checked\":36,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[],\"prose_changed\":false,\"notes\":\"MOD-01.2 and MOD-01.6 were rewritten; Mermaid's #35; encodes the literal # preserved in the rewrite. MOD-01.1 and MOD-01.4 remain non-sequence diagrams.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":26595,"cached_input_tokens":12288,"cache_write_input_tokens":0,"output_tokens":847,"reasoning_output_tokens":738}}

@@ -1,0 +1,1 @@
+{"id": "MOD-02.1", "verdict": "pass", "facts_checked": 19, "unsupported": [], "changed": [], "dropped": [{"fact": "+parse(s) Option  hash.rs:38 (return type Option)"}, {"fact": "+short(n) str  hash.rs:49 (return type str)"}, {"fact": "+parse(s) Option  hash.rs:114 (return type Option)"}], "citations_dropped": ["hash.rs:89"], "citations_added": []}

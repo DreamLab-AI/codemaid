@@ -1,0 +1,8 @@
+{"id": "EXT-04.3", "verdict": "fail", "facts_checked": 12,
+ "unsupported": [],
+ "changed": [
+  {"fact": "else policy None (confidence.rs:52) / EK-->>FL: internal calls only", "original": "NONE[\"None: internal calls only\"] with no edge to KEEP[\"kept in the flow\"]", "why": "The arrow from keeps to the flow claims the external call is delivered to the flow under None. The original does not link None to the flow, and confidence.rs:52 returns false, so the call is dropped."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,11 @@
+{
+ "topic": "mermaid/02-injective-diagram-ids.md",
+ "diagrams_rewritten": 4,
+ "facts_checked": 65,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Count includes original diagram label facts and directed relationships; Mermaid's #35; represents the same hash character shown literally in the rewrite."
+}

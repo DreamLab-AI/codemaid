@@ -1,0 +1,15 @@
+{"id": "COR-01.3", "verdict": "fail", "facts_checked": 18,
+ "unsupported": [
+  {"fact": "IX->>DE: documents (index.rs:97)", "why": "Arrow claims a message from Index to DocumentEntry; the original states only composition `Index *-- DocumentEntry` (a field), no call or message."},
+  {"fact": "DE->>FE: fragments (index.rs:82)", "why": "Arrow claims a message, and an order after IX->>DE; the original has only composition `DocumentEntry *-- FragmentEntry`, with no message or ordering."},
+  {"fact": "FE->>CR: calls (index.rs:53)", "why": "Arrow claims a message, ordered after DE->>FE; the original has only composition `FragmentEntry *-- CallRef`."},
+  {"fact": "FE->>FK: kind (index.rs:11)", "why": "Arrow claims a message, ordered last; the original has only the type association `FragmentEntry --> FragmentKind`."}
+ ],
+ "changed": [],
+ "dropped": [
+  {"fact": "Index *-- DocumentEntry / DocumentEntry *-- FragmentEntry / FragmentEntry *-- CallRef (composition, i.e. ownership, as distinct from the plain association to FragmentKind)"},
+  {"fact": "+fragment(id) linear search (public visibility marker '+')"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []
+}

@@ -1,0 +1,11 @@
+{
+ "topic": "model/01-the-sym-id-grammar.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 36,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "MOD-01.2 and MOD-01.6 were rewritten; Mermaid's #35; encodes the literal # preserved in the rewrite. MOD-01.1 and MOD-01.4 remain non-sequence diagrams."
+}

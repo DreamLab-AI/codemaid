@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f6-b1ab-7b03-ad47-3e1751a2fd07"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"corpus/02-structure-sequence-and-overview-projections.md\",\"diagrams_rewritten\":3,\"facts_checked\":58,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[\"structure.rs:178\"],\"prose_changed\":false,\"notes\":\"COR-02.2–COR-02.4 preserve their diagram facts; COR-02.5 remains an unconverted flowchart. The added point citation is distinct from the retained structure.rs:178-190 range.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":26333,"cached_input_tokens":12288,"cache_write_input_tokens":0,"output_tokens":815,"reasoning_output_tokens":698}}

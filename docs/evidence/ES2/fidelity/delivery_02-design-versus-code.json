@@ -1,0 +1,17 @@
+{
+ "topic": "delivery/02-design-versus-code.md",
+ "diagrams_rewritten": 6,
+ "facts_checked": 169,
+ "facts_dropped": [],
+ "facts_invented": [
+  {
+   "diagram": "DEL-02.6",
+   "fact": "par topics with no seal and no citation ... and MER-02 cites a fixture id in prose",
+   "why": "The par block asserts parallel execution of the two verification cases; the original states their outcomes but no concurrency."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "All original diagram facts and citations are retained; the added fifteen-topics/one-failure note is supported by the original prose."
+}

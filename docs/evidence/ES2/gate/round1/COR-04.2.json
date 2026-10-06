@@ -1,0 +1,1 @@
+{"id": "COR-04.2", "verdict": "pass", "facts_checked": 13, "unsupported": [], "changed": [], "dropped": [], "citations_dropped": [], "citations_added": ["lock.rs:203 (participant parse; stated in the original topic's COR-04.1 '+parse(text) lock.rs:203')", "lock.rs:231 (opt parse_canonical; stated in the original topic's COR-04.1 '+parse_canonical(text) lock.rs:231')"]}

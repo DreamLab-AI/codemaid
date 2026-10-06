@@ -1,0 +1,9 @@
+{"id": "DEN-01.6", "verdict": "fail", "facts_checked": 13,
+ "unsupported": [
+  {"fact": "F-->>R: call paths starting Self or self resolve ... (and the four other F-->>R replies)", "why": "Each fix is drawn as a return message from 'the fix' back to the read of dense.txt; the original only draws read -> defect -> fix (R --> S --> SF), with no edge from a fix back to the read."},
+  {"fact": "autonumbered order: Self::f defect, its fix, then guard defect, its fix, ... then pack defect, its fix", "why": "The original fans the five defects out of R in parallel with no order; the sequence claims a strict interleaved order (each defect raised only after the previous fix returned), whereas the prose says the first four came from one read and three were fixed together in d227dd8."}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

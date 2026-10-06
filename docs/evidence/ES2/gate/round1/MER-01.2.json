@@ -1,0 +1,8 @@
+{"id": "MER-01.2", "verdict": "fail", "facts_checked": 13,
+ "unsupported": [],
+ "changed": [
+  {"fact": "E->>TY: type text", "original": "E --> TY (\"escape_type adds angle brackets, braces, and parens for fields\")", "why": "The sequence arrow claims escape_text passes type text to (calls) escape_type. The cited code has the reverse: escape_type calls escape_text (escape.rs:145) and then makes its own pass. The original flowchart edge only layers escape_type on top of escape_text."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,60 @@
+{
+ "id": "DEL-01.4",
+ "verdict": "fail",
+ "facts_checked": 21,
+ "unsupported": [],
+ "changed": [
+  {
+   "fact": "MO->>MM: depends",
+   "original": "MO --> MM",
+   "why": "labelled message reads 'MO depends on MM', reversing the relationship; cited manifests show sealmap-mermaid depends on sealmap-model (optional), not the reverse; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "MO->>XT: depends",
+   "original": "MO --> XT",
+   "why": "labelled message reads 'MO depends on XT', reversing the relationship; cited manifests show sealmap-extract depends on sealmap-model; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "XT->>RU: depends",
+   "original": "XT --> RU",
+   "why": "labelled message reads 'XT depends on RU', reversing the relationship; cited manifests show sealmap-rust depends on sealmap-extract; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "MO->>CO: depends",
+   "original": "MO --> CO",
+   "why": "labelled message reads 'MO depends on CO', reversing the relationship; cited manifests show sealmap-corpus depends on sealmap-model; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "MM->>CO: depends",
+   "original": "MM --> CO",
+   "why": "labelled message reads 'MM depends on CO', reversing the relationship; cited manifests show sealmap-corpus depends on sealmap-mermaid; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "RU->>FA: depends",
+   "original": "RU --> FA",
+   "why": "labelled message reads 'RU depends on FA', reversing the relationship; cited manifests show the facade depends on sealmap-rust; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "CO->>FA: depends",
+   "original": "CO --> FA",
+   "why": "labelled message reads 'CO depends on FA', reversing the relationship; cited manifests show the facade depends on sealmap-corpus; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "MO->>DE: depends",
+   "original": "MO --> DE",
+   "why": "labelled message reads 'MO depends on DE', reversing the relationship; cited manifests show sealmap-dense depends on sealmap-model; autonumber also imposes an order the original does not claim"
+  },
+  {
+   "fact": "DE->>FA: depends",
+   "original": "DE --> FA",
+   "why": "labelled message reads 'DE depends on FA', reversing the relationship; cited manifests show the facade depends on sealmap-dense; autonumber also imposes an order the original does not claim"
+  }
+ ],
+ "dropped": [
+  {
+   "fact": "LN --> DT (workspace lints lead to every crate's deny missing_docs/README doctests)"
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": []
+}

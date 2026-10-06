@@ -1,0 +1,1 @@
+{"id": "COR-06.3", "verdict": "pass", "facts_checked": 13, "unsupported": [], "changed": [], "dropped": [], "citations_dropped": [], "citations_added": ["src/pack.rs:295"]}

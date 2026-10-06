@@ -1,0 +1,9 @@
+{"id": "DEN-01.4", "verdict": "fail", "facts_checked": 11,
+ "unsupported": [],
+ "changed": [
+  {"fact": "L->>L: level 0 ... L->>L: level 1 ... level 2 ... level 3 ... levels 4 and 5 (five unconditional numbered steps before the loop)", "original": "each symbol climbs only when it must; G{any name shared?} -->|yes| B moves to its next distinct level", "why": "Climbing the ladder is drawn as an unconditional sequence every symbol runs through levels 0-5 before any collision check; the original (and short.rs:38-55) starts every name at level 0 and climbs only for colliding group members."},
+  {"fact": "loop any name shared (short.rs:41) ... every member of each group moves to its next distinct level", "original": "ladder --> G; G -->|yes| B; B --> G", "why": "Order changed: the rewrite puts the collision loop after all five levels have already been climbed, so the 'next distinct level' step has no lower level to start from; in the original and in code the collision check drives each climb from level 0."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,1000 @@
+{
+ "original_non_sequence": 77,
+ "converted": 64,
+ "restored": [
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.5 The overview and its caps",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "COR-02.5"
+   ]
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.4 Reading a directory",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "COR-03.4"
+   ]
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.6 What reading sealmap's own projection revealed",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "DEN-01.6"
+   ]
+  },
+  {
+   "topic": "extract/01-the-adapter-pipeline.md",
+   "head": "## EXT-01.2 Where a file sits in the workspace",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-01.2"
+   ]
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.1 The id table",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-02.1"
+   ]
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.4 Formatting never reaches an id",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-02.4"
+   ]
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.7 What the walker remembers about local names",
+   "orig_kind": "stateDiagram-v2",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-03.7"
+   ]
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.5 From tokens to a label",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-04.5"
+   ]
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.6 Closure parameters are untyped",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-05.6"
+   ]
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.1 The shared fingerprinter",
+   "orig_kind": "classDiagram",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-06.1"
+   ]
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.2 Escaping a label",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MER-01.2"
+   ]
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.1 The id's shape as types",
+   "orig_kind": "classDiagram",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MOD-01.1"
+   ]
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.4 Escaping names and package fields",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MOD-01.4"
+   ]
+  }
+ ],
+ "repair_decisions": [
+  {
+   "topic": "corpus/01-generating-the-corpus-and-index.md",
+   "head": "## COR-01.3 The index as types",
+   "orig_kind": "classDiagram",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-01.3"
+   ]
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.3 Assembling a file's structure diagram",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-02.3"
+   ]
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.5 The overview and its caps",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "COR-02.5"
+   ]
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.3 A corpus file's drift states",
+   "orig_kind": "stateDiagram-v2",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-03.3"
+   ]
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.4 Reading a directory",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "COR-03.4"
+   ]
+  },
+  {
+   "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+   "head": "## COR-04.1 The lock and the report as types",
+   "orig_kind": "classDiagram",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-04.1"
+   ]
+  },
+  {
+   "topic": "corpus/05-the-seal-commands.md",
+   "head": "## COR-05.3 seal sign, from the command line",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-05.3"
+   ]
+  },
+  {
+   "topic": "corpus/05-the-seal-commands.md",
+   "head": "## COR-05.4 Exit codes",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-05.4"
+   ]
+  },
+  {
+   "topic": "corpus/06-review-packs.md",
+   "head": "## COR-06.1 From a request to a pack",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-06.1"
+   ]
+  },
+  {
+   "topic": "corpus/06-review-packs.md",
+   "head": "## COR-06.3 The budget: refuse, or shard by topic",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "COR-06.3"
+   ]
+  },
+  {
+   "topic": "delivery/01-ci-msrv-and-determinism.md",
+   "head": "## DEL-01.1 The four CI jobs",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "DEL-01.1"
+   ]
+  },
+  {
+   "topic": "delivery/01-ci-msrv-and-determinism.md",
+   "head": "## DEL-01.4 Crates, dependencies and publication",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "DEL-01.4"
+   ]
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.6 Dogfooding the gate on this repository",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "DEL-02.6"
+   ]
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.4 Short names and collisions",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "DEN-01.4"
+   ]
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.6 What reading sealmap's own projection revealed",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "DEN-01.6"
+   ]
+  },
+  {
+   "topic": "extract/01-the-adapter-pipeline.md",
+   "head": "## EXT-01.2 Where a file sits in the workspace",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-01.2"
+   ]
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.1 The id table",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-02.1"
+   ]
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.2 Which Rust items become symbols",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "EXT-02.2"
+   ]
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.4 Formatting never reaches an id",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-02.4"
+   ]
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.7 What the walker remembers about local names",
+   "orig_kind": "stateDiagram-v2",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-03.7"
+   ]
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.3 The confidence lattice and the external policy",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "EXT-04.3"
+   ]
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.5 From tokens to a label",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-04.5"
+   ]
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.2 Walking a path",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "EXT-05.2"
+   ]
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.6 Closure parameters are untyped",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-05.6"
+   ]
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.1 The shared fingerprinter",
+   "orig_kind": "classDiagram",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "EXT-06.1"
+   ]
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.3 What goes into each value",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "EXT-06.3"
+   ]
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.1 The writers and what they share",
+   "orig_kind": "classDiagram",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MER-01.1"
+   ]
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.2 Escaping a label",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MER-01.2"
+   ]
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.1 The id's shape as types",
+   "orig_kind": "classDiagram",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MOD-01.1"
+   ]
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.4 Escaping names and package fields",
+   "orig_kind": "flowchart",
+   "keep": false,
+   "changed": true,
+   "seq": true,
+   "pass2": false,
+   "units2": [
+    "MOD-01.4"
+   ]
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.6 Where the grammar is documented and claimed",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-01.6"
+   ]
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.2 From bytes to printed value",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-02.2"
+   ]
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.5 What the pair decides",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-02.5"
+   ]
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.1 The model as types",
+   "orig_kind": "classDiagram",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-03.1"
+   ]
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.3 Normalising a path",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-03.3"
+   ]
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.5 A flow is the skeleton of a sequence diagram",
+   "orig_kind": "flowchart",
+   "keep": true,
+   "changed": true,
+   "seq": true,
+   "pass2": true,
+   "units2": [
+    "MOD-03.5"
+   ]
+  }
+ ],
+ "reverted_stray_edits": [],
+ "rounds": {
+  "round1": {
+   "units": 77,
+   "pass": 41,
+   "rate": 0.5324675324675324
+  },
+  "round2": {
+   "units": 36,
+   "pass": 23,
+   "rate": 0.6388888888888888
+  },
+  "repair_targets": 36,
+  "repaired_and_kept": 23,
+  "restored": 13,
+  "final_pass_rate_of_rewritten": 0.8311688311688312
+ },
+ "per_diagram": [
+  {
+   "topic": "corpus/01-generating-the-corpus-and-index.md",
+   "head": "## COR-01.2 Anatomy of a document",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/01-generating-the-corpus-and-index.md",
+   "head": "## COR-01.3 The index as types",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/01-generating-the-corpus-and-index.md",
+   "head": "## COR-01.5 Per-file lookups built once",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.2 Which lane a call lands on",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.3 Assembling a file's structure diagram",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.4 Relations as class arrows",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+   "head": "## COR-02.5 The overview and its caps",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.2 Classifying a difference",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.3 A corpus file's drift states",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.4 Reading a directory",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "corpus/03-generate-check-write-and-the-cli.md",
+   "head": "## COR-03.5 Commands, flags and the facade",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+   "head": "## COR-04.1 The lock and the report as types",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+   "head": "## COR-04.2 Reading a lock",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+   "head": "## COR-04.3 What a topic contributes",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+   "head": "## COR-04.5 Deciding one symbol, and failing closed",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/05-the-seal-commands.md",
+   "head": "## COR-05.3 seal sign, from the command line",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/05-the-seal-commands.md",
+   "head": "## COR-05.4 Exit codes",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/06-review-packs.md",
+   "head": "## COR-06.1 From a request to a pack",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "corpus/06-review-packs.md",
+   "head": "## COR-06.3 The budget: refuse, or shard by topic",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/01-ci-msrv-and-determinism.md",
+   "head": "## DEL-01.1 The four CI jobs",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/01-ci-msrv-and-determinism.md",
+   "head": "## DEL-01.3 Where byte-identical output comes from",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/01-ci-msrv-and-determinism.md",
+   "head": "## DEL-01.4 Crates, dependencies and publication",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.1 The design's layers against the tree",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.2 The order of work and where the tree stands",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.3 Planned commands against present ones",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.4 A sealed topic's life, as built",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.5 Crates planned against crates present",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "delivery/02-design-versus-code.md",
+   "head": "## DEL-02.6 Dogfooding the gate on this repository",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.1 From a model to two texts and a slice",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.2 One call line and its mark",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.4 Short names and collisions",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "dense/01-the-dense-agent-projection.md",
+   "head": "## DEN-01.6 What reading sealmap's own projection revealed",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/01-the-adapter-pipeline.md",
+   "head": "## EXT-01.2 Where a file sits in the workspace",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/01-the-adapter-pipeline.md",
+   "head": "## EXT-01.4 What becomes of one file",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/01-the-adapter-pipeline.md",
+   "head": "## EXT-01.5 The order resolve builds the model in",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.1 The id table",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.2 Which Rust items become symbols",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.4 Formatting never reaches an id",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/02-minting-ids-for-definitions.md",
+   "head": "## EXT-02.5 A member the code does not define stays with its type",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.1 The raw IR",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.3 Where a deferred closure body goes",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.4 A closure stored with let is drawn where it is defined",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.5 if and else-if chains",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.6 Macros in a body",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+   "head": "## EXT-03.7 What the walker remembers about local names",
+   "final_kind": "stateDiagram-v2"
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.2 Collapsing a branch after resolution",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.3 The confidence lattice and the external policy",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/04-lowering-confidence-and-labels.md",
+   "head": "## EXT-04.5 From tokens to a label",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.1 The tables, built before anything resolves",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.2 Walking a path",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.4 Deciding a method call",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/05-workspace-name-resolution.md",
+   "head": "## EXT-05.6 Closure parameters are untyped",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.1 The shared fingerprinter",
+   "final_kind": "classDiagram"
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.3 What goes into each value",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.4 Undoing what rustfmt does",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.5 Is this comma layout?",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "extract/06-signature-and-body-fingerprints.md",
+   "head": "## EXT-06.6 The semantics the tests pin",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.1 The writers and what they share",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.2 Escaping a label",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.4 Class, ER and flowchart rendering rules",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/01-typed-writers-and-escaping.md",
+   "head": "## MER-01.5 Identifiers from arbitrary text",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/02-injective-diagram-ids.md",
+   "head": "## MER-02.1 Encoding a global id",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/02-injective-diagram-ids.md",
+   "head": "## MER-02.2 Plain names and escaped names",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/02-injective-diagram-ids.md",
+   "head": "## MER-02.4 The injectivity proof",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "mermaid/02-injective-diagram-ids.md",
+   "head": "## MER-02.5 Three generations of diagram id",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.1 The id's shape as types",
+   "final_kind": "classDiagram"
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.2 Three forms and their suffixes",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.4 Escaping names and package fields",
+   "final_kind": "flowchart"
+  },
+  {
+   "topic": "model/01-the-sym-id-grammar.md",
+   "head": "## MOD-01.6 Where the grammar is documented and claimed",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.1 The two hash types",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.2 From bytes to printed value",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.4 A fingerprint's life",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/02-content-hashes-and-fingerprints.md",
+   "head": "## MOD-02.5 What the pair decides",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.1 The model as types",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.2 Loading a directory",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.3 Normalising a path",
+   "final_kind": "sequenceDiagram"
+  },
+  {
+   "topic": "model/03-the-codebase-model-and-schema-v2.md",
+   "head": "## MOD-03.5 A flow is the skeleton of a sequence diagram",
+   "final_kind": "sequenceDiagram"
+  }
+ ]
+}

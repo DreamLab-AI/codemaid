@@ -1,0 +1,18 @@
+{"id": "MOD-01.1", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [],
+ "changed": [
+  {"fact": "RE->>DE: Path holds segments (sym.rs:114), Unresolved a bare name (sym.rs:115)", "original": "Repr --> Descriptor; Path segments sym.rs:114; Unresolved name sym.rs:115", "why": "Attaches Path and Unresolved to Descriptor; code has Path(Vec<String>) and Unresolved(String), only Global holds Vec<Descriptor> (sym.rs:113-115)"},
+  {"fact": "accessors on the text itself (sym.rs:436, sym.rs:544, sym.rs:576, sym.rs:634)", "original": "+parse(text) Result sym.rs:436 ... +view() IdView sym.rs:634", "why": "parse (sym.rs:436) is a constructor that runs the Parser to build a Repr (sym.rs:437), not an accessor working on the stored text"}
+ ],
+ "dropped": [
+  {"fact": "+Arc str canonical text"},
+  {"fact": "+parse(text) Result"},
+  {"fact": "+parent() Option"},
+  {"fact": "+child(descriptor) Option"},
+  {"fact": "+view() IdView"},
+  {"fact": "Version <<enum>>"},
+  {"fact": "Suffix <<enum>>"},
+  {"fact": "Repr --> Descriptor (Global's descriptors)"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,11 @@
+{
+ "topic": "corpus/05-the-seal-commands.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 38,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "COR-05.3 and COR-05.4 preserve all checked facts, including branches, write order, conditions and exit codes; the other diagrams are unchanged."
+}

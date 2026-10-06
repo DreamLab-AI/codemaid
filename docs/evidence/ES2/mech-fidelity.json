@@ -1,0 +1,427 @@
+{
+  "totals": {
+    "topics": 20,
+    "prose_verbatim": 20,
+    "non_sequence_after": 13,
+    "blocks_before": 106,
+    "blocks_after": 106,
+    "headings_added": 0,
+    "cites_dropped": 1,
+    "cites_invented": 2,
+    "topics_with_dropped_cites": 1,
+    "topics_with_invented_cites": 2
+  },
+  "per_topic": [
+    {
+      "topic": "corpus/01-generating-the-corpus-and-index.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 2,
+        "flowchart": 2,
+        "classDiagram": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5
+      },
+      "cites_before": 39,
+      "cites_after": 39,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "corpus/02-structure-sequence-and-overview-projections.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 1,
+        "flowchart": 4
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 43,
+      "cites_after": 44,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": [
+        "structure.rs:178"
+      ]
+    },
+    {
+      "topic": "corpus/03-generate-check-write-and-the-cli.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 1,
+        "flowchart": 3,
+        "stateDiagram-v2": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 38,
+      "cites_after": 38,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "corpus/04-seals-the-lock-and-the-checks.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 3,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 6
+      },
+      "cites_before": 71,
+      "cites_after": 71,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "corpus/05-the-seal-commands.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 2,
+        "flowchart": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4
+      },
+      "cites_before": 37,
+      "cites_after": 37,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "corpus/06-review-packs.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 2,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4
+      },
+      "cites_before": 40,
+      "cites_after": 40,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "delivery/01-ci-msrv-and-determinism.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 3,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5
+      },
+      "cites_before": 45,
+      "cites_after": 45,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "delivery/02-design-versus-code.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 5,
+        "stateDiagram-v2": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 6
+      },
+      "cites_before": 26,
+      "cites_after": 26,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "dense/01-the-dense-agent-projection.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 4,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5,
+        "flowchart": 1
+      },
+      "cites_before": 42,
+      "cites_after": 42,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "extract/01-the-adapter-pipeline.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 2,
+        "flowchart": 2,
+        "stateDiagram-v2": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 39,
+      "cites_after": 39,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "extract/02-minting-ids-for-definitions.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 4,
+        "sequenceDiagram": 1
+      },
+      "kinds_after": {
+        "flowchart": 2,
+        "sequenceDiagram": 3
+      },
+      "cites_before": 44,
+      "cites_after": 44,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "extract/03-the-flow-walker-and-raw-ir.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "sequenceDiagram": 1,
+        "flowchart": 4,
+        "stateDiagram-v2": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 6,
+        "stateDiagram-v2": 1
+      },
+      "cites_before": 57,
+      "cites_after": 57,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "extract/04-lowering-confidence-and-labels.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "sequenceDiagram": 2,
+        "flowchart": 3
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 43,
+      "cites_after": 43,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "extract/05-workspace-name-resolution.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 3,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5,
+        "flowchart": 1
+      },
+      "cites_before": 59,
+      "cites_after": 60,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": [
+        "resolve.rs:868-872"
+      ]
+    },
+    {
+      "topic": "extract/06-signature-and-body-fingerprints.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "sequenceDiagram": 1,
+        "flowchart": 4
+      },
+      "kinds_after": {
+        "classDiagram": 1,
+        "sequenceDiagram": 5
+      },
+      "cites_before": 45,
+      "cites_after": 45,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "mermaid/01-typed-writers-and-escaping.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 3,
+        "sequenceDiagram": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 47,
+      "cites_after": 47,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "mermaid/02-injective-diagram-ids.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "flowchart": 4,
+        "sequenceDiagram": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5
+      },
+      "cites_before": 28,
+      "cites_after": 28,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "model/01-the-sym-id-grammar.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 3,
+        "sequenceDiagram": 2
+      },
+      "kinds_after": {
+        "classDiagram": 1,
+        "sequenceDiagram": 4,
+        "flowchart": 1
+      },
+      "cites_before": 49,
+      "cites_after": 49,
+      "bare_line_refs_before": 4,
+      "bare_line_refs_after": 4,
+      "cites_dropped": [],
+      "cites_invented": []
+    },
+    {
+      "topic": "model/02-content-hashes-and-fingerprints.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 2,
+        "sequenceDiagram": 1,
+        "stateDiagram-v2": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5
+      },
+      "cites_before": 33,
+      "cites_after": 32,
+      "bare_line_refs_before": 0,
+      "bare_line_refs_after": 0,
+      "cites_dropped": [
+        "hash.rs:89"
+      ],
+      "cites_invented": []
+    },
+    {
+      "topic": "model/03-the-codebase-model-and-schema-v2.md",
+      "prose_verbatim": true,
+      "headings_added": 0,
+      "headings_missing": [],
+      "kinds_before": {
+        "classDiagram": 1,
+        "flowchart": 3,
+        "sequenceDiagram": 1
+      },
+      "kinds_after": {
+        "sequenceDiagram": 5
+      },
+      "cites_before": 38,
+      "cites_after": 38,
+      "bare_line_refs_before": 1,
+      "bare_line_refs_after": 1,
+      "cites_dropped": [],
+      "cites_invented": []
+    }
+  ]
+}

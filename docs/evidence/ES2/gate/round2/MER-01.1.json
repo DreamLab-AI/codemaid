@@ -1,0 +1,1 @@
+{"id": "MER-01.1", "verdict": "pass", "facts_checked": 24, "unsupported": [], "changed": [], "dropped": [{"fact": "class Ident { String, letters digits underscore  escape.rs:58 } (the 'String' representation is no longer stated)"}], "citations_dropped": [], "citations_added": []}

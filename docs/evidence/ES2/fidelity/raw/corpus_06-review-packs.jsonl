@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f6-fbad-71a2-afd2-2771535f079b"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"corpus/06-review-packs.md\",\"diagrams_rewritten\":2,\"facts_checked\":70,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[],\"prose_changed\":false,\"notes\":\"Both flowcharts retain their facts and citations as sequences; the existing sequence diagrams and all prose are unchanged.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":26060,"cached_input_tokens":8064,"cache_write_input_tokens":0,"output_tokens":956,"reasoning_output_tokens":874}}

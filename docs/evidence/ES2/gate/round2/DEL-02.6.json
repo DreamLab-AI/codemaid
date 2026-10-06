@@ -1,0 +1,1 @@
+{"id": "DEL-02.6", "verdict": "pass", "facts_checked": 9, "unsupported": [], "changed": [], "dropped": [{"fact": "V -.-> CI (dotted edge from verify to the CI node; now a note \"no CI job runs verify yet (ci.yml:9-84)\")"}], "citations_dropped": [], "citations_added": []}

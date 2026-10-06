@@ -1,0 +1,10 @@
+{"id": "COR-02.3", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [
+  {"fact": "ED->>SUB: field edges first", "why": "Original only says a field edge subsumes a uses edge for the same pair (structure.rs:172-176); it claims no ordering or priority of field edges, and the code iterates all edges in BTreeSet order, not field edges first"}
+ ],
+ "changed": [
+  {"fact": "SUB->>STUB: stubs for the rest", "original": "stubs for targets defined elsewhere, kind in file, or external", "why": "Stubs are made only for edge targets not already drawn (structure.rs:178), not for 'the rest' of the edges or symbols"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

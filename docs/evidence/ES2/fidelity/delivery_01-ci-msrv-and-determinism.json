@@ -1,0 +1,17 @@
+{
+ "topic": "delivery/01-ci-msrv-and-determinism.md",
+ "diagrams_rewritten": 3,
+ "facts_checked": 75,
+ "facts_dropped": [],
+ "facts_invented": [
+  {
+   "diagram": "DEL-01.3",
+   "fact": "ordered collections only → normalised relative paths → BLAKE3, never a seeded hasher → no timestamps, absolute paths, user names or environment → parallel results in input order",
+   "why": "The numbered messages impose an order on mechanisms that the original presents as independent contributors."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Counted 40 labelled nodes/groups and 35 directed relationships; compound labels were checked in full."
+}

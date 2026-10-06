@@ -1,0 +1,10 @@
+{"id": "EXT-02.1", "verdict": "fail", "facts_checked": 15,
+ "unsupported": [],
+ "changed": [
+  {"fact": "ME->>TR: a trait-impl method / ME->>FO: an impl method whose type is outside the code (successive messages, no alt)",
+   "original": "METH --> TRAIT; METH --> FOREIGN (separate builders, one per kind of definition)",
+   "why": "The sequence draws both outcomes as happening one after the other in a single run. They are exclusive: impl_method_id returns method_id (the type-owned [Trait] form) only when the owner is global, and the module/impl anchor otherwise (ids.rs:102-110). No alt marks the choice, though the same rewrite uses one for this branch in EXT-02.3."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

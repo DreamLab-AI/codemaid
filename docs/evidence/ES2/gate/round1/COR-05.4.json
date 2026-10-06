@@ -1,0 +1,6 @@
+{"id": "COR-05.4", "verdict": "fail", "facts_checked": 7,
+ "unsupported": [{"fact": "the gates<br/>verify, seal-check, generate --check", "why": "the original topic calls only verify 'the gate' and says nothing grouping seal-check and generate --check as gates; the participant label adds a classification the original does not make"}],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

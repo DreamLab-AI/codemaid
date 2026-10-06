@@ -1,0 +1,11 @@
+{
+ "topic": "corpus/06-review-packs.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 70,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Both flowcharts retain their facts and citations as sequences; the existing sequence diagrams and all prose are unchanged."
+}

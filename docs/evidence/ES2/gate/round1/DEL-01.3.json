@@ -1,0 +1,1 @@
+{"id": "DEL-01.3", "verdict": "pass", "facts_checked": 15, "unsupported": [], "changed": [], "dropped": [{"fact": "BY --> T1 ... BY --> T5 (the byte-identical output is the subject each test/CI check holds; the rewrite draws the five checks as notes over 'the tests and CI' with no link to B)"}], "citations_dropped": [], "citations_added": []}

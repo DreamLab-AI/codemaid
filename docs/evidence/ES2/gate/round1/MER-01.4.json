@@ -1,0 +1,1 @@
+{"id": "MER-01.4", "verdict": "pass", "facts_checked": 11, "unsupported": [], "changed": [], "dropped": [{"fact": "CLS --> ER --> FC (edges between the subgraphs; the rewrite keeps the order only as participant/message sequence)"}], "citations_dropped": [], "citations_added": []}

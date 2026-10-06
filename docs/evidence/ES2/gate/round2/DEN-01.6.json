@@ -1,0 +1,10 @@
+{"id": "DEN-01.6", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [],
+ "changed": [
+  {"fact": "par the first four came from one read ... and the fifth came from reading the projection of the pack code",
+   "original": "The fifth came from reading the projection of the `pack` code added afterwards.",
+   "why": "par places the fifth finding concurrently with the first four, but the original says it came from a later read of code added afterwards; a sequence/order is drawn as simultaneous"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

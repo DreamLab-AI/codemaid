@@ -1,0 +1,13 @@
+{"id": "EXT-02.1", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [],
+ "changed": [
+  {"fact": "alt owner is a global id (ids.rs:102-104) / ME->>TR: a trait-impl method (ids.rs:84)",
+   "original": "METH --> TRAIT (unconditional edge)",
+   "why": "Unconditional METH->TRAIT edge made conditional on owner being a global id; ids.rs:102-104 gates method_id (inherent or trait) vs the foreign anchor, not trait-impl vs foreign."},
+  {"fact": "else owner outside the code / ME->>FO: anchored in the module holding the impl",
+   "original": "METH --> TRAIT and METH --> FOREIGN (two parallel edges)",
+   "why": "Two co-existing edges drawn as exclusive alternatives; a foreign impl id also carries [Trait] (ids.rs:105-108, original label impl#[SelfTy][Trait]m()), so trait-impl and foreign are not mutually exclusive."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": ["ids.rs:102-104"]}

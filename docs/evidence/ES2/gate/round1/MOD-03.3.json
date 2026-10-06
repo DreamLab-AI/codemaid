@@ -1,0 +1,8 @@
+{"id": "MOD-03.3", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [],
+ "changed": [
+  {"fact": "participant PE as PathError<br/>path.rs:49", "original": "ABS{\"leading slash or drive letter?<br/>path.rs:49\"}", "why": "path.rs:49 is attached to the absolute-path check in the original and in the code; the rewrite re-attaches it to the PathError component, which the code defines at path.rs:28, so the citation now locates PathError wrongly"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,42 @@
+{
+ "topic": "mermaid/01-typed-writers-and-escaping.md",
+ "diagrams_rewritten": 3,
+ "facts_checked": 75,
+ "facts_dropped": [
+  {
+   "diagram": "MER-01.1",
+   "fact": "String"
+  }
+ ],
+ "facts_invented": [
+  {
+   "diagram": "MER-01.4",
+   "fact": "\"label with generics as entity codes\" before \"relation arrows drawn so the head\"",
+   "why": "The sequence imposes an order between two class rules that the original does not order."
+  },
+  {
+   "diagram": "MER-01.4",
+   "fact": "\"relation arrows drawn so the head\" before \"duplicate classes and relations ignored\"",
+   "why": "The original does not order arrow rendering before duplicate handling."
+  },
+  {
+   "diagram": "MER-01.4",
+   "fact": "\"attribute type squeezed to Mermaid's\" before \"identifying relations solid\"",
+   "why": "The original does not order attribute processing before relation styling."
+  },
+  {
+   "diagram": "MER-01.4",
+   "fact": "\"every node label quoted\" before \"edge labels quoted\"",
+   "why": "The original lists these independently without specifying their order."
+  },
+  {
+   "diagram": "MER-01.4",
+   "fact": "\"edge labels quoted\" before \"subgraphs with optional direction\"",
+   "why": "The original does not order edge processing before subgraph processing."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "MER-01.2 remains an unchanged flowchart; MER-01.3 is unchanged. Ident's String type is omitted; the original ClassDiagram → ErDiagram → Flowchart order is retained."
+}

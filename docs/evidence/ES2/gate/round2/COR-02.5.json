@@ -1,0 +1,8 @@
+{"id": "COR-02.5", "verdict": "fail", "facts_checked": 17,
+ "unsupported": [
+  {"fact": "par the crate graph view ... and the module graph view ... and the data model view ... and the trait map view ... end", "why": "par claims the four views are produced concurrently; the original flowchart only fans out from _overview.md with no concurrency claim, and overview.rs:23-38 renders them sequentially (crate graph, module graphs, data models, trait map)"}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

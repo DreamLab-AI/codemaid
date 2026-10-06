@@ -1,0 +1,9 @@
+{"id": "EXT-06.1", "verdict": "fail", "facts_checked": 17,
+ "unsupported": [
+  {"fact": "the methods on one value's hasher,<br/>no order between them", "why": "The original classDiagram makes no claim about call order either way. The code's own doc says to feed tokens, sections and nested fingerprints 'then finish' (fingerprint.rs:139-143), and feed order determines the value."},
+  {"fact": "(new_derive_key(kind.context()),", "why": "The original says only 'hasher keyed blake3' and 'distinct key contexts'. It never names new_derive_key or kind.context(), even though the code at :163-164 matches."}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,14 @@
+{"id": "MOD-01.1", "verdict": "fail", "facts_checked": 20,
+ "unsupported": [],
+ "changed": [
+  {"fact": "SY->>RE: every id is built and checked through the Repr (parse, sym.rs:436)",
+   "original": "SymbolId ..> Repr : built and checked through",
+   "why": "Original states a dependency, not a universal; 'every id' is contradicted by child() (sym.rs:576-583), which builds an id by appending to the text with no Repr, and parent() which slices text (MOD-01.5: 'Neither runs the parser')."}
+ ],
+ "dropped": [
+  {"fact": "+Arc str canonical text  sym.rs:108 (Arc str no longer in the diagram; prose keeps it)"},
+  {"fact": "+parse(text) Result (Result return type)"},
+  {"fact": "+parent() Option / +child(descriptor) Option (Option return types)"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

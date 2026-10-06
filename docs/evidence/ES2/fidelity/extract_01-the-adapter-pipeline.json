@@ -1,0 +1,11 @@
+{
+ "topic": "extract/01-the-adapter-pipeline.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 34,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "The two changed diagrams preserve the original facts; EXT-01.2 remains an unchanged flowchart, so the requested conversion is incomplete."
+}

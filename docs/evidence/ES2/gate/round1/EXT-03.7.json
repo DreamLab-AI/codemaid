@@ -1,0 +1,13 @@
+{"id": "EXT-03.7", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [
+  {"fact": "EN->>EN: a typed parameter or self seeds Param / EN->>EN: a let binding seeds Bound / opt a pattern binding ... (drawn in that order)", "why": "The original gives Param, Bound and Destructured as three parallel entries from [*]; it claims no order between parameter seeding, let handling and pattern handling, nor that pattern handling follows the let outcome."}
+ ],
+ "changed": [
+  {"fact": "EN->>EN: a typed parameter or self seeds Param, then EN->>EN: a let binding seeds Bound (both unconditional)", "original": "[*] --> Param: typed parameter or self; [*] --> Bound: let binding", "why": "Alternative entry points for a name are drawn as two unconditional steps that both happen; the let-binding path (and its alt) is shown as always taken."},
+  {"fact": "TY->>RS: block ends; CO->>RS: block ends; DE->>RS: block ends", "original": "Typed --> Restored; Computed --> Restored; Derived --> Restored", "why": "Exclusive per-binding states (Typed vs Computed vs Derived) are drawn as three sequential messages that all occur, so mutually exclusive outcomes appear to happen together."}
+ ],
+ "dropped": [
+  {"fact": "Restored --> [*]"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

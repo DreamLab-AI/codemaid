@@ -1,0 +1,13 @@
+{"id": "COR-05.3", "verdict": "fail", "facts_checked": 11,
+ "unsupported": [],
+ "changed": [
+  {"fact": "alt TOPIC an id, else a path under the cwd or the diagrams dir (main.rs:775-789) ... end wrapping date, library call and writes",
+   "original": "A --> L --> T --> D --> S (T has a single outgoing edge, no failure branch)",
+   "why": "A one-branch alt makes the date, sign and writes conditional on the TOPIC guard; the original draws topic resolution as an unconditional step in the chain"},
+  {"fact": "LIB-->>CMD: refused, message, exit 1, nothing written (main.rs:673-675)",
+   "original": "S -->|error| R \"refused: message, exit 1, nothing written\"",
+   "why": "Arrow claims the library itself returns the message and exit code to the command; main.rs:673-675 has the CLI print the message and return ExitCode 1 after the library's Err"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

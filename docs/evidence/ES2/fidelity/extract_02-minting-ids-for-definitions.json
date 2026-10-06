@@ -1,0 +1,11 @@
+{
+ "topic": "extract/02-minting-ids-for-definitions.md",
+ "diagrams_rewritten": 2,
+ "facts_checked": 38,
+ "facts_dropped": [],
+ "facts_invented": [],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Checked 20 node statements and 18 relationships in EXT-02.2 and EXT-02.5; all are preserved. EXT-02.1 and EXT-02.4 remain unconverted flowcharts."
+}

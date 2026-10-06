@@ -1,0 +1,1 @@
+{"id": "EXT-06.3", "verdict": "pass", "facts_checked": 15, "unsupported": [], "changed": [], "dropped": [{"fact": "CALL --> DATA --> TRAIT --> VALUE --> MODULE (edges chaining the five kinds)"}], "citations_dropped": [], "citations_added": []}

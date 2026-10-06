@@ -1,0 +1,30 @@
+{"run_id":"r8ab75c",
+"issues":[
+{"id":"T-02","score":"FULL","findings":[7],"why":"ignore 0.4.30 needs newer Rust than MSRV 1.85; only lockfile holds it"},
+{"id":"DB-38","score":"FULL","findings":[7],"why":"ignore 0.4.30 exceeds MSRV, Cargo.toml dependency"},
+{"id":"T-03","score":"FULL","findings":[9],"why":"codebase name from checkout dir leaks into output when --name omitted"},
+{"id":"DB-07","score":"FULL","findings":[11],"why":"stack overflow aborts the process, uncatchable"},
+{"id":"DB-11","score":"FULL","findings":[12],"why":"let-bound closure drawn at definition not call"},
+{"id":"DB-18","score":"FULL","findings":[13],"why":"untyped closure params name-guessed to internal method (vacuum on u8)"},
+{"id":"DB-19","score":"FULL","findings":[13],"why":"closure param shadowing outer typed local keeps outer type"},
+{"id":"DB-28","score":"FULL","findings":[8],"why":"trait map truncates to first max_edges with no omitted count"},
+{"id":"DB-40","score":"FULL","findings":[6],"why":"inline example id in MER-02 reads as unsealed citation, verify exits 1"},
+{"id":"DB-05","score":"PARTIAL","findings":[10],"why":"same silent-skip in source.rs load but for >2MiB files, not non-UTF8"}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:609-620","why":"No shell is used (Command args), so no metachar injection; only a leading-dash rev could be read as a git archive option"},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/contract.rs:98-101, crates/sealmap-corpus/src/document.rs:153-155","why":"Deletion is real but limited to files bearing sealmap's generated marker, not all Markdown; documented design"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:679-682","why":"Two sequential non-atomic writes exist; consequence is a recoverable LockFault, and it is documented"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-corpus/src/seal/lock.rs:227-236","why":"parse_canonical rejects CRLF locks byte-for-byte, as its own doc states"},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:459-462","why":"--repo is refused with --since/--diff as claimed, but it is a deliberate explicit error"},
+{"n":6,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"MER-02 example id as code span fails verify"},
+{"n":7,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore 0.4.30 vs MSRV"},
+{"n":8,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"trait map no omitted count"},
+{"n":9,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"checkout-derived name leaks"},
+{"n":10,"class":"REG","matches":["DB-05"],"verdict":null,"code":null,"why":"silent skip of files in load_dir (size rather than UTF-8)"},
+{"n":11,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow aborts"},
+{"n":12,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"let closure drawn at definition"},
+{"n":13,"class":"REG","matches":["DB-18","DB-19"],"verdict":null,"code":null,"why":"closure param guesses and shadowing"},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-rust/src/layout.rs:170","why":"Binary crate name becomes pkg_main when a lib exists, changing SymbolIds on adding lib.rs"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:315-318","why":"TopicOverBudget error on a single oversized topic exists, but it is the documented refusal behaviour"}
+]}

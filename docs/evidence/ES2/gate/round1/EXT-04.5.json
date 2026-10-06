@@ -1,0 +1,8 @@
+{"id": "EXT-04.5", "verdict": "fail", "facts_checked": 15,
+ "unsupported": [
+  {"fact": "autonumbered order 2 TS->>SQ, 3 T->>AS, 4 AS->>CL, 5 SQ->>CO", "why": "The original draws two independent chains (T->TS->SQ->CO->CP and T->AS->CL->CP) with no relative order; the rewrite serialises them, claiming argument sketching and call_label happen between squeeze and condition_label. A par block would have kept them independent."}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

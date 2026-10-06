@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a110f8-4e38-7e71-9f26-b975e46e6565"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"topic\":\"extract/05-workspace-name-resolution.md\",\"diagrams_rewritten\":3,\"facts_checked\":80,\"facts_dropped\":[],\"facts_invented\":[],\"citations_dropped\":[],\"citations_added\":[],\"prose_changed\":false,\"notes\":\"EXT-05.1, EXT-05.2 and EXT-05.4 preserve their facts; the added provenance branch and citation are supported by original prose. EXT-05.6 remains an unchanged flowchart.\"}"}}
+{"type":"turn.completed","usage":{"input_tokens":27997,"cached_input_tokens":12288,"cache_write_input_tokens":0,"output_tokens":1514,"reasoning_output_tokens":1409}}

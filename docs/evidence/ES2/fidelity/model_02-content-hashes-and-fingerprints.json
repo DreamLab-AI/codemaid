@@ -1,0 +1,34 @@
+{
+ "topic": "model/02-content-hashes-and-fingerprints.md",
+ "diagrams_rewritten": 4,
+ "facts_checked": 74,
+ "facts_dropped": [
+  {
+   "diagram": "MOD-02.1",
+   "fact": "ContentHash: +String"
+  },
+  {
+   "diagram": "MOD-02.1",
+   "fact": "ContentHash: +parse(s) Option"
+  },
+  {
+   "diagram": "MOD-02.1",
+   "fact": "ContentHash: +short(n) str"
+  },
+  {
+   "diagram": "MOD-02.1",
+   "fact": "Fingerprint: +parse(s) Option"
+  },
+  {
+   "diagram": "MOD-02.2",
+   "fact": "blake3 colon 64 hex"
+  }
+ ],
+ "facts_invented": [],
+ "citations_dropped": [
+  "hash.rs:89"
+ ],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Dropped details are String storage, both Option return types, the str return type, and the content-hash colon separator; the associated operations and other formatting details remain. MOD-02.3 is unchanged."
+}

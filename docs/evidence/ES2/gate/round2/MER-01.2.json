@@ -1,0 +1,8 @@
+{"id": "MER-01.2", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [
+  {"fact": "escape_type layers escape_text ... calling it first (escape.rs:145)", "why": "The original topic never says escape_type calls escape_text, or that it runs first. It only says escape_type 'adds angle brackets, braces, and parens' and that type text is 'also' escaped. The code at escape.rs:145 agrees, but the claim is new to the topic."}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

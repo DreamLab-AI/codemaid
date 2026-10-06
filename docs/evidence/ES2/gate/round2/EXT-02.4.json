@@ -1,0 +1,13 @@
+{"id": "EXT-02.4", "verdict": "fail", "facts_checked": 8,
+ "unsupported": [],
+ "changed": [
+  {"fact": "alt trailing comma before a closing angle or square bracket ... TK-->>ID: dropped, the same Trait descriptor text either way / else comma before a closing paren: Note kept",
+   "original": "W --> TT --> TK --> TC --> ID; TC -.-> KEEP",
+   "why": "Original reaches ID ('the same Trait descriptor text either way') unconditionally after the comma-drop step; the rewrite makes reaching ID conditional on the drop branch, so the paren-comma else branch yields no descriptor text, whereas trait_text always returns its string (collect.rs:493-500)."},
+  {"fact": "alt ... else comma before a closing paren",
+   "original": "TC[\"trailing comma ... dropped\"] -.-> KEEP[\"comma before a closing paren kept\"]",
+   "why": "Original shows the drop as an unconditional step with the paren-comma rule as a side note; the rewrite turns them into two mutually exclusive branches, though one path can contain both kinds of comma and the replace loop runs on every input (collect.rs:495)."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

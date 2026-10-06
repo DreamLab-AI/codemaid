@@ -1,0 +1,1 @@
+{"id": "COR-03.5", "verdict": "pass", "facts_checked": 15, "unsupported": [], "changed": [], "dropped": [{"fact": "SITE --> SRC (seal commands and pack edge to shared source flags; still stated in the SITE label 'source flags')"}], "citations_dropped": [], "citations_added": []}

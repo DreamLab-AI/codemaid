@@ -1,0 +1,10 @@
+{"id": "MOD-01.4", "verdict": "fail", "facts_checked": 11,
+ "unsupported": [
+  {"fact": "NM->>WR: a package name or version to print", "why": "The package field is sent by the 'a descriptor or path name' participant and comes after the name step. The original has 'a package name or version' as a separate, independent input (F --> FC) and makes no claim that names and fields come from one source or in any order."}
+ ],
+ "changed": [
+  {"fact": "else a char falls outside the simple set", "original": "S{\"non-empty and every char in the simple set?\"} -->|no| Q", "why": "The original 'no' branch also covers the empty name. write_name (sym.rs:373) backtick-quotes an empty name too, so the rewrite's else label drops that case and narrows the condition."}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,32 @@
+{
+ "topic": "dense/01-the-dense-agent-projection.md",
+ "diagrams_rewritten": 3,
+ "facts_checked": 71,
+ "facts_dropped": [
+  {
+   "diagram": "DEN-01.4",
+   "fact": "candidate"
+  }
+ ],
+ "facts_invented": [
+  {
+   "diagram": "DEN-01.1",
+   "fact": "NEW->>SN: name the symbols; NEW->>GR: read the call graph",
+   "why": "The sequence orders naming before graph construction; the original states dependencies without ordering these operations."
+  },
+  {
+   "diagram": "DEN-01.1",
+   "fact": "TX->>OUT: dense.txt; IX->>OUT: _index.txt",
+   "why": "The sequence orders delivery of dense.txt before _index.txt; the original gives no relative order."
+  },
+  {
+   "diagram": "DEN-01.1",
+   "fact": "IX->>OUT: _index.txt; GR->>SL: callers and callees",
+   "why": "The sequence places slicing after both rendered outputs; the original allows rendering and slicing to share the constructed results without this ordering."
+  }
+ ],
+ "citations_dropped": [],
+ "citations_added": [],
+ "prose_changed": false,
+ "notes": "Checked 35, 15 and 21 facts in DEN-01.1, DEN-01.2 and DEN-01.4 respectively; DEN-01.6 remains an unchanged flowchart."
+}

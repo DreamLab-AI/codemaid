@@ -1,0 +1,9 @@
+{"id": "MOD-02.2", "verdict": "fail", "facts_checked": 13,
+ "unsupported": [],
+ "changed": [
+  {"fact": "KD-->>TK: first 16 bytes kept (from_blake3, hash.rs:99)", "original": "KD --> TR[\"first 16 bytes kept\"] --> FP", "why": "the truncated digest is drawn as a reply back to the token stream; the original (and from_blake3 at hash.rs:97-101) flows it forward from the keyed hasher to the Fingerprint that Display prints"},
+  {"fact": "TK->>FP: printed as blake3-16, 32 hex (Display, hash.rs:149)", "original": "TR[\"first 16 bytes kept\"] --> FP[\"blake3-16 colon 32 hex, Display\"]", "why": "the printing step is drawn as a message from the symbol token stream; in the original (and Display for Fingerprint at hash.rs:148-155) it is the truncated 16-byte fingerprint that is printed, not the tokens"}
+ ],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

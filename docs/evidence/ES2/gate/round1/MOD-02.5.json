@@ -1,0 +1,13 @@
+{"id": "MOD-02.5", "verdict": "fail", "facts_checked": 16,
+ "unsupported": [
+  {"fact": "MD-->>SC: unparsable, fail closed (in-model branch)", "why": "Arrow claims the model replies with the verdict; original only has the seal check deciding 'unparsable, fail closed', and classify() in check.rs computes it, codebase.symbol() only returns the symbol"},
+  {"fact": "MD-->>SC: holds (check.rs:153)", "why": "Arrow claims the model returns 'holds'; original shows it as the check's outcome node, and check.rs:153 builds it in classify()"},
+  {"fact": "MD-->>SC: behaviour, body only", "why": "Arrow claims a model-to-check message carrying the verdict; no such message in the original or code"},
+  {"fact": "MD-->>SC: contract", "why": "Arrow claims a model-to-check message carrying the verdict; no such message in the original or code"},
+  {"fact": "MD-->>SC: unparsable, fail closed (absent branch, check.rs:155)", "why": "Arrow claims the model returns the verdict; original's ancestor check is the seal check's decision (unparsable_ancestor in classify)"},
+  {"fact": "MD-->>SC: absent, same-kind ids with the sealed body are rename candidates", "why": "Arrow claims the model returns absent with rename candidates; original shows it as the check's outcome, computed by classify/rename_candidates"}
+ ],
+ "changed": [],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

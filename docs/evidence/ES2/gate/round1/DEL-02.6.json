@@ -1,0 +1,6 @@
+{"id": "DEL-02.6", "verdict": "fail", "facts_checked": 8,
+ "unsupported": [],
+ "changed": [{"fact": "alt topics with no seal and no citation ... else MER-02 cites a fixture id in prose", "original": "V --> C; V --> M (prose: verify treats fifteen topics as legacy coverage and fails on one)", "why": "the original shows both outcomes from the same verify run (15 coverage plus 1 failure, so the run exits 1); the alt makes them exclusive outcomes of the run, implying a run could return 'coverage only, never a failure' instead of exit 1"}],
+ "dropped": [],
+ "citations_dropped": [],
+ "citations_added": []}

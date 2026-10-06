@@ -1,0 +1,28 @@
+{"run_id":"r805245",
+"issues":[
+{"id":"DB-07","score":"FULL","findings":[1],"why":"stack overflow aborts, cannot be caught (isolate.rs)"},
+{"id":"DB-19","score":"FULL","findings":[5],"why":"closure param shadowing outer typed local keeps outer type"},
+{"id":"DB-18","score":"PARTIAL","findings":[5],"why":"closure params not in env, resolved by name; only shadow case described"},
+{"id":"T-02","score":"FULL","findings":[9],"why":"ignore 0.4.30 vs MSRV 1.85, lockfile pin not shipped"},
+{"id":"DB-38","score":"FULL","findings":[9],"why":"ignore 0.4.30 needs newer Rust, Cargo.toml dependency"},
+{"id":"T-03","score":"FULL","findings":[8],"why":"codebase name from checkout directory leaks into ids/output"},
+{"id":"DB-28","score":"FULL","findings":[14],"why":"trait map truncates with no omitted count"},
+{"id":"DB-40","score":"FULL","findings":[6,11],"why":"verify fails on MER-02 example id in prose; dogfood deferred"}
+],
+"findings":[
+{"n":1,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow abort"},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:622-625","why":"rev is first part of an arg to git archive so a leading -- is parsed as an option; real but needs untrusted rev, no command execution; no gold match"},
+{"n":3,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:678-682","why":"topic written then lock; non-atomic as stated but documented and detected by verify"},
+{"n":4,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/seal/lock.rs:57","why":"flow_hash deliberately not built (documented design decision) read as defect"},
+{"n":5,"class":"REG","matches":["DB-19","DB-18"],"verdict":null,"code":null,"why":"closure param shadowing and name-guess"},
+{"n":6,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"example id in prose fails verify"},
+{"n":7,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-corpus/src/seal/lock.rs:195-232","why":"parse_canonical does not normalise CRLF so a CRLF checkout is NonCanonical, as the doc comment states"},
+{"n":8,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"directory-derived codebase name"},
+{"n":9,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore 0.4.30 MSRV"},
+{"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:950-968","why":"ambiguity drops edge as claimed, but deliberate and scoped to reachable crates, documented in comment"},
+{"n":11,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"verify not dogfooded in CI due to MER-02 failure"},
+{"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:460-462","why":"--since/--diff refuse --repo with a clear error; real limitation but not a crash"},
+{"n":13,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/collect.rs:458","why":"trait-impl methods forced Public as stated; deliberate, and visibility follows trait not its own"},
+{"n":14,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"trait map truncation without count"},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/seal/lock.rs:142","why":"deny_unknown_fields real; deliberate strictness with a version field"}
+]}

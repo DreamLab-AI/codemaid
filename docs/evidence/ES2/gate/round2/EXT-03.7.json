@@ -1,0 +1,10 @@
+{"id": "EXT-03.7", "verdict": "fail", "facts_checked": 12,
+ "unsupported": [],
+ "changed": [
+  {"fact": "par a typed parameter or self ... and a let binding ... and a pattern binding", "original": "[*] --> Param / [*] --> Bound / [*] --> Destructured", "why": "the original draws three alternative entry transitions from [*] (each name enters one way); par claims all three happen together, i.e. exclusive outcomes drawn as concurrent"}
+ ],
+ "dropped": [
+  {"fact": "Restored --> [*]"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

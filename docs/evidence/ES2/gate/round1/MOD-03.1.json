@@ -1,0 +1,12 @@
+{"id": "MOD-03.1", "verdict": "fail", "facts_checked": 14,
+ "unsupported": [
+  {"fact": "CB->>SF: files ... / CB->>SY: symbols ... / SY->>FL: may carry a flow / CB->>RE: relations ... / RE->>CO: carries a confidence", "why": "Five sequence arrows claim messages between participants in a fixed order (SourceFile, Symbol, Flow, Relation, Confidence); the original states only static composition/aggregation/association (Codebase *-- SourceFile, Symbol o-- Flow, Relation --> Confidence) with no calls or ordering"}
+ ],
+ "changed": [],
+ "dropped": [
+  {"fact": "Relation: +from to kind confidence  symbol.rs:325 (field list no longer stated; only 'carries a confidence')"},
+  {"fact": "Confidence <<enum>> Exact Inferred External  symbol.rs:299 (variants no longer stated)"},
+  {"fact": "Codebase *-- Relation composition vs Symbol o-- Flow aggregation distinction (ownership kinds not drawn)"}
+ ],
+ "citations_dropped": [],
+ "citations_added": []}

@@ -1,0 +1,218 @@
+{
+ "run_id": "rc310a5",
+ "issues": [
+  {
+   "id": "DB-18",
+   "score": "FULL",
+   "findings": [
+    6
+   ],
+   "why": "closure params untyped, name-only match to internal method"
+  },
+  {
+   "id": "DB-19",
+   "score": "FULL",
+   "findings": [
+    6
+   ],
+   "why": "closure param inherits outer variable's type"
+  },
+  {
+   "id": "DB-07",
+   "score": "FULL",
+   "findings": [
+    10
+   ],
+   "why": "stack overflow aborts, defeating catch_unwind"
+  },
+  {
+   "id": "DB-12",
+   "score": "PARTIAL",
+   "findings": [
+    7
+   ],
+   "why": "notes macro invocation never recorded as call step"
+  },
+  {
+   "id": "T-02",
+   "score": "FULL",
+   "findings": [
+    12
+   ],
+   "why": "ignore 0.4.30 vs MSRV 1.85, lockfile pin only"
+  },
+  {
+   "id": "DB-38",
+   "score": "PARTIAL",
+   "findings": [
+    12
+   ],
+   "why": "ignore 0.4.30 breaks 1.85 build"
+  },
+  {
+   "id": "T-01",
+   "score": "PARTIAL",
+   "findings": [
+    8
+   ],
+   "why": "+dirty header provenance imprecise, but via untracked files not differing edits"
+  },
+  {
+   "id": "T-03",
+   "score": "FULL",
+   "findings": [
+    9
+   ],
+   "why": "checkout dir name becomes codebase name in ids"
+  },
+  {
+   "id": "DB-40",
+   "score": "FULL",
+   "findings": [
+    5,
+    13
+   ],
+   "why": "fixture sym: id in prose breaks verify; no CI verify job"
+  }
+ ],
+ "findings": [
+  {
+   "n": 1,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "crates/sealmap/src/main.rs:608-622",
+   "why": "rev:prefix passed as one arg to git archive, so leading -- is parsed as option; but CLI user supplies it and --exec needs remote"
+  },
+  {
+   "n": 2,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "crates/sealmap-corpus/src/contract.rs:145-170, crates/sealmap-corpus/src/document.rs:153",
+   "why": "only orphaned files with generated marker are removed and remove_dir only removes empty dirs; overstated"
+  },
+  {
+   "n": 3,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "crates/sealmap/src/main.rs:679-682",
+   "why": "non-atomic two-file write is real; fail-closed and recoverable by re-sign"
+  },
+  {
+   "n": 4,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "REAL",
+   "code": "crates/sealmap-corpus/src/seal/lock.rs:224-235",
+   "why": "parse_canonical documents that CRLF lock is non-canonical"
+  },
+  {
+   "n": 5,
+   "class": "REG",
+   "matches": [
+    "DB-40"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "fixture id in prose breaks verify"
+  },
+  {
+   "n": 6,
+   "class": "REG",
+   "matches": [
+    "DB-18",
+    "DB-19"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "closure parameter false guesses"
+  },
+  {
+   "n": 7,
+   "class": "REG",
+   "matches": [
+    "DB-12"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "macro never emitted as call"
+  },
+  {
+   "n": 8,
+   "class": "REG",
+   "matches": [
+    "T-01"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "+dirty header imprecision"
+  },
+  {
+   "n": 9,
+   "class": "REG",
+   "matches": [
+    "T-03"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "directory name in ids"
+  },
+  {
+   "n": 10,
+   "class": "REG",
+   "matches": [
+    "DB-07"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "stack overflow abort"
+  },
+  {
+   "n": 11,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "WRONG",
+   "code": "crates/sealmap/src/main.rs:574-599",
+   "why": "git/model errors return Err (nonzero); exit 0 only after a successful run, by design"
+  },
+  {
+   "n": 12,
+   "class": "REG",
+   "matches": [
+    "T-02",
+    "DB-38"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "ignore MSRV"
+  },
+  {
+   "n": 13,
+   "class": "REG",
+   "matches": [
+    "DB-40"
+   ],
+   "verdict": null,
+   "code": null,
+   "why": "no CI verify job"
+  },
+  {
+   "n": 14,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "PARTLY",
+   "code": "crates/sealmap-corpus/src/pack.rs:295-331",
+   "why": "shard returns TopicOverBudget error on one oversized topic; documented behaviour"
+  },
+  {
+   "n": 15,
+   "class": "NOVEL",
+   "matches": [],
+   "verdict": "WRONG",
+   "code": "crates/sealmap-corpus/src/index.rs:112-124",
+   "why": "link_expansions uses a BTreeMap of sequence ids, not Index::fragment"
+  }
+ ]
+}
