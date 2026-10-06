@@ -16,7 +16,8 @@ sources:
   - crates/sealmap-rust/src/collect.rs
   - crates/sealmap-extract/src/lower.rs
   - docs/DESIGN.md
-verified_commit: 4ed7a51f92f7241a1c420e49e8036a8d9189912a
+  - README.md
+verified_commit: eacc59ece21274273c6bf2c83d4642b4fa7acaf5
 ---
 ## For developers
 
@@ -28,7 +29,7 @@ classifier, and the step that writes a seal. It is pure: callers pass models
 and texts, and nothing reads the file system or runs git
 (`crates/sealmap-corpus/src/seal/mod.rs:1`-`6`). The CLI around it is COR-05.
 
-The module implements DESIGN §3 (`docs/DESIGN.md:50`-`121`). Where the design
+The module implements DESIGN §3 (`docs/DESIGN.md:92`-`163`). Where the design
 was loose the build chose, and DESIGN now records the choices: the exact lock
 layout, `topic_hash`, the citation rule, failing closed from the model alone,
 and legacy topics as coverage rather than failures. After this topic you
@@ -37,12 +38,18 @@ tests pin.
 
 ## For the business
 
-A seal is the cheap, mechanical half of keeping a diagram true. A reviewer,
-human or model, decides once that a topic matches the code; the lock then
-remembers exactly which versions of which functions that judgement was about.
-From then on a CI job can say "still true" or name the function that changed
-and how (its behaviour, its contract, or its name), with no model and no
-tokens involved.
+A seal records a judgement mechanically. A reviewer, human or model, decides
+once that a topic matches the code; the lock then remembers exactly which
+versions of which functions that judgement was about. From then on a CI job
+can say "no cited function changed" or name the one that did and how (its
+behaviour, its contract, or its name), with no model and no tokens involved.
+
+That is narrower than "the topic is still true", and the evidence says the
+gap matters. On blind-labelled commits, per-symbol body hashes caught 0.76 of
+the changes that made a topic wrong, against 1.0 for per-file flags, while
+flagging only 1.19× fewer topics (`README.md:81`-`85`). The seal surface is
+therefore experimental and frozen, not the recommended way to keep a corpus
+true (`docs/DESIGN.md:19`-`30`).
 
 It is deliberately strict where strictness is cheap. An edit to the prose
 needs a re-seal, a function that cannot be parsed counts as changed rather
@@ -250,7 +257,7 @@ pointers with no entry, and citations in topics nobody sealed.
 one stray byte does not hide a real behaviour change
 (`crates/sealmap-corpus/tests/seal.rs:387`). Legacy `path:line` topics are
 coverage, not failures, so a corpus migrates one topic at a time
-(`docs/DESIGN.md:119`-`121`).
+(`docs/DESIGN.md:161`-`163`).
 
 **Debt:** removing a topic's lock entry and its pointer together passes
 `verify` whenever the topic cites no `sym:` id, because such a topic is then
@@ -336,7 +343,7 @@ resolved now, and any citation `verify` could not confirm stops the seal
 before the lock is touched.
 
 **Why it is this way.** The design makes the sign step mechanical so the lock
-is never hand-edited (`docs/DESIGN.md:80`-`85`). Replacing by file as well as
+is never hand-edited (`docs/DESIGN.md:122`-`127`). Replacing by file as well as
 by id means a renumbered topic moves its seal rather than leaving the old
 entry orphaned (`crates/sealmap-corpus/tests/seal.rs:543`).
 

@@ -20,7 +20,7 @@ sources:
   - crates/sealmap/src/main.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
+verified_commit: eacc59ece21274273c6bf2c83d4642b4fa7acaf5
 ---
 ## For developers
 
@@ -34,10 +34,10 @@ crates are prepared for crates.io.
 The relevant history is short: the `msrv` job came in `dc5e025`; per-crate
 READMEs, docs.rs metadata and `deny(missing_docs)` in `d308faf`; the dual
 licence in `0d1fe6b`; the committed generated corpus and its drift gate were
-retired in step 3, when CI started checking determinism instead. None of the
-0.2 crates in this tree is published yet; the README's roadmap puts the first
-0.2 crates.io release after step 3, which is now done in the tree
-(`README.md:375`-`378`).
+retired in step 3, when CI started checking determinism instead. The 0.2
+crates are on crates.io at 0.2.1 (`Cargo.toml:6`). After the evidence
+programme the seal surface is frozen and this repository does not seal its
+own corpus (`README.md:373`-`376`).
 
 ## For the business
 
@@ -102,9 +102,9 @@ is the proof that typed writers produce valid diagrams (`README.md:324`-`327`).
 (`.github/workflows/ci.yml:46`-`47`); clippy, docs and the
 `--no-default-features` configuration are checked on stable only.
 
-**Open:** no job runs `sealmap verify` yet: this repository's topics are not
-sealed (DESIGN step 6 adds it, non-blocking first), so the seal gate is
-exercised only by its tests.
+No job runs `sealmap verify`, and none is planned: DESIGN's step 6, the
+dogfood seal of this corpus, was closed with the rest of the seal work
+(`docs/DESIGN.md:26`-`30`), so the seal gate is exercised only by its tests.
 
 ## DEL-01.2 The ignore 0.4.30 problem
 

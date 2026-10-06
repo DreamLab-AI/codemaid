@@ -105,7 +105,7 @@ _20 topic files, 106 diagrams. Regenerate with_ `node docs/diagrams/tools/diagra
 | ID | Topic | Diagrams | Kinds | Governing | ADRs |
 |----|-------|----------|-------|-----------|------|
 | DEL-01 | [CI, the MSRV job and the determinism guarantees](delivery/01-ci-msrv-and-determinism.md) | 5 | flowchart, sequenceDiagram | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
-| DEL-02 | [Design versus code after the seal surface](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
+| DEL-02 | [Design versus code after the evidence programme](delivery/02-design-versus-code.md) | 6 | flowchart, stateDiagram-v2 | [DESIGN.md](../../docs/DESIGN.md), [README.md](../../README.md) |  |
 
 ### dense
 

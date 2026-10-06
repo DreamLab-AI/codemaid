@@ -13,7 +13,7 @@ sources:
   - crates/sealmap-extract/src/fingerprint.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
+verified_commit: eacc59ece21274273c6bf2c83d4642b4fa7acaf5
 ---
 ## For developers
 
@@ -33,8 +33,8 @@ means, how two `#[cfg]` twins that share an id end up with one fingerprint,
 and what the pair lets the seal check decide (built; drawn in COR-04).
 
 The fingerprints arrived in commit `0a304ba` (step 2 of the 0.2 plan,
-`docs/DESIGN.md:296`), after rustc's split between a definition's identity
-and its query fingerprints (`docs/DESIGN.md:130`).
+`docs/DESIGN.md:338`), after rustc's split between a definition's identity
+and its query fingerprints (`docs/DESIGN.md:172`).
 
 ## For the business
 
@@ -45,12 +45,14 @@ that cites it. Per-symbol fingerprints answer it per function, and they answer
 two questions rather than one: did the function's contract change, or only its
 behaviour?
 
-That split is what lets an adopter route maintenance by cost. A behaviour
-change is a cheap re-review; a contract change is worth a more careful look.
+That split was meant to let an adopter route maintenance by cost: a
+behaviour change a cheap re-review, a contract change a more careful look.
 The values are deliberately blind to formatting and comments, so a
-reformatting commit costs nothing at all. The tooling that acts on this split
-(seals, `sealmap verify` and `sealmap stale`) now exists (COR-04); this
-repository's own topics are not sealed yet.
+reformatting commit never changes them. The tooling that acts on the split
+(seals, `sealmap verify` and `sealmap stale`, COR-04) exists but is frozen as
+experimental: per-symbol hashes missed about a quarter of the changes that
+made a topic wrong (`README.md:81`-`85`). The hashes themselves stay, as the
+identity and change signal of the code lens (`docs/DESIGN.md:11`-`17`).
 
 ## MOD-02.1 The two hash types
 
@@ -232,7 +234,7 @@ contract, and a vanished id whose body reappears in a symbol of the same kind
 is a suspected rename. Unparsable code is decided first, so it is never
 reported as holding or absent (`crates/sealmap-corpus/src/seal/check.rs:146`,
 `crates/sealmap-corpus/src/seal/check.rs:155`); the design's table is
-`docs/DESIGN.md:99`-`107`.
+`docs/DESIGN.md:141`-`149`.
 
 **Why it is this way.** The name sits in `sig_hash` and never in `body_hash`,
 which is what makes a rename detectable by body
@@ -240,5 +242,5 @@ which is what makes a rename detectable by body
 same table for users (`README.md:191`-`198`).
 
 The crate-surface table records that an optional `flow_hash` was considered
-and not built (`docs/DESIGN.md:130`); the model has only the two
+and not built (`docs/DESIGN.md:172`); the model has only the two
 (`crates/sealmap-model/src/symbol.rs:209`-`212`), as commit `0a304ba` left it.

@@ -12,12 +12,12 @@ sources:
   - crates/sealmap-dense/src/lib.rs
   - docs/DESIGN.md
   - README.md
-verified_commit: b9a6aebddd2e8379206eea6cfdd3ab84546724b4
+verified_commit: eacc59ece21274273c6bf2c83d4642b4fa7acaf5
 ---
 ## For developers
 
 `sealmap pack` turns chosen topics into one text a reviewer can read without
-the repository (`docs/DESIGN.md:42`). For each topic the pack holds the file
+the repository (`docs/DESIGN.md:84`). For each topic the pack holds the file
 verbatim, the `sealmap-dense` slice around the symbols it cites, the
 citations that do not resolve, and a window of each cited symbol's current
 source (`crates/sealmap-corpus/src/pack.rs:477`-`495`). The library half,
@@ -62,10 +62,12 @@ reviewers, or two runs of one reviewer, see the same thing. If the file
 would be too big, the tool says by how much and which topics are largest,
 or splits the request into whole topics. It never quietly drops content.
 
-`sealmap pack --diff main` answers the routine question "what needs another
-look after this branch?". It packs exactly the topics whose cited code
-changed, and topics that merely share a file with the change stay out
-(`README.md:42`-`45`).
+`sealmap pack --diff main` selects the topics whose cited symbols changed,
+and leaves out topics that merely share a file with the change. That is the
+per-symbol rule the evidence found loses real changes, so `--diff` is a
+convenience, not an answer to "what needs another look after this branch?"
+(`README.md:41`-`46`, `README.md:291`). Naming the topics, for example every
+topic a per-file flag selects, is the dependable way to build a pack.
 
 ## COR-06.1 From a request to a pack
 
@@ -98,7 +100,7 @@ and the budget decision live in the library, so another caller, such as the
 `sealmap-review` skill, gets the same refusals from either.
 
 **Why it is this way.** Git stays out of the libraries
-(`docs/DESIGN.md:166`-`169`). The revision is therefore an opaque string the
+(`docs/DESIGN.md:208`-`211`). The revision is therefore an opaque string the
 CLI supplies. Untracked files do not make it dirty, so writing a pack into
 the checkout does not change the next pack's header
 (`crates/sealmap/src/main.rs:763`-`769`).
@@ -146,7 +148,7 @@ the unresolved list when it does not.
 
 **Why it is this way.** A pack is evidence for a review, so a citation that
 no longer resolves must stay visible rather than vanish
-(`docs/DESIGN.md:187`-`188`). The slice carries its own index, so the pack
+(`docs/DESIGN.md:229`-`230`). The slice carries its own index, so the pack
 needs no `_index.txt` beside it (`crates/sealmap-dense/src/lib.rs:75`-`79`).
 
 **Invariant:** the dense slice is taken without a byte limit, so it cannot
@@ -154,10 +156,11 @@ fail on size. The only budget is the pack's
 (`crates/sealmap-corpus/src/pack.rs:479`-`481`).
 
 **Open:** a topic that cites `path:line` rather than `sym:` ids packs as its
-text alone (`docs/DESIGN.md:190`-`191`). Every topic of this repository's
-own corpus is such a topic today, so a pack of it carries no slices and no
-source windows until the corpus migrates to `sym:` citations (step 6,
-`docs/DESIGN.md:308`-`309`).
+text alone (`docs/DESIGN.md:232`-`233`). Every topic of this repository's
+own corpus is such a topic, and the step that would have migrated it to
+`sym:` citations is closed with the seal work (`docs/DESIGN.md:26`-`30`), so a
+pack of it carries no slices and no source windows. Should `pack` resolve
+`path:line` citations itself, so that corpora which never migrate get them?
 
 ## COR-06.3 The budget: refuse, or shard by topic
 
@@ -187,7 +190,7 @@ needs to plan shards. `shard` does that planning itself, one topic at a time,
 and fails only on a topic no file could hold.
 
 **Why it is this way.** The design forbids silent truncation
-(`docs/DESIGN.md:161`). Sizes are planned from the header's length and the
+(`docs/DESIGN.md:203`). Sizes are planned from the header's length and the
 section lengths, so each file is assembled once
 (`crates/sealmap-corpus/src/pack.rs:301`-`332`). The first version assembled
 every candidate file in full. The dense projection of that code showed the
@@ -199,8 +202,8 @@ is refused, and the refusal's sizes add up to the pack's length
 shard, with its section unchanged (`crates/sealmap-corpus/tests/pack.rs:208`).
 
 **Debt (designed, not built):** the diagrams-only `--review` pack for an
-outside reviewer is in the design (`docs/DESIGN.md:42`) but not in the
-binary (`docs/DESIGN.md:181`).
+outside reviewer is in the design (`docs/DESIGN.md:84`) but not in the
+binary (`docs/DESIGN.md:223`).
 
 ## COR-06.4 Choosing topics by change
 
