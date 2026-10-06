@@ -2,7 +2,7 @@
 
 All crates in this workspace share one version.
 
-## Unreleased
+## 0.2.1 — 2026-10-06
 
 ### Fixed
 - `write` (and so `sealmap generate`) followed symbolic links in the output

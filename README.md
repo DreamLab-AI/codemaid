@@ -242,7 +242,7 @@ cheap and checkable.
 
 ## Crates
 
-**Today (0.2.0 on crates.io: ids and hashes, the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
+**Today (0.2.1 on crates.io: ids and hashes, the seal surface, `sealmap-dense` and `pack`; renamed from `codemaid-*`):**
 
 | Crate | Role | Deps |
 |---|---|---|
@@ -353,11 +353,11 @@ A diagrams-only `--review` mode is designed but not built
 
 ## Status and roadmap
 
-**0.2.0** is released. It is dogfooded on its own source, and the Rust language
+**0.2.1** is released. It is dogfooded on its own source, and the Rust language
 adapter has been run on VisionClaw, tokio, axum, ripgrep and oxdraw. Steps 1
 to 3 of the plan are done; changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
 
-**Unreleased** (on `main`, not yet on crates.io): fixes for defects found by
+**0.2.1** (on crates.io): fixes for defects found by
 the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
 `generate` never writes through a symbolic link; `if let` and `while let`
 bindings no longer leak past their block; `#[cfg]` twins keep every
