@@ -1,0 +1,34 @@
+{
+"run_id":"re70ed0",
+"issues":[
+{"id":"T-03","score":"FULL","findings":[3],"why":"Codebase name from checkout dir (main.rs:393,419-424) makes ids/bytes differ across clones."},
+{"id":"DB-07","score":"FULL","findings":[4],"why":"Stack overflow aborts the process, isolate.rs."},
+{"id":"DB-33","score":"FULL","findings":[6],"why":"Seal does not record extraction options; --tests mismatch makes symbols Absent (main.rs:73-74)."},
+{"id":"DB-05","score":"FULL","findings":[7],"why":"Non-UTF-8 file skipped silently at source.rs:181."},
+{"id":"DB-28","score":"FULL","findings":[8],"why":"Trait map truncates to first max_edges with no omitted count, overview.rs:236."},
+{"id":"DB-18","score":"FULL","findings":[9],"why":"Untyped closure params name-matched to internal methods (extract.rs:351)."},
+{"id":"DB-19","score":"PARTIAL","findings":[9],"why":"Finding mentions resolution against an outer same-named variable's type but gives it little emphasis."},
+{"id":"DB-40","score":"FULL","findings":[10],"why":"verify fails on own repo because MER-02 example id is read as citation, check.rs:390."},
+{"id":"T-02","score":"FULL","findings":[11],"why":"ignore 0.4.30 breaks MSRV 1.85 without the lock pin."},
+{"id":"DB-38","score":"FULL","findings":[11],"why":"Same ignore 0.4.30 needs newer Rust than declared."},
+{"id":"DB-11","score":"FULL","findings":[12],"why":"Closure bound by let is drawn at definition, later calls dropped."},
+{"id":"DB-15","score":"FULL","findings":[13],"why":"Re-entry depth limit of 8 at resolve.rs:642 turns paths into External ids."}
+],
+"findings":[
+{"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:680-682, crates/sealmap-corpus/src/seal/check.rs:380-390","why":"Topic then lock written non-atomically, but verify deliberately flags the orphan pointer and re-running sign repairs it; 'permanent' and manual git recovery are overstated."},
+{"n":2,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/document.rs:10-12,153-155, crates/sealmap-corpus/src/contract.rs:99-102","why":"Deletion keys on a front-matter marker alone, as designed; only .md files with sealmap: as first key are affected, which is an unlikely collision."},
+{"n":3,"class":"REG","matches":["T-03"],"verdict":null,"code":null,"why":"Matches the determinism-vs-CLI name tension."},
+{"n":4,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"Matches the stack-overflow abort debt."},
+{"n":5,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-corpus/src/seal/lock.rs:198-234","why":"parse_canonical compares to_toml() byte-for-byte and does not normalise \\r\\n, so a CRLF checkout fails verify as NonCanonical; the code documents this."},
+{"n":6,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"Matches seal not recording extraction options."},
+{"n":7,"class":"REG","matches":["DB-05"],"verdict":null,"code":null,"why":"Matches the silent non-UTF-8 skip."},
+{"n":8,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"Matches the trait map truncation without omitted count."},
+{"n":9,"class":"REG","matches":["DB-18","DB-19"],"verdict":null,"code":null,"why":"Matches false guesses from untyped closure parameters."},
+{"n":10,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"Matches verify failing on its own repository."},
+{"n":11,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"Matches the MSRV vs ignore dependency issue."},
+{"n":12,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"Matches the let-bound closure drawn at its definition."},
+{"n":13,"class":"REG","matches":["DB-15"],"verdict":null,"code":null,"why":"Matches the eight-re-entry resolve limit."},
+{"n":14,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-rust/src/collect.rs:451-452,548-562","why":"Each method's sig fingerprint feeds impl_header (attrs, generics, trait, self type, where), so an impl-header edit changes every method's sig_hash."},
+{"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"docs/diagrams/delivery/01-ci-msrv-and-determinism.md:37-38, README.md:364-367, Cargo.toml:6","why":"The corpus statement 'none of the 0.2 crates is published' does contradict the README/DESIGN 'published as 0.2.0' (a doc drift), but the claimed seal reproducibility consequence is speculative."}
+]
+}

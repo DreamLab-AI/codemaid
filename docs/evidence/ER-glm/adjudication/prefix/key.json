@@ -1,0 +1,33 @@
+[
+  {
+    "label": "X-01",
+    "members": [
+      "prefix-A-glm:critical:F-02",
+      "prefix-B-glm:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-02",
+    "members": [
+      "prefix-A-glm:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-03",
+    "members": [
+      "prefix-A-glm:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-04",
+    "members": [
+      "prefix-B-glm:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-05",
+    "members": [
+      "prefix-B-glm:critical:F-02"
+    ]
+  }
+]

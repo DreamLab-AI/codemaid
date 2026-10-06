@@ -1,0 +1,13 @@
+{"topic": "extract/05-workspace-name-resolution.md", "diagrams_rewritten": 4, "facts_checked": 68,
+ "facts_dropped": [
+  {"diagram": "EXT-05.1", "fact": "Slots ..> Ns (Slots depends on Ns): rewrite's NS participant has no message linking it to Slots"},
+  {"diagram": "EXT-05.6", "fact": "closure argument walked with the environment cloned (rewrite AR says only 'closure argument walk', 'parameters never bound')"}
+ ],
+ "facts_invented": [
+  {"diagram": "EXT-05.4", "fact": "untyped variable: R->>BN name guess; BN->>OUT: Type method id", "why": "original gives by_name_only no outcome here; 'Type method id' is the lookup-miss outcome (resolve.rs:890), and the topic says by_name_only yields Inferred or sym:? name"},
+  {"diagram": "EXT-05.4", "fact": "derived, origin internal: BN->>OUT: Type method id", "why": "same misattributed outcome as above"},
+  {"diagram": "EXT-05.4", "fact": "derived, else not internal: R->>OUT: dropped", "why": "original draws no non-internal branch for derived values; the topic says such a call becomes sym:? name (resolve.rs:868-872), not dropped"},
+  {"diagram": "EXT-05.2", "fact": "use alias: F->>REST: re-walk the target plus the rest (resolve.rs:675)", "why": "original USE node has no edge to the later-segment step; rewrite routes it into REST and then the internal check"}
+ ],
+ "citations_dropped": [], "citations_added": [], "prose_changed": false,
+ "notes": "EXT-05.3 and EXT-05.5 were already sequence diagrams and are unchanged; every citation survives; the main fidelity problem is outcomes misattributed to by_name_only in EXT-05.4."}

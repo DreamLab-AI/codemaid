@@ -1,0 +1,38 @@
+[
+  {
+    "label": "X-01",
+    "members": [
+      "var-B-glm:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-02",
+    "members": [
+      "var-A-glm:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-03",
+    "members": [
+      "var-B-glm:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-04",
+    "members": [
+      "var-A-glm:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-05",
+    "members": [
+      "var-A-glm:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-06",
+    "members": [
+      "var-B-glm:critical:F-01"
+    ]
+  }
+]

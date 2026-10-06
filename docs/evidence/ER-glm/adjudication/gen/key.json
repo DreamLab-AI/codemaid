@@ -1,0 +1,33 @@
+[
+  {
+    "label": "X-01",
+    "members": [
+      "gen-A-glm:critical:F-03",
+      "gen-B-glm:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-02",
+    "members": [
+      "gen-B-glm:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-03",
+    "members": [
+      "gen-A-glm:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-04",
+    "members": [
+      "gen-A-glm:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-05",
+    "members": [
+      "gen-B-glm:critical:F-02"
+    ]
+  }
+]

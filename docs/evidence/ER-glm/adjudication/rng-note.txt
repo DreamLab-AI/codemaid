@@ -1,0 +1,1 @@
+ER-glm (copy of er/pool.cjs): shuffle: mulberry32(20261006), cases in sorted order (gen, prefix, var); sampling continues from a fresh mulberry32(20261006) stream per sample.cjs

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "critical:F-01",
+    "kind": "finding",
+    "title": "`sealmap verify` exits 0 (gate green) when `seals.lock` and any citing topics are missing",
+    "topics": "COR-03 (verify, write and the command line); DEL-01 (CI wiring, inferred)",
+    "evidence": "`crates/sealmap-corpus/src/seal/check.rs` (`verify`): a `lock_text` of `None` is substituted with an empty `Lock::new()`, and the canonicality check is skipped for `None`; findings arise only from lock entries and from the `topics` map. `crates/sealmap/src/main.rs` (`Ctx::load`, `read_topics`): a missing lock reads as `None`, and `read_topics` returns an **empty map without error** when the directory does not exist (`if dir.is_dir() { … }`). `Cmd::Verify` then prints the empty report and exits 0 because `report.passes()` is vacuously true; the only trace is a stderr line \"0 topic(s) checked\". The material's own sibling commands contradict this posture: `Cmd::SealCheck` hard-errors when the lock is missing (\"… does not exist\"), and `generate --check` fails closed on a missing output directory (`crates/sealmap/tests/cli.rs`, `generate_check_compares_with_a_fresh_generation`: exit 1, \"—check writes nothing\"). Two of three evidence-consuming paths treat absent evidence as fatal; the flagship gate treats it as success.",
+    "failure": "CI invokes `sealmap verify` from a subdirectory (defaults are `--root .`, `--diagrams docs/diagrams`), or a merge/refactor deletes or renames `docs/diagrams/` without updating `--diagrams`, or a sparse checkout omits it. Every sealed topic silently leaves the gate, the step goes green, and merges proceed with zero seal coverage. Same outcome for a checkout where the lock is absent and no topic currently carries `sym:` citations (e.g. all ids live inside fenced blocks, which `citations` deliberately skips).",
+    "confidence": "high (the code paths are explicit; the material shows no guard, count check, or minimum-coverage assertion anywhere on the verify path).",
+    "marked_by_authors": "no.",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-02",
+    "kind": "finding",
+    "title": "Seals are self-attesting: anyone with write access to the repo — including the LLM agents the gate exists to govern — can rewrite topics and mint valid seals",
+    "topics": "COR-03; COR-01 (the seal surface lives in `sealmap-corpus`)",
+    "evidence": "`crates/sealmap-corpus/src/seal/lock.rs` (`TopicSeal` doc) states a seal is \"the record that a reviewer checked the topic's claims against these exact symbol versions and this exact prose.\" `crates/sealmap-corpus/src/seal/sign.rs` (`sign`, `Signature`): `reviewer`, `model` and `date` are recorded \"as given\"; the only validations are non-emptiness, a `YYYY-MM-DD` shape, and that every citation resolves with fingerprints. Nothing binds the entry to an identity, an approval event, or a key; `crates/sealmap/src/main.rs` (`sign`) overwrites the prior entry on re-sign and resets `lock.generator`. The lock is an unkeyed TOML file sitting next to the topics it attests (`seal/mod.rs`: `docs/diagrams/seals.lock`). `seal/check.rs::verify` does add a `LockFault` for a non-canonical lock, so *accidental* tamper is detected — but there is no tamper *resistance*: the canonical re-serialisation of forged content is indistinguishable from an honest one.",
+    "failure": "an agent in the harness (or any process with commit access, the normal condition for the \"agent-harness owners\" this tool targets) edits a topic's claims, runs `sealmap seal sign <topic> --reviewer <anyone> --model <anything>`, and commits. `verify` passes with fabricated attestation rows. The incident shape: the gate is later cited as evidence that \"a reviewer confirmed X against code version H\", when the record has always been mintable by the supervised role itself.",
+    "confidence": "high on the mechanics (all shown in the code); the exploitation path is inferred from the threat model rather than demonstrated in the material.",
+    "marked_by_authors": "partially. The policy vacuum is marked — \"Opaque to sealmap: reviewer policy belongs to the calling skill\" (`sign.rs`/`lock.rs` docs) — but the forgeability of the *record itself*, contradicting the `TopicSeal` doc's claim that it *is* the record of a review, is not marked anywhere.",
+    "status": "unverified"
+  },
+  {
+    "id": "critical:F-03",
+    "kind": "finding",
+    "title": "Multi-repository analysis silently merges two repositories that contain same-named crates into one id space",
+    "topics": "EXT-05 (workspace-wide name resolution); COR-01 (generate); DEL-02 (design versus code)",
+    "evidence": "ids are keyed by crate name only. `crates/sealmap-rust/src/layout.rs` (`role_in_package`) sets each file's module to `[crate_name, …]` from that file's own `Cargo.toml`, with no repository component; `crates/sealmap-rust/src/resolve.rs` (`module_sym`, `crate_package`) builds `sym:cargo <crate_name> . …`. `sealmap::load_repos` (`crates/sealmap/src/lib.rs`) only prefixes file *paths* with the repo name; the overview groups crates by top directory for display only. So repos `api` and `core`, each containing a crate named `util`, produce identical ids `sym:cargo util . …`. Consequences are visible in code: `Codebase::add_symbol` (`crates/sealmap-model/src/codebase.rs`) merges same-id symbols with \"first definition wins\" for scalar fields — including `file` and `flow`, so the losing repo's call flow is dropped; `Resolver`'s item table (`Slots::insert`, \"first definition wins\") makes one repo's items resolvable — and callable — from the other at `Confidence::Exact`; and `naming::assert_unique_idents` (`crates/sealmap-corpus/src/naming.rs`) compares `prev == id` and therefore cannot fire on this collision, by construction. Cargo forbids duplicate package names inside one workspace, so the single-workspace case that the tests cover is exactly the case where this cannot happen; the multi-repo mode (`generate_repos`, `--repo NAME=PATH`), a first-class advertised path, is where it can. The material discusses multi-repository grouping but nowhere mentions name collisions across repositories.",
+    "failure": "adoption of `--repo api=… --repo core=…` where both contain, say, `common`, `proto`, or two generated client crates with the same name: diagrams silently attribute the merged symbols to whichever repo sorts first by path, half the merged symbol's call flows vanish, and invented cross-repo call edges appear at `Exact` confidence between unrelated code. Seals signed against that model then attach to ids that name both crates, so a rename in one repository flips seal findings for the other. `Extraction::diagnostics` stays empty; nothing reports the collision.",
+    "confidence": "high on the mechanism (directly shown by the code); medium overall, since it requires a same-name collision to bite — that exposure estimate is inferred.",
+    "marked_by_authors": "no.",
+    "status": "unverified"
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "gen": [
+    {
+      "label": "X-03",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    },
+    {
+      "label": "X-04",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    }
+  ],
+  "prefix": [
+    {
+      "label": "X-01",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    },
+    {
+      "label": "X-02",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    }
+  ],
+  "var": [
+    {
+      "label": "X-02",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    },
+    {
+      "label": "X-05",
+      "reason": "sample",
+      "astra": false,
+      "claude2": true
+    }
+  ]
+}

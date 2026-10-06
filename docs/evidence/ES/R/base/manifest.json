@@ -1,0 +1,10 @@
+{
+  "corpus": "/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/b01c5fc4-3280-499b-877b-822952d5876f/scratchpad/es/R/corpus/docs/diagrams",
+  "revision": null,
+  "topics": 20,
+  "only": null,
+  "register": "strip",
+  "pack_bytes": 214662,
+  "pack_sha256": "8a78cfb9b513d2db1f162169befabed13f3a469509f73641000ea88add371aa2",
+  "lenses": []
+}

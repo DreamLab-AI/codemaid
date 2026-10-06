@@ -1,0 +1,619 @@
+{
+  "generated": "2026-10-06T09:22:54.479Z",
+  "exploratory": true,
+  "note": "Dated exploratory third reviewer added after ER finished; cannot change ER decision.",
+  "items": [
+    {
+      "case": "gen",
+      "label": "X-01",
+      "members": [
+        "gen-A-glm:critical:F-03",
+        "gen-B-glm:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Load-time drops really are silent and nothing in the outputs records them, while parse failures are surfaced, so a src/build/ directory or an oversized or non-UTF-8 .rs file vanishes without notice. LoadOptions documents the filters, but the CLI has no way to see or report what was dropped."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 17591,
+      "cost_seconds": 32.3
+    },
+    {
+      "case": "gen",
+      "label": "X-02",
+      "members": [
+        "gen-B-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Crates with the same name in different repos collapse into one set of symbol ids, so the repos' symbols merge with no warning, which contradicts the generate_repos documentation."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 17591,
+      "cost_seconds": 32.3
+    },
+    {
+      "case": "gen",
+      "label": "X-03",
+      "members": [
+        "gen-A-glm:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Two clones of the same commit in differently named directories produce different bytes in _index.json and _overview.md. That breaks the 'same sources on any machine' promise unless every caller pins --name."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Without --name, the checkout directory's name ends up in the corpus bytes and the corpus hash, so identical sources in differently named directories produce different output, which contradicts the README's determinism claim. The flag's help text documents the default, but the determinism guarantee does not mention that it depends on it."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 51667,
+      "cost_seconds": 70
+    },
+    {
+      "case": "gen",
+      "label": "X-04",
+      "members": [
+        "gen-A-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "One deeply nested file under the size cap kills the whole run, and the panic isolation cannot catch it. The code documents this, but it remains a real, deterministic denial-of-service path."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Neither the syn parse nor the fingerprint canonicalisation has a depth bound, so a crafted deeply nested file under the 2 MiB cap can overflow even the 64 MiB stack and abort the whole run, and catch_unwind cannot stop that. The code admits the abort in a doc comment, but the corpus overclaims what the walker cap protects, and a pre-parse nesting check would be an actionable fix."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 51667,
+      "cost_seconds": 70
+    },
+    {
+      "case": "gen",
+      "label": "X-05",
+      "members": [
+        "gen-B-glm:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "After a switch to --no-model, a stale _model.json persists and verify reports clean, so drift in that artefact goes undetected."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 17591,
+      "cost_seconds": 32.3
+    },
+    {
+      "case": "var",
+      "label": "X-01",
+      "members": [
+        "var-B-glm:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The mechanics are described accurately, but this is an explicit, documented design decision: the crate never claims tamper resistance or identity binding and delegates signature policy to an external gate. It is not a defect at this revision."
+        }
+      ],
+      "final": "unsupported",
+      "primary_only": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 14294,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-02",
+      "members": [
+        "var-A-glm:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "An expected document that is not valid UTF-8 is classed as Missing, so verify fails and write overwrites it. Only non-expected, non-UTF-8 files are skipped, which is harmless. The claimed permanent blind spot does not exist."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "A truncated, non-UTF-8 generated document is reported as missing and rewritten. It is not skipped green forever, so the claimed permanent blind spot does not exist."
+        }
+      ],
+      "final": "unsupported",
+      "primary_only": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 51779,
+      "cost_seconds": 52.3
+    },
+    {
+      "case": "var",
+      "label": "X-03",
+      "members": [
+        "var-B-glm:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "In multi-repo mode, two repositories that each contain a crate with the same name produce identical sym: ids. Their symbols are silently merged and no diagnostic is raised. The core defect is real, though the cross-repo call-edge consequence was not reproduced."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 14294,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-04",
+      "members": [
+        "var-A-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The header is by design the marker of generated output, and the target directory is a gitignored generated tree. Deleting a copied, header-bearing file there is the intended contract, not a defect."
+        }
+      ],
+      "final": "unsupported",
+      "primary_only": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 14294,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-05",
+      "members": [
+        "var-A-glm:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "By default the output depends on the checkout directory name, which undercuts the README promise of byte-identical output. The effect is overstated: only the overview and index differ, not every file, unless the tree has no Cargo.toml and the fallback crate name is used."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The default codebase name really does come from the checkout directory and ends up in the generated output, which contradicts the unqualified determinism property. It is already registered as tension T-03 (docs/diagrams/REGISTER.md:14) but is not documented as intended. The citations are inaccurate, and the failure is overstated because generated output is not committed and `sealmap verify` is the seal gate, not a corpus diff."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 51779,
+      "cost_seconds": 52.3
+    },
+    {
+      "case": "var",
+      "label": "X-06",
+      "members": [
+        "var-B-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "When both the diagrams directory and the lock are missing, the CI gate exits 0 with zero coverage, and nothing reports the absence. That is fail-open behaviour and is actionable."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 14294,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "prefix",
+      "label": "X-01",
+      "members": [
+        "prefix-A-glm:critical:F-02",
+        "prefix-B-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Unlocked read-modify-write and non-atomic truncating writes really are there, so concurrent signers can lose entries and a crash can truncate the lock. The consequences are overstated: the gate fails closed, and the risk needs concurrent use in one checkout."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The lock write really is an unguarded read-modify-write done with a truncating fs::write, so a crash can truncate it and overlapping signs lose entries. Temp-file+rename or an advisory lock is a cheap fix. The impact is overstated, because the lock is normally in git and can be recovered from there."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 49455,
+      "cost_seconds": 59.1
+    },
+    {
+      "case": "prefix",
+      "label": "X-02",
+      "members": [
+        "prefix-A-glm:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Self::f() calls inside an impl or trait are explicitly exempt from the prelude drop and resolve against the self type. The claimed join of the two facts does not hold."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Self::f() calls inside an impl are explicitly exempted from the prelude drop and resolve against the impl's self type. The finding's premise is wrong at this revision."
+        }
+      ],
+      "final": "unsupported",
+      "primary_only": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 49455,
+      "cost_seconds": 59.1
+    },
+    {
+      "case": "prefix",
+      "label": "X-03",
+      "members": [
+        "prefix-A-glm:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The gap is real and visible in code, though narrower than claimed, because trailing commas are normalised at token level and rustfmt leaves most non-expression macros alone. It is a registered known limitation, not a hidden one, and the claimed scale of false findings is unmeasured."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 19517,
+      "cost_seconds": 43.5
+    },
+    {
+      "case": "prefix",
+      "label": "X-04",
+      "members": [
+        "prefix-B-glm:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A leftover _model.json after --no-model is neither Missing, Modified nor Orphaned, so generate --check passes and write never removes it. This contradicts the documented contract."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 19517,
+      "cost_seconds": 43.5
+    },
+    {
+      "case": "prefix",
+      "label": "X-05",
+      "members": [
+        "prefix-B-glm:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A small admissible input aborts the whole process instead of producing a per-file diagnostic, so the no-fail contract is broken. I did not isolate whether the overflow happens in syn's parser or a later recursive pass, but the core defect is reproduced."
+        }
+      ],
+      "final": "confirmed",
+      "primary_only": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 19517,
+      "cost_seconds": 43.5
+    }
+  ],
+  "arms": {
+    "A-glm": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 3,
+          "confirmed_primary_only": 3,
+          "hidden_detected": false,
+          "hidden_partial": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 1,
+          "confirmed_primary_only": 1,
+          "hidden_detected": false,
+          "hidden_partial": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 2,
+          "confirmed_primary_only": 2,
+          "hidden_detected": false,
+          "hidden_partial": false
+        }
+      },
+      "confirmed": 6,
+      "confirmed_primary_only": 6,
+      "unsupported": 3,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 357204,
+      "adjudication_seconds": 455.1
+    },
+    "B-glm": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 3,
+          "confirmed_primary_only": 3,
+          "hidden_detected": false,
+          "hidden_partial": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 2,
+          "confirmed_primary_only": 2,
+          "hidden_detected": false,
+          "hidden_partial": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 3,
+          "confirmed_primary_only": 3,
+          "hidden_detected": false,
+          "hidden_partial": false
+        }
+      },
+      "confirmed": 8,
+      "confirmed_primary_only": 8,
+      "unsupported": 1,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 184144,
+      "adjudication_seconds": 292.5
+    }
+  },
+  "agreement": {
+    "pairs": [
+      {
+        "case": "gen",
+        "label": "X-03",
+        "primary": "confirmed",
+        "second": "confirmed"
+      },
+      {
+        "case": "gen",
+        "label": "X-04",
+        "primary": "confirmed",
+        "second": "confirmed"
+      },
+      {
+        "case": "var",
+        "label": "X-02",
+        "primary": "unsupported",
+        "second": "unsupported"
+      },
+      {
+        "case": "var",
+        "label": "X-05",
+        "primary": "confirmed",
+        "second": "confirmed"
+      },
+      {
+        "case": "prefix",
+        "label": "X-01",
+        "primary": "confirmed",
+        "second": "confirmed"
+      },
+      {
+        "case": "prefix",
+        "label": "X-02",
+        "primary": "unsupported",
+        "second": "unsupported"
+      }
+    ],
+    "agree": 6,
+    "total": 6
+  },
+  "decision_rule_glm": {
+    "a_ge_b_plus_2": false,
+    "hidden_ok": true,
+    "cost_ok": false,
+    "branch": "otherwise (hunk-overlap checker)"
+  },
+  "review_cost": {
+    "gen-A-glm": {
+      "transport": "claude -p --bare --tools \"\"",
+      "seconds": 359,
+      "input_tokens": 43536,
+      "output_tokens": 13094,
+      "modelUsage": {
+        "glm-5.3-flash": {
+          "inputTokens": 43536,
+          "outputTokens": 13094,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.43602399999999997,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "glm-5.3-flash",
+          "provider": "firstParty",
+          "costBasis": "unknown"
+        }
+      }
+    },
+    "gen-B-glm": {
+      "transport": "claude -p --bare --tools \"\"",
+      "seconds": 416,
+      "input_tokens": 117376,
+      "output_tokens": 19449,
+      "modelUsage": {
+        "glm-5.3-flash": {
+          "inputTokens": 117376,
+          "outputTokens": 19449,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.858484,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "glm-5.3-flash",
+          "provider": "firstParty",
+          "costBasis": "unknown"
+        }
+      }
+    },
+    "prefix-A-glm": {
+      "transport": "claude -p --bare --tools \"\"",
+      "seconds": 572,
+      "input_tokens": 54191,
+      "output_tokens": 22096,
+      "modelUsage": {
+        "glm-5.3-flash": {
+          "inputTokens": 54191,
+          "outputTokens": 22096,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.658684,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "glm-5.3-flash",
+          "provider": "firstParty",
+          "costBasis": "unknown"
+        }
+      }
+    },
+    "prefix-B-glm": {
+      "transport": "direct Messages API (#G2)",
+      "seconds": 386.596,
+      "input_tokens": 188052,
+      "output_tokens": 16484,
+      "claude_code_attempt": "Prompt is too long (client-side, 0 API ms)"
+    },
+    "var-A-glm": {
+      "transport": "claude -p --bare --tools \"\"",
+      "seconds": 381,
+      "input_tokens": 43765,
+      "output_tokens": 15128,
+      "modelUsage": {
+        "glm-5.3-flash": {
+          "inputTokens": 43765,
+          "outputTokens": 15128,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.47762,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "glm-5.3-flash",
+          "provider": "firstParty",
+          "costBasis": "unknown"
+        }
+      }
+    },
+    "var-B-glm": {
+      "transport": "direct Messages API (#G2)",
+      "seconds": 642.713,
+      "input_tokens": 150352,
+      "output_tokens": 28765,
+      "claude_code_attempt": "Prompt is too long (client-side, 0 API ms)"
+    }
+  },
+  "primary_cost": {
+    "gen": {
+      "tokens": 87956,
+      "seconds": 161.7,
+      "tool_uses": 16
+    },
+    "var": {
+      "tokens": 85762,
+      "seconds": 99.1,
+      "tool_uses": 15
+    },
+    "prefix": {
+      "tokens": 97587,
+      "seconds": 217.7,
+      "tool_uses": 22
+    },
+    "source": "Agent tool completion notifications (subagent_tokens, duration_ms)"
+  },
+  "second_cost": {
+    "gen": {
+      "tokens": 68151,
+      "seconds": 75.4,
+      "tool_uses": 12
+    },
+    "var": {
+      "tokens": 74970,
+      "seconds": 71.5,
+      "tool_uses": 10
+    },
+    "prefix": {
+      "tokens": 59875,
+      "seconds": 31.2,
+      "tool_uses": 5
+    },
+    "source": "Agent tool completion notifications"
+  }
+}

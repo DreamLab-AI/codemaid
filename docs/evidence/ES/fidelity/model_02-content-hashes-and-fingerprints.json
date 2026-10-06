@@ -1,0 +1,15 @@
+{"topic": "model/02-content-hashes-and-fingerprints.md", "diagrams_rewritten": 4, "facts_checked": 52,
+ "facts_dropped": [
+  {"diagram": "MOD-02.1", "fact": "ContentHash +parse(s) Option  hash.rs:38 (Option return type)"},
+  {"diagram": "MOD-02.1", "fact": "ContentHash +short(n) str  hash.rs:49 (str return type)"},
+  {"diagram": "MOD-02.1", "fact": "Fingerprint +parse(s) Option  hash.rs:114 (Option return type)"},
+  {"diagram": "MOD-02.1", "fact": "SourceFile +hash ContentHash (field typed ContentHash; rewrite participant says only 'hash, source.rs:24')"},
+  {"diagram": "MOD-02.2", "fact": "FILE --> SYM (edge from file-text pipeline to symbol-token pipeline; rewrite only places them in sequence)"}
+ ],
+ "facts_invented": [
+  {"diagram": "MOD-02.1", "fact": "SF->>CH: of_text normalises newlines / SF->>CH: of_bytes, raw", "why": "Claims SourceFile calls of_text and of_bytes; original only lists them as ContentHash members with a SourceFile --> ContentHash association"},
+  {"diagram": "MOD-02.1", "fact": "SY->>FP: from_blake3 truncates (hash.rs:97)", "why": "Claims Symbol calls from_blake3; original only has Symbol --> Fingerprint association and from_blake3 as a Fingerprint member"},
+  {"diagram": "MOD-02.2", "fact": "KD->>DP: first 16 bytes kept, from_blake3 (hash.rs:99)", "why": "Presents truncation as a message from the keyed hasher to Display; original has truncation as a separate step before Display (same order, minor reframing)"}
+ ],
+ "citations_dropped": [], "citations_added": [], "prose_changed": false,
+ "notes": "MOD-02.3 already a sequenceDiagram and unchanged; MOD-02.4 and MOD-02.5 carry all states, branches and outcomes faithfully; main losses are return types and the class-diagram-to-call reframing in MOD-02.1."}

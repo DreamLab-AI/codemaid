@@ -1,0 +1,34 @@
+{
+  "run_id": "r32977d",
+  "issues": [
+    {"id":"DB-34","score":"FULL","findings":[2],"why":"temp dir from git archive|tar leaks when process killed (Drop not run)"},
+    {"id":"DB-40","score":"FULL","findings":[3],"why":"verify cannot run on own repo because MER-02 example sym: id in code span"},
+    {"id":"DB-05","score":"FULL","findings":[4],"why":"non-UTF-8 files silently skipped from model"},
+    {"id":"DB-18","score":"FULL","findings":[6],"why":"untyped closure param conn matched to internal vacuum by name"},
+    {"id":"DB-19","score":"FULL","findings":[6],"why":"closure param shadowing outer local takes outer type"},
+    {"id":"DB-07","score":"FULL","findings":[7],"why":"stack overflow aborts process, not catchable"},
+    {"id":"DB-28","score":"FULL","findings":[9],"why":"trait map truncates with no omitted count"},
+    {"id":"DB-15","score":"FULL","findings":[10],"why":"eight re-entry limit turns path into external id"},
+    {"id":"T-02","score":"FULL","findings":[11],"why":"ignore 0.4.30 breaks MSRV 1.85 without lockfile"},
+    {"id":"DB-38","score":"FULL","findings":[11],"why":"ignore 0.4.30 needs newer Rust than declared MSRV"},
+    {"id":"DB-11","score":"FULL","findings":[12],"why":"let-bound closure drawn at definition not call"},
+    {"id":"DB-12","score":"FULL","findings":[13],"why":"macro invocations never recorded as call steps (CallKind::Macro unused)"}
+  ],
+  "findings": [
+    {"n":1,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:679-682","why":"topic then lock written with plain fs::write, non-atomic as claimed, but verify detects it as a lock fault and the design documents it"},
+    {"n":2,"class":"REG","matches":["DB-34"],"verdict":null,"code":null,"why":"same temp-dir leak mechanism"},
+    {"n":3,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"same MER-02 verify failure"},
+    {"n":4,"class":"REG","matches":["DB-05"],"verdict":null,"code":null,"why":"non-UTF-8 silent skip"},
+    {"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/layout.rs:186,267","why":"build.rs is deliberately mapped to no target and tested as None; true but documented design limitation, impact overstated"},
+    {"n":6,"class":"REG","matches":["DB-18","DB-19"],"verdict":null,"code":null,"why":"closure parameter guesses"},
+    {"n":7,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"stack overflow abort"},
+    {"n":8,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:459-462","why":"model_at refuses --repo as claimed, but it is an explicit error with message, a documented limitation, not silent"},
+    {"n":9,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"trait map no omitted count"},
+    {"n":10,"class":"REG","matches":["DB-15"],"verdict":null,"code":null,"why":"depth 8 re-entry limit"},
+    {"n":11,"class":"REG","matches":["T-02","DB-38"],"verdict":null,"code":null,"why":"ignore 0.4.30 MSRV"},
+    {"n":12,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"closure drawn at definition"},
+    {"n":13,"class":"REG","matches":["DB-12"],"verdict":null,"code":null,"why":"macro calls never emitted"},
+    {"n":14,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-model/src/codebase.rs:89-93","why":"self-loops are dropped as claimed, but it is a documented deliberate model rule"},
+    {"n":15,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-dense/src/lib.rs:367-375","why":"over-budget slice returns OverBudget error as claimed, but it carries per-seed sizes and is a deliberate refusal, not a defect"}
+  ]
+}

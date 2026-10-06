@@ -1,0 +1,31 @@
+{
+  "run_id": "rfcf635",
+  "issues": [
+    {"id":"DB-07","score":"FULL","findings":[1],"why":"Stack overflow aborts the process, not catchable by catch_unwind in isolate.rs."},
+    {"id":"DB-33","score":"FULL","findings":[4],"why":"Seal does not record extraction flags such as --tests, so verify with different flags reports absent symbols."},
+    {"id":"DB-19","score":"FULL","findings":[7],"why":"Closure parameter shadowing an outer typed local resolves with the outer type."},
+    {"id":"DB-18","score":"FULL","findings":[8],"why":"Untyped closure parameter call matched to an internal method by name (vacuum example)."},
+    {"id":"DB-17","score":"PARTIAL","findings":[8],"why":"Names untyped-variable by-name matching but only for closure parameters, not plain locals."},
+    {"id":"DB-11","score":"FULL","findings":[9],"why":"Let-bound closure drawn at definition inside an optional fragment, not at call sites."},
+    {"id":"DB-28","score":"FULL","findings":[15],"why":"Trait map truncates to first max_edges relations with no omitted count (overview.rs:236)."},
+    {"id":"DB-40","score":"FULL","findings":[3],"why":"Example sym: id in MER-02 prose is scanned as a citation and fails verify in the repo's own CI."},
+    {"id":"DB-05","score":"PARTIAL","findings":[14],"why":"Same silent-skip site in source.rs but the finding describes the 2 MiB size limit, not invalid UTF-8."}
+  ],
+  "findings": [
+    {"n":1,"class":"REG","matches":["DB-07"],"verdict":null,"code":null,"why":"Matches stack-overflow-aborts debt item."},
+    {"n":2,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap/src/main.rs:677-681","why":"Topic and lock are written by two separate non-atomic fs::write calls, so a kill between them leaves a pointer with no lock entry."},
+    {"n":3,"class":"REG","matches":["DB-40"],"verdict":null,"code":null,"why":"Matches example id in prose failing verify."},
+    {"n":4,"class":"REG","matches":["DB-33"],"verdict":null,"code":null,"why":"Matches flags not recorded in seal."},
+    {"n":5,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap/src/main.rs:459-462","why":"model_at refuses --repo, so --since and --diff fail on multi-repo; real but a deliberate, explicit error message."},
+    {"n":6,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-model/src/hash.rs:139-146, crates/sealmap-model/src/codebase.rs:74-75","why":"Pairwise merge is commutative but not associative, so three or more twins depend on insertion order; that order is deterministic source order, so platform-dependence is overstated."},
+    {"n":7,"class":"REG","matches":["DB-19"],"verdict":null,"code":null,"why":"Matches closure shadowing keeps outer type."},
+    {"n":8,"class":"REG","matches":["DB-18","DB-17"],"verdict":null,"code":null,"why":"Matches untyped closure parameter by-name guessing."},
+    {"n":9,"class":"REG","matches":["DB-11"],"verdict":null,"code":null,"why":"Matches let-closure drawn at definition."},
+    {"n":10,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/pack.rs:314-320, crates/sealmap-corpus/src/pack.rs:479-481","why":"A single over-budget topic returns TopicOverBudget and exits 1 as claimed, but it names the topic and is a documented invariant."},
+    {"n":11,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-rust/src/resolve.rs:950-968","why":"A second reachable candidate removes the inferred edge as claimed, but the doc states this is deliberate ambiguity handling."},
+    {"n":12,"class":"NOVEL","matches":[],"verdict":"PARTLY","code":"crates/sealmap-corpus/src/sequence.rs:18-21, crates/sealmap-corpus/src/index.rs:113-124, crates/sealmap-corpus/src/lib.rs:161","why":"No expands link below min_calls is real, but the default is 1 and expands None is accurate; the agent-misreading consequence is speculative."},
+    {"n":13,"class":"NOVEL","matches":[],"verdict":"REAL","code":"crates/sealmap-corpus/src/contract.rs:101-104, crates/sealmap-corpus/src/lib.rs:205","why":"Orphan detection requires an .md extension, so a _model.json left from an earlier run is never deleted after --no-model."},
+    {"n":14,"class":"REG","matches":["DB-05"],"verdict":null,"code":null,"why":"Partial match to the silent skip in source.rs, with a different trigger."},
+    {"n":15,"class":"REG","matches":["DB-28"],"verdict":null,"code":null,"why":"Matches trait map truncation without an omitted count."}
+  ]
+}

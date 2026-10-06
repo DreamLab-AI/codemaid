@@ -1,0 +1,24 @@
+{
+  "gen": [
+    {"members": ["gen-A-glm:critical:F-01"]},
+    {"members": ["gen-A-glm:critical:F-02"]},
+    {"members": ["gen-A-glm:critical:F-03", "gen-B-glm:critical:F-03"]},
+    {"members": ["gen-B-glm:critical:F-01"]},
+    {"members": ["gen-B-glm:critical:F-02"]}
+  ],
+  "prefix": [
+    {"members": ["prefix-A-glm:critical:F-01"]},
+    {"members": ["prefix-A-glm:critical:F-02", "prefix-B-glm:critical:F-01"]},
+    {"members": ["prefix-A-glm:critical:F-03"]},
+    {"members": ["prefix-B-glm:critical:F-02"]},
+    {"members": ["prefix-B-glm:critical:F-03"]}
+  ],
+  "var": [
+    {"members": ["var-A-glm:critical:F-01"]},
+    {"members": ["var-A-glm:critical:F-02"]},
+    {"members": ["var-A-glm:critical:F-03"]},
+    {"members": ["var-B-glm:critical:F-01"]},
+    {"members": ["var-B-glm:critical:F-02"]},
+    {"members": ["var-B-glm:critical:F-03"]}
+  ]
+}

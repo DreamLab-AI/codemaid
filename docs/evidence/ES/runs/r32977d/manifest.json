@@ -1,0 +1,12 @@
+{
+  "model": "gemini-3.8-flash",
+  "pack": "R/arms/pack-R.txt",
+  "started": "2026-10-06T09:35:21.269Z",
+  "seconds": 117.2,
+  "findings": 15,
+  "finish": "STOP",
+  "prompt_tokens": 66240,
+  "cached_tokens": 0,
+  "thinking_tokens": 9462,
+  "output_tokens": 3293
+}
