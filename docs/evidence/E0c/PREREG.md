@@ -76,3 +76,64 @@ endpoint 4 is where E0c can fail even if the ratio passes.
 ## Amendments
 
 None.
+
+The "None." above was true at registration. The entries below are appended,
+never edited.
+
+### 2026-10-06 #1: making the registration concrete (written before any E0c code ran or any number was seen)
+
+Written while building the harness, before the first E0c run and before any
+endpoint number existed. None of these changes an endpoint, a threshold, the
+window, the seed or a mapping rule. Each one picks the most literal reading of
+a point the registration leaves open.
+
+- **Which topics are in scope.** A topic is in a repository's scope when at
+  least one of its sequence citations resolves to a `sources:` file in that
+  repository (E0 amendments #1 and #3). The window is still E0's 100 eligible
+  commits, so a commit that touches none of a repository's sequence-cited files
+  contributes 0 to every count.
+- **What T_file^seq tracks.** It tracks the files that hold the topic's
+  sequence citations. A `sources:` entry that no sequence citation names is not
+  tracked, because both sides use only sequence citations. E0 excludes
+  citations that resolve to no single source, and E0c excludes them too.
+- **Callables only have flows.** sealmap 0.2.0 records a `Flow` only for
+  callables. A sequence citation that maps to a non-callable or to a file's
+  module (E0 amendment #5) therefore has a flow made of its signature hash and
+  an empty call list. That is the literal definition. The share of such
+  citations is reported.
+- **Order and serialisation.** The call list is `Flow::calls()`, which is
+  sealmap's own depth-first, source-order walk. Branches and loops are
+  flattened, and their labels are not part of the flow. Each call is recorded
+  as `exact`, `inferred` or `external`, followed by the text of its target
+  `SymbolId`. For an external call that text is the canonical external name.
+  The call list holds whatever external calls the adapter keeps under
+  `RustOptions::default()`. The canonical serialisation is UTF-8, one
+  `\n`-terminated line per item: first `sig <blake3-16:hex>`, then one
+  `<kind> <target>` per call. The flow hash is the first 16 bytes of BLAKE3 over
+  those bytes (`Fingerprint::from_blake3`).
+- **A symbol absent on both sides.** T_flow's definition does not carry over
+  E0's conservative rule (a cited symbol absent at P and at C, with its file
+  changed, counts as changed). Read literally, such a symbol does not flag
+  T_flow. A sensitivity row with the rule applied is reported. It is not an
+  endpoint. T_sym^seq keeps the rule, because it is "as E0's T_sym".
+- **Endpoint 2.** Both sides keep only the sequence citations whose file ends
+  in `.rs`. Topics with no such citation are out of scope for that row.
+- **"After the topic's stamp" (endpoint 4).** A (commit C, topic) pair is
+  eligible when the topic's stamp in that repository is P (C's parent) or an
+  ancestor of P, so that the whole change from P to C postdates the stamp. A
+  topic with no usable stamp in that repository (`no_stamp`, `stamp_unknown`)
+  contributes no pairs. Pairs are listed and drawn as in E0 amendment #8: window
+  order, then topic file order, one ChaCha8 generator seeded with 20261006,
+  VisionClaw first, then agentbox. Each prompt carries the whole topic text and
+  the commit's diff, restricted to the topic's sequence-cited files in that
+  repository. The harness has no subagent tool, so endpoint 4 stays PENDING
+  until judges run per `judge/PROTOCOL.md`.
+- **Timing and byte identity.** These follow E0 amendment #2. Timing goes to
+  `TIMING.md`. Byte identity covers `results.json`, `RESULTS.md` and every
+  file under `judge/` except verdicts.
+- **What drives the remaining flags (exploratory, not an endpoint).** For each
+  T_flow flag set by a symbol, the change is classified as follows: signature
+  changed, calls added or removed, calls reordered only, resolution kind changed
+  only, flow changed while `sig_hash` and `body_hash` are both unchanged
+  (resolution drift caused by edits elsewhere), or symbol present on one side
+  only.
