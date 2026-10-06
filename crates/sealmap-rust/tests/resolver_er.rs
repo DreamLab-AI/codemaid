@@ -1,7 +1,7 @@
 //! Resolver and model defects confirmed by the ER review experiment
 //! (`docs/evidence/ER/`): each test reproduces one adjudicated finding.
 
-use sealmap_model::{Codebase, Confidence, SourceSet, SymbolId};
+use sealmap_model::{Codebase, Confidence, RelationKind, SourceSet, Step, SymbolId};
 use sealmap_rust::{RustOptions, extract};
 
 fn model(files: &[(&str, &str)]) -> Codebase {
@@ -69,4 +69,54 @@ fn if_let_and_while_let_bindings_end_with_their_statement() {
     assert!(
         cb.symbols.values().all(|s| s.flow.as_ref().is_none_or(|f| f.calls().all(|c| c.target.to_string() != db_ping)))
     );
+}
+
+/// ER `gen X-09` / `prefix X-10`: `#[cfg]` twins share one id, and the merge
+/// kept only the first definition's flow, so the second twin's calls were
+/// lost from the flow and from the call relations. The twins are now arms of
+/// one branch, each labelled with its definition's line.
+#[test]
+fn cfg_twins_keep_every_definitions_flow() {
+    let cb = model(&[(
+        "src/lib.rs",
+        r#"
+        fn a() {}
+        fn b() {}
+        fn c() {}
+        #[cfg(unix)]
+        pub fn plat() { a(); }
+        #[cfg(windows)]
+        pub fn plat() { b(); }
+        #[cfg(unix)]
+        pub fn quiet() {}
+        #[cfg(not(unix))]
+        pub fn quiet() { c(); }
+        #[cfg(unix)]
+        pub fn same() { a(); }
+        #[cfg(windows)]
+        pub fn same() { a(); }
+        "#,
+    )]);
+    let (a, b, c) = ("sym:cargo ledger . a().", "sym:cargo ledger . b().", "sym:cargo ledger . c().");
+    assert_eq!(calls(&cb, "sym:cargo ledger . plat()."), [exact(a), exact(b)]);
+    // The first twin calls nothing; the second's call still reaches the model.
+    assert_eq!(calls(&cb, "sym:cargo ledger . quiet()."), [exact(c)]);
+    // Identical twins stay one flat flow.
+    assert_eq!(calls(&cb, "sym:cargo ledger . same()."), [exact(a)]);
+    let flow = |s: &str| cb.symbol(&SymbolId::parse(s).unwrap()).unwrap().flow.clone().unwrap();
+    assert_eq!(flow("sym:cargo ledger . same().").steps.len(), 1);
+    let Step::Branch { arms } = &flow("sym:cargo ledger . plat().").steps[0] else { panic!("not a branch") };
+    let labels: Vec<_> = arms.iter().map(|a| a.label.as_str()).collect();
+    // A definition's span opens on its `#[cfg]` attribute.
+    assert_eq!(labels, ["cfg twin at src/lib.rs:5", "cfg twin at src/lib.rs:7"]);
+    let Step::Branch { arms } = &flow("sym:cargo ledger . quiet().").steps[0] else { panic!("not a branch") };
+    assert!(arms[0].steps.is_empty() && arms[1].steps.len() == 1, "{arms:?}");
+    // Call relations come from flows, so the second twin's edges are there.
+    let to: Vec<String> = cb
+        .relations
+        .iter()
+        .filter(|r| r.kind == RelationKind::Calls && r.from.to_string().ends_with(" quiet()."))
+        .map(|r| r.to.to_string())
+        .collect();
+    assert_eq!(to, [c]);
 }
