@@ -66,3 +66,20 @@ blocks, and compares T_file^seq with T_flow. T_flow is a BLAKE3-16 hash over a
 symbol's `sig_hash` and its ordered calls as sealmap's Rust adapter resolves them
 (`src/flow.rs`). The rest of the experiment lives in `src/e0c.rs`. Once verdicts
 exist, `e0 e0c-score --out docs/evidence/E0c` scores endpoint 4.
+
+## E0d
+
+`e0 e0d` (same arguments, `--out docs/evidence/E0d`) runs the experiment in
+[`docs/evidence/E0d/PREREG.md`](../../docs/evidence/E0d/PREREG.md): a
+language-agnostic overlap rule, T_hunk(k) (`src/hunk.rs`). Each citation is
+relocated from its topic's stamp to P through one `git diff -U0` between the two
+blobs. The topic is flagged when a P→C hunk lies within k lines of a relocated
+citation, when a cited file is deleted, or when a lost or ambiguous citation's
+file changed. Every hunk-placing git option is pinned on the command line.
+`src/e0d.rs` recomputes T_file, T_sym, T_hop (E0), T_region (E0b) and T_flow
+(E0c) on the same commits with their own code. It draws 45 + 15 post-stamp
+T_file pairs and writes blind label prompts to `labels/`. The detectors' flags
+for those pairs go to `detectors.json`, outside `labels/`. A run takes about
+three minutes. Once labels exist (`labels/<id>.l1.json`, plus `.l2.json` for
+every first `yes`), `e0 e0d-score --out docs/evidence/E0d` scores recall and
+precision for every detector and reads each ratio together with its recall.

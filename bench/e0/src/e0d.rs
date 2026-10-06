@@ -128,7 +128,14 @@ pub fn htopic(t: &crate::TopicInRepo) -> HTopic {
 }
 
 fn coverage(tracked: &[crate::TopicInRepo], topics: &[HTopic], store: &mut Store) -> Result<Coverage, String> {
-    let mut cov = Coverage { topics: topics.len(), ..Coverage::default() };
+    let mut cov = Coverage {
+        topics: topics.len(),
+        ambiguous_at_stamp: [Why::NoStamp, Why::AbsentAtStamp, Why::LineOutOfRange, Why::Binary]
+            .into_iter()
+            .map(|w| (w, 0))
+            .collect(),
+        ..Coverage::default()
+    };
     for t in tracked {
         cov.citations += t.cites.len();
         cov.ranges += t.cites.iter().filter(|(c, _, _)| c.end.is_some_and(|e| e > c.line)).count();
@@ -294,7 +301,8 @@ impl Series {
 }
 
 fn reasons(r: &Run) -> Value {
-    let mut n: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut n: BTreeMap<&str, usize> =
+        ["overlap_k5", "deleted", "lost", "ambiguous", "binary"].into_iter().map(|k| (k, 0)).collect();
     let (mut hunk_not_file, mut monotone_breaks, mut only_overlap, mut only_whole) = (0, 0, 0, 0);
     for row in &r.rows {
         for (_, c) in &row.cells {

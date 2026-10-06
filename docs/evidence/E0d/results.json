@@ -1,0 +1,520 @@
+{
+  "corpus": {
+    "topics": 69
+  },
+  "endpoint4": {
+    "drawn": {
+      "agentbox": 15,
+      "total": 60,
+      "visionclaw": 45
+    },
+    "flagged_in_sample": {
+      "file": 60,
+      "flow": 25,
+      "hop": 56,
+      "hunk0": 8,
+      "hunk20": 23,
+      "hunk5": 13,
+      "hunk5_literal_lost": 24,
+      "hunk5_uncited": 20,
+      "region": 49,
+      "sym": 52
+    },
+    "population": [
+      {
+        "after_stamp": 121,
+        "repo": "visionclaw",
+        "t_file_pairs": 719
+      },
+      {
+        "after_stamp": 729,
+        "repo": "agentbox",
+        "t_file_pairs": 1224
+      }
+    ],
+    "question": "Did this change make anything this topic states wrong or misleading?",
+    "reason": "no subagent tool in the harness context; blind prompts prepared, no label produced",
+    "seed": 20261006,
+    "status": "PENDING"
+  },
+  "experiment": "E0d",
+  "k_primary": 5,
+  "overlap_rule": "git diff -U0 --diff-algorithm=myers --indent-heuristic --no-textconv --no-ext-diff over blob ids; stamp→P relocation, P→C overlap within k (amendment #1)",
+  "pins": {
+    "agentbox": "b487c95fa9caf7096a3284f91138935a7f3c3531",
+    "corpus": "cace76a09db2c98732a41cd8d798b9ef0a1f74e2",
+    "git": "git version 2.55.0",
+    "sealmap": "0.2.0 crates in-tree, sealmap_rust::extract_dir with RustOptions::default()",
+    "visionclaw": "9c8dcdc92d7ac50644f336bbd4e156f161219be0"
+  },
+  "pooled": {
+    "counts": {
+      "commits": 200,
+      "detectors": {
+        "file": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "infinite_resamples": 0,
+          "median": 5.5,
+          "p90": 27,
+          "r": 1.0,
+          "sum": 1943
+        },
+        "flow": {
+          "ci95": [
+            1.5788,
+            1.8307
+          ],
+          "infinite_resamples": 0,
+          "median": 2.0,
+          "p90": 18,
+          "r": 1.6881,
+          "sum": 1151
+        },
+        "hop": {
+          "ci95": [
+            0.9816,
+            1.044
+          ],
+          "infinite_resamples": 0,
+          "median": 5.0,
+          "p90": 27,
+          "r": 1.012,
+          "sum": 1920
+        },
+        "hunk0": {
+          "ci95": [
+            2.5682,
+            3.0966
+          ],
+          "infinite_resamples": 0,
+          "median": 1.0,
+          "p90": 9,
+          "r": 2.8159,
+          "sum": 690
+        },
+        "hunk20": {
+          "ci95": [
+            1.994,
+            2.3694
+          ],
+          "infinite_resamples": 0,
+          "median": 2.0,
+          "p90": 12,
+          "r": 2.1709,
+          "sum": 895
+        },
+        "hunk5": {
+          "ci95": [
+            2.2984,
+            2.756
+          ],
+          "infinite_resamples": 0,
+          "median": 2.0,
+          "p90": 10,
+          "r": 2.5168,
+          "sum": 772
+        },
+        "hunk5_literal_lost": {
+          "ci95": [
+            0.4382,
+            0.5952
+          ],
+          "infinite_resamples": 0,
+          "median": 19.0,
+          "p90": 34,
+          "r": 0.5142,
+          "sum": 3779
+        },
+        "hunk5_uncited": {
+          "ci95": [
+            1.774,
+            2.0595
+          ],
+          "infinite_resamples": 0,
+          "median": 3.0,
+          "p90": 12,
+          "r": 1.9124,
+          "sum": 1016
+        },
+        "region": {
+          "ci95": [
+            1.0461,
+            1.1046
+          ],
+          "infinite_resamples": 0,
+          "median": 5.0,
+          "p90": 27,
+          "r": 1.0723,
+          "sum": 1812
+        },
+        "sym": {
+          "ci95": [
+            1.0426,
+            1.1002
+          ],
+          "infinite_resamples": 0,
+          "median": 5.0,
+          "p90": 27,
+          "r": 1.0688,
+          "sum": 1818
+        }
+      },
+      "flow_e0c_scope": {
+        "ci95": [
+          1.1036,
+          1.2727
+        ],
+        "r_flow": 1.1764,
+        "t_file_seq": 1354,
+        "t_flow": 1151
+      }
+    }
+  },
+  "prereg": "docs/evidence/E0d/PREREG.md",
+  "repos": {
+    "agentbox": {
+      "counts": {
+        "commits": 100,
+        "detectors": {
+          "file": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "infinite_resamples": 0,
+            "median": 5.5,
+            "p90": 29,
+            "r": 1.0,
+            "sum": 1224
+          },
+          "flow": {
+            "ci95": [
+              1.4701,
+              1.6489
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 23,
+            "r": 1.5455,
+            "sum": 792
+          },
+          "hop": {
+            "ci95": [
+              1.0008,
+              1.0167
+            ],
+            "infinite_resamples": 0,
+            "median": 5.0,
+            "p90": 29,
+            "r": 1.0074,
+            "sum": 1215
+          },
+          "hunk0": {
+            "ci95": [
+              3.0927,
+              3.7188
+            ],
+            "infinite_resamples": 0,
+            "median": 1.5,
+            "p90": 10,
+            "r": 3.3812,
+            "sum": 362
+          },
+          "hunk20": {
+            "ci95": [
+              2.3767,
+              2.8961
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 12,
+            "r": 2.621,
+            "sum": 467
+          },
+          "hunk5": {
+            "ci95": [
+              2.7436,
+              3.3344
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 11,
+            "r": 3.0222,
+            "sum": 405
+          },
+          "hunk5_literal_lost": {
+            "ci95": [
+              0.6364,
+              0.9203
+            ],
+            "infinite_resamples": 0,
+            "median": 17.0,
+            "p90": 20,
+            "r": 0.7747,
+            "sum": 1580
+          },
+          "hunk5_uncited": {
+            "ci95": [
+              1.9653,
+              2.3219
+            ],
+            "infinite_resamples": 0,
+            "median": 4.0,
+            "p90": 14,
+            "r": 2.1399,
+            "sum": 572
+          },
+          "region": {
+            "ci95": [
+              1.0008,
+              1.0215
+            ],
+            "infinite_resamples": 0,
+            "median": 5.0,
+            "p90": 29,
+            "r": 1.0091,
+            "sum": 1213
+          },
+          "sym": {
+            "ci95": [
+              1.0008,
+              1.0189
+            ],
+            "infinite_resamples": 0,
+            "median": 5.0,
+            "p90": 29,
+            "r": 1.0082,
+            "sum": 1214
+          }
+        },
+        "flow_e0c_scope": {
+          "ci95": [
+            1.0012,
+            1.0351
+          ],
+          "r_flow": 1.0139,
+          "t_file_seq": 803,
+          "t_flow": 792
+        }
+      },
+      "coverage": {
+        "ambiguous_at_stamp": {
+          "absent_at_stamp": 0,
+          "binary": 0,
+          "line_out_of_range": 0,
+          "no_stamp": 0
+        },
+        "citations": 6039,
+        "cited_files": 668,
+        "non_rust_citations": 5207,
+        "ranges": 2207,
+        "topics": 38,
+        "topics_with_uncited_sources": 32,
+        "uncited_sources": 215
+      },
+      "endpoint4_population": {
+        "after_stamp": 729,
+        "t_file_pairs": 1224
+      },
+      "reasons": {
+        "check_k_monotonicity_breaks": 0,
+        "check_t_hunk20_without_t_file": 0,
+        "t_hunk5_flags_by_reason": {
+          "ambiguous": 0,
+          "binary": 0,
+          "deleted": 0,
+          "lost": 308,
+          "overlap_k5": 173
+        },
+        "t_hunk5_only_overlap": 97,
+        "t_hunk5_only_whole_file_rule": 232
+      }
+    },
+    "visionclaw": {
+      "counts": {
+        "commits": 100,
+        "detectors": {
+          "file": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "infinite_resamples": 0,
+            "median": 5.5,
+            "p90": 18,
+            "r": 1.0,
+            "sum": 719
+          },
+          "flow": {
+            "ci95": [
+              1.7031,
+              2.4539
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 7,
+            "r": 2.0028,
+            "sum": 359
+          },
+          "hop": {
+            "ci95": [
+              0.9406,
+              1.107
+            ],
+            "infinite_resamples": 0,
+            "median": 5.0,
+            "p90": 19,
+            "r": 1.0199,
+            "sum": 705
+          },
+          "hunk0": {
+            "ci95": [
+              1.9255,
+              2.5595
+            ],
+            "infinite_resamples": 0,
+            "median": 1.0,
+            "p90": 9,
+            "r": 2.1921,
+            "sum": 328
+          },
+          "hunk20": {
+            "ci95": [
+              1.5191,
+              1.8899
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 10,
+            "r": 1.6799,
+            "sum": 428
+          },
+          "hunk5": {
+            "ci95": [
+              1.7399,
+              2.2572
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 10,
+            "r": 1.9591,
+            "sum": 367
+          },
+          "hunk5_literal_lost": {
+            "ci95": [
+              0.263,
+              0.3978
+            ],
+            "infinite_resamples": 0,
+            "median": 24.0,
+            "p90": 35,
+            "r": 0.327,
+            "sum": 2199
+          },
+          "hunk5_uncited": {
+            "ci95": [
+              1.4648,
+              1.8255
+            ],
+            "infinite_resamples": 0,
+            "median": 2.0,
+            "p90": 11,
+            "r": 1.6194,
+            "sum": 444
+          },
+          "region": {
+            "ci95": [
+              1.1314,
+              1.2879
+            ],
+            "infinite_resamples": 0,
+            "median": 3.0,
+            "p90": 15,
+            "r": 1.2003,
+            "sum": 599
+          },
+          "sym": {
+            "ci95": [
+              1.1224,
+              1.2758
+            ],
+            "infinite_resamples": 0,
+            "median": 4.0,
+            "p90": 16,
+            "r": 1.1904,
+            "sum": 604
+          }
+        },
+        "flow_e0c_scope": {
+          "ci95": [
+            1.3191,
+            1.8702
+          ],
+          "r_flow": 1.5348,
+          "t_file_seq": 551,
+          "t_flow": 359
+        }
+      },
+      "coverage": {
+        "ambiguous_at_stamp": {
+          "absent_at_stamp": 0,
+          "binary": 0,
+          "line_out_of_range": 0,
+          "no_stamp": 0
+        },
+        "citations": 5960,
+        "cited_files": 903,
+        "non_rust_citations": 1751,
+        "ranges": 1551,
+        "topics": 37,
+        "topics_with_uncited_sources": 33,
+        "uncited_sources": 202
+      },
+      "endpoint4_population": {
+        "after_stamp": 121,
+        "t_file_pairs": 719
+      },
+      "reasons": {
+        "check_k_monotonicity_breaks": 0,
+        "check_t_hunk20_without_t_file": 0,
+        "t_hunk5_flags_by_reason": {
+          "ambiguous": 0,
+          "binary": 0,
+          "deleted": 0,
+          "lost": 299,
+          "overlap_k5": 229
+        },
+        "t_hunk5_only_overlap": 68,
+        "t_hunk5_only_whole_file_rule": 138
+      }
+    }
+  },
+  "verdict": {
+    "e0d": "UNDETERMINED until endpoint 4 is labelled",
+    "endpoint1": {
+      "ci95": [
+        1.7399,
+        2.2572
+      ],
+      "r_hunk": 1.9591,
+      "result": "FAIL",
+      "threshold": 2.0
+    },
+    "endpoint2": {
+      "ci95": [
+        2.2984,
+        2.756
+      ],
+      "r_hunk_pooled": 2.5168,
+      "result": "PASS",
+      "threshold": 2.0
+    },
+    "endpoint4": {
+      "recall_floor": 0.9,
+      "result": "PENDING"
+    }
+  }
+}

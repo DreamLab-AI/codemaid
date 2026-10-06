@@ -1,6 +1,6 @@
 [package]
 name = "sealmap-bench-e0"
-description = "E0/E0b harness: file-level against symbol- and region-level staleness over pinned history (docs/evidence/E0/PREREG.md, docs/evidence/E0b/PREREG.md)"
+description = "E0–E0d harness: file-level against symbol-, region-, call-flow- and hunk-level staleness over pinned history (docs/evidence/E0*/PREREG.md)"
 version = "0.0.0"
 publish = false
 edition.workspace = true
