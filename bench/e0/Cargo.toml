@@ -1,0 +1,26 @@
+[package]
+name = "sealmap-bench-e0"
+description = "E0 harness: file-level against symbol-level staleness over pinned history (docs/evidence/E0/PREREG.md)"
+version = "0.0.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "e0"
+path = "src/main.rs"
+
+[dependencies]
+sealmap-model.workspace = true
+sealmap-rust = { workspace = true, features = ["parallel"] }
+serde.workspace = true
+serde_json.workspace = true
+blake3.workspace = true
+fancy-regex = "0.14"
+rand = { version = "0.9", default-features = false, features = ["std"] }
+rand_chacha = { version = "0.9", default-features = false, features = ["std"] }
+
+[lints]
+workspace = true
