@@ -55,6 +55,8 @@ pub struct Citation {
     pub diagram: String,
     /// `true` for a citation in prose outside the mermaid blocks.
     pub prose: bool,
+    /// The block's diagram kind (see [`kind_of`]), or `prose`.
+    pub kind: String,
     pub cited: String,
     pub line: u32,
     pub resolved: Resolved,
@@ -209,6 +211,7 @@ pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bo
         cites.push(Citation {
             diagram: diagram.into(),
             prose,
+            kind: String::new(),
             cited: cited.into(),
             line,
             resolved: resolve(sources, cited),
@@ -287,6 +290,19 @@ pub fn diagram_citations(diagram: &str, src: &str, sources: &[String], prose: bo
     (cites, unbound)
 }
 
+/// A mermaid block's kind: the generator's rule (first token of the block's
+/// first line), with `graph` folded into `flowchart` and `stateDiagram` into
+/// `stateDiagram-v2`.
+pub fn kind_of(src: &str) -> String {
+    let first = src.split('\n').next().unwrap_or("").split_whitespace().next().unwrap_or("");
+    match first {
+        "graph" | "flowchart" => "flowchart".into(),
+        "stateDiagram" | "stateDiagram-v2" => "stateDiagram-v2".into(),
+        "" => "unknown".into(),
+        k => k.into(),
+    }
+}
+
 /// Parse one topic file.
 pub fn parse_topic(file: &str, text: &str) -> Result<Topic, String> {
     let (fm, body) = parse_frontmatter(text).ok_or_else(|| format!("{file}: no front matter"))?;
@@ -307,7 +323,11 @@ pub fn parse_topic(file: &str, text: &str) -> Result<Topic, String> {
     let mut unbound_bare = 0;
     for (id, src, is_prose) in blocks.iter().map(|(i, s)| (i, s, false)).chain(prose.iter().map(|(i, s)| (i, s, true)))
     {
-        let (c, u) = diagram_citations(id, src, &sources, is_prose);
+        let (mut c, u) = diagram_citations(id, src, &sources, is_prose);
+        let kind = if is_prose { "prose".to_string() } else { kind_of(src) };
+        for x in &mut c {
+            x.kind = kind.clone();
+        }
         citations.extend(c);
         unbound_bare += u;
     }
@@ -465,6 +485,9 @@ mod tests {
         assert_eq!(t.verified_commit, "{visionclaw: abcdef0}");
         assert_eq!(t.citations.len(), 2);
         assert!(!t.citations[0].prose && t.citations[1].prose);
+        assert_eq!((t.citations[0].kind.as_str(), t.citations[1].kind.as_str()), ("flowchart", "prose"));
+        assert_eq!(kind_of("graph TD\n  A"), "flowchart");
+        assert_eq!(kind_of("stateDiagram\n"), "stateDiagram-v2");
         assert_eq!((t.citations[1].diagram.as_str(), t.citations[1].line), ("VC-01.1.prose", 9));
     }
 }

@@ -191,7 +191,7 @@ adds an **exploratory, post-hoc** row: T_file and T_sym recomputed over the same
 100 commits with each topic restricted to its `.rs` sources and citations. It is
 not an endpoint, does not enter the verdict and carries no threshold.
 
-### 2026-10-06 #12: endpoint 4 is not judged (written after endpoint 1 failed)
+### 2026-10-06 #11: endpoint 4 is not judged (written after endpoint 1 failed)
 
 Endpoint 1 failed (R = 1.19, CI 1.12–1.28, against 2.0), so E0 does not hold
 whatever endpoint 4 shows. The drawn sample also has a defect the registration
