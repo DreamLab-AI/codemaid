@@ -325,3 +325,37 @@ fn write_never_writes_through_a_symlink() {
     assert!(verify(&dir, &c).unwrap().is_clean());
     fs::remove_dir_all(&root).unwrap();
 }
+
+/// ER `var X-07`: after a generation with `emit_model: false` (CLI
+/// `--no-model`), a `_model.json` from an earlier run was neither reported
+/// nor removed, so a stale model sat beside a corpus that verified clean.
+#[test]
+fn a_model_left_from_an_earlier_run_is_orphaned() {
+    let dir = std::env::temp_dir().join(format!("sealmap-no-model-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let mut src = SourceSet::new();
+    for (p, t) in SHOP {
+        src.insert(p, t).unwrap();
+    }
+    let cb = extract(&src, &RustOptions { name: "shop".into(), ..Default::default() }).codebase;
+    let with = generate(&cb, &CorpusOptions::default());
+    let without = generate(&cb, &CorpusOptions { emit_model: false, ..Default::default() });
+    assert!(!without.files.contains_key(&SourcePath::new("_model.json").unwrap()));
+
+    write(&dir, &with).unwrap();
+    let report = verify(&dir, &without).unwrap();
+    assert_eq!(report.count(Drift::Orphaned), 1, "{report:?}");
+    write(&dir, &without).unwrap();
+    assert!(!dir.join("_model.json").exists());
+    assert!(verify(&dir, &without).unwrap().is_clean());
+
+    // A pretty-printed model is recognised too; a file that is not a
+    // sealmap model is left alone, like any other file sealmap did not write.
+    let pretty = generate(&cb, &CorpusOptions { pretty_json: true, ..Default::default() });
+    write(&dir, &pretty).unwrap();
+    assert_eq!(write(&dir, &without).unwrap().count(Drift::Orphaned), 1);
+    fs::write(dir.join("_model.json"), "{\"mine\": true}\n").unwrap();
+    assert!(write(&dir, &without).unwrap().is_clean());
+    assert!(dir.join("_model.json").exists());
+    fs::remove_dir_all(&dir).unwrap();
+}

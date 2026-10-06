@@ -74,7 +74,8 @@ impl Report {
 ///
 /// Only `.md` files that carry the sealmap header, and the reserved `_`
 /// files, are considered part of the corpus; anything else in the directory
-/// is ignored.
+/// is ignored. A `_model.json` that `expected` leaves out (generated with
+/// `emit_model: false`) is orphaned when it is a sealmap model.
 pub fn verify_against(expected: &Corpus, actual: &BTreeMap<SourcePath, String>) -> Report {
     let mut entries = Vec::new();
     for (path, want) in &expected.files {
@@ -96,12 +97,21 @@ pub fn verify_against(expected: &Corpus, actual: &BTreeMap<SourcePath, String>) 
         }
     }
     for (path, text) in actual {
-        if !expected.files.contains_key(path) && path.extension() == Some("md") && is_generated(text) {
+        let ours = if path.extension() == Some("md") { is_generated(text) } else { is_model_json(path, text) };
+        if !expected.files.contains_key(path) && ours {
             entries.push(DriftEntry { path: path.clone(), drift: Drift::Orphaned });
         }
     }
     entries.sort();
     Report { entries, checked: expected.files.len() }
+}
+
+/// `true` for the reserved `_model.json` written by [`generate`](crate::generate):
+/// a serialised `Codebase`, whose first key is `schema_version` (compact or
+/// pretty-printed).
+fn is_model_json(path: &SourcePath, text: &str) -> bool {
+    path.as_str() == "_model.json"
+        && text.strip_prefix('{').is_some_and(|rest| rest.trim_start().starts_with("\"schema_version\":"))
 }
 
 /// Read every file under `dir` (UTF-8 only) keyed by relative path. A
@@ -136,7 +146,8 @@ pub fn verify(dir: &Path, expected: &Corpus) -> io::Result<Report> {
 }
 
 /// Bring `dir` into compliance with `expected`: write missing, stale and
-/// modified files, delete orphaned generated documents (and nothing else).
+/// modified files, delete orphaned generated documents and a sealmap
+/// `_model.json` that `expected` leaves out (and nothing else).
 /// Unchanged files are not touched, so mtimes stay stable. Returns what was
 /// changed.
 ///

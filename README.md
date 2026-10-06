@@ -360,7 +360,7 @@ the ER review experiment ([`docs/evidence/ER/`](docs/evidence/ER/RESULTS.md)).
 `generate` never writes through a symbolic link; `if let` and `while let`
 bindings no longer leak past their block; `#[cfg]` twins keep every
 definition's calls; impls on tuples, slices and other non-path types keep
-their methods.
+their methods; `--no-model` removes a model left by an earlier run.
 
 The 0.2 plan, in order (detail in [`docs/DESIGN.md`](docs/DESIGN.md) §10):
 

@@ -19,6 +19,10 @@ All crates in this workspace share one version.
   pointer or trait object) was skipped with all its methods and calls. Its
   methods are now anchored like those of any type the codebase does not
   define, e.g. ``sym:cargo app . impl#[`(u8, u8)`][T]go().``.
+- `generate --no-model` left a `_model.json` from an earlier run in place,
+  and `generate --check` passed with it. A sealmap model the generation leaves
+  out is now orphaned: reported by `--check`, deleted by `generate`. A
+  `_model.json` that is not a sealmap model is still left alone.
 
 ## 0.2.0 — 2026-10-06
 
