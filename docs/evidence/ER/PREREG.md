@@ -73,3 +73,21 @@ informative outcome.
 ## Amendments
 
 None.
+
+### 2026-10-06 #T1 (team lead): second reviewer, gpt-6-luna (written before any review output existed)
+
+At the owner's request, every case and arm is also reviewed by **gpt-6-luna,
+high reasoning, through the Codex CLI**, with the identical pack and lens. It is
+an additional, pre-specified reviewer factor, not a replacement:
+
+- The decision rule above is evaluated **for Gemini as registered** (primary)
+  and reported separately **for Luna** (secondary). If they disagree, the
+  primary governs and the disagreement is reported.
+- Luna runs from an **empty working directory with a read-only sandbox**, so it
+  can read nothing but the pack (arm A must stay diagrams-only). The pack is
+  passed on stdin, never as a command-line argument.
+- Luna's findings are pooled and adjudicated blind with Gemini's. Because Luna
+  shares a vendor with the gpt-6-astra second adjudicator, Luna-originated
+  findings that need a second opinion go to a **second independent Claude
+  subagent** instead.
+- Also reported per reviewer: wall-clock and tokens per review.
