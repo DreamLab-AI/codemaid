@@ -1,0 +1,69 @@
+[
+  {
+    "label": "X-01",
+    "members": [
+      "prefix-A-gemini:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-02",
+    "members": [
+      "prefix-B-gemini:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-03",
+    "members": [
+      "prefix-B-luna:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-04",
+    "members": [
+      "prefix-A-luna:critical:F-01",
+      "prefix-B-luna:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-05",
+    "members": [
+      "prefix-A-luna:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-06",
+    "members": [
+      "prefix-A-luna:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-07",
+    "members": [
+      "prefix-A-gemini:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-08",
+    "members": [
+      "prefix-B-luna:critical:F-03"
+    ]
+  },
+  {
+    "label": "X-09",
+    "members": [
+      "prefix-B-gemini:critical:F-02"
+    ]
+  },
+  {
+    "label": "X-10",
+    "members": [
+      "prefix-B-gemini:critical:F-01"
+    ]
+  },
+  {
+    "label": "X-11",
+    "members": [
+      "prefix-A-gemini:critical:F-02"
+    ]
+  }
+]

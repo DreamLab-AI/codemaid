@@ -1,0 +1,40 @@
+You are an independent adjudicator in a pre-registered experiment. The current directory is a checkout of the Rust workspace "sealmap" at revision 6e0604c. Validate each code-review finding below against the code at this revision. Be rigorous and sceptical; check every citation yourself.
+
+Rules: judge only the files in this directory at this revision. Do not run git log/show/diff or look at any other revision, and do not modify, create or delete any file here. Read-only commands only.
+
+For each item give a verdict: "confirmed" (the problem is real and actionable in this code, evidenced at specific file:line you checked; exaggerated consequences are fine if the core defect is real), "unsupported" (wrong, already handled or deliberately documented as intended, not present at this revision, or not evidenced), or "unsure". Also say whether the item identifies this hidden defect (yes / partial / no): An enum struct or tuple variant label (built in crates/sealmap-rust/src/collect.rs when collecting enum variants) prints the whole field list as tokens, including field attributes, so a doc comment or attribute on a field (`#[doc = " ..."]`, `#[serde(skip)]`) appears verbatim in class-diagram variant labels.
+
+Reply with ONLY a JSON array, no prose: [{"label":"X-..","verdict":"confirmed|unsupported|unsure","evidence":"file:line facts you checked","hidden_defect":"yes|partial|no","rationale":"one or two sentences"}].
+
+FINDINGS
+
+## X-01
+
+**`sealmap verify` audits topic lockfiles rather than the generated corpus, leaving generated diagram drift undetected in CI**
+- Evidence: `docs/diagrams/README.md:12-14` claims: "This corpus is **not** `docs/sealmap/`. That directory is sealmap's own generated, one-document-per-source-file output, checked by `sealmap verify` in CI." In contrast, `crates/sealmap/src/main.rs:88-91` binds `Cmd::Verify(Corpus)` to `seal::verify(ctx.lock_text.as_deref(), seal::LOCK_FILE, &ctx.topics, &ctx.codebase)` at `crates/sealmap/src/main.rs:230-234`. `seal::verify` (`crates/sealmap-corpus/src/seal/check.rs:374-411`) only inspects hand-authored topic markdown files under `--diagrams` (`docs/diagrams/`) against `seals.lock`. Checking the generated 1:1 corpus requires `sealmap generate --check -o docs/sealmap` (`crates/sealmap/src/main.rs:59-62`, `246-258`).
+- Failure: CI configurations set up according to `README.md` will execute `sealmap verify` expecting it to enforce the 1:1 contract on `docs/sealmap/`. Because `verify` exclusively inspects `docs/diagrams/seals.lock`, any drift, missing files, stale content, or hand edits in `docs/sealmap/` pass CI undetected. Developers and downstream orchestrators will consume drifted, obsolete architecture maps without any CI alert.
+- Reviewer confidence: high
+
+
+## X-06
+
+Merged from near-identical reports; each version follows.
+
+**Uncatchable stack overflow abort on deeply nested ASTs breaks the fault-isolation invariant**
+- Evidence: EXT-01 and EXT-01.1 state as an invariant: "Extraction never fails: unparsable files surface in Extraction::diagnostics (`crates/sealmap-rust/src/lib.rs:148`-`150`)" and "It never fails a whole run because of one bad file: a file that does not parse, or that trips a bug, becomes a warning and a placeholder entry". In contradiction, worker threads isolate panics using `catch_unwind` (`crates/sealmap-extract/src/isolate.rs:46`), but stack overflows in Rust trigger an uncatchable process abort. While expression walking enforces a 1,024 depth cap (`crates/sealmap-rust/src/collect.rs:1113`), `syn::parse_file` runs *before* the flow walker (`crates/sealmap-rust/src/collect.rs:33`) without a recursion limit. Syn consumes ~40 KiB per nesting level in debug builds (`crates/sealmap-extract/src/isolate.rs:3`-`7`).
+- Failure: Analyzing a codebase containing deeply nested recursive types, large macro expansions, or machine-generated expressions exhausts the 64 MiB stack during syn's recursive-descent parsing. The operating system aborts the process via SIGSEGV/SIGBUS. The entire CI run or indexing job crashes immediately, producing no diagnostics, warnings, or partial codebase models.
+- Reviewer confidence: High.
+
+**A stack overflow can abort the whole extraction run**
+- Evidence: The material says one bad file does not fail the whole run and describes per-file panic handling (`crates/sealmap-extract/src/isolate.rs:46`-`47`), but also says a stack overflow cannot be caught and can end the process. The 64 MiB stack and fallback thread do not remove that stated limit (`crates/sealmap-extract/src/isolate.rs:52`-`56`); the expression-depth cap is a separate guard (`crates/sealmap-rust/src/collect.rs:30`).
+- Failure: A sufficiently deeply nested file can terminate the process, losing the entire corpus run rather than producing a per-file diagnostic.
+- Reviewer confidence: high; inferred production scenario from the stated uncaught stack-overflow limit.
+
+
+## X-08
+
+**Chained, returned, and computed method calls are silently dropped from sequence flows and call graphs**
+- Evidence: `crates/sealmap-extract/src/confidence.rs:30-33` states that under `ExternalCalls::All`, extraction will "Keep every external call, including `std` and unresolved method calls (`sym:? name`)." `crates/sealmap/src/lib.rs:17-18` advertises "sequence diagrams for every function's ordered calls, with `alt`/`opt`/`loop`/`par` fragments for control flow". However, `crates/sealmap-rust/src/resolve.rs:732` resolves method calls via `Callee::Method { recv, name } => self.method(ctx, recv, name)?`. At `crates/sealmap-rust/src/resolve.rs:753`, receiver handling explicitly drops values of unknown type or origin: `Recv::Returned(_) | Recv::Computed(_) | Recv::Unknown => None`. Because `self.method` returns `None`, the `?` operator aborts `call()`, returning `None` before `opts.external_calls.keeps(...)` (`resolve.rs:737`) is ever evaluated.
+- Failure: In idiomatic Rust, builder patterns, factory calls, and chained expressions (`let client = make_client(); client.send()`, `conn_pool.get().query()`, or `builder.build().start()`) bind variables to `Recv::Computed` or evaluate receivers as `Recv::Unknown`. All method calls on these receivers are silently dropped from the generated sequence diagrams and call graph relations. Autonomous harness agents reading these diagrams will conclude that the calling functions execute no calls and have no side effects, concealing critical operations (e.g., authorization checks, database updates, metrics publishing) from the agent's context.
+- Reviewer confidence: high
+

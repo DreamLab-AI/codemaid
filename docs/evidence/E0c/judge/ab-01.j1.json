@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only changes two test call sites in lib.rs, replacing `&[pubkey.clone()]` with `std::slice::from_ref(&pubkey)`. It touches no runtime calls, guards, arguments or returns that any sequence diagram shows, and it doesn't move any cited non-test line."}

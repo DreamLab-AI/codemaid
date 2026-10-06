@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The diff only adds a new `class_iris` method and a test to oxigraph_ontology_repository.rs, inserted around line 2152. The sequence diagrams cite only lines 57, 63, 70, 730-824 and similar. None of their calls, guards, arguments or returns change."}

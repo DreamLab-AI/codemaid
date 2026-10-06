@@ -1,0 +1,1 @@
+{"gen":{"tokens":100511,"seconds":159.4,"tool_uses":19},"var":{"tokens":97059,"seconds":165.4,"tool_uses":18},"prefix":{"tokens":100702,"seconds":172.8,"tool_uses":22},"source":"Agent tool completion notifications (subagent_tokens, duration_ms)"}

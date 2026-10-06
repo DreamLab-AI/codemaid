@@ -1,0 +1,64 @@
+   Compiling sealmap-rust v0.1.0 (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/wt/gen-S/crates/sealmap-rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+     Running tests/extract.rs (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/target/gen-S/debug/deps/extract-e8fa2afd1a2f4e80)
+
+running 3 tests
+test single_letter_generic_parameters_stay_unresolved ... ok
+test single_capital_type_names_are_concrete_types_not_generics ... FAILED
+test declared_multi_letter_generics_shadow_concrete_types ... FAILED
+
+failures:
+
+---- single_capital_type_names_are_concrete_types_not_generics stdout ----
+
+thread 'single_capital_type_names_are_concrete_types_not_generics' (2425764) panicked at crates/sealmap-rust/tests/extract.rs:437:5:
+assertion `left == right` failed
+  left: []
+ right: [("sym:cargo app . A#bump().", Exact), ("sym:cargo app . geom/V2#normalise().", Exact)]
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:80:14
+   2: core::panicking::assert_failed_inner
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:452:17
+   3: core::panicking::assert_failed::<alloc::vec::Vec<(alloc::string::String, sealmap_model::symbol::Confidence)>, [(alloc::string::String, sealmap_model::symbol::Confidence); 2]>
+             at /nix/store/np3jnsrvjgbl3jy6jzg8wcjhs2wk6g6n-rust-minimal-1.99.0/lib/rustlib/src/rust/library/core/src/panicking.rs:407:5
+   4: extract::single_capital_type_names_are_concrete_types_not_generics
+             at ./tests/extract.rs:437:5
+   5: extract::single_capital_type_names_are_concrete_types_not_generics::{closure#0}
+             at ./tests/extract.rs:421:63
+   6: <extract::single_capital_type_names_are_concrete_types_not_generics::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /nix/store/np3jnsrvjgbl3jy6jzg8wcjhs2wk6g6n-rust-minimal-1.99.0/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+   7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+---- declared_multi_letter_generics_shadow_concrete_types stdout ----
+
+thread 'declared_multi_letter_generics_shadow_concrete_types' (2425763) panicked at crates/sealmap-rust/tests/extract.rs:478:9:
+sync(). bound a generic parameter to a concrete type: ["sym:cargo app . Store#put().", "sym:cargo app . Store#open()."]
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/panicking.rs:80:14
+   2: extract::declared_multi_letter_generics_shadow_concrete_types
+             at ./tests/extract.rs:478:9
+   3: extract::declared_multi_letter_generics_shadow_concrete_types::{closure#0}
+             at ./tests/extract.rs:459:58
+   4: <extract::declared_multi_letter_generics_shadow_concrete_types::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /nix/store/np3jnsrvjgbl3jy6jzg8wcjhs2wk6g6n-rust-minimal-1.99.0/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+   5: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    declared_multi_letter_generics_shadow_concrete_types
+    single_capital_type_names_are_concrete_types_not_generics
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p sealmap-rust --test extract`
+exit=101

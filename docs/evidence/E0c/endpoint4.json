@@ -1,0 +1,221 @@
+{
+  "agentbox": {
+    "first_judge_yes": 0,
+    "hidden": 0,
+    "n": 2,
+    "rate": 0.0,
+    "wilson95_upper": 0.6576197724933469
+  },
+  "eligible_total": 40,
+  "pairs": [
+    {
+      "hidden": false,
+      "id": "vc-01",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-02",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-03",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-04",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-05",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": true,
+      "id": "vc-06",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-07",
+      "j1": true,
+      "j2": false
+    },
+    {
+      "hidden": true,
+      "id": "vc-08",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-09",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-10",
+      "j1": true,
+      "j2": false
+    },
+    {
+      "hidden": true,
+      "id": "vc-11",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-12",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-13",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "vc-14",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-15",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-16",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-17",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-18",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-19",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": true,
+      "id": "vc-20",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": true,
+      "id": "vc-21",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": true,
+      "id": "vc-22",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": true,
+      "id": "vc-23",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-24",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-25",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-26",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-27",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-28",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": true,
+      "id": "vc-29",
+      "j1": true,
+      "j2": true
+    },
+    {
+      "hidden": false,
+      "id": "vc-30",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "ab-01",
+      "j1": false,
+      "j2": null
+    },
+    {
+      "hidden": false,
+      "id": "ab-02",
+      "j1": false,
+      "j2": null
+    }
+  ],
+  "pooled": {
+    "first_judge_yes": 16,
+    "hidden": 14,
+    "n": 32,
+    "rate": 0.4375,
+    "wilson95_upper": 0.6067440886314801
+  },
+  "question": "Does this change make any sequence diagram in this topic wrong or misleading (a call, branch condition, argument or return a diagram shows)?",
+  "result": "FAIL",
+  "threshold": 0.1,
+  "visionclaw": {
+    "first_judge_yes": 16,
+    "hidden": 14,
+    "n": 30,
+    "rate": 0.4666666666666667,
+    "wilson95_upper": 0.6385770038012671
+  }
+}

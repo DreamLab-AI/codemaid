@@ -1,0 +1,1181 @@
+{
+  "cases": {
+    "gen": {
+      "fix": "fec7aff",
+      "parent": "1667cc4",
+      "snapshot": "28c62d8",
+      "test": "crates/sealmap-rust/tests/extract.rs (single_capital_type_names_are_concrete_types_not_generics, declared_multi_letter_generics_shadow_concrete_types)",
+      "disclosed": false,
+      "items": 12,
+      "primary_cost": {
+        "tokens": 100511,
+        "seconds": 159.4,
+        "tool_uses": 19
+      }
+    },
+    "var": {
+      "fix": "ae478d9",
+      "parent": "6e0604c",
+      "snapshot": "6e0604c",
+      "test": "crates/sealmap-rust/tests/extract.rs (variant_labels_leave_out_field_attributes)",
+      "disclosed": false,
+      "items": 10,
+      "primary_cost": {
+        "tokens": 97059,
+        "seconds": 165.4,
+        "tool_uses": 18
+      }
+    },
+    "prefix": {
+      "fix": "926144c",
+      "parent": "dd88e1f",
+      "snapshot": "dd88e1f",
+      "test": "crates/sealmap-rust/tests/resolver_den01.rs (a_path_prefix_never_resolves_to_a_function)",
+      "disclosed": false,
+      "items": 11,
+      "primary_cost": {
+        "tokens": 100702,
+        "seconds": 172.8,
+        "tool_uses": 22
+      }
+    }
+  },
+  "items": [
+    {
+      "case": "gen",
+      "label": "X-01",
+      "members": [
+        "gen-A-luna:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A non-generated file at an expected corpus path is reported as drift and overwritten, contrary to the 'anything else is ignored' doc; low severity since the output dir is generator-owned."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-02",
+      "members": [
+        "gen-A-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "This is a documented, deliberate load limit aimed at generated files, not a defect; the consequence follows from intended policy."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The mechanics are accurate: a file over 2 MiB is excluded from generate and verify alike, so edits to it are invisible. But this is a deliberate, documented and configurable scope rule (generated files), applied the same way to the extensions, skip_dirs, hidden-file and gitignore filters. verify's contract is that the corpus matches what the configured source set generates, and that contract holds. The lack of a diagnostic for skipped files is at most a UX nit. The finding has nothing to do with the hidden defect, which is name-shape generic detection in is_generic_param in sealmap-rust/src/resolve.rs."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 65908,
+      "cost_seconds": 29.6
+    },
+    {
+      "case": "gen",
+      "label": "X-03",
+      "members": [
+        "gen-A-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Shadowing closure parameters resolve against the outer variable's type, producing a wrong Exact call edge; the by-name half is intended heuristic but the shadowing half is a real bug."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-04",
+      "members": [
+        "gen-A-gemini:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The checkout directory name leaks into generated output, so verify drifts between checkouts with different directory names unless --name is passed; documented default, consequence overstated."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Directory-dependent output is real, but the naming default is explicitly documented behaviour, which the adjudication rules exclude. The codebase name is an input to generation, and this checkout's CI already pins it."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 91435,
+      "cost_seconds": 39.8
+    },
+    {
+      "case": "gen",
+      "label": "X-05",
+      "members": [
+        "gen-B-gemini:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "if-let/while-let bindings leak past their scope and mis-type later receivers, yielding wrong Exact edges."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A condition binding that shadows an outer variable persists into else branches and subsequent statements, allowing calls on the outer variable to resolve to the condition-bound type. The supplied line numbers are stale and fresh bindings can overwrite the leak, but the core scope defect remains; it is separate from generic-name classification."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 91435,
+      "cost_seconds": 39.8
+    },
+    {
+      "case": "gen",
+      "label": "X-06",
+      "members": [
+        "gen-B-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Any associated function call types its result as the owner type, creating wrong Exact edges for non-constructor associated functions."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-07",
+      "members": [
+        "gen-B-gemini:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "partial",
+          "rationale": "Dropping unresolved calls on genuine generic parameters is the documented default policy, not a defect; it cites is_generic_param but not the name-shape misclassification (real struct A lost, multi-letter generic bound to concrete type)."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "partial",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-08",
+      "members": [
+        "gen-B-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Two --repo entries with the same name silently overwrite each other's same-relative-path files."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-09",
+      "members": [
+        "gen-B-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "For cfg-gated duplicate definitions only the first definition's flow survives, losing the other variant's calls."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-10",
+      "members": [
+        "gen-A-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "An explicitly documented unbuilt roadmap feature is not a code defect."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-11",
+      "members": [
+        "gen-A-gemini:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Legitimate Rust module directories such as src/build/ or src/out/ are silently dropped from extraction with no diagnostic."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "gen",
+      "label": "X-12",
+      "members": [
+        "gen-B-luna:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A symlink at an expected corpus path causes generate to overwrite the symlink target."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 8376,
+      "cost_seconds": 13.3
+    },
+    {
+      "case": "var",
+      "label": "X-01",
+      "members": [
+        "var-B-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The README statement is false on every count, so the core documentation defect is real. The consequence (undetected drift in a committed docs/sealmap) is overstated because nothing generated is committed."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "The documentation mismatch is real and actionable: following it would not check generated-output drift. The claimed existing CI failure is overstated, since .github/workflows/ci.yml:24-30 and 55-59 deliberately generate fresh output for determinism and rendering checks."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 83443,
+      "cost_seconds": 41.5
+    },
+    {
+      "case": "var",
+      "label": "X-02",
+      "members": [
+        "var-A-gemini:critical:F-01",
+        "var-A-luna:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A shadowing closure parameter inherits the outer variable's type and mints a false Exact call, which I reproduced. The untyped-parameter guess is labelled Inferred and is intended, but the shadowing case is a real defect."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-03",
+      "members": [
+        "var-B-luna:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "I reproduced the write through a symlink to a target outside the output directory. Practical exposure depends on who controls the output directory."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-04",
+      "members": [
+        "var-B-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The filtering is documented, deliberate behaviour that defines what a topic is. The scenario needs a malformed topic that other structure gates would catch, so this is not a defect in the code as written."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-05",
+      "members": [
+        "var-A-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "This is a documented CLI default, not a hidden leak, and the stated failure path through `verify` does not exist."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-06",
+      "members": [
+        "var-A-gemini:critical:F-03",
+        "var-A-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "I reproduced the process abort, which contradicts the never-fails contract. The trigger input is pathological, but the defect is real."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Stack exhaustion remains possible, but it is an explicitly documented residual limitation of the chosen isolation design. Under the supplied rubric, this does not establish an undocumented fault-isolation defect; the finding quotes the general guarantee without its express qualification."
+        },
+        {
+          "who": "claude-second",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The parser-depth gap behind it is real, since syn recursion is unbounded before the walker's cap applies. However, the code itself and the corpus register document exactly this outcome, an uncatchable abort that ends the run, as a known and accepted trade-off. Under the rubric, a limitation documented as accepted is unsupported. The finding is unrelated to the hidden defect, which is enum variant labels in collect.rs printing field attributes verbatim."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 142284,
+      "cost_seconds": 59.9
+    },
+    {
+      "case": "var",
+      "label": "X-07",
+      "members": [
+        "var-B-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "A stale _model.json survives and verification passes, which I reproduced."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-08",
+      "members": [
+        "var-B-gemini:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The finding misreads the match arm: those receivers produce an unresolved External call, not a dropped one."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The finding mistakes an inner Option representing the receiver type for the method's return value. These calls survive under ExternalCalls::All; their default filtering and lack of internal return-type inference are documented behaviour."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 83443,
+      "cost_seconds": 41.5
+    },
+    {
+      "case": "var",
+      "label": "X-09",
+      "members": [
+        "var-A-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "This is intended, documented scope, opt-in through a flag, not a defect."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "var",
+      "label": "X-10",
+      "members": [
+        "var-B-gemini:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The premise (a committed, CRLF-converted generated corpus) does not hold for this tool's workflow, and a byte-identity gate correctly flags CRLF files as drift. The orphan miss is real code, but only in that unrealistic setup."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9706,
+      "cost_seconds": 16.5
+    },
+    {
+      "case": "prefix",
+      "label": "X-01",
+      "members": [
+        "prefix-A-gemini:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Both claimed omissions are handled at this revision. It touches leading-segment handling in call(), but not the type/value namespace capture in walk()."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-02",
+      "members": [
+        "prefix-B-gemini:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Reordering items changes the cited module's body hash and fails verify. It is acknowledged only in a test as a known limit."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The behaviour exists, but is explicitly documented and pinned as intended by the fingerprint contract, making it unsupported under the supplied rubric. Moving an item's position preserves that item's fingerprints; rearranging a module's contents can change the containing module's fingerprint."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 67563,
+      "cost_seconds": 31.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-03",
+      "members": [
+        "prefix-B-luna:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Mechanism follows directly from std semantics at the cited lines. Exploitability depends on an attacker-placed symlink in the output dir."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-04",
+      "members": [
+        "prefix-A-luna:critical:F-01",
+        "prefix-B-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "Authentication is an explicit non-goal of the crate, delegated to the caller. No claim of tamper resistance is made."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-05",
+      "members": [
+        "prefix-A-luna:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "The skipping is real but deliberate, documented and configurable. It is a design trade-off rather than a defect."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-06",
+      "members": [
+        "prefix-A-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "One pathological file aborts the entire extraction."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-07",
+      "members": [
+        "prefix-A-gemini:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "For manifest-less files, ids depend on the checkout directory name unless --name is passed. Real, but limited to files outside any Cargo package."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-08",
+      "members": [
+        "prefix-B-luna:critical:F-03"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Crate-name ids carry no repo prefix, so colliding crate names merge symbols."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-09",
+      "members": [
+        "prefix-B-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Impls on non-path self types are silently skipped, together with their methods and calls."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Valid impls on slices, tuples, arrays, function pointers and trait objects lose their method symbols and flows without a diagnostic. This is an unsupported self-type representation problem, separate from the hidden namespace lookup defect."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 67563,
+      "cost_seconds": 31.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-10",
+      "members": [
+        "prefix-B-gemini:critical:F-01"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Documented 'first definition wins for scalar fields', but this silently drops the twin's call flow."
+        },
+        {
+          "who": "gpt-6-astra",
+          "verdict": "confirmed",
+          "hidden_defect": "no",
+          "rationale": "Alternate definitions' calls are lost from the merged flow and consequently from aggregated call relations, establishing the core defect. First-definition precedence for scalar metadata is documented at codebase.rs:66-70, but does not justify discarding alternate control-flow content."
+        }
+      ],
+      "final": "confirmed",
+      "hidden_final": "no",
+      "cost_tokens": 67563,
+      "cost_seconds": 31.7
+    },
+    {
+      "case": "prefix",
+      "label": "X-11",
+      "members": [
+        "prefix-A-gemini:critical:F-02"
+      ],
+      "opinions": [
+        {
+          "who": "claude-primary",
+          "verdict": "unsupported",
+          "hidden_defect": "no",
+          "rationale": "This is intended citation grammar with a documented escape hatch (fenced blocks). The repo's own failing verify is a content issue, not a code defect."
+        }
+      ],
+      "final": "unsupported",
+      "hidden_final": "no",
+      "cost_tokens": 9155,
+      "cost_seconds": 15.7
+    }
+  ],
+  "arms": {
+    "A-gemini": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 2,
+          "unsupported": 1,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        }
+      },
+      "confirmed": 4,
+      "unsupported": 5,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 297348,
+      "adjudication_seconds": 206.4
+    },
+    "B-gemini": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 2,
+          "unsupported": 1,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 2,
+          "unsupported": 1,
+          "unsure": 0,
+          "hidden_detected": false
+        }
+      },
+      "confirmed": 5,
+      "unsupported": 4,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 487468,
+      "adjudication_seconds": 261
+    },
+    "A-luna": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 1,
+          "unsupported": 2,
+          "unsure": 0,
+          "hidden_detected": false
+        }
+      },
+      "confirmed": 3,
+      "unsupported": 6,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 271821,
+      "adjudication_seconds": 196.2
+    },
+    "B-luna": {
+      "per_case": {
+        "gen": {
+          "items": 3,
+          "confirmed": 3,
+          "unsupported": 0,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "var": {
+          "items": 3,
+          "confirmed": 2,
+          "unsupported": 1,
+          "unsure": 0,
+          "hidden_detected": false
+        },
+        "prefix": {
+          "items": 3,
+          "confirmed": 2,
+          "unsupported": 1,
+          "unsure": 0,
+          "hidden_detected": false
+        }
+      },
+      "confirmed": 7,
+      "unsupported": 2,
+      "unsure": 0,
+      "hidden_detected": 0,
+      "adjudication_tokens": 81711,
+      "adjudication_seconds": 136.5
+    }
+  },
+  "agreement": {
+    "pairs": [
+      {
+        "case": "gen",
+        "label": "X-02",
+        "primary": "unsupported",
+        "second": "unsupported",
+        "who": "claude-second"
+      },
+      {
+        "case": "gen",
+        "label": "X-04",
+        "primary": "confirmed",
+        "second": "unsupported",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "gen",
+        "label": "X-05",
+        "primary": "confirmed",
+        "second": "confirmed",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "var",
+        "label": "X-01",
+        "primary": "confirmed",
+        "second": "confirmed",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "var",
+        "label": "X-06",
+        "primary": "confirmed",
+        "second": "unsupported",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "var",
+        "label": "X-06",
+        "primary": "confirmed",
+        "second": "unsupported",
+        "who": "claude-second"
+      },
+      {
+        "case": "var",
+        "label": "X-08",
+        "primary": "unsupported",
+        "second": "unsupported",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "prefix",
+        "label": "X-02",
+        "primary": "confirmed",
+        "second": "unsupported",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "prefix",
+        "label": "X-09",
+        "primary": "confirmed",
+        "second": "confirmed",
+        "who": "gpt-6-astra"
+      },
+      {
+        "case": "prefix",
+        "label": "X-10",
+        "primary": "confirmed",
+        "second": "confirmed",
+        "who": "gpt-6-astra"
+      }
+    ],
+    "agree": 6,
+    "total": 10
+  },
+  "second_cost": {
+    "gen": {
+      "astra": {
+        "tokens": 166119,
+        "seconds": 53,
+        "items": 2,
+        "commands": 4,
+        "usage": [
+          {
+            "input_tokens": 164846,
+            "cached_input_tokens": 119552,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1273,
+            "reasoning_output_tokens": 192
+          }
+        ]
+      },
+      "claude2": {
+        "tokens": 57532,
+        "seconds": 16.3,
+        "items": 1
+      }
+    },
+    "var": {
+      "astra": {
+        "tokens": 221212,
+        "seconds": 75,
+        "items": 3,
+        "commands": 7,
+        "usage": [
+          {
+            "input_tokens": 219150,
+            "cached_input_tokens": 170240,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2062,
+            "reasoning_output_tokens": 379
+          }
+        ]
+      },
+      "claude2": {
+        "tokens": 58841,
+        "seconds": 18.4,
+        "items": 1
+      }
+    },
+    "prefix": {
+      "astra": {
+        "tokens": 175225,
+        "seconds": 48,
+        "items": 3,
+        "commands": 4,
+        "usage": [
+          {
+            "input_tokens": 173892,
+            "cached_input_tokens": 133248,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1333,
+            "reasoning_output_tokens": 157
+          }
+        ]
+      },
+      "claude2": null
+    }
+  },
+  "decision": {
+    "primary_gemini": {
+      "A_confirmed": 4,
+      "B_confirmed": 5,
+      "A_hidden": 0,
+      "B_hidden": 0,
+      "A_cost_tokens": 297348,
+      "B_cost_tokens": 487468,
+      "a_plus_two": false,
+      "hidden_at_least": true,
+      "cost_no_more": true,
+      "outcome": "OTHERWISE: build the hunk-overlap shadow checker next; defer review-pack and sequence-flow features"
+    },
+    "secondary_luna": {
+      "A_confirmed": 3,
+      "B_confirmed": 7,
+      "A_hidden": 0,
+      "B_hidden": 0,
+      "A_cost_tokens": 271821,
+      "B_cost_tokens": 81711,
+      "a_plus_two": false,
+      "hidden_at_least": true,
+      "cost_no_more": false,
+      "outcome": "OTHERWISE: build the hunk-overlap shadow checker next; defer review-pack and sequence-flow features"
+    }
+  },
+  "sensitivity_primary_only": {
+    "A-gemini": {
+      "confirmed_primary_only": 6,
+      "primary_only_tokens": 81710
+    },
+    "B-gemini": {
+      "confirmed_primary_only": 6,
+      "primary_only_tokens": 81710
+    },
+    "A-luna": {
+      "confirmed_primary_only": 4,
+      "primary_only_tokens": 81710
+    },
+    "B-luna": {
+      "confirmed_primary_only": 7,
+      "primary_only_tokens": 81710
+    },
+    "decision": {
+      "gemini": "A+2 NOT met -> otherwise",
+      "luna": "A+2 NOT met -> otherwise"
+    }
+  },
+  "review_cost": {
+    "gen-A-gemini": {
+      "seconds": 92.1,
+      "prompt_tokens": 47984,
+      "thinking_tokens": 9052,
+      "output_tokens": 1615,
+      "pack_bytes": 153564
+    },
+    "gen-A-luna": {
+      "seconds": 198,
+      "input_tokens": 195345,
+      "cached_input_tokens": 137472,
+      "output_tokens": 19862,
+      "reasoning_tokens": 19038,
+      "tool_items": [
+        {
+          "type": "mcp_tool_call",
+          "server": "agentbox-memory",
+          "tool": "memory_search",
+          "status": "failed",
+          "error": "MCP tool call requires approval, but approval policy is never"
+        }
+      ]
+    },
+    "gen-B-gemini": {
+      "seconds": 390.2,
+      "prompt_tokens": 137810,
+      "thinking_tokens": 62915,
+      "output_tokens": 1435,
+      "pack_bytes": 455507
+    },
+    "gen-B-luna": {
+      "seconds": 183,
+      "input_tokens": 547120,
+      "cached_input_tokens": 420864,
+      "output_tokens": 20361,
+      "reasoning_tokens": 19603,
+      "tool_items": [
+        {
+          "type": "mcp_tool_call",
+          "server": "agentbox-memory",
+          "tool": "memory_search",
+          "status": "failed",
+          "error": "MCP tool call requires approval, but approval policy is never"
+        }
+      ]
+    },
+    "prefix-A-gemini": {
+      "seconds": 121,
+      "prompt_tokens": 59722,
+      "thinking_tokens": 13102,
+      "output_tokens": 1456,
+      "pack_bytes": 190469
+    },
+    "prefix-A-luna": {
+      "seconds": 173,
+      "input_tokens": 216455,
+      "cached_input_tokens": 153856,
+      "output_tokens": 9097,
+      "reasoning_tokens": 8313,
+      "tool_items": [
+        {
+          "type": "mcp_tool_call",
+          "server": "agentbox-memory",
+          "tool": "memory_search",
+          "status": "failed",
+          "error": "MCP tool call requires approval, but approval policy is never"
+        }
+      ]
+    },
+    "prefix-B-gemini": {
+      "seconds": 408.5,
+      "prompt_tokens": 220458,
+      "thinking_tokens": 62912,
+      "output_tokens": 1878,
+      "pack_bytes": 721712
+    },
+    "prefix-B-luna": {
+      "seconds": 527,
+      "input_tokens": 618963,
+      "cached_input_tokens": 422144,
+      "output_tokens": 28768,
+      "reasoning_tokens": 27903,
+      "tool_items": [
+        {
+          "type": "mcp_tool_call",
+          "server": "agentbox-memory",
+          "tool": "memory_search",
+          "status": "failed",
+          "error": "MCP tool call requires approval, but approval policy is never"
+        }
+      ]
+    },
+    "var-A-gemini": {
+      "seconds": 186.2,
+      "prompt_tokens": 48237,
+      "thinking_tokens": 21400,
+      "output_tokens": 1640,
+      "pack_bytes": 154440
+    },
+    "var-A-luna": {
+      "seconds": 212,
+      "input_tokens": 185536,
+      "cached_input_tokens": 133376,
+      "output_tokens": 11373,
+      "reasoning_tokens": 10410,
+      "tool_items": [
+        {
+          "type": "mcp_tool_call",
+          "server": "agentbox-memory",
+          "tool": "memory_search",
+          "status": "failed",
+          "error": "MCP tool call requires approval, but approval policy is never"
+        }
+      ]
+    },
+    "var-B-gemini": {
+      "seconds": 383.9,
+      "prompt_tokens": 176491,
+      "thinking_tokens": 50941,
+      "output_tokens": 1527,
+      "pack_bytes": 579012
+    },
+    "var-B-luna": {
+      "seconds": 381,
+      "input_tokens": 168155,
+      "cached_input_tokens": 11008,
+      "output_tokens": 20770,
+      "reasoning_tokens": 20200,
+      "tool_items": []
+    }
+  }
+}

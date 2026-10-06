@@ -1,0 +1,64 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling proc-macro2 v1.0.107
+   Compiling serde_core v1.0.229
+   Compiling crossbeam-utils v0.8.23
+   Compiling memchr v2.8.3
+   Compiling serde v1.0.229
+   Compiling crossbeam-epoch v0.9.21
+   Compiling crossbeam-deque v0.8.8
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling regex-syntax v0.8.11
+   Compiling zmij v1.0.23
+   Compiling log v0.4.34
+   Compiling same-file v1.0.6
+   Compiling thiserror v2.0.21
+   Compiling rayon-core v1.13.0
+   Compiling serde_json v1.0.151
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.1
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.5
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling itoa v1.0.18
+   Compiling toml_write v0.1.2
+   Compiling winnow v0.7.15
+   Compiling either v1.18.0
+   Compiling walkdir v2.5.0
+   Compiling cc v1.6.0
+   Compiling aho-corasick v1.1.5
+   Compiling bstr v1.13.1
+   Compiling indexmap v2.14.2
+   Compiling regex-automata v0.4.18
+   Compiling syn v3.0.6
+   Compiling blake3 v1.8.7
+   Compiling syn v2.0.119
+   Compiling rayon v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling globset v0.4.19
+   Compiling ignore v0.4.29
+   Compiling toml_datetime v0.6.11
+   Compiling serde_spanned v0.6.9
+   Compiling sealmap-model v0.1.0 (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/wt/reach-F/crates/sealmap-model)
+   Compiling toml_edit v0.22.27
+   Compiling toml v0.8.23
+   Compiling sealmap-extract v0.1.0 (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/wt/reach-F/crates/sealmap-extract)
+   Compiling sealmap-rust v0.1.0 (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/wt/reach-F/crates/sealmap-rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.96s
+     Running tests/resolver_den01.rs (/home/devuser/workspace/.tmp/claude-1000/-home-devuser-workspace-project-agentbox/47520655-f105-4c26-b318-3f1103e004ae/scratchpad/er/target/reach-F/debug/deps/resolver_den01-157fb01be9ce1f8a)
+
+running 3 tests
+test binaries_and_target_dependencies_reach_their_libraries ... ok
+test ambiguous_guesses_among_reachable_crates_emit_no_edge ... ok
+test guessed_edges_ignore_crates_the_caller_cannot_reach ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.04s
+
+exit=0

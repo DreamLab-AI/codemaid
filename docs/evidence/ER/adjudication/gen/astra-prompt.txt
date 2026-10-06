@@ -1,0 +1,25 @@
+You are an independent adjudicator in a pre-registered experiment. The current directory is a checkout of the Rust workspace "sealmap" at revision 28c62d8. Validate each code-review finding below against the code at this revision. Be rigorous and sceptical; check every citation yourself.
+
+Rules: judge only the files in this directory at this revision. Do not run git log/show/diff or look at any other revision, and do not modify, create or delete any file here. Read-only commands only.
+
+For each item give a verdict: "confirmed" (the problem is real and actionable in this code, evidenced at specific file:line you checked; exaggerated consequences are fine if the core defect is real), "unsupported" (wrong, already handled or deliberately documented as intended, not present at this revision, or not evidenced), or "unsure". Also say whether the item identifies this hidden defect (yes / partial / no): The resolver decides whether a type name is a generic parameter by its name shape (`is_generic_param` in crates/sealmap-rust/src/resolve.rs): any single-capital name such as `A` or `V2` is treated as a generic parameter, so method calls through a real struct named `A` are lost; and a declared multi-letter generic parameter such as `Store` or `Item` is never treated as one, so calls on it bind to a same-named concrete struct.
+
+Reply with ONLY a JSON array, no prose: [{"label":"X-..","verdict":"confirmed|unsupported|unsure","evidence":"file:line facts you checked","hidden_defect":"yes|partial|no","rationale":"one or two sentences"}].
+
+FINDINGS
+
+## X-04
+
+**Ambient checkout directory leaks into codebase identity, breaking determinism and CI verification**
+- Evidence: `crates/sealmap-model/src/lib.rs:18`-`34` defines a strict determinism contract: identical inputs must produce byte-identical output across runs and machines, explicitly prohibiting "timestamps, absolute paths, user names or environment" (`crates/sealmap-model/src/lib.rs:33`). In contrast, `COR-03.5` and `DEL-01.3` show that the CLI falls back to the host machine's checkout directory name as the codebase name whenever the optional `--name` flag is omitted (`crates/sealmap/src/main.rs:159`-`161`).
+- Failure: When run locally by developers and remotely in CI, local checkouts in different folder paths (e.g., `/Users/dev/work/project` versus `/runner/work/1/s`) derive different codebase names for the exact same source commit. The codebase name is embedded in `Codebase`, `_model.json`, `_index.json`, and overview diagrams. Running `sealmap verify` in CI will flag spurious drift between the local corpus and the CI run, exiting 1 (`crates/sealmap/src/main.rs:146`) and blocking deployment pipelines unless every caller explicitly passes `--name`.
+- Reviewer confidence: high
+
+
+## X-05
+
+**Scoped `if let` and `while let` pattern bindings leak into outer function scope**
+- Evidence: `FlowWalker::cond` (`crates/sealmap-rust/src/collect.rs:880-885`) executes `self.bind(&l.pat, Some(&l.expr))` for `Expr::Let` guards, mutating `self.env` directly. While `Expr::Match` (`crates/sealmap-rust/src/collect.rs:834-837`) and `Expr::ForLoop` (`crates/sealmap-rust/src/collect.rs:848-851`) clone and restore `self.env`, `Expr::If` (`crates/sealmap-rust/src/collect.rs:795-824`) and `Expr::While` (`crates/sealmap-rust/src/collect.rs:855-863`) invoke `self.cond` without snapshotting or restoring the outer environment.
+- Failure: Pattern-bound identifiers from `if let` and `while let` guards leak into the enclosing function body and persist for all subsequent statements and `else` blocks. If an identifier with the same name is later used in an unannotated `let` binding, field access, or closure in the remainder of the function, the walker resolves its receiver to the leaked `Recv` from the earlier condition. Calls on the subsequent variable are erroneously resolved to methods of the earlier pattern-matched type, generating corrupt call edges and misleading sequence diagram participants.
+- Reviewer confidence: high
+

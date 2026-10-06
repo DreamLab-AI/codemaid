@@ -1,0 +1,1 @@
+{"verdict": "no", "statements": [], "line_anchors_only": false, "reason": "The only sequence diagram that touches the changed file is VC-02.18. It cites elevation_actor.rs:191, the ELEVATION_ACTOR_ENABLED gate, which sits above every hunk, so it has not moved. The change affects the consistency gate, draft parsing and tests, none of which any sequence diagram shows."}

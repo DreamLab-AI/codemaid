@@ -1,0 +1,87 @@
+You are an independent adjudicator in a pre-registered experiment. The current directory is a checkout of the Rust workspace "sealmap" at revision dd88e1f. Validate each code-review finding below against the code at this revision. Be rigorous and sceptical; check every citation yourself.
+
+Rules: judge only the files in this directory at this revision. Do not run git log/show/diff or look at any other revision, and do not modify, create or delete any file here. Read-only commands only.
+
+For each item give a verdict: "confirmed" (the problem is real and actionable in this code, evidenced at specific file:line you checked; exaggerated consequences are fine if the core defect is real), "unsupported" (wrong, already handled or deliberately documented as intended, not present at this revision, or not evidenced), or "unsure". Also say whether the item identifies this hidden defect (yes / partial / no): In path resolution (crates/sealmap-rust/src/resolve.rs), a path leading segment that has further segments after it is looked up in the type namespace with a fallback to the value namespace, so a same-named function in the current module (e.g. the CLI own `fn pack`) captures an imported module of that name (`use ...::pack; pack::shard(..)`), and the call becomes an inferred/extern edge instead of an exact one.
+
+Reply with ONLY a JSON array, no prose: [{"label":"X-..","verdict":"confirmed|unsupported|unsure","evidence":"file:line facts you checked","hidden_defect":"yes|partial|no","rationale":"one or two sentences"}].
+
+FINDINGS
+
+## X-02
+
+**Moving or reordering items within a file breaks module seals despite stability claims**
+- Evidence: `crates/sealmap/src/lib.rs` and `sealmap-extract/src/fingerprint.rs` claim:
+  > "Every symbol carries `sig_hash` for its contract and `body_hash` for its implementation, both blind to formatting, comments and moves."
+  > "Positions are never hashed either, so moving an item within a file or to another file changes neither of its fingerprints."
+  
+  However, in `crates/sealmap-rust/src/collect.rs` lines 88–108, while declarations (`use`, `mod x;`) are sorted before hashing, non-declaration module items are folded directly in source order:
+  ```rust
+  for item in items {
+      match item {
+          Item::Use(_) | Item::ExternCrate(_) | Item::Mod(syn::ItemMod { content: None, .. }) => { ... }
+          _ => self.item(&path, item, &mut body),
+      }
+  }
+  ```
+  And `crates/sealmap-rust/tests/seal.rs` lines 198–200 explicitly shows:
+  ```rust
+  // Known limit, pinned: a module's body folds its members in source order,
+  // so reordering items inside it changes the module's body hash.
+  assert_eq!(class_of(&report, ACCOUNTS_MOD), [Class::Behaviour]);
+  assert_eq!(failing(&report), BTreeSet::from([Class::Behaviour]));
+  ```
+- Failure: Any CI workflow guarding diagram veracity with `sealmap verify` will fail with `Class::Behaviour` if an engineer reorders two functions or types within a file whose module is cited by a topic (a common practice when organizing code). The lockfile rejects the clean change as a behavioural drift, forcing developers to repeatedly re-sign and re-review topics when no semantic or behavioural changes occurred, degrading trust in the verification gate.
+- Reviewer confidence: high
+
+
+## X-09
+
+**Non-path trait implementations are silently discarded during resolution**
+- Evidence: In `crates/sealmap-rust/src/resolve.rs` lines 258–265 and `collect.rs` lines 867–875:
+  ```rust
+  for imp in &f.impls {
+      let module = module_sym(&imp.module);
+      let Some(self_segs) = &imp.self_ty else { continue };
+      let (ty, _) = r.resolve(&module, self_segs, None, Ns::Type);
+  ```
+  `first_path` in `collect.rs` resolves `self_ty` by inspecting `syn::Type`:
+  ```rust
+  fn first_path(ty: &Type) -> Option<Segs> {
+      match ty {
+          Type::Path(p) => Some(path_segs(&p.path)),
+          Type::Reference(r) => first_path(&r.elem),
+          Type::Paren(p) => first_path(&p.elem),
+          Type::Group(g) => first_path(&g.elem),
+          _ => None,
+      }
+  }
+  ```
+  When an impl block defines a trait on a slice (e.g., `impl Trait for [u8]` or `&[u8]`), tuple (e.g., `impl Trait for (A, B)`), array, bare function pointer (`fn()`), or dynamic trait object (`dyn Trait`), `first_path` returns `None`. Consequently, `self_segs` is `None`, and `resolve.rs` hits `continue`.
+- Failure: Entire `impl` blocks for non-path types are skipped without warning. None of their methods are registered in `cb.symbols`, none of their calls or flows enter `cb.relations`, and their implementation relations (`RelationKind::Implements`) are never created. If an agent or engineer relies on sealmap to trace execution flow through standard patterns like tuple-based handlers (common in Axum/Actix), byte-slice parsers, or trait objects, sealmap renders those calls as dead ends or unresolved external calls.
+- Reviewer confidence: high
+
+
+## X-10
+
+**Silent dropping of function flows and metadata for multiple definitions sharing an ID**
+- Evidence: In `crates/sealmap-model/src/codebase.rs` lines 61–78:
+  ```rust
+  pub fn add_symbol(&mut self, symbol: Symbol) {
+      match self.symbols.get_mut(&symbol.id) {
+          Some(existing) => {
+              existing.sig_hash = existing.sig_hash.merge(symbol.sig_hash);
+              existing.body_hash = existing.body_hash.merge(symbol.body_hash);
+              existing.members.extend(symbol.members);
+              for tag in symbol.tags {
+                  if !existing.tags.contains(&tag) { existing.tags.push(tag); }
+              }
+          }
+          None => { self.symbols.insert(symbol.id.clone(), symbol); }
+      }
+  }
+  ```
+  `add_symbol` merges the `sig_hash` and `body_hash` across duplicate IDs (such as multi-target or `#[cfg]` twins: Windows vs. Unix, feature-gated implementations), but it completely ignores `symbol.flow`, `symbol.signature`, and `symbol.visibility`.
+- Failure: Any codebase that uses target-specific or feature-gated functions under the same path/name will have only the first parsed variant's control-flow tree retained in the model. Calls and critical side effects in alternate implementations (e.g., Windows OS syscalls, fallback network logic, feature-flagged security checks) are silently dropped from the generated sequence diagrams, the call graph, and `_index.json`. Downstream LLM agents relying on `.sealmap/` or `dense.txt` will see an incomplete and misleading call graph, leading them to assume these functions execute no calls or only the calls of the first platform parsed.
+- Reviewer confidence: high
+
